@@ -1,0 +1,26 @@
+Created At: 2026-07-30T12:55:07+05:30
+Completed At: 2026-07-30T12:55:07+05:30
+File Path: `file:///g:/sw%20m/erp/src/main.js`
+Total Lines: 904
+Total Bytes: 30856
+Showing lines 1 to 18
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: import { state } from "./state.js";
+2: import { renderDashboard } from "./views/dashboard.js";
+3: import { renderInventory, showProductMasterModal } from "./views/inventory.js";
+4: import { renderTransactions } from "./views/transactions.js";
+5: import { renderVouchers } from "./views/vouchers.js";
+6: import { renderContacts, showAddContactModal, setContactTypeFilter } from "./views/contacts.js";
+7: import { renderReports, setReportsActiveTab, setPartyReportTab } from "./views/reports.js";
+8: import { renderAdmin } from "./views/admin.js";
+9: import { renderGroups, renderLedger } from "./views/ledger.js";
+10: import { renderAdjustments } from "./views/adjustments.js";
+11: import { renderPresetLoading } from "./views/presetLoading.js";
+12: import { showWelcomeScreen } from "./views/login.js";
+13: 
+14: // Stackable Modal System polyfill
+15: const modalRoot = document.getElementById("modal-container-root");
+16: if (modalRoot) {
+17:   const originalDescriptor = Object.getOwnPropertyDescriptor(Element.prototype, "innerHTML");
+18:   
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

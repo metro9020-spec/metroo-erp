@@ -1,0 +1,84 @@
+async syncCompanies() {
+      try {
+        const res = await fetch(`http://${window.location.hostname}:3001/api/companies`);
+        if (res.ok) {
+          const data = await res.json();
+          const currentStr = localStorage.getItem("erp_companies");
+          const current = currentStr ? JSON.parse(currentStr) : [];
+          
+          // If backend has companies, sync to local
+          if (Array.isArray(data) && data.length > 0) {
+      }
+    }
+  
+>   ensureStandardBaseLedgers() {
+      if (!this.ledgers) this.ledgers = [];
+      const baseCodes = ["L016","L018","L019","L020","L021","L022","L023","L024","L025"];
+      const standardBaseLedgers = initialLedgers.filter(l => baseCodes.includes(l.code));
+      
+      let changed = false;
+  
+      standardBaseLedge
+
+async syncCompanies() {
+      try {
+        const res = await fetch(`http://${window.location.hostname}:3001/api/companies`);
+        if (res.ok) {
+          const data = await res.json();
+          const currentStr = localStorage.getItem("erp_companies");
+          const current = currentStr ? JSON.parse(currentStr) : [];
+          
+          // If backend has companies, sync to local
+          if (Array.isArray(data) && data.length > 0) {
+            localStorage.setItem("erp_companies", JSON.stringify(data));
+            if (current.length === 0) {
+              window.location.reload();
+            }
+          } 
+          // If backend is empty but local has companies, push to backend (migration)
+          else if (current.length > 0) {
+            this.saveRegistered
+
+async syncCompanies() {
+      try {
+        const res = await fetch(`http://${window.location.hostname}:3001/api/companies`);
+        if (res.ok) {
+          const data = await res.json();
+          const currentStr = localStorage.getItem("erp_companies");
+          const current = currentStr ? JSON.parse(currentStr) : [];
+          
+        const res = await fetch(`http://${window.location.hostname}:3001/api/data/${activeId}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.ledgers) {
+            localStorage.setItem("erp_company_data_" + activeId, JSON.stringify(data));
+>           this.loadState(); // Reload from local storage memory
+            this.notifyListeners();
+            console.log("State synced from local backend.");
+
+async syncCompan
+
+{{ CHECKPOINT 15 }}
+ **The earlier parts of this conversation have been truncated due to its long length. The following content summarizes the truncated context so that you may continue your work. **
+
+
+# User Requests
+The following were user requests from the truncated conversation in chronological order:
+1. SO IT IS NOT STORING IN MY PC?
+2. I WANT TO SAVE IT IN IN MY PC
+3. NOW WHERE THE DATAS ARE STORING
+4. SO IF I CREATE A NEW COMPANY WILL IT CREATE NEW FILE LIKE THIS?
+5. I WANT TO SAVE THESE 
+
+Created At: 2026-08-21T15:48:37+05:30
+Completed At: 2026-08-21T15:48:37+05:30
+
+				The command exited with code 0.
+				Output:
+				
+      this.units = [];
+      this.seriesMaster = [];
+      this.gstMaster = [];
+      this.adminPassword = "123";
+      this
+

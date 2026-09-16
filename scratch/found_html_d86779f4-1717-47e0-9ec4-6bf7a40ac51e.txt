@@ -1,0 +1,59 @@
+Created At: 2026-08-16T07:52:14+05:30
+Completed At: 2026-08-16T07:52:16+05:30
+File Path: `file:///g:/sw%20m/erp/index.html`
+Total Lines: 279
+Total Bytes: 16441
+Showing lines 50 to 100
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+50:           </div>
+51:         </div>
+52:         <div class="menu-item">
+53:           <span class="menu-title">Transaction</span>
+54:           <div class="dropdown-content">
+55:             <a href="#vouchers" id="menu-vouchers">Voucher Entry <span class="shortcut">F5</span></a>
+56:             <div class="dropdown-divider"></div>
+57:             <a href="#" id="menu-purchase">Purchase <span class="shortcut">F3</span></a>
+58:             <a href="#" id="menu-sales">Sales <span class="shortcut">F4</span></a>
+59:             <a href="#" id="menu-stock-adjust">Stock Adjustment</a>
+60:             <a href="#" id="menu-product-loosening">Product Loosening</a>
+61:             <div class="dropdown-divider"></div>
+62:             <a href="#" id="menu-purchase-return">Purchase Return</a>
+63:             <a href="#" id="menu-sales-return">Sales Return</a>
+64:             <div class="dropdown-divider"></div>
+65:             <a href="#transactions" id="menu-transaction-log">Transaction Log</a>
+66:             <div class="dropdown-divider"></div>
+67:             <a href="#search-vouchers" id="menu-search-vouchers">Search Vouchers</a>
+68:           </div>
+69:         </div>
+70:         <div class="menu-item">
+71:           <span class="menu-title">Inventory Reports</span>
+72:           <div class="dropdown-content">
+73:             <div class="dropdown-submenu">
+74:               <a href="#" id="menu-sales-reports-sub">Sales Reports <span class="shortcut">&gt;</span></a>
+75:               <div class="dropdown-menu">
+76:                 <a href="#reports" id="menu-sales-report-main">Sales Report</a>
+77:                 <a href="#reports" id="menu-sales-return-report">Sales Return</a>
+78:                 <div class="dropdown-divider"></div>
+79:                 <a href="#" id="menu-sales-free-items">Sales Report [ Free Items only ]</a>
+80:                 <a href="#" id="menu-sales-billwise-margin">Sales Report [Billwise Margin ]</a>
+81:                 <a href="#" id="menu-sales-product-margin">Product wise Margin Report</a>
+82:                 <div class="dropdown-divider"></div>
+83:                 <a href="#" id="menu-sales-paymode">Sales Report [Payment Mode wise]</a>
+84:                 <a href="#" id="menu-sales-monthwise">Month wise Sales Report</a>
+85:                 <a href="#" id="menu-sales-calendar">Monthly Sales Calendar</a>
+86:                 <a href="#" id="menu-sales-prod-analysis">Product Wise Sales analysis</a>
+87:                 <a href="#" id="menu-sales-cust-analysis">Customer Wise Sales Analysis</a>
+88:                 <a href="#" id="menu-sales-adjust-rep">Sales Adjustment Report</a>
+89:                 <a href="#" id="menu-sales-company">Company Wise Sales Report</a>
+90:                 <a href="#" id="menu-sales-product">Product Wise Sales Report</a>
+91:                 <a href="#" id="menu-sales-category">Category Wise Sales Report</a>
+92:                 <a href="#" id="menu-sales-employee">Employee Wise Sales Report</a>
+93:                 <a href="#" id="menu-sales-cust-summary">Customer Wise Sales Summary</a>
+94:                 <a href="#" id="menu-sales-group-wise">Product Group Wise Sales Report</a>
+95:                 <a href="#" id="menu-sales-vendor-wise">Vendor wise Sales Report</a>
+96:                 <a href="#" id="menu-sales-cust-prod-summary">Customer wise Product Sales Summary</a>
+97:               </div>
+98:             </div>
+99:             <a href="#" id="menu-purchase-reports-sub">Purchase Reports <span class="shortcut">&gt;</span></a>
+100:             <div class="dropdown-submenu">
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

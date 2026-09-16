@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Material Ledger | Building Materials ERP</title>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- App Custom Style -->
+    <link rel="stylesheet" href="/src/style.css" />
+    <script>
+      // Clear session on load to ensure login page is shown first
+      localStorage.removeItem("erp_active_company_id");
+      
+      // Inject CSS immediately to hide the main app layout
+      const style = document.createElement("style");
+      style.id = "hide-app-style";
+      style.innerHTML = "#app { display: none !important; }";
+      document.head.appendChild(style);
+    </script>
+  </head>
+  <body>
+    <div id="app">
+      <!-- Top Horizontal Menu Bar -->
+      <nav class="erp-menu-bar">
+        <div class="menu-item">
+          <span class="menu-title">Masters</span>
+          <div class="dropdown-content">
+            <a href="#" id="menu-product-master">Product Master <span class="shortcut">F2</span></a>
+            <a href="#inventory" id="menu-products-list">Products List <span class="shortcut">F10</span></a>
+            <a href="#" id="menu-unit-settings">Unit Settings</a>
+            <a href="#" id="menu-customer">Customer <span class="shortcut">Ctrl+U</span></a>
+            <a href="#" id="menu-vendor">Vendor <span class="shortcut">Ctrl+O</span></a>
+            <a href="#contacts" id="menu-contacts-directory">Contacts Directory</a>
+            <a href="#" id="menu-employee">Employee <span class="shortcut">Ctrl+M</span></a>
+            <a href="#" id="menu-influencers">Influencer Master</a>
+            <a href="#" id="menu-series-master">Invoice Series Setting</a>
+            <div class="dropdown-divider"></div>
+            <a href="#" id="menu-exit">Exit <span class="shortcut">Ctrl+X</span></a>
+          </div>
+        </div>
+        <div class="menu-item">
+          <span class="menu-title">Accounts</span>
+          <div class="dropdown-content">
+            <a href="#groups" id="menu-groups">Group Creation</a>
+            <a href="#ledgers" id="menu-ledgers">Ledger Creation</a>
+            <a href="#adjustments" id="menu-adjustments">Sale/Purchase Adjustment Master</a>
+            <a href="#" id="menu-opening-stock-register">Opening Stock Entry</a>
+          </div>
+        </div>
+        <div class="menu-item">
+          <span class="menu-title">Transaction</span>
+          <div class="dropdown-content">
+            <a href="#vouchers" id="menu-vouchers">Voucher Entry <span class="shortcut">F5</span></a>
+            <div class="dropdown-divider"></div>
+            <a href="#" id="menu-purchase">Purchase <span class="shortcut">F3</span></a>
+            <a href="#" id="menu-sales">Sales <span class="shortcut">F4</span></a>
+            <a href="#" id="menu-stock-adjust">Stock Adjustment</a>
+            <a href="#" id="menu-product-loosening">Product Loosening</a>
+            <div class="dropdown-divider"></div>
+            <a href="#" id="menu-purchase-return">Purchase Return</a>
+            <a href="#" id="menu-sales-return">Sales Return</a>
+            <div class="dropdown-divider"></div>
+            <a href="#transactions" id="menu-transaction-log">Transaction Log</a>
+            <div class="dropdown-divider"></div>
+            <a href="#search-vouchers" id="menu-search-vouchers">Search Vouchers</a>
+          </div>
+        </div>
+        <div class="menu-item">
+          <span class="menu-title">Inventory Reports</span>
+          <div class="dropdown-content">
+            <div class="dropdown-submenu">
+              <a href="#" id="menu-sales-reports-sub">Sales Reports <span class="shortcut">&gt;</span></a>
+              <div class="dropdown-menu">
+                <a href="#reports" id="menu-sales-report-main">Sales Report</a>
+                <a href="#reports" id="menu-sales-return-report">Sales Return</a>
+                <div class="dropdown-divider"></div>
+                <a href="#" id="menu-sales-billwise-margin">Sales Report [Billwise Margin ]</a>
+                <a href="#" id="menu-sales-product-margin">Product wise Margin Report</a>
+                <div class="dropdown-divider"></div>
+                <a href="#" id="menu-sales-company">Company Wise Sales Report</a>
+                <a href="#" id="menu-sales-product">Product Wise Sales Report</a>
+                <a href="#" id="menu-sales-category">Category Wise Sales Report</a>
+                <a href="#" id="menu-sales-cust-summary">Customer Wise Sales Report</a>
+                <a href="#" id="menu-sales-group-wise">Product Group Wise Sales Report</a>
+              </div>
+            </div>
+            <div class="dropdown-submenu">
+              <a href="#" id="menu-purchase-reports-sub">Purchase Reports <span class="shortcut">&gt;</span></a>
+              <div class="dropdown-menu">
+                <a href="#reports" id="menu-purchase-report-main">Purchase Report</a>
+                <a href="#reports" id="menu-purchase-return-report">Purchase Return</a>
+                <div class="dropdown-divider"></div>
+                <a href="#" id="menu-purchase-item-analysis">Item wise Purchase Analysis</a>
+                <a href="#" id="menu-purchase-vendor-analysis">Vendor Wise Purchase Analysis</a>
+
+              </div>
+            </div>
+            <div class="dropdown-submenu">
+              <a href="#" id="menu-canceled-bills">Canceled Bills <span class="shortcut">&gt;</span></a>
+              <div class="dropdown-menu">
+                <a href="#" id="menu-canceled-sales-bills">Sales Bills</a>
+                <a href="#" id="menu-canceled-purchase-bills">Purchase Bills</a>
+              </div>
+            </div>
+            <div class="dropdown-divider"></div>
+            <a href="#inventory" id="menu-stock-register">Stock Register <span class="shortcut">Ctrl+F1</span></a>
+            <a href="#inventory" id="menu-stock-register-detailed">Stock Register Detailed <span class="shortcut">Ctrl+F2</span></a>
+            <a href="#reports" id="menu-stock-register-batch">Stock Register [Batch Wise]</a>
+            <a href="#" id="menu-item-wise-stock">Item wise Stock Register</a>
+            <a href="#inventory" id="menu-stock-quick-view">Stock [Quick View] <span class="shortcut">Ctrl+F</span></a>
+            <div class="dropdown-divider"></div>
+            <a href="#" id="menu-product-wise-analysis">Product Wise Analysis</a>
+            <a href="#" id="menu-product-analysis-loc">Product Analysis Location Wise</a>
+            <a href="#" id="menu-performance-sub">Performance <span class="shortcut">&gt;</span></a>
+            <div class="dropdown-divider"></div>
+            <a href="#" id="menu-employee-attendance">Employee Attendance</a>
+            <div class="dropdown-divider"></div>
+            <a href="#" id="menu-deactivated-items">Deactivated Items</a>
+          </div>
+        </div>
+        <div class="menu-item">
+          <span class="menu-title">Tax Reports</span>
+          <div class="dropdown-content">
+            <a href="#reports" id="menu-tax-summary">GST Summary</a>
+            <div class="dropdown-divider"></div>
+            <a href="#" id="menu-input-gst">Input GST</a>
+            <a href="#" id="menu-gst-purchase-hsn">GST Purchase Report [HSN/SAC Code]</a>
+            <div class="dropdown-divider"></div>
+            <a href="#" id="menu-output-gst">Output GST</a>
+            <a href="#" id="menu-gst-sales-hsn">GST Sales Report [HSN/SAC Code]</a>
+            <div class="dropdown-divider"></div>
+            <a href="#" id="menu-gst-voucher-summary">GST Voucher Summary</a>
+            <div class="dropdown-divider"></div>
+            <a href="#" id="menu-gst-sales-return-report">GST Sales Return Report</a>
+            <a href="#" id="menu-gst-purchase-return-report">GST Purchase Return Report</a>
+          </div>
+        </div>
+        <div class="menu-item">
+          <span class="menu-title">Account Reports</span>
+          <div class="dropdown-content">
+            <a href="#reports" id="menu-profit-loss">Profit & Loss</a>
+            <a href="#reports" id="menu-balance-sheet">Balance Sheet</a>
+            <a href="#reports" id="menu-trial-balance">Trial Balance</a>
+            <div class="dropdown-divider"></div>
+            <a href="#reports" id="menu-individual-ledger">Individual Ledger</a>
+            <a href="#reports" id="menu-ledger-group-summary">Ledger Group Summary</a>
+            <a href="#reports" id="menu-day-book">Day Book</a>
+            <div class="dropdown-divider"></div>
+            <a href="#reports" id="menu-customer-report">Customer Report</a>
+            <a href="#reports" id="menu-vendor-report">Vendor Report</a>
+            <a href="#reports" id="menu-debtors-report">Sundry Debtors Report</a>
+            <a href="#reports" id="menu-creditors-report">Sundry Creditors Report</a>
+          </div>
+        </div>
+        <div class="menu-item">
+          <span class="menu-title">Utilities</span>
+          <div class="dropdown-content">
+            <a href="#admin" id="menu-admin">Admin Settings</a>
+            <a href="#preset-loading" id="menu-preset-loading">Preset Loading</a>
+            <a href="#" id="menu-options">Options</a>
+            <a href="#" id="menu-gst-master">GST Master</a>
+            <div class="dropdown-divider"></div>
+            <a href="#" id="menu-reset-db">Reset Database</a>
+            <a href="#" id="menu-clear-db">CLEAR DATAT BASE</a>
+          </div>
+        </div>
+        <div class="menu-item">
+          <span class="menu-title">Admin</span>
+          <div class="dropdown-content">
+            <a href="#" id="menu-edit-company">Edit Company Information</a>
+            <a href="#" id="menu-delete-company" style="color: #ef4444;">Delete Company</a>
+            <div class="dropdown-divider"></div>
+            <a href="#" id="menu-logout">Logout</a>
+          </div>
+        </div>
+        <div class="menu-item">
+          <span class="menu-title">Help</span>
+          <div class="dropdown-content">
+            <a href="#" id="menu-about">About Material Ledger</a>
+          </div>
+        </div>
+        
+        <!-- Right side utility: theme toggle and user tag -->
+        <div class="menu-bar-right" style="margin-left: auto; display: flex; align-items: center; gap: 15px; padding-right: 10px;">
+          <button id="theme-toggle" class="theme-toggle" title="Toggle Theme" style="display: none; background: none; border: none; color: inherit; cursor: pointer; padding: 2px 6px; font-size: 0.8rem;">
+            <i class="fa-solid fa-sun" id="theme-icon"></i>
+          </button>
+          <span id="header-company-name" style="font-size: 0.75rem; font-weight: 600; color: #1e3b8b; background: #e2e8f0; padding: 2px 8px; border-radius: 4px;">Admin (Accounts Manager)</span>
+          <button id="header-logout-btn" style="background: #ef4444; color: white; border: none; padding: 2px 8px; font-size: 0.7rem; border-radius: 4px; font-weight: bold; cursor: pointer;">Logout</button>
+        </div>
+      </nav>
+
+      <!-- Left Vertical Sidebar (Masters panel) -->
+      <aside class="erp-sidebar">
+        <div class="sidebar-header">Master</div>
+        <div class="sidebar-buttons">
+          <button class="sidebar-btn" id="sidebar-btn-product" title="Product Master (F2)">
+            <div class="btn-icon-wrapper"><i class="fa-solid fa-box-open" style="color: #22c55e;"></i></div>
+            <span class="btn-text">Product</span>
+          </button>
+          <button class="sidebar-btn" id="sidebar-btn-customer" title="Customer Directory (Ctrl+U)">
+            <div class="btn-icon-wrapper"><i class="fa-solid fa-users" style="color: #eab308;"></i></div>
+            <span class="btn-text">Customer</span>
+          </button>
+          <button class="sidebar-btn" id="sidebar-btn-vendor" title="Vendor Directory (Ctrl+O)">
+            <div class="btn-icon-wrapper"><i class="fa-solid fa-truck-field" style="color: #3b82f6;"></i></div>
+            <span class="btn-text">Vendor</span>
+          </button>
+          <button class="sidebar-btn" id="sidebar-btn-employee" title="Employee Registry (Ctrl+M)">
+            <div class="btn-icon-wrapper"><i class="fa-solid fa-id-card" style="color: #ec4899;"></i></div>
+            <span class="btn-text">Employee</span>
+          </button>
+          <button class="sidebar-btn" id="sidebar-btn-cashbook" title="Cash Book">
+            <div class="btn-icon-wrapper"><i class="fa-solid fa-money-bill-wave" style="color: #14b8a6;"></i></div>
+            <span class="btn-text">Cash Book</span>
+          </button>
+          <button class="sidebar-btn" id="sidebar-btn-bankbook" title="Bank Book">
+            <div class="btn-icon-wrapper"><i class="fa-solid fa-building-columns" style="color: #8b5cf6;"></i></div>
+            <span class="btn-text">Bank Book</span>
+          </button>
+        </div>
+      </aside>
+
+      <!-- Main Desktop Workspace -->
+      <main id="erp-workspace" class="erp-workspace">
+        <!-- Watermark background -->
+        <div class="workspace-watermark">
+          <h1>GST ERP</h1>
+          <p>MATERIAL LEDGER</p>
+        </div>
+
+        <!-- Floating Desktop Window Frame -->
+        <div id="active-window" class="erp-window hidden">
+          <div class="window-header">
+            <div class="window-title" id="window-title-text">Dashboard</div>
+            <div class="window-controls">
+              <button class="win-btn" id="win-btn-minimize" title="Minimize"><i class="fa-solid fa-minus"></i></button>
+              <button class="win-btn" id="win-btn-maximize" title="Maximize"><i class="fa-solid fa-square" style="font-size: 0.6rem;"></i></button>
+              <button class="win-btn win-btn-close" id="win-btn-close" title="Close"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+          </div>
+          <div class="window-body" id="window-content-area">
+            <!-- Active view HTML dynamically rendered here -->
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Global Modals Placeholder -->
+    <div id="modal-container-root"></div>
+    <div id="sub-modal-container-root"></div>
+
+    <!-- Main Module Script -->
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
+
+The above content shows the entire, complete file contents of the requested file.

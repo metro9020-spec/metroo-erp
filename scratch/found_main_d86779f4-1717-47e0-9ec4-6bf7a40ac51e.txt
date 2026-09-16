@@ -1,0 +1,88 @@
+Created At: 2026-08-16T07:51:36+05:30
+Completed At: 2026-08-16T07:51:36+05:30
+File Path: `file:///g:/sw%20m/erp/src/main.js`
+Total Lines: 1304
+Total Bytes: 44176
+Showing lines 1 to 80
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: import { state } from "./state.js";
+2: import { renderDashboard } from "./views/dashboard.js";
+3: import { renderInventory, showProductMasterModal } from "./views/inventory.js";
+4: import { renderTransactions } from "./views/transactions.js";
+5: import { renderVouchers } from "./views/vouchers.js";
+6: import { renderContacts, showAddContactModal, setContactTypeFilter } from "./views/contacts.js";
+7: import { renderReports, setReportsActiveTab, setPartyReportTab } from "./views/reports.js";
+8: import { renderAdmin } from "./views/admin.js";
+9: import { renderGroups, renderLedger } from "./views/ledger.js";
+10: import { renderAdjustments } from "./views/adjustments.js";
+11: import { renderPresetLoading } from "./views/presetLoading.js";
+12: import { renderSearchVouchers } from "./views/searchVouchers.js";
+13: import { showWelcomeScreen, showEditCompanyModal } from "./views/login.js";
+14: import { auth } from "./db.js";
+15: import { onAuthStateChanged } from "firebase/auth";
+16: import { showFirebaseAuthScreen } from "./views/firebaseAuthUI.js";
+17: 
+18: // Stackable Modal System polyfill
+19: const modalRoot = document.getElementById("modal-container-root");
+20: if (modalRoot) {
+21:   const originalDescriptor = Object.getOwnPropertyDescriptor(Element.prototype, "innerHTML");
+22:   
+23:   Object.defineProperty(modalRoot, "innerHTML", {
+24:     get() {
+25:       return originalDescriptor.get.call(modalRoot);
+26:     },
+27:     set(value) {
+28:       if (value === "") {
+29:         // Close/remove the topmost modal
+30:         if (modalRoot.lastElementChild) {
+31:           modalRoot.lastElementChild.remove();
+32:         }
+33:         return;
+34:       }
+35: 
+36:       // Parse the incoming HTML
+37:       const tempDiv = document.createElement("div");
+38:       tempDiv.innerHTML = value;
+39: 
+40:       // Extract all top-level elements (usually a div.modal-overlay)
+41:       const children = Array.from(tempDiv.children);
+42:       children.forEach((child) => {
+43:         if (child.id) {
+44:           // Remove existing modal with the same ID to prevent duplicates
+45:           const existing = modalRoot.querySelector(`#${child.id}`);
+46:           if (existing) {
+47:             existing.remove();
+48:           }
+49:         }
+50:         
+51:         // Increase z-index of the stacked modal to ensure it lays on top
+52:         if (child.classList.contains("modal-overlay")) {
+53:           const currentCount = modalRoot.children.length;
+54:           child.style.zIndex = String(2000 + currentCount * 10);
+55:         }
+56:         
+57:         modalRoot.appendChild(child);
+58:       });
+59:     }
+60:   });
+61: }
+62: 
+63: // Routes Mapping
+64: const routes = {
+65:   dashboard: { title: "Dashboard Overview", render: renderDashboard },
+66:   inventory: { title: "Inventory Stock Ledger", render: renderInventory },
+67:   transactions: { title: "Transactions Log", render: renderTransactions },
+68:   vouchers: { title: "Vouchers Ledger", render: renderVouchers },
+69:   contacts: { title: "Contacts Directory", render: renderContacts },
+70:   reports: { title: "Accounting Financial Statements", render: renderReports },
+71:   admin: { title: "Admin Panel & Security Settings", render: renderAdmin },
+72:   groups: { title: "Account Group Master", render: renderGroups },
+73:   ledgers: { title: "Ledger Creation", render: renderLedger },
+74:   adjustments: { title: "Sale/Purchase Adjustment Master", render: renderAdjustments },
+75:   "preset-loading": { title: "Preset Loading Charges Configuration", render: renderPresetLoading },
+76:   "search-vouchers": { title: "Search Vouchers", render: renderSearchVouchers }
+77: };
+78: 
+79: const windowContainerEl = document.getElementById("active-window");
+80: const windowTitleEl = document.getElementById("window-title-text");
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

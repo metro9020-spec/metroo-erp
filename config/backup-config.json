@@ -1,0 +1,16 @@
+{
+  "dbName": "mydatabase",
+  "dbUser": "dbuser",
+  "dbPassword": "dbpassword",
+  "mongoUri": "mongodb://user:pass@host:port/db",
+  "dumpCommand": "pg_dump -U ${dbUser} ${dbName} > {output}",
+  "restoreCommand": "psql -U ${dbUser} ${dbName} < {input}",
+  "localDir": "./backups",
+  "useS3": false,
+  "s3": {
+    "bucket": "my-backup-bucket",
+    "region": "us-east-1",
+    "accessKeyId": "YOUR_ACCESS_KEY",
+    "secretAccessKey": "YOUR_SECRET_KEY"
+  }
+}

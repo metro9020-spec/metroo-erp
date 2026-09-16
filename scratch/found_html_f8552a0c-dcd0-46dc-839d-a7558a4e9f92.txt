@@ -1,0 +1,34 @@
+Created At: 2026-08-06T11:11:18+05:30
+Completed At: 2026-08-06T11:11:18+05:30
+File Path: `file:///g:/sw%20m/erp/index.html`
+Total Lines: 272
+Total Bytes: 16200
+Showing lines 70 to 95
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+70:           <div class="dropdown-content">
+71:             <div class="dropdown-submenu">
+72:               <a href="#" id="menu-sales-reports-sub">Sales Reports <span class="shortcut">&gt;</span></a>
+73:               <div class="dropdown-menu">
+74:                 <a href="#reports" id="menu-sales-report-main">Sales Report</a>
+75:                 <a href="#reports" id="menu-sales-return-report">Sales Return</a>
+76:                 <div class="dropdown-divider"></div>
+77:                 <a href="#" id="menu-sales-free-items">Sales Report [ Free Items only ]</a>
+78:                 <a href="#" id="menu-sales-billwise-margin">Sales Report [Billwise Margin ]</a>
+79:                 <a href="#" id="menu-sales-product-margin">Product wise Margin Report</a>
+80:                 <div class="dropdown-divider"></div>
+81:                 <a href="#" id="menu-sales-paymode">Sales Report [Payment Mode wise]</a>
+82:                 <a href="#" id="menu-sales-monthwise">Month wise Sales Report</a>
+83:                 <a href="#" id="menu-sales-calendar">Monthly Sales Calendar</a>
+84:                 <a href="#" id="menu-sales-prod-analysis">Product Wise Sales analysis</a>
+85:                 <a href="#" id="menu-sales-cust-analysis">Customer Wise Sales Analysis</a>
+86:                 <a href="#" id="menu-sales-adjust-rep">Sales Adjustment Report</a>
+87:                 <a href="#" id="menu-sales-company">Company Wise Sales Report</a>
+88:                 <a href="#" id="menu-sales-product">Product Wise Sales Report</a>
+89:                 <a href="#" id="menu-sales-category">Category Wise Sales Report</a>
+90:                 <a href="#" id="menu-sales-employee">Employee Wise Sales Report</a>
+91:                 <a href="#" id="menu-sales-cust-summary">Customer Wise Sales Summary</a>
+92:                 <a href="#" id="menu-sales-group-wise">Product Group Wise Sales Report</a>
+93:                 <a href="#" id="menu-sales-vendor-wise">Vendor wise Sales Report</a>
+94:                 <a href="#" id="menu-sales-cust-prod-summary">Customer wise Product Sales Summary</a>
+95:               </div>
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

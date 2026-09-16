@@ -1,0 +1,29 @@
+Created At: 2026-08-07T18:45:54+05:30
+Completed At: 2026-08-07T18:45:54+05:30
+File Path: `file:///g:/sw%20m/erp/index.html`
+Total Lines: 288
+Total Bytes: 17160
+Showing lines 260 to 280
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+260:           <p>MATERIAL LEDGER</p>
+261:         </div>
+262: 
+263:         <!-- Floating Desktop Window Frame -->
+264:         <div id="active-window" class="erp-window hidden">
+265:           <div class="window-header">
+266:             <div class="window-title" id="window-title-text">Dashboard</div>
+267:             <div class="window-controls">
+268:               <button class="win-btn" id="win-btn-minimize" title="Minimize"><i class="fa-solid fa-minus"></i></button>
+269:               <button class="win-btn" id="win-btn-maximize" title="Maximize"><i class="fa-solid fa-square" style="font-size: 0.6rem;"></i></button>
+270:               <button class="win-btn win-btn-close" id="win-btn-close" title="Close"><i class="fa-solid fa-xmark"></i></button>
+271:             </div>
+272:           </div>
+273:           <div class="window-body" id="window-content-area">
+274:             <!-- Active view HTML dynamically rendered here -->
+275:           </div>
+276:         </div>
+277:       </main>
+278:     </div>
+279: 
+280:     <!-- Global Modals Placeholder -->
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

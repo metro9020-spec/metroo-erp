@@ -1,0 +1,808 @@
+Created At: 2026-08-13T12:42:19+05:30
+Completed At: 2026-08-13T12:42:19+05:30
+File Path: `file:///G:/sw%20m/erp/src/main.js`
+Total Lines: 1110
+Total Bytes: 37903
+Showing lines 1 to 800
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: import { state } from "./state.js";
+2: import { renderDashboard } from "./views/dashboard.js";
+3: import { renderInventory, showProductMasterModal } from "./views/inventory.js";
+4: import { renderTransactions } from "./views/transactions.js";
+5: import { renderVouchers } from "./views/vouchers.js";
+6: import { renderContacts, showAddContactModal, setContactTypeFilter } from "./views/contacts.js";
+7: import { renderReports, setReportsActiveTab, setPartyReportTab } from "./views/reports.js";
+8: import { renderAdmin } from "./views/admin.js";
+9: import { renderGroups, renderLedger } from "./views/ledger.js";
+10: import { renderAdjustments } from "./views/adjustments.js";
+11: import { renderPresetLoading } from "./views/presetLoading.js";
+12: import { renderSearchVouchers } from "./views/searchVouchers.js";
+13: import { showWelcomeScreen, showEditCompanyModal } from "./views/login.js";
+14: 
+15: // Stackable Modal System polyfill
+16: const modalRoot = document.getElementById("modal-container-root");
+17: if (modalRoot) {
+18:   const originalDescriptor = Object.getOwnPropertyDescriptor(Element.prototype, "innerHTML");
+19:   
+20:   Object.defineProperty(modalRoot, "innerHTML", {
+21:     get() {
+22:       return originalDescriptor.get.call(modalRoot);
+23:     },
+24:     set(value) {
+25:       if (value === "") {
+26:         // Close/remove the topmost modal
+27:         if (modalRoot.lastElementChild) {
+28:           modalRoot.lastElementChild.remove();
+29:         }
+30:         return;
+31:       }
+32: 
+33:       // Parse the incoming HTML
+34:       const tempDiv = document.createElement("div");
+35:       tempDiv.innerHTML = value;
+36: 
+37:       // Extract all top-level elements (usually a div.modal-overlay)
+38:       const children = Array.from(tempDiv.children);
+39:       children.forEach((child) => {
+40:         if (child.id) {
+41:           // Remove existing modal with the same ID to prevent duplicates
+42:           const existing = modalRoot.querySelector(`#${child.id}`);
+43:           if (existing) {
+44:             existing.remove();
+45:           }
+46:         }
+47:         
+48:         // Increase z-index of the stacked modal to ensure it lays on top
+49:         if (child.classList.contains("modal-overlay")) {
+50:           const currentCount = modalRoot.children.length;
+51:           child.style.zIndex = String(2000 + currentCount * 10);
+52:         }
+53:         
+54:         modalRoot.appendChild(child);
+55:       });
+56:     }
+57:   });
+58: }
+59: 
+60: // Routes Mapping
+61: const routes = {
+62:   dashboard: { title: "Dashboard Overview", render: renderDashboard },
+63:   inventory: { title: "Inventory Stock Ledger", render: renderInventory },
+64:   transactions: { title: "Transactions Log", render: renderTransactions },
+65:   vouchers: { title: "Vouchers Ledger", render: renderVouchers },
+66:   contacts: { title: "Contacts Directory", render: renderContacts },
+67:   reports: { title: "Accounting Financial Statements", render: renderReports },
+68:   admin: { title: "Admin Panel & Security Settings", render: renderAdmin },
+69:   groups: { title: "Account Group Master", render: renderGroups },
+70:   ledgers: { title: "Ledger Creation", render: renderLedger },
+71:   adjustments: { title: "Sale/Purchase Adjustment Master", render: renderAdjustments },
+72:   "preset-loading": { title: "Preset Loading Charges Configuration", render: renderPresetLoading },
+73:   "search-vouchers": { title: "Search Vouchers", render: renderSearchVouchers }
+74: };
+75: 
+76: const windowContainerEl = document.getElementById("active-window");
+77: const windowTitleEl = document.getElementById("window-title-text");
+78: const windowContentEl = document.getElementById("window-content-area");
+79: 
+80: // Route renderer
+81: export function renderCurrentView() {
+82:   const activeCompanyId = state.getActiveCompanyId();
+83:   if (!activeCompanyId) {
+84:     if (windowContainerEl) {
+85:       windowContainerEl.classList.add("hidden");
+86:     }
+87:     return;
+88:   }
+89: 
+90:   const hash = window.location.hash.substring(1) || "";
+91:   
+92:   if (!hash || hash === "home") {
+93:     if (windowContainerEl) {
+94:       windowContainerEl.classList.add("hidden");
+95:     }
+96:     return;
+97:   }
+98: 
+99:   const route = routes[hash];
+100:   if (!route) {
+101:     if (windowContainerEl) {
+102:       windowContainerEl.classList.add("hidden");
+103:     }
+104:     return;
+105:   }
+106: 
+107:   if (windowContainerEl) {
+108:     windowContainerEl.classList.remove("hidden");
+109:   }
+110:   if (windowTitleEl) {
+111:     windowTitleEl.innerText = route.title;
+112:   }
+113: 
+114:   // Render view template inside window body
+115:   if (windowContentEl) {
+116:     route.render(windowContentEl);
+117:   }
+118: }
+119: 
+120: // Router Event Listeners
+121: window.addEventListener("hashchange", renderCurrentView);
+122: 
+123: state.subscribe(() => {
+124:   const hasModal = document.getElementById("modal-container-root")?.children.length > 0;
+125:   if (!hasModal) {
+126:     renderCurrentView();
+127:   }
+128: });
+129: 
+130: // Initialize Theme Toggle
+131: const themeToggleBtn = document.getElementById("theme-toggle");
+132: const themeIcon = document.getElementById("theme-icon");
+133: 
+134: function initTheme() {
+135:   document.documentElement.setAttribute("data-theme", "light");
+136:   localStorage.setItem("erp_theme", "light");
+137:   updateThemeIcon("light");
+138: }
+139: 
+140: function updateThemeIcon(theme) {
+141:   if (themeIcon) {
+142:     if (theme === "light") {
+143:       themeIcon.className = "fa-solid fa-moon";
+144:       themeToggleBtn.setAttribute("title", "Switch to Dark Mode");
+145:     } else {
+146:       themeIcon.className = "fa-solid fa-sun";
+147:       themeToggleBtn.setAttribute("title", "Switch to Light Mode");
+148:     }
+149:   }
+150: }
+151: 
+152: if (themeToggleBtn) {
+153:   themeToggleBtn.addEventListener("click", () => {
+154:     document.documentElement.setAttribute("data-theme", "light");
+155:     localStorage.setItem("erp_theme", "light");
+156:     updateThemeIcon("light");
+157:   });
+158: }
+159: 
+160: // Window controls click actions
+161: const closeBtn = document.getElementById("win-btn-close");
+162: const minimizeBtn = document.getElementById("win-btn-minimize");
+163: const maximizeBtn = document.getElementById("win-btn-maximize");
+164: 
+165: if (closeBtn) {
+166:   closeBtn.addEventListener("click", () => {
+167:     window.location.hash = "";
+168:   });
+169: }
+170: if (minimizeBtn) {
+171:   minimizeBtn.addEventListener("click", () => {
+172:     if (windowContainerEl) {
+173:       windowContainerEl.classList.add("hidden");
+174:     }
+175:   });
+176: }
+177: if (maximizeBtn) {
+178:   maximizeBtn.addEventListener("click", () => {
+179:     if (windowContainerEl) {
+180:       windowContainerEl.classList.toggle("maximized");
+181:     }
+182:   });
+183: }
+184: 
+185: // Left master sidebar buttons clicks
+186: const btnProd = document.getElementById("sidebar-btn-product");
+187: if (btnProd) {
+188:   btnProd.addEventListener("click", () => {
+189:     showProductMasterModal(windowContentEl, null, null);
+190:   });
+191: }
+192: 
+193: const btnCust = document.getElementById("sidebar-btn-customer");
+194: if (btnCust) {
+195:   btnCust.addEventListener("click", () => {
+196:     showAddContactModal(document.getElementById("modal-container-root"), null, "customer");
+197:   });
+198: }
+199: 
+200: const btnVend = document.getElementById("sidebar-btn-vendor");
+201: if (btnVend) {
+202:   btnVend.addEventListener("click", () => {
+203:     showAddContactModal(document.getElementById("modal-container-root"), null, "supplier");
+204:   });
+205: }
+206: 
+207: const btnEmp = document.getElementById("sidebar-btn-employee");
+208: if (btnEmp) {
+209:   btnEmp.addEventListener("click", () => {
+210:     alert("Employee Registry: This module records attendance, salary allowances, and employee expense claims. Access key settings under Transaction ➔ Employee Expense Entry.");
+211:   });
+212: }
+213: 
+214: const btnCashbook = document.getElementById("sidebar-btn-cashbook");
+215: if (btnCashbook) {
+216:   btnCashbook.addEventListener("click", () => {
+217:     import("./views/cashBankBook.js").then(m => {
+218:       m.showCashBookModal(windowContentEl);
+219:     });
+220:   });
+221: }
+222: 
+223: const btnBankbook = document.getElementById("sidebar-btn-bankbook");
+224: if (btnBankbook) {
+225:   btnBankbook.addEventListener("click", () => {
+226:     import("./views/cashBankBook.js").then(m => {
+227:       m.showBankBookModal(windowContentEl);
+228:     });
+229:   });
+230: }
+231: 
+232: // Menu shortcuts
+233: const menuResetDb = document.getElementById("menu-reset-db");
+234: if (menuResetDb) {
+235:   menuResetDb.addEventListener("click", (e) => {
+236:     e.preventDefault();
+237:     if (confirm("Are you sure you want to reset all database records to sample data?")) {
+238:       state.resetToDefault();
+239:       state.saveState();
+240:       window.location.hash = "";
+241:       alert("Database reset successfully.");
+242:     }
+243:   });
+244: }
+245: 
+246: const menuClearDb = document.getElementById("menu-clear-db");
+247: if (menuClearDb) {
+248:   menuClearDb.addEventListener("click", (e) => {
+249:     e.preventDefault();
+250:     if (confirm("Are you sure you want to clear the database? All transactions, products, and contacts will be permanently deleted.")) {
+251:       state.clearDatabase();
+252:       window.location.hash = "";
+253:       alert("Database cleared successfully.");
+254:     }
+255:   });
+256: }
+257: 
+258: const menuAbout = document.getElementById("menu-about");
+259: if (menuAbout) {
+260:   menuAbout.addEventListener("click", (e) => {
+261:     e.preventDefault();
+262:     alert("Material Ledger ERP v1.0.4\nA classic, high-performance batch-wise building materials inventory system with GST compliance.");
+263:   });
+264: }
+265: 
+266: const menuExit = document.getElementById("menu-exit");
+267: if (menuExit) {
+268:   menuExit.addEventListener("click", (e) => {
+269:     e.preventDefault();
+270:     window.location.hash = "";
+271:   });
+272: }
+273: 
+274: const menuProductMaster = document.getElementById("menu-product-master");
+275: if (menuProductMaster) {
+276:   menuProductMaster.addEventListener("click", (e) => {
+277:     e.preventDefault();
+278:     showProductMasterModal(windowContentEl, null, null);
+279:   });
+280: }
+281: 
+282: const menuUnitSettings = document.getElementById("menu-unit-settings");
+283: if (menuUnitSettings) {
+284:   menuUnitSettings.addEventListener("click", (e) => {
+285:     e.preventDefault();
+286:     import("./views/units.js").then(m => {
+287:       m.showUnitSettingsModal(document.getElementById("modal-container-root"), null, null);
+288:     });
+289:   });
+290: }
+291: 
+292: const menuCustomer = document.getElementById("menu-customer");
+293: if (menuCustomer) {
+294:   menuCustomer.addEventListener("click", (e) => {
+295:     e.preventDefault();
+296:     showAddContactModal(document.getElementById("modal-container-root"), null, "customer");
+297:   });
+298: }
+299: 
+300: const menuVendor = document.getElementById("menu-vendor");
+301: if (menuVendor) {
+302:   menuVendor.addEventListener("click", (e) => {
+303:     e.preventDefault();
+304:     showAddContactModal(document.getElementById("modal-container-root"), null, "supplier");
+305:   });
+306: }
+307: 
+308: const menuOptions = document.getElementById("menu-options");
+309: if (menuOptions) {
+310:   menuOptions.addEventListener("click", (e) => {
+311:     e.preventDefault();
+312:     import("./views/options.js").then(m => {
+313:       m.showOptionsModal();
+314:     });
+315:   });
+316: }
+317: 
+318: const menuGstMaster = document.getElementById("menu-gst-master");
+319: if (menuGstMaster) {
+320:   menuGstMaster.addEventListener("click", (e) => {
+321:     e.preventDefault();
+322:     import("./views/gstMaster.js").then(m => {
+323:       m.showGstMasterModal();
+324:     });
+325:   });
+326: }
+327: 
+328: const menuInfluencers = document.getElementById("menu-influencers");
+329: if (menuInfluencers) {
+330:   menuInfluencers.addEventListener("click", (e) => {
+331:     e.preventDefault();
+332:     import("./views/influencer.js").then(m => {
+333:       m.showInfluencerMasterModal();
+334:     });
+335:   });
+336: }
+337: 
+338: const menuContactsDirectory = document.getElementById("menu-contacts-directory");
+339: if (menuContactsDirectory) {
+340:   menuContactsDirectory.addEventListener("click", () => {
+341:     setContactTypeFilter("all");
+342:     window.location.hash = "#contacts";
+343:   });
+344: }
+345: 
+346: // Bind Purchase and Sales Menu Clicks to open transactional modals directly
+347: const menuPurchase = document.getElementById("menu-purchase");
+348: if (menuPurchase) {
+349:   menuPurchase.addEventListener("click", (e) => {
+350:     e.preventDefault();
+351:     import("./views/selectSeriesModal.js").then(sm => {
+352:       sm.showSelectBillSeriesModal("Purchase", (selectedSeries) => {
+353:         import("./views/transactions.js").then(m => {
+354:           m.showRecordPurchaseModal(windowContentEl, null, null, selectedSeries);
+355:         });
+356:       });
+357:     });
+358:   });
+359: }
+360: 
+361: const menuSales = document.getElementById("menu-sales");
+362: if (menuSales) {
+363:   menuSales.addEventListener("click", (e) => {
+364:     e.preventDefault();
+365:     import("./views/selectSeriesModal.js").then(sm => {
+366:       sm.showSelectBillSeriesModal("Sales", (selectedSeries) => {
+367:         import("./views/transactions.js").then(m => {
+368:           m.showInvoiceBuilderModal(windowContentEl, null, null, null, null, selectedSeries);
+369:         });
+370:       });
+371:     });
+372:   });
+373: }
+374: 
+375: const menuPurchaseReturn = document.getElementById("menu-purchase-return");
+376: if (menuPurchaseReturn) {
+377:   menuPurchaseReturn.addEventListener("click", (e) => {
+378:     e.preventDefault();
+379:     import("./views/transactions.js").then(m => {
+380:       m.setTransactionsActiveTab("purchase-return");
+381:       window.location.hash = "#transactions";
+382:       m.showPurchaseReturnModal(windowContentEl);
+383:     });
+384:   });
+385: }
+386: 
+387: const menuSalesReturn = document.getElementById("menu-sales-return");
+388: if (menuSalesReturn) {
+389:   menuSalesReturn.addEventListener("click", (e) => {
+390:     e.preventDefault();
+391:     import("./views/transactions.js").then(m => {
+392:       m.setTransactionsActiveTab("sales-return");
+393:       window.location.hash = "#transactions";
+394:       m.showSalesReturnModal(windowContentEl);
+395:     });
+396:   });
+397: }
+398: 
+399: const menuSeriesMaster = document.getElementById("menu-series-master");
+400: if (menuSeriesMaster) {
+401:   menuSeriesMaster.addEventListener("click", (e) => {
+402:     e.preventDefault();
+403:     import("./views/seriesMaster.js").then(m => {
+404:       m.showSeriesMasterModal(windowContentEl);
+405:     });
+406:   });
+407: }
+408: 
+409: const menuStockAdjust = document.getElementById("menu-stock-adjust");
+410: if (menuStockAdjust) {
+411:   menuStockAdjust.addEventListener("click", (e) => {
+412:     e.preventDefault();
+413:     import("./views/transactions.js").then(m => {
+414:       m.setTransactionsActiveTab("stock-adjust");
+415:       window.location.hash = "#transactions";
+416:       setTimeout(() => {
+417:         const btn = document.getElementById("btn-stock-adjust-form");
+418:         if (btn) btn.click();
+419:       }, 50);
+420:     });
+421:   });
+422: }
+423: 
+424: const menuProductLoosening = document.getElementById("menu-product-loosening");
+425: if (menuProductLoosening) {
+426:   menuProductLoosening.addEventListener("click", (e) => {
+427:     e.preventDefault();
+428:     import("./views/transactions.js").then(m => {
+429:       m.setTransactionsActiveTab("stock-conversion");
+430:       window.location.hash = "#transactions";
+431:       setTimeout(() => {
+432:         const btn = document.getElementById("btn-add-conversion");
+433:         if (btn) btn.click();
+434:       }, 50);
+435:     });
+436:   });
+437: }
+438: // Reports Menu Handlers
+439: const bindReportMenuClick = (id, action) => {
+440:   const el = document.getElementById(id);
+441:   if (el) {
+442:     el.addEventListener("click", () => {
+443:       action();
+444:       // If we are already on #reports, renderCurrentView won't trigger automatically because hash hasn't changed.
+445:       // So we force a reload.
+446:       if (window.location.hash === "#reports") {
+447:         renderCurrentView();
+448:       }
+449:     });
+450:   }
+451: };
+452: 
+453: bindReportMenuClick("menu-profit-loss", () => setReportsActiveTab("pl"));
+454: bindReportMenuClick("menu-balance-sheet", () => setReportsActiveTab("bs"));
+455: bindReportMenuClick("menu-trial-balance", () => setReportsActiveTab("trial"));
+456: bindReportMenuClick("menu-individual-ledger", () => setReportsActiveTab("ledger"));
+457: bindReportMenuClick("menu-ledger-group-summary", () => setReportsActiveTab("groupSummary"));
+458: bindReportMenuClick("menu-tax-summary", () => setReportsActiveTab("tax"));
+459: bindReportMenuClick("menu-customer-report", () => setPartyReportTab("customer"));
+460: bindReportMenuClick("menu-vendor-report", () => setPartyReportTab("vendor"));
+461: bindReportMenuClick("menu-debtors-report", () => setPartyReportTab("debtors"));
+462: bindReportMenuClick("menu-creditors-report", () => setPartyReportTab("creditors"));
+463: const menuStockRegisterBatch = document.getElementById("menu-stock-register-batch");
+464: if (menuStockRegisterBatch) {
+465:   menuStockRegisterBatch.addEventListener("click", (e) => {
+466:     e.preventDefault();
+467:     import("./views/reports.js").then(m => {
+468:       m.showBatchStockRegisterModal(windowContentEl);
+469:     });
+470:   });
+471: }
+472: const menuDayBook = document.getElementById("menu-day-book");
+473: if (menuDayBook) {
+474:   menuDayBook.addEventListener("click", (e) => {
+475:     e.preventDefault();
+476:     import("./views/dayBook.js").then(m => {
+477:       m.showDayBookModal(windowContentEl);
+478:     });
+479:   });
+480: }
+481: const salesRepEl = document.getElementById("menu-sales-report-main");
+482: if (salesRepEl) {
+483:   salesRepEl.addEventListener("click", (e) => {
+484:     e.preventDefault();
+485:     import("./views/salesReport.js").then(m => {
+486:       m.showSalesReportModal(windowContentEl);
+487:     });
+488:   });
+489: }
+490: 
+491: const salesReturnRepEl = document.getElementById("menu-sales-return-report");
+492: if (salesReturnRepEl) {
+493:   salesReturnRepEl.addEventListener("click", (e) => {
+494:     e.preventDefault();
+495:     import("./views/transactions.js").then(m => {
+496:       m.setTransactionsActiveTab("sales-return");
+497:       window.location.hash = "#transactions";
+498:     });
+499:   });
+500: }
+501: 
+502: const salesRepBillwiseMarginEl = document.getElementById("menu-sales-billwise-margin");
+503: if (salesRepBillwiseMarginEl) {
+504:   salesRepBillwiseMarginEl.addEventListener("click", (e) => {
+505:     e.preventDefault();
+506:     import("./views/salesReport.js").then(m => {
+507:       m.showBillwiseMarginReportModal(windowContentEl);
+508:     });
+509:   });
+510: }
+511: 
+512: const salesRepProductwiseMarginEl = document.getElementById("menu-sales-product-margin");
+513: if (salesRepProductwiseMarginEl) {
+514:   salesRepProductwiseMarginEl.addEventListener("click", (e) => {
+515:     e.preventDefault();
+516:     import("./views/salesReport.js").then(m => {
+517:       m.showProductwiseMarginReportModal(windowContentEl);
+518:     });
+519:   });
+520: }
+521: 
+522: const salesReportsSubmenuLinks = [
+523:   { id: "menu-sales-free-items", title: "Sales Report [Free Items only]" },
+524:   { id: "menu-sales-paymode", title: "Sales Report [Payment Mode wise]" },
+525:   { id: "menu-sales-monthwise", title: "Month-wise Sales Report" },
+526:   { id: "menu-sales-calendar", title: "Monthly Sales Calendar" },
+527:   { id: "menu-sales-prod-analysis", title: "Product-wise Sales Analysis" },
+528:   { id: "menu-sales-cust-analysis", title: "Customer-wise Sales Analysis" },
+529:   { id: "menu-sales-adjust-rep", title: "Sales Adjustment Report" },
+530:   { id: "menu-sales-company", title: "Company-wise Sales Report" },
+531:   { id: "menu-sales-product", title: "Product-wise Sales Report" },
+532:   { id: "menu-sales-category", title: "Category-wise Sales Report" },
+533:   { id: "menu-sales-employee", title: "Employee-wise Sales Report" },
+534:   { id: "menu-sales-cust-summary", title: "Customer-wise Sales Summary" },
+535:   { id: "menu-sales-group-wise", title: "Product Group-wise Sales Report" },
+536:   { id: "menu-sales-vendor-wise", title: "Vendor-wise Sales Report" },
+537:   { id: "menu-sales-cust-prod-summary", title: "Customer-wise Product Sales Summary" }
+538: ];
+539: 
+540: salesReportsSubmenuLinks.forEach(link => {
+541:   const el = document.getElementById(link.id);
+542:   if (el) {
+543:     el.addEventListener("click", (e) => {
+544:       e.preventDefault();
+545:       alert(`${link.title}: Generates detailed sales analytics. Enter Sales Invoice data to view these summaries.`);
+546:     });
+547:   }
+548: });
+549: 
+550: const inventoryReportLinks = [
+551:   { id: "menu-purchase-reports-sub", title: "Purchase Reports Analysis" },
+552:   { id: "menu-canceled-bills", title: "Canceled Bills Registry" },
+553:   { id: "menu-location-wise-stock", title: "Location Wise Stock Registry" },
+554:   { id: "menu-stock-register-rack", title: "Rack-Wise Stock Register" },
+555:   { id: "menu-external-stock-transfer", title: "External Stock Transfer Logs" },
+556:   { id: "menu-stock-adjustment-report", title: "Stock Adjustment Summaries" },
+557:   { id: "menu-external-stock-receipt", title: "External Stock Receipt Logs" },
+558:   { id: "menu-internal-stock-transfer", title: "Internal Stock Transfer Logs" },
+559:   { id: "menu-product-loosening-report", title: "Product Loosening Conversions" },
+560:   { id: "menu-product-bundling-report", title: "Product Bundling / Packaging" },
+561:   { id: "menu-serial-no-status", title: "Serial Number Traceability Status" },
+562:   { id: "menu-quotation-report", title: "Sales Quotation Summaries" },
+563:   { id: "menu-pricelist", title: "Standard Pricelist View" },
+564:   { id: "menu-emp-bill-analysis", title: "Employee-Wise Bill Generation Analysis" },
+565:   { id: "menu-emp-product-analysis", title: "Employee-Wise Product Item Sales Analysis" },
+566:   { id: "menu-emp-pending-bills", title: "Employee-Wise Outstanding Dues & Pending Bills" },
+567:   { id: "menu-emp-collection", title: "Employee-Wise Collection Sheets" },
+568:   { id: "menu-cust-bill-analysis", title: "Customer-Wise Bill Analysis" },
+569:   { id: "menu-cust-product-analysis", title: "Customer-Wise Product Sales breakdown" },
+570:   { id: "menu-cust-pending-bills", title: "Customer-Wise Pending Invoices" },
+571:   { id: "menu-product-wise-analysis", title: "Product-Wise Sales & Profitability Analysis" },
+572:   { id: "menu-product-analysis-loc", title: "Location-Wise Product Stock & Sales Analysis" },
+573:   { id: "menu-performance-sub", title: "Executive Sales Performance Reports" },
+574:   { id: "menu-employee-attendance", title: "Employee Attendance Roll & Shift Register" },
+575:   { id: "menu-deactivated-items", title: "Deactivated / Discontinued Product Master Registry" }
+576: ];
+577: 
+578: inventoryReportLinks.forEach(link => {
+579:   const el = document.getElementById(link.id);
+580:   if (el) {
+581:     el.addEventListener("click", (e) => {
+582:       e.preventDefault();
+583:       alert(`${link.title}: This module compiles live summaries of transactions. Start generating logs under Transaction to populate data.`);
+584:     });
+585:   }
+586: });
+587: 
+588: // Canceled bills submenu bindings
+589: const mCanceledSales = document.getElementById("menu-canceled-sales-bills");
+590: if (mCanceledSales) {
+591:   mCanceledSales.addEventListener("click", (e) => {
+592:     e.preventDefault();
+593:     import("./views/canceledBills.js").then(m => {
+594:       m.showCanceledBillsReportModal("sales", windowContentEl);
+595:     });
+596:   });
+597: }
+598: const mCanceledPurchase = document.getElementById("menu-canceled-purchase-bills");
+599: if (mCanceledPurchase) {
+600:   mCanceledPurchase.addEventListener("click", (e) => {
+601:     e.preventDefault();
+602:     import("./views/canceledBills.js").then(m => {
+603:       m.showCanceledBillsReportModal("purchase", windowContentEl);
+604:     });
+605:   });
+606: }
+607: 
+608: const taxReportLinks = [
+609:   { id: "menu-input-gst-detailed", title: "Detailed Input GST Report" },
+610:   { id: "menu-gst-purchase-product", title: "GST Purchase Report [Product Wise]" },
+611:   { id: "menu-purchase-list", title: "Purchase List Report" },
+612:   { id: "menu-output-gst-detailed", title: "Detailed Output GST Report" },
+613:   { id: "menu-gst-sales-product", title: "GST Sales Report [Product Wise]" },
+614:   { id: "menu-gst-sales-detailed", title: "GST Sales Report [Detailed]" },
+615:   { id: "menu-sales-list", title: "Sales List Report" },
+616:   { id: "menu-category-wise-gst", title: "Category Wise GST Report" },
+617:   { id: "menu-consolidated-gst-sales", title: "Consolidated GST Sales Report" }
+618: ];
+619: 
+620: taxReportLinks.forEach(link => {
+621:   const el = document.getElementById(link.id);
+622:   if (el) {
+623:     el.addEventListener("click", (e) => {
+624:       e.preventDefault();
+625:       alert(`${link.title}: Generates comprehensive GST taxation summaries. Start recording transactions to see logs.`);
+626:     });
+627:   }
+628: });
+629: 
+630: const menuGstPurchaseHsn = document.getElementById("menu-gst-purchase-hsn");
+631: if (menuGstPurchaseHsn) {
+632:   menuGstPurchaseHsn.addEventListener("click", (e) => {
+633:     e.preventDefault();
+634:     import("./views/gstHsnReports.js").then(m => {
+635:       m.showGstPurchaseHsnModal();
+636:     });
+637:   });
+638: }
+639: 
+640: const menuGstSalesHsn = document.getElementById("menu-gst-sales-hsn");
+641: if (menuGstSalesHsn) {
+642:   menuGstSalesHsn.addEventListener("click", (e) => {
+643:     e.preventDefault();
+644:     import("./views/gstHsnReports.js").then(m => {
+645:       m.showGstSalesHsnModal();
+646:     });
+647:   });
+648: }
+649: 
+650: const menuGstVoucherSummary = document.getElementById("menu-gst-voucher-summary");
+651: if (menuGstVoucherSummary) {
+652:   menuGstVoucherSummary.addEventListener("click", (e) => {
+653:     e.preventDefault();
+654:     import("./views/gstVoucherSummary.js").then(m => {
+655:       m.showGstVoucherSummaryModal();
+656:     });
+657:   });
+658: }
+659: 
+660: const menuInputGst = document.getElementById("menu-input-gst");
+661: if (menuInputGst) {
+662:   menuInputGst.addEventListener("click", (e) => {
+663:     e.preventDefault();
+664:     import("./views/reports.js").then(m => {
+665:       m.showInputGstReportModal(windowContentEl);
+666:     });
+667:   });
+668: }
+669: 
+670: const menuOutputGst = document.getElementById("menu-output-gst");
+671: if (menuOutputGst) {
+672:   menuOutputGst.addEventListener("click", (e) => {
+673:     e.preventDefault();
+674:     import("./views/reports.js").then(m => {
+675:       m.showOutputGstReportModal(windowContentEl);
+676:     });
+677:   });
+678: }
+679: 
+680: const menuGstSalesReturn = document.getElementById("menu-gst-sales-return-report");
+681: if (menuGstSalesReturn) {
+682:   menuGstSalesReturn.addEventListener("click", (e) => {
+683:     e.preventDefault();
+684:     import("./views/reports.js").then(m => {
+685:       m.showSalesReturnGstReportModal(windowContentEl);
+686:     });
+687:   });
+688: }
+689: 
+690: const menuGstPurchaseReturn = document.getElementById("menu-gst-purchase-return-report");
+691: if (menuGstPurchaseReturn) {
+692:   menuGstPurchaseReturn.addEventListener("click", (e) => {
+693:     e.preventDefault();
+694:     import("./views/reports.js").then(m => {
+695:       m.showPurchaseReturnGstReportModal(windowContentEl);
+696:     });
+697:   });
+698: }
+699: 
+700: const menuStockRegisterDetailed = document.getElementById("menu-stock-register-detailed");
+701: if (menuStockRegisterDetailed) {
+702:   menuStockRegisterDetailed.addEventListener("click", (e) => {
+703:     e.preventDefault();
+704:     import("./views/inventory.js").then(m => {
+705:       m.showDetailedStockRegisterModal(windowContentEl);
+706:     });
+707:   });
+708: }
+709: 
+710: const menuItemWiseStock = document.getElementById("menu-item-wise-stock");
+711: if (menuItemWiseStock) {
+712:   menuItemWiseStock.addEventListener("click", (e) => {
+713:     e.preventDefault();
+714:     import("./views/inventory.js").then(m => {
+715:       m.showItemWiseStockRegisterModal(windowContentEl);
+716:     });
+717:   });
+718: }
+719: 
+720: const menuOpeningStockRegister = document.getElementById("menu-opening-stock-register");
+721: if (menuOpeningStockRegister) {
+722:   menuOpeningStockRegister.addEventListener("click", (e) => {
+723:     e.preventDefault();
+724:     import("./views/openingStock.js").then(m => {
+725:       m.showOpeningStockEntryModal(windowContentEl);
+726:     });
+727:   });
+728: }
+729: 
+730: const menuStockQuickView = document.getElementById("menu-stock-quick-view");
+731: if (menuStockQuickView) {
+732:   menuStockQuickView.addEventListener("click", (e) => {
+733:     e.preventDefault();
+734:     window.location.hash = "#inventory";
+735:     setTimeout(() => {
+736:       const searchInput = document.querySelector("#inv-search-input");
+737:       if (searchInput) searchInput.focus();
+738:     }, 50);
+739:   });
+740: }
+741: 
+742: // Keyboard shortcuts handlers
+743: window.addEventListener("keydown", (e) => {
+744:   // Enter key navigates to next form field
+745:   if (e.key === "Enter" && e.target.tagName !== "TEXTAREA" && e.target.type !== "submit" && e.target.type !== "button" && !e.target.id.startsWith("ribbon-sale-") && !e.target.id.startsWith("ret-ribbon-")) {
+746:     const form = e.target.closest("form");
+747:     if (form) {
+748:       e.preventDefault();
+749:       const focusables = Array.from(form.querySelectorAll("input:not([disabled]):not([readonly]), select, textarea, button:not([type='button'])"));
+750:       const idx = focusables.indexOf(e.target);
+751:       if (idx > -1 && idx < focusables.length - 1) {
+752:         focusables[idx + 1].focus();
+753:       }
+754:     }
+755:   }
+756: 
+757:   // Ctrl+A saves the active form immediately if all mandatory fields are valid
+758:   if (e.ctrlKey && e.key.toLowerCase() === "a") {
+759:     let form = e.target.closest("form");
+760:     if (!form) {
+761:       const activeOverlay = document.querySelector(".modal-overlay.active");
+762:       if (activeOverlay) {
+763:         form = activeOverlay.querySelector("form");
+764:       }
+765:     }
+766:     if (!form) {
+767:       form = document.querySelector("form");
+768:     }
+769: 
+770:     if (form) {
+771:       e.preventDefault();
+772:       if (form.checkValidity()) {
+773:         if (typeof form.requestSubmit === "function") {
+774:           form.requestSubmit();
+775:         } else {
+776:           const submitEvent = new Event("submit", { cancelable: true });
+777:           form.dispatchEvent(submitEvent);
+778:         }
+779:       } else {
+780:         form.reportValidity();
+781:       }
+782:     }
+783:   }
+784: 
+785:   // ESC key: close modal or active window
+786:   if (e.key === "Escape") {
+787:     const root = document.getElementById("modal-container-root");
+788:     const activeModals = root ? Array.from(root.children) : [];
+789:     if (activeModals.length > 0) {
+790:       const topmostModal = activeModals[activeModals.length - 1];
+791:       const closeBtn = topmostModal.querySelector(".btn-secondary, button[id$='close-btn-header'], .modal-close-btn, #pl-groups-modal-close");
+792:       if (closeBtn) {
+793:         closeBtn.click();
+794:       } else {
+795:         topmostModal.remove();
+796:       }
+797:     } else {
+798:       window.location.hash = "";
+799:     }
+800:   }
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

@@ -1,0 +1,24 @@
+Created At: 2026-08-17T23:35:29+05:30
+Completed At: 2026-08-17T23:35:30+05:30
+File Path: `file:///g:/sw%20m/erp/index.html`
+Total Lines: 287
+Total Bytes: 17151
+Showing lines 90 to 105
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+90:               <a href="#" id="menu-purchase-reports-sub">Purchase Reports <span class="shortcut">&gt;</span></a>
+91:               <div class="dropdown-menu">
+92:                 <a href="#reports" id="menu-purchase-report-main">Purchase Report</a>
+93:                 <a href="#reports" id="menu-purchase-return-report">Purchase Return</a>
+94:                 <div class="dropdown-divider"></div>
+95:                 <a href="#" id="menu-purchase-item-analysis">Item wise Purchase Analysis</a>
+96:                 <a href="#" id="menu-purchase-vendor-analysis">Vendor Wise Purchase Analysis</a>
+97:                 <div class="dropdown-divider"></div>
+98:                 <a href="#" id="menu-purchase-product-wise">Product Wise Purchase Report</a>
+99:                 <a href="#" id="menu-purchase-category-wise">Category Wise Purchase Report</a>
+100:                 <a href="#" id="menu-purchase-company-wise">Company Wise Purchase Report</a>
+101:               </div>
+102:             </div>
+103:             <div class="dropdown-submenu">
+104:               <a href="#" id="menu-canceled-bills">Canceled Bills <span class="shortcut">&gt;</span></a>
+105:               <div class="dropdown-menu">
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

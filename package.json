@@ -1,0 +1,22 @@
+{
+  "name": "erp",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host --open",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "vite": "^8.1.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

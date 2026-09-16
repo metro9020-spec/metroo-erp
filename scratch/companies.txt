@@ -1,0 +1,422 @@
+Created At: 2026-08-21T11:28:20+05:30
+Completed At: 2026-08-21T11:28:22+05:30
+
+				The command exited with code 0.
+				Output:
+				
+  
+    getRegisteredCompanies() {
+      try {
+>       const val = localStorage.getItem("erp_companies");
+        if (!val || val === "undefined" || val === "null") return [];
+        return JSON.parse(val) || [];
+      } catch (e) {
+        return [];
+      }
+    }
+  
+    saveRegisteredCompanies(companies) {
+>     localStorage.setItem("erp_companies", JSON.stringify(companies));
+    }
+  
+    getCompanies() {
+      return this.companies || [];
+    }
+
+
+
+
+Created At: 2026-08-21T15:40:32+05:30
+Completed At: 2026-08-21T15:40:33+05:30
+
+				The command exited with code 0.
+				Output:
+				
+>     this.ensureStandardBaseLedgers();
+      this.healCorruptedBaseLedgers();
+      this.ensureStandardGstLedgers();
+      this.migrateLegacyTaxEntries();
+      this.rebuildAllTaxTransactions();
+      this.alignVoucherPrefixesWithSeries();
+      this.realignSeriesCurrentNumbers();
+      this.forceAlignTransactionUnits();
+    }
+  
+  
+    async syncCompanies() {
+      try {
+        const res = await fetch(`http://${window.location.hostname}:3001/api/companies`);
+        if (res.ok) {
+          const data = await res.json();
+          const currentStr = localStorage.getItem("erp_companies");
+          const current = currentStr ? JSON.parse(currentStr) : [];
+          
+          // If backend has companies, sync to local
+          if (Array.isArray(data) && data.length > 0) {
+            localStorage.setItem("erp_companies", JSON.stringify(data));
+            if (current.length === 0) {
+              window.location.reload();
+            }
+          } 
+          // If backend is empty but local has companies, push to backend (migration)
+          else if (current.length > 0) {
+            this.saveRegisteredCompanies(current);
+          }
+        }
+      } catch(e) {}
+    }
+  
+    async syncFromServer() {
+      const activeId = this.getActiveCompanyId();
+>   ensureStandardBaseLedgers() {
+      if (!this.ledgers) this.ledgers = [];
+      const baseCodes = ["L016","L018","L019","L020","L021","L022","L023","L024","L025"];
+      const standardBaseLedgers = initialLedgers.filter(l => baseCodes.includes(l.code));
+      
+      let changed = false;
+  
+      standardBaseLedgers.forEach(stdL => {
+        // User explicitly requested to remove INTERSTATE PURCHASE A/C
+        if (stdL.code === "L019") return; 
+  
+        const conflictIdx = this.ledgers.findIndex(l => l.code === stdL.code);
+        if (conflictIdx !== -1) {
+          const conflict = this.ledgers[conflictIdx];
+          if (conflict.name.toUpperCase() !== stdL.name.toUpperCase()) {
+            // Relocate the conflicting ledger to a new ID
+            let maxNum = 0;
+            this.ledgers.forEach(l => {
+              if (l.code && l.code.startsWith("L")) {
+                 const num = parseInt(l.code.substring(1));
+                 if (!isNaN(num) && num > maxNum) maxNum = num;
+              }
+            });
+            const newCode = `L${String(maxNum + 1).padStart(3, "0")}`;
+            
+            // Update gstMaster if it was a GST ledger
+            if (this.gstMaster) {
+              const gstMasterMatch = this.gstMaster.find(g => g.id === conflict.code);
+              if (gstMasterMatch) gstMasterMatch.id = newCode;
+            }
+            
+            // DO NOT blindly update tx.entries here, because it corrupts base ledger pointers.
+            // healCorruptedBaseLedgers() will handle re-syncing the true base ledgers.
+  
+            conflict.code = newCode; 
+            this.ledgers.push(JSON.parse(JSON.stringify(stdL)));
+
+
+
+
+{{ CHECKPOINT 15 }}
+ **The earlier parts of this conversation have been truncated due to its long length. The following content summarizes the truncated context so that you may continue your work. **
+
+
+# User Requests
+The following were user requests from the truncated conversation in chronological order:
+1. SO IT IS NOT STORING IN MY PC?
+2. I WANT TO SAVE IT IN IN MY PC
+3. NOW WHERE THE DATAS ARE STORING
+4. SO IF I CREATE A NEW COMPANY WILL IT CREATE NEW FILE LIKE THIS?
+5. I WANT TO SAVE THESE FILE IN A SUBFOLDER 'COMPANY DATA BASE'
+6. CAN I SAVE BACKUP IN A SUBFOLDER 'BACKUP' ?
+7. NO IT IS NOT DOING SO
+8. NOW CAN I OPEN IT FROM ANOTHER DEVICE?
+9. WEN I OPENED FROM MOBILE , WHEN I LOGINED IN TO A COMPANY , INSIDE OF IT IS CLEAN. BUT I CAN SEE THE DATAS WHEN I OPENED FROM MAIN PC
+10. NOW DATA IN MAIN PC ALSO BECAOME EMPTY
+
+# Previous Session Summary:
+# 1. Outstanding User Requests
+- **Fix Empty Data on Main PC** (Phase: IMPLEMENTATION): The user reported "NOW DATA IN MAIN PC ALSO BECAOME EMPTY".
+  - *Current Status*: I discovered the root cause (a race condition where a new mobile device loaded empty `localStorage`, initialized default ledgers, and pushed the empty state to the server). I successfully patched the race condition in `src/views/login.js` and have just performed an emergency restore by copying `BACKUP\erp_backup_1_2026-08-21T09-59-16.json` over `COMPANY DATA BASE\data_company_1.json`. The next step is simply to notify the user to refresh their browser to see the restored data.
+
+# 2. User Knowledge
+- **Storage Preferences:** "I WANT TO SAVE IT IN IN MY PC" and "I WANT TO SAVE THESE FILE IN A SUBFOLDER 'COMPANY DATA BASE'". The user explicitly rejected browser-based downloads (`<a download>`) and `localStorage` as the primary storage. They want physical JSON files saved to specific folders on the host PC.
+- **Backup Preferences:** "CAN I SAVE BACKUP IN A SUBFOLDER 'BACKUP' ?". The "Backup Database" button should trigger a server-side file copy into a `BACKUP` directory on the host PC rather than downloading to the client browser.
+- **Multi-Device Support:** "NOW CAN I OPEN IT FROM ANOTHER DEVICE?". The app is accessed over the network (e.g., `http://100.66.24.43:5173`). This required moving the list of registered companies from pure `localStorage` to a synchronized `companies.json` on the backend.
+- **Bug Report (Empty Data):** "WEN I OPENED FROM MOBILE , WHEN I LOGINED IN TO A COMPANY , INSIDE OF IT IS CLEAN. BUT I CAN SEE THE DATAS WHEN I OPENED FROM MAIN PC" followed by "NOW DATA IN MAIN PC ALSO BECAOME EMPTY". This flagged a critical race condition where logging into a company on a fresh device wiped the server file.
+
+# 3. Work Accomplished
+- **Node.js Backend Created:** Built a lightweight Express server (`server.js`) to act as a persistent file backend, bypassing browser storage limitations. It handles GET/POST for company state and registered companies, storing them in `COMPANY DATA BASE/`.
+- **Server-Side Backups:** Re-wired the frontend "Backup Database" button to hit a new `/api/backup/:companyId` endpoint. This copies the active company's JSON file to a `BACKUP/` folder on the host PC, timestamped (e.g., `erp_backup_1_2026-08-21T09-59-16.json`).
+- **State Synchronization (`state.js`):** Implemented an offline-first sync pattern. On startup/login, `syncFromServer()` and `syncCompanies()` fetch data from the backend and populate `localStorage`. `saveState()` and `saveRegisteredCompanies()` write to `localStorage` and simultaneously POST to the backend.
+- **Fixed Multi-Device Network API Calls:** Updated all `fetch()` calls in the frontend to dynamically use `http://${window.location.hostname}:3001` instead of `localhost:3001` so other devices on the network can correctly route to the host server.
+- **Fixed Mobile Wipe Race Condition:** Updated `src/views/login.js` to `await state.syncFromServer()` *before* calling `await state.loadState()`. This prevents a fresh device from loading empty `localStorage`, populating it with default ledgers, and erroneously pushing that empty state back to the server.
+- **Emergency Restore:** Recovered the user's data after the mobile wipe bug by copying a backup generated right before the wipe back into the main database folder.
+
+# 4. Model Knowledge
+- **The Empty Wipe Race Condition:** In `state.js`, if `loadState()` runs while `localStorage` is empty for a company, it triggers `ensureStandardBaseLedgers()`. This function populates defaults and calls `this.saveState(true)`. Because `saveState()` now POSTs to the server, doing this on a new device *before* the device fetches the real data will overwrite the server's data with an empty set. *CRITICAL:* Always ensure `syncFromServer()` completes successfully before `loadState()` is allowed to run on a new login.
+- **Dynamic Hostnames:** Client-side JavaScript cannot hardcode `localhost` for the backend URL, as it resolves to the device itself (e.g., the user's phone). It must use `window.location.hostname` to correctly target the Vite host PC.
+- **Backend Setup:** The project is an ES Module (`"type": "module"` in `package.json`). `server.js` uses ES6 imports. The backend runs on port `3001` as a background task (`npm run server`).
+
+# 5. Files and Code
+- **Created: `g:\sw m\erp\server.js`**
+  - WHAT: An Express API with endpoints `/api/data/:companyId`, `/api/companies`, and `/api/backup/:companyId`.
+  - WHY: To fulfill the user's request to save physical files to the PC rather than relying on browser cache.
+- **Edited: `g:\sw m\erp\package.json`**
+  - WHAT: Added `express`, `cors`, and an `npm run server` script.
+- **Edited: `g:\sw m\erp\src\state.js`**
+  - WHAT: Added `syncFromServer()` and `syncCompanies()`. Updated `saveState` and `saveRegisteredCompanies` to POST to the backend. Used `window.location.hostname` for API URLs.
+  - WHY: To sync the browser's `localStorage` bidirectionally with the new Node.js backend.
+- **Edited: `g:\sw m\erp\src\main.js`**
+  - WHAT: Modified the `#menu-backup` click listener to POST to `/api/backup/:companyId` instead of triggering a browser download or file picker.
+  - WHY: User wanted backups saved silently into a `BACKUP` subfolder on the host PC.
+- **Edited: `g:\sw m\erp\src\views\login.js`**
+  - WHAT: Injected `await state.syncFromServer();` into the login flow immediately after `setActiveCompanyId`.
+  - WHY: Fixed the critical bug where logging in on a new device wiped the server data.
+
+# 6. Current Work and Next Steps
+- **Current Task:** I have just executed `Copy-Item -Path "BACKUP\erp_backup_1_2026-08-21T09-59-16.json" -Destination "COMPANY DATA BASE\data_company_1.json" -Force` to undo the data wipe caused by the race condition.
+- **Next Steps (IMPLEMENTATION):**
+  1. Reply to the user explaining that their data has been safely restored from the backup created just prior to the bug.
+  2. Instruct them to completely refresh their browser on the Main PC (and the mobile device) so that it fetches the restored `data_company_1.json` from the server.
+  3. Await their confirmation that both devices can now log in and see the exact same data without wiping it.
+
+You have the 21 following artifacts written to the artifacts directory:
+
+[ARTIFACT: media_1787199648558]
+Path: file:///C:/Users/91702/.gemini/antigravity/brain/4eb30e9b-6266-456f-9693-9635f6d8fe70/.user_uploaded/media_1787199648558.png
+Last Edited: 2026-08-20T04:29:15Z
+
+[ARTIFACT: media_1787200483019]
+Path: file:///C:/Users/91702/.gemini/antigravity/brain/4eb30e9b-6266-456f-9693-9635f6d8fe70/.user_uploaded/media_1787200483019.png
+Last Edited: 2026-08-20T04:37:07Z
+
+[ARTIFACT: media_1787200524318]
+Path: file:///C:/Users/91702/.gemini/antigravity/brain/4eb30e9b-6266-456f-9693-9635f6d8fe70/.user_uploaded/media_1787200524318.png
+Last Edited: 2026-08-20T04:37:07Z
+
+[ARTIFACT: media_1787201002720]
+Path: file:///C:/Users/91702/.gemini/antigravity/brain/4eb30e9b-6266-456f-9693-9635f6d8fe70/.user_uploaded/media_1787201002720.png
+Last Edited: 2026-08-20T04:43:49Z
+
+[ARTIFACT: media_1787201904170]
+Path: file:///C:/Users/91702/.gemini/antigravity/brain/4eb30e9b-6266-456f-9693-9635f6d8fe70/.user_uploaded/media_1787201904170.png
+Last Edited: 2026-08-20T04:58:53Z
+
+[ARTIFACT: media_1787202301206]
+Path: file:///C:/Users/91702/.gemini/antigravity/brain/4eb30e9b-6266-456f-9693-9635f6d8fe70/.user_uploaded/media_1787202301206.png
+Last Edited: 2026-08-20T05:05:02Z
+
+[ARTIFACT: media_1787206411247]
+Path: file:///C:/Users/91702/.gemini/antigravity/brain/4eb30e9b-6266-456f-9693-9635f6d8fe70/.user_uploaded/media_1787206411247.png
+Last Edited: 2026-08-20T06:14:47Z
+
+[ARTIFACT: media_1787207066606]
+Path: file:///C:/Users/91702/.gemini/antigravity/brain/4eb30e9b-6266-456f-9693-9635f6d8fe70/.user_uploaded/media_1787207066606.png
+Last Edited: 2026-08-20T06:24:46Z
+
+[ARTIFACT: media_1787207323011]
+Path: file:///C:/Users/91702/.gemini/antigravity/brain/4eb30e9b-6266-456f-9693-9635f6d8fe70/.user_uploaded/media_1787207323011.png
+Last Edited: 2026-08-20T06:30:58Z
+
+[ARTIFACT: media_1787207386858]
+Path: file:///C:/Users/91702/.gemini/antigravity/brain/4eb30e9b-6266-456f-9693-9635f6d8fe70/.user_uploaded/media_1787207386858.png
+Last Edited: 2026-08-20T06:30:58Z
+
+[ARTIFACT: media_1787208294565]
+Path: file:///C:/Users/91702/.gemini/antigravity/brain/4eb30e9b-6266-456f-9693-9635f6d8fe70/.user_uploaded/media_1787208294565.png
+Last Edited: 2026-08-20T06:45:25Z
+
+[ARTIFACT: media_1787209179692]
+Path: file:///C:/Users/91702/.gemini/antigravity/brain/4eb30e9b-6266-456f-9693-9635f6d8fe70/.user_uploaded/media_1787209179692.png
+Last Edited: 2026-08-20T07:01:34Z
+
+[ARTIFACT: media_1787209721842]
+Path: file:///C:/Users/91702/.gemini/antigravity/brain/4eb30e9b-6266-456f-9693-9635f6d8fe70/.user_uploaded/media_1787209721842.png
+Last Edited: 2026-08-20T07:09:08Z
+
+[ARTIFACT: media_1787218357675]
+Path: file:///C:/Users/91702/.gemini/antigravity/brain/4eb30e9b-6266-456f-9693-9635f6d8fe70/.user_uploaded/media_1787218357675.png
+Last Edited: 2026-08-20T09:32:44Z
+
+[ARTIFACT: media_1787218647012]
+Path: file:///C:/Users/91702/.gemini/antigravity/brain/4eb30e9b-6266-456f-9693-9635f6d8fe70/.user_uploaded/media_1787218647012.png
+Last Edited: 2026-08-20T09:37:27Z
+
+[ARTIFACT: media_1787288185371]
+Path: file:///C:/Users/91702/.gemini/antigravity/brain/4eb30e9b-6266-456f-9693-9635f6d8fe70/.user_uploaded/media_1787288185371.png
+Last Edited: 2026-08-21T04:56:31Z
+
+[ARTIFACT: media_1787288541878]
+Path: file:///C:/Users/91702/.gemini/antigravity/brain/4eb30e9b-6266-456f-9693-9635f6d8fe70/.user_uploaded/media_1787288541878.png
+Last Edited: 2026-08-21T05:04:26Z
+
+[ARTIFACT: media_1787289352229]
+Path: file:///C:/Users/91702/.gemini/antigravity/brain/4eb30e9b-6266-456f-9693-9635f6d8fe70/.user_uploaded/media_1787289352229.png
+Last Edited: 2026-08-21T05:16:02Z
+
+[ARTIFACT: media_1787289928970]
+Path: file:///C:/Users/91702/.gemini/antigravity/brain/4eb30e9b-6266-456f-9693-9635f6d8fe70/.user_uploaded/media_1787289928970.png
+Last Edited: 2026-08-21T05:26:14Z
+
+[ARTIFACT: implementation_plan]
+Path: file:///C:/Users/91702/.gemini/antigravity/brain/4eb30e9b-6266-456f-9693-9635f6d8fe70/implementation_plan.md
+Last Edited: 2026-08-21T05:49:32Z
+
+[ARTIFACT: walkthrough]
+Path: file:///C:/Users/91702/.gemini/antigravity/brain/4eb30e9b-6266-456f-9693-9635f6d8fe70/walkthrough.md
+Last Edited: 2026-08-21T05:52:39Z
+
+# Running Background Tasks
+The following background tasks were running at the time this checkpoint was created.
+Use the manage_task tool to interact with them (e.g. to kill them or check their status).
+
+{
+  "taskId": "4eb30e9b-6266-456f-9693-9635f6d8fe70/task-844",
+  "toolName": "run_command",
+  "toolSummary": "Command execution",
+  "description": "cmd.exe /c npm run dev",
+  "startTime": "2026-08-20T09:28:59.599956200Z",
+  "stepIndex": 844,
+  "logUri": "file:///C:/Users/91702/.gemini/antigravity/brain/4eb30e9b-6266-456f-9693-9635f6d8fe70/.system_generated/tasks/task-844.log",
+  "isDaemon": true
+}
+{
+  "taskId": "4eb30e9b-6266-456f-9693-9635f6d8fe70/task-1242",
+  "toolName": "run_command",
+  "toolSummary": "Command execution",
+  "description": "cmd.exe /c npm run server",
+  "startTime": "2026-08-21T10:03:06.500399800Z",
+  "stepIndex": 1242,
+  "logUri": "file:///C:/Users/91702/.gemini/antigravity/brain/4eb30e9b-6266-456f-9693-9635f6d8fe70/.system_generated/tasks/task-1242.log",
+  "isDaemon": true
+}
+
+# Conversation Logs
+
+Reference the following log files for the full, untruncated conversation:
+
+- C:\Users\91702\.gemini\antigravity\brain\4eb30e9b-6266-456f-9693-9635f6d8fe70\.system_generated\logs\transcript.jsonl
+
+**IMPORTANT: this summary is just for your reference. You may respond to my previous and future messages, but DO NOT ACKNOWLEDGE THIS CHECKPOINT MESSAGE. JUST READ IT BUT DO NOT MENTION IT, RESPOND TO IT, OR TAKE ACTION BECAUSE OF IT.**
+Created At: 2026-08-21T15:48:37+05:30
+Completed At: 2026-08-21T15:48:37+05:30
+
+				The command exited with code 0.
+				Output:
+				
+      this.units = [];
+      this.seriesMaster = [];
+      this.gstMaster = [];
+      this.adminPassword = "123";
+      this.checkAndMigrateLegacyData();
+>     this.loadState();
+      this.ensureDefaultSeries();
+      this.ensureStandardBaseLedgers();
+      this.healCorruptedBaseLedgers();
+      this.ensureStandardGstLedgers();
+      this.migrateLegacyTaxEntries();
+      this.rebuildAllTaxTransactions();
+      this.alignVoucherPrefixesWithSeries();
+      this.realignSeriesCurrentNumbers();
+      this.forceAlignTransactionUnits();
+    }
+  
+  
+    async syncCompanies() {
+      try {
+        const res = await fetch(`http://${window.location.hostname}:3001/api/companies`);
+        if (res.ok) {
+          const data = await res.json();
+          const currentStr = localStorage.getItem("erp_companies");
+          const current = currentStr ? JSON.parse(currentStr) : [];
+          
+        const res = await fetch(`http://${window.location.hostname}:3001/api/data/${activeId}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.ledgers) {
+            localStorage.setItem("erp_company_data_" + activeId, JSON.stringify(data));
+>           this.loadState(); // Reload from local storage memory
+            this.notifyListeners();
+            console.log("State synced from local backend.");
+          }
+        }
+      } catch(err) {
+        console.log("No local backend found or error syncing:", err);
+      }
+    }
+  
+    getRegisteredCompanies() {
+      try {
+        const val = localStorage.getItem("erp_companies");
+        if (!val || val === "undefined" || val === "null") return [];
+        return JSON.parse(val) || [];
+      } catch (e) {
+        return [];
+      }
+    }
+  
+    saveRegisteredCompanies(companies) {
+      }
+    }
+  
+    // Load from Firestore
+    // Load from Firestore
+>   loadState(skipNotify = false) {
+      try {
+        const activeId = this.getActiveCompanyId();
+        if (!activeId) {
+          // Clear active variables if not logged in
+          this.materials = [];
+          this.contacts = [];
+          this.invoices = [];
+          this.transactions = [];
+          this.purchases = [];
+          this.salesReturns = [];
+          this.purchaseReturns = [];
+          this.conversions = [];
+          this.adminPassword = "123";
+          this.accountGroups = [];
+          this.ledgers = [];
+          this.units = [];
+          this.seriesMaster = [];
+          this.stockAdjustments = [];
+          return;
+        }
+
+
+
+
+Created At: 2026-08-21T21:41:25+05:30
+Completed At: 2026-08-21T21:41:27+05:30
+
+The command exited with code 0.
+Output:
+  getRegisteredCompanies() {
+    try {
+      const val = localStorage.getItem("erp_companies");
+      if (!val || val === "undefined" || val === "null") return [];
+      return JSON.parse(val) || [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  saveRegisteredCompanies(companies) {
+    localStorage.setItem("erp_companies", JSON.stringify(companies));
+  }
+
+  getCompanies() {
+    return this.companies || [];
+  }
+
+  saveCompanies(companies) {
+    this.companies = companies;
+    this.saveState();
+  }
+
+  getActiveCompanyId() {
+    const val = localStorage.getItem("erp_active_company_id");
+    if (!val || val === "undefined" || val === "null") return null;
+    return val;
+  }
+
+  setActiveCompanyId(companyId) {
+    if (companyId) {
+      localStorage.setItem("erp_active_company_id", companyId);
+    } else {
+      localStorage.removeItem("erp_active_company_id");
+    }
+
+

@@ -1,0 +1,287 @@
+Created At: 2026-08-13T15:49:38+05:30
+Completed At: 2026-08-13T15:49:51+05:30
+File Path: `file:///g:/sw%20m/erp/index.html`
+Total Lines: 279
+Total Bytes: 16441
+Showing lines 1 to 279
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: <!doctype html>
+2: <html lang="en" data-theme="dark">
+3:   <head>
+4:     <meta charset="UTF-8" />
+5:     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+6:     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+7:     <title>Material Ledger | Building Materials ERP</title>
+8:     <!-- FontAwesome Icons -->
+9:     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+10:     <!-- App Custom Style -->
+11:     <link rel="stylesheet" href="/src/style.css" />
+12:     <script>
+13:       // Clear session on load to ensure login page is shown first
+14:       localStorage.removeItem("erp_active_company_id");
+15:       
+16:       // Inject CSS immediately to hide the main app layout
+17:       const style = document.createElement("style");
+18:       style.id = "hide-app-style";
+19:       style.innerHTML = "#app { display: none !important; }";
+20:       document.head.appendChild(style);
+21:     </script>
+22:   </head>
+23:   <body>
+24:     <div id="app">
+25:       <!-- Top Horizontal Menu Bar -->
+26:       <nav class="erp-menu-bar">
+27:         <div class="menu-item">
+28:           <span class="menu-title">Masters</span>
+29:           <div class="dropdown-content">
+30:             <a href="#" id="menu-product-master">Product Master <span class="shortcut">F2</span></a>
+31:             <a href="#inventory" id="menu-products-list">Products List <span class="shortcut">F10</span></a>
+32:             <a href="#" id="menu-unit-settings">Unit Settings</a>
+33:             <a href="#" id="menu-customer">Customer <span class="shortcut">Ctrl+U</span></a>
+34:             <a href="#" id="menu-vendor">Vendor <span class="shortcut">Ctrl+O</span></a>
+35:             <a href="#contacts" id="menu-contacts-directory">Contacts Directory</a>
+36:             <a href="#" id="menu-employee">Employee <span class="shortcut">Ctrl+M</span></a>
+37:             <a href="#" id="menu-influencers">Influencer Master</a>
+38:             <a href="#" id="menu-series-master">Invoice Series Setting</a>
+39:             <div class="dropdown-divider"></div>
+40:             <a href="#" id="menu-exit">Exit <span class="shortcut">Ctrl+X</span></a>
+41:           </div>
+42:         </div>
+43:         <div class="menu-item">
+44:           <span class="menu-title">Accounts</span>
+45:           <div class="dropdown-content">
+46:             <a href="#groups" id="menu-groups">Group Creation</a>
+47:             <a href="#ledgers" id="menu-ledgers">Ledger Creation</a>
+48:             <a href="#adjustments" id="menu-adjustments">Sale/Purchase Adjustment Master</a>
+49:             <a href="#" id="menu-opening-stock-register">Opening Stock Entry</a>
+50:           </div>
+51:         </div>
+52:         <div class="menu-item">
+53:           <span class="menu-title">Transaction</span>
+54:           <div class="dropdown-content">
+55:             <a href="#vouchers" id="menu-vouchers">Voucher Entry <span class="shortcut">F5</span></a>
+56:             <div class="dropdown-divider"></div>
+57:             <a href="#" id="menu-purchase">Purchase <span class="shortcut">F3</span></a>
+58:             <a href="#" id="menu-sales">Sales <span class="shortcut">F4</span></a>
+59:             <a href="#" id="menu-stock-adjust">Stock Adjustment</a>
+60:             <a href="#" id="menu-product-loosening">Product Loosening</a>
+61:             <div class="dropdown-divider"></div>
+62:             <a href="#" id="menu-purchase-return">Purchase Return</a>
+63:             <a href="#" id="menu-sales-return">Sales Return</a>
+64:             <div class="dropdown-divider"></div>
+65:             <a href="#transactions" id="menu-transaction-log">Transaction Log</a>
+66:             <div class="dropdown-divider"></div>
+67:             <a href="#search-vouchers" id="menu-search-vouchers">Search Vouchers</a>
+68:           </div>
+69:         </div>
+70:         <div class="menu-item">
+71:           <span class="menu-title">Inventory Reports</span>
+72:           <div class="dropdown-content">
+73:             <div class="dropdown-submenu">
+74:               <a href="#" id="menu-sales-reports-sub">Sales Reports <span class="shortcut">&gt;</span></a>
+75:               <div class="dropdown-menu">
+76:                 <a href="#reports" id="menu-sales-report-main">Sales Report</a>
+77:                 <a href="#reports" id="menu-sales-return-report">Sales Return</a>
+78:                 <div class="dropdown-divider"></div>
+79:                 <a href="#" id="menu-sales-free-items">Sales Report [ Free Items only ]</a>
+80:                 <a href="#" id="menu-sales-billwise-margin">Sales Report [Billwise Margin ]</a>
+81:                 <a href="#" id="menu-sales-product-margin">Product wise Margin Report</a>
+82:                 <div class="dropdown-divider"></div>
+83:                 <a href="#" id="menu-sales-paymode">Sales Report [Payment Mode wise]</a>
+84:                 <a href="#" id="menu-sales-monthwise">Month wise Sales Report</a>
+85:                 <a href="#" id="menu-sales-calendar">Monthly Sales Calendar</a>
+86:                 <a href="#" id="menu-sales-prod-analysis">Product Wise Sales analysis</a>
+87:                 <a href="#" id="menu-sales-cust-analysis">Customer Wise Sales Analysis</a>
+88:                 <a href="#" id="menu-sales-adjust-rep">Sales Adjustment Report</a>
+89:                 <a href="#" id="menu-sales-company">Company Wise Sales Report</a>
+90:                 <a href="#" id="menu-sales-product">Product Wise Sales Report</a>
+91:                 <a href="#" id="menu-sales-category">Category Wise Sales Report</a>
+92:                 <a href="#" id="menu-sales-employee">Employee Wise Sales Report</a>
+93:                 <a href="#" id="menu-sales-cust-summary">Customer Wise Sales Summary</a>
+94:                 <a href="#" id="menu-sales-group-wise">Product Group Wise Sales Report</a>
+95:                 <a href="#" id="menu-sales-vendor-wise">Vendor wise Sales Report</a>
+96:                 <a href="#" id="menu-sales-cust-prod-summary">Customer wise Product Sales Summary</a>
+97:               </div>
+98:             </div>
+99:             <a href="#" id="menu-purchase-reports-sub">Purchase Reports <span class="shortcut">&gt;</span></a>
+100:             <div class="dropdown-submenu">
+101:               <a href="#" id="menu-canceled-bills">Canceled Bills <span class="shortcut">&gt;</span></a>
+102:               <div class="dropdown-menu">
+103:                 <a href="#" id="menu-canceled-sales-bills">Sales Bills</a>
+104:                 <a href="#" id="menu-canceled-purchase-bills">Purchase Bills</a>
+105:               </div>
+106:             </div>
+107:             <div class="dropdown-divider"></div>
+108:             <a href="#inventory" id="menu-stock-register">Stock Register <span class="shortcut">Ctrl+F1</span></a>
+109:             <a href="#inventory" id="menu-stock-register-detailed">Stock Register Detailed <span class="shortcut">Ctrl+F2</span></a>
+110:             <a href="#reports" id="menu-stock-register-batch">Stock Register [Batch Wise]</a>
+111:             <a href="#" id="menu-item-wise-stock">Item wise Stock Register</a>
+112:             <a href="#" id="menu-location-wise-stock">Location Wise Stock</a>
+113:             <a href="#" id="menu-stock-register-rack">Stock Register [Rack wise]</a>
+114:             <a href="#" id="menu-external-stock-transfer">External Stock Transfer</a>
+115:             <a href="#" id="menu-stock-adjustment-report">Stock Adjustment Report</a>
+116:             <a href="#inventory" id="menu-stock-quick-view">Stock [Quick View] <span class="shortcut">Ctrl+F</span></a>
+117:             <a href="#" id="menu-external-stock-receipt">External Stock Receipt Report</a>
+118:             <a href="#" id="menu-internal-stock-transfer">Internal Stock Transfer Report</a>
+119:             <a href="#" id="menu-product-loosening-report">Product Loosening Report</a>
+120:             <a href="#" id="menu-product-bundling-report">Product Bundling Report</a>
+121:             <div class="dropdown-divider"></div>
+122:             <a href="#" id="menu-serial-no-status">Serial No Status</a>
+123:             <a href="#" id="menu-quotation-report">Quotation Report</a>
+124:             <a href="#" id="menu-pricelist">Pricelist <span class="shortcut">Ctrl+P</span></a>
+125:             <div class="dropdown-divider"></div>
+126:             <a href="#" id="menu-emp-bill-analysis">Employee Wise Bill Analysis</a>
+127:             <a href="#" id="menu-emp-product-analysis">Employee Wise Product Analysis</a>
+128:             <a href="#" id="menu-emp-pending-bills">Employee Wise Pending Bills</a>
+129:             <a href="#" id="menu-emp-collection">Employee Wise Collection</a>
+130:             <a href="#" id="menu-cust-bill-analysis">Customer Wise Bill Analysis</a>
+131:             <a href="#" id="menu-cust-product-analysis">Customer Wise Product Analysis</a>
+132:             <a href="#" id="menu-cust-pending-bills">Customer Wise Pending Bills</a>
+133:             <div class="dropdown-divider"></div>
+134:             <a href="#" id="menu-product-wise-analysis">Product Wise Analysis</a>
+135:             <a href="#" id="menu-product-analysis-loc">Product Analysis Location Wise</a>
+136:             <a href="#" id="menu-performance-sub">Performance <span class="shortcut">&gt;</span></a>
+137:             <div class="dropdown-divider"></div>
+138:             <a href="#" id="menu-employee-attendance">Employee Attendance</a>
+139:             <div class="dropdown-divider"></div>
+140:             <a href="#" id="menu-deactivated-items">Deactivated Items</a>
+141:           </div>
+142:         </div>
+143:         <div class="menu-item">
+144:           <span class="menu-title">Tax Reports</span>
+145:           <div class="dropdown-content">
+146:             <a href="#reports" id="menu-tax-summary">GST Summary</a>
+147:             <div class="dropdown-divider"></div>
+148:             <a href="#" id="menu-input-gst">Input GST</a>
+149:             <a href="#" id="menu-gst-purchase-hsn">GST Purchase Report [HSN/SAC Code]</a>
+150:             <div class="dropdown-divider"></div>
+151:             <a href="#" id="menu-output-gst">Output GST</a>
+152:             <a href="#" id="menu-gst-sales-hsn">GST Sales Report [HSN/SAC Code]</a>
+153:             <div class="dropdown-divider"></div>
+154:             <a href="#" id="menu-gst-voucher-summary">GST Voucher Summary</a>
+155:             <div class="dropdown-divider"></div>
+156:             <a href="#" id="menu-gst-sales-return-report">GST Sales Return Report</a>
+157:             <a href="#" id="menu-gst-purchase-return-report">GST Purchase Return Report</a>
+158:           </div>
+159:         </div>
+160:         <div class="menu-item">
+161:           <span class="menu-title">Account Reports</span>
+162:           <div class="dropdown-content">
+163:             <a href="#reports" id="menu-profit-loss">Profit & Loss</a>
+164:             <a href="#reports" id="menu-balance-sheet">Balance Sheet</a>
+165:             <a href="#reports" id="menu-trial-balance">Trial Balance</a>
+166:             <div class="dropdown-divider"></div>
+167:             <a href="#reports" id="menu-individual-ledger">Individual Ledger</a>
+168:             <a href="#reports" id="menu-ledger-group-summary">Ledger Group Summary</a>
+169:             <a href="#reports" id="menu-day-book">Day Book</a>
+170:             <div class="dropdown-divider"></div>
+171:             <a href="#reports" id="menu-customer-report">Customer Report</a>
+172:             <a href="#reports" id="menu-vendor-report">Vendor Report</a>
+173:             <a href="#reports" id="menu-debtors-report">Sundry Debtors Report</a>
+174:             <a href="#reports" id="menu-creditors-report">Sundry Creditors Report</a>
+175:           </div>
+176:         </div>
+177:         <div class="menu-item">
+178:           <span class="menu-title">Utilities</span>
+179:           <div class="dropdown-content">
+180:             <a href="#admin" id="menu-admin">Admin Settings</a>
+181:             <a href="#preset-loading" id="menu-preset-loading">Preset Loading</a>
+182:             <a href="#" id="menu-options">Options</a>
+183:             <a href="#" id="menu-gst-master">GST Master</a>
+184:             <div class="dropdown-divider"></div>
+185:             <a href="#" id="menu-reset-db">Reset Database</a>
+186:             <a href="#" id="menu-clear-db">CLEAR DATAT BASE</a>
+187:           </div>
+188:         </div>
+189:         <div class="menu-item">
+190:           <span class="menu-title">Admin</span>
+191:           <div class="dropdown-content">
+192:             <a href="#" id="menu-edit-company">Edit Company Information</a>
+193:             <a href="#" id="menu-delete-company" style="color: #ef4444;">Delete Company</a>
+194:             <div class="dropdown-divider"></div>
+195:             <a href="#" id="menu-logout">Logout</a>
+196:           </div>
+197:         </div>
+198:         <div class="menu-item">
+199:           <span class="menu-title">Help</span>
+200:           <div class="dropdown-content">
+201:             <a href="#" id="menu-about">About Material Ledger</a>
+202:           </div>
+203:         </div>
+204:         
+205:         <!-- Right side utility: theme toggle and user tag -->
+206:         <div class="menu-bar-right" style="margin-left: auto; display: flex; align-items: center; gap: 15px; padding-right: 10px;">
+207:           <button id="theme-toggle" class="theme-toggle" title="Toggle Theme" style="display: none; background: none; border: none; color: inherit; cursor: pointer; padding: 2px 6px; font-size: 0.8rem;">
+208:             <i class="fa-solid fa-sun" id="theme-icon"></i>
+209:           </button>
+210:           <span id="header-company-name" style="font-size: 0.75rem; font-weight: 600; color: #1e3b8b; background: #e2e8f0; padding: 2px 8px; border-radius: 4px;">Admin (Accounts Manager)</span>
+211:           <button id="header-logout-btn" style="background: #ef4444; color: white; border: none; padding: 2px 8px; font-size: 0.7rem; border-radius: 4px; font-weight: bold; cursor: pointer;">Logout</button>
+212:         </div>
+213:       </nav>
+214: 
+215:       <!-- Left Vertical Sidebar (Masters panel) -->
+216:       <aside class="erp-sidebar">
+217:         <div class="sidebar-header">Master</div>
+218:         <div class="sidebar-buttons">
+219:           <button class="sidebar-btn" id="sidebar-btn-product" title="Product Master (F2)">
+220:             <div class="btn-icon-wrapper"><i class="fa-solid fa-box-open" style="color: #22c55e;"></i></div>
+221:             <span class="btn-text">Product</span>
+222:           </button>
+223:           <button class="sidebar-btn" id="sidebar-btn-customer" title="Customer Directory (Ctrl+U)">
+224:             <div class="btn-icon-wrapper"><i class="fa-solid fa-users" style="color: #eab308;"></i></div>
+225:             <span class="btn-text">Customer</span>
+226:           </button>
+227:           <button class="sidebar-btn" id="sidebar-btn-vendor" title="Vendor Directory (Ctrl+O)">
+228:             <div class="btn-icon-wrapper"><i class="fa-solid fa-truck-field" style="color: #3b82f6;"></i></div>
+229:             <span class="btn-text">Vendor</span>
+230:           </button>
+231:           <button class="sidebar-btn" id="sidebar-btn-employee" title="Employee Registry (Ctrl+M)">
+232:             <div class="btn-icon-wrapper"><i class="fa-solid fa-id-card" style="color: #ec4899;"></i></div>
+233:             <span class="btn-text">Employee</span>
+234:           </button>
+235:           <button class="sidebar-btn" id="sidebar-btn-cashbook" title="Cash Book">
+236:             <div class="btn-icon-wrapper"><i class="fa-solid fa-money-bill-wave" style="color: #14b8a6;"></i></div>
+237:             <span class="btn-text">Cash Book</span>
+238:           </button>
+239:           <button class="sidebar-btn" id="sidebar-btn-bankbook" title="Bank Book">
+240:             <div class="btn-icon-wrapper"><i class="fa-solid fa-building-columns" style="color: #8b5cf6;"></i></div>
+241:             <span class="btn-text">Bank Book</span>
+242:           </button>
+243:         </div>
+244:       </aside>
+245: 
+246:       <!-- Main Desktop Workspace -->
+247:       <main id="erp-workspace" class="erp-workspace">
+248:         <!-- Watermark background -->
+249:         <div class="workspace-watermark">
+250:           <h1>GST ERP</h1>
+251:           <p>MATERIAL LEDGER</p>
+252:         </div>
+253: 
+254:         <!-- Floating Desktop Window Frame -->
+255:         <div id="active-window" class="erp-window hidden">
+256:           <div class="window-header">
+257:             <div class="window-title" id="window-title-text">Dashboard</div>
+258:             <div class="window-controls">
+259:               <button class="win-btn" id="win-btn-minimize" title="Minimize"><i class="fa-solid fa-minus"></i></button>
+260:               <button class="win-btn" id="win-btn-maximize" title="Maximize"><i class="fa-solid fa-square" style="font-size: 0.6rem;"></i></button>
+261:               <button class="win-btn win-btn-close" id="win-btn-close" title="Close"><i class="fa-solid fa-xmark"></i></button>
+262:             </div>
+263:           </div>
+264:           <div class="window-body" id="window-content-area">
+265:             <!-- Active view HTML dynamically rendered here -->
+266:           </div>
+267:         </div>
+268:       </main>
+269:     </div>
+270: 
+271:     <!-- Global Modals Placeholder -->
+272:     <div id="modal-container-root"></div>
+273:     <div id="sub-modal-container-root"></div>
+274: 
+275:     <!-- Main Module Script -->
+276:     <script type="module" src="/src/main.js"></script>
+277:   </body>
+278: </html>
+279: 
+The above content shows the entire, complete file contents of the requested file.

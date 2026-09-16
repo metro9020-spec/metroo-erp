@@ -1,0 +1,17 @@
+<!DOCTYPE html><html><body><script type="module">
+import { state } from "./src/state.js";
+window.state = state;
+</script>
+<script type="module" src="./src/main.js"></script>
+<script>
+setTimeout(() => {
+  try {
+    window.state.setActiveCompanyId("1");
+    window.showYearEndModal();
+    console.log("Success rendering modal");
+  } catch(e) {
+    console.error(e);
+  }
+}, 1000);
+</script>
+</body></html>

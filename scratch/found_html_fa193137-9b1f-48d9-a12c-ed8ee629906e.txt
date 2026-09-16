@@ -1,0 +1,23 @@
+Created At: 2026-08-13T18:16:16+05:30
+Completed At: 2026-08-13T18:16:17+05:30
+File Path: `file:///g:/sw%20m/erp/index.html`
+Total Lines: 279
+Total Bytes: 16441
+Showing lines 265 to 279
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+265:             <!-- Active view HTML dynamically rendered here -->
+266:           </div>
+267:         </div>
+268:       </main>
+269:     </div>
+270: 
+271:     <!-- Global Modals Placeholder -->
+272:     <div id="modal-container-root"></div>
+273:     <div id="sub-modal-container-root"></div>
+274: 
+275:     <!-- Main Module Script -->
+276:     <script type="module" src="/src/main.js"></script>
+277:   </body>
+278: </html>
+279: 
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

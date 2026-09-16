@@ -1,0 +1,93 @@
+<a href="#" id="menu-product-master">Product Master <span class="shortcut">F2</span></a>
+<a href="#inventory" id="menu-products-list">Products List <span class="shortcut">F10</span></a>
+<a href="#" id="menu-unit-settings">Unit Settings</a>
+<a href="#" id="menu-customer">Customer <span class="shortcut">Ctrl+U</span></a>
+<a href="#" id="menu-vendor">Vendor <span class="shortcut">Ctrl+O</span></a>
+<a href="#contacts" id="menu-contacts-directory">Contacts Directory</a>
+<a href="#" id="menu-employee">Employee <span class="shortcut">Ctrl+M</span></a>
+<a href="#" id="menu-influencers">Influencer Master</a>
+<a href="#" id="menu-series-master">Invoice Series Setting</a>
+<a href="#" id="menu-exit">Exit <span class="shortcut">Ctrl+X</span></a>
+<a href="#groups" id="menu-groups">Group Creation</a>
+<a href="#ledgers" id="menu-ledgers">Ledger Creation</a>
+<a href="#adjustments" id="menu-adjustments">Sale/Purchase Adjustment Master</a>
+<a href="#" id="menu-opening-stock-register">Opening Stock Entry</a>
+<a href="#reports" id="menu-balance-sheet">Balance Sheet</a>
+<a href="#reports" id="menu-trial-balance">Trial Balance</a>
+<a href="#reports" id="menu-individual-ledger">Individual Ledger</a>
+<a href="#reports" id="menu-ledger-group-summary">Ledger Group Summary</a>
+<a href="#reports" id="menu-day-book">Day Book</a>
+<a href="#ledger-statement" id="menu-individual-ledger">Individual Ledger</a>
+<a href="#" id="menu-individual-ledger">Individual Ledger</a>
+<a href="#" id="menu-canceled-sales-bills">Sales Bills</a>
+<a href="#" id="menu-canceled-purchase-bills">Purchase Bills</a>
+<a href="#inventory" id="menu-stock-register">Stock Register <span class="shortcut">Ctrl+F1</span></a>
+<a href="#inventory" id="menu-stock-register-detailed">Stock Register Detailed <span \r\nclass="shortcut">Ctrl+F2</span></a>
+<a href="#reports" id="menu-stock-register-batch">Stock Register [Batch Wise]</a>
+<a href="#" id="menu-item-wise-stock">Item wise Stock Register</a>
+<a href="#" id="menu-location-wise-stock">Location Wise Stock</a>
+<a href="#" id="menu-stock-register-rack">Stock Register [Rack wise]</a>
+<a href="#" id="menu-external-stock-transfer">External Stock Transfer</a>
+<a href="#" id="menu-stock-adjustment-report">Stock Adjustment Report</a>
+<a href="#inventory" id="menu-stock-quick-view">Stock [Quick View] <span \r\nclass="shortcut">Ctrl+F</span></a>
+<a href="#" id="menu-external-stock-receipt">External Stock Receipt Report</a>
+<a href="#" id="menu-internal-stock-transfer">Internal Stock Transfer Report</a>
+<a href="#" id="menu-product-loosening-report">Product Loosening Report</a>
+<a href="#" id="menu-product-bundling-report">Product Bundling Report</a>
+<a href="#" id="menu-serial-no-status">Serial No Status</a>
+<a href="#" id="menu-quotation-report">Quotation Report</a>
+<a href="#" id="menu-pricelist">Pricelist <span class="shortcut">Ctrl+P</span></a>
+<a href="#" id="menu-emp-bill-analysis">Employee Wise Bill Analysis</a>
+<a href="#" id="menu-emp-product-analysis">Employee Wise Product Analysis</a>
+<a href="#" id="menu-emp-pending-bills">Employee Wise Pending Bills</a>
+<a href="#" id="menu-emp-collection">Employee Wise Collection</a>
+<a href="#" id="menu-cust-bill-analysis">Customer Wise Bill Analysis</a>
+<a href="#" id="menu-cust-product-analysis">Customer Wise Product Analysis</a>
+<a href="#" id="menu-cust-pending-bills">Customer Wise Pending Bills</a>
+<a href="#" id="menu-product-wise-analysis">Product Wise Analysis</a>
+<a href="#" id="menu-product-analysis-loc">Product Analysis Location Wise</a>
+<a href="#" id="menu-performance-sub">Performance <span class="shortcut">></span></a>
+<a href="#" id="menu-employee-attendance">Employee Attendance</a>
+<a href="#" id="menu-deactivated-items">Deactivated Items</a>
+<a href="#inventory" id="menu-stock-quick-view">Stock [Quick View] <span class="shortcut">Ctrl+F</span></a>
+<a href="#inventory" id="menu-stock-register-detailed">Stock Register Detailed <span class="shortcut">Ctrl+F2</span></a>
+<a href="#admin" id="menu-admin">Admin Settings</a>
+<a href="#preset-loading" id="menu-preset-loading">Preset Loading</a>
+<a href="#" id="menu-options">Options</a>
+<a href="#" id="menu-gst-master">GST Master</a>
+<a href="#" id="menu-reset-db">Reset Database</a>
+<a href="#" id="menu-clear-db">CLEAR DATAT BASE</a>
+<a href="#" id="menu-edit-company">Edit Company Information</a>
+<a href="#" id="menu-delete-company" style="color: #ef4444;">Delete Company</a>
+<a href="#" id="menu-logout">Logout</a>
+<a href="#" id="menu-about">About Material Ledger</a>
+<a href="#" id="menu-backup">Backup Database</a>
+<a href="#" id="menu-restore">Restore Database</a>
+<a href="#" id="menu-year-ending" style="color:var(--warning-color); font-weight:bold;">Accounting Period Ending</a>
+<a href="#" id="menu-year-ending" style="color:var(--warning-color); font-weight:bold;">Accounting \r\nPeriod Ending</a>
+<a href="#" id="menu-select-fy" style="color:var(--accent-color); font-weight:bold;">Select Accounting Period (Ctrl+F3)</a>
+<a href="#" id="menu-select-fy" style="color:var(--accent-color); font-weight:bold;">Select Accounting \r\nPeriod (Ctrl+F3)</a>
+<a href="#" id="menu-year-ending" style="color:var(--warning-color); font-weight:bold;">Accounting \\nPeriod Ending</a>
+<a href="#" id="menu-select-fy".*?<\\/a>/s, "");\n\nhtml = html.replace(\n  /<a href="#" id="menu-year-ending".*?<\\/a>/s,\n  `<a href="#" id="menu-select-fy" style="color:var(--accent-color); font-weight:bold;">Select Accounting Period (Ctrl+F3)</a>
+<a href="#" id="menu-year-ending".*?<\\/a>/s,\n  `<a href="#" id="menu-select-fy" style="color:var(--accent-color); font-weight:bold;">Select Accounting Period (Ctrl+F3)</a>
+<a href="#" id="menu-select-fy" onclick="window.showSelectFinancialYearModal(); event.preventDefault();" \r\nstyle="color:var(--accent-color); font-weight:bold;">Select Accounting Period (Ctrl+F3)</a>
+<a href="#" id="menu-year-ending" onclick="window.showYearEndModal(); event.preventDefault();" \r\nstyle="color:var(--warning-color); font-weight:bold;">Accounting Period Ending</a>
+<a href="#" id="menu-select-fy" onclick="window.showSelectFinancialYearModal(); event.preventDefault();" style="color:var(--accent-color); font-weight:bold;">Select Accounting Period (Ctrl+F3)</a>
+<a href="#" id="menu-year-ending" onclick="window.showYearEndModal(); event.preventDefault();" style="color:var(--warning-color); font-weight:bold;">Accounting Period Ending</a>
+<a href="#" id="menu-about">About ERP</a>
+<a href="#" id="menu-license">License Info</a>
+<a href="#groups" id="menu-groups">Account Group Master</a>
+<a href="#ledgers" id="menu-ledgers">Account Ledger Creation</a>
+<a href="#inventory" id="menu-product-master">Product Master</a>
+<a href="#reports" id="menu-bank-book">Bank Book</a>
+<a href="#reports" id="menu-cash-book">Cash Book</a>
+<a href="#reports" id="menu-journal-register">Journal Register</a>
+<a href="#transactions" id="menu-sales">Sales</a>
+<a href="#transactions" id="menu-purchase">Purchase</a>
+<a href="#transactions" id="menu-payment">Payment</a>
+<a href="#transactions" id="menu-receipt">Receipt</a>
+<a href="#reports" id="menu-gstr1">GSTR-1</a>
+<a href="#reports" id="menu-gstr2">GSTR-2</a>
+<a href="#reports" id="menu-gstr3b">GSTR-3B</a>
+<a href="#reports" id="menu-pl">Profit & Loss</a>
+<a href="#reports" id="menu-bs">Balance Sheet</a>

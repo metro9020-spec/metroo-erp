@@ -1,0 +1,87 @@
+[
+  {
+    "id": "1",
+    "name": "METRO AGENCIES",
+    "subName": "",
+    "address": "POKKUNDU\nKURUMATHUR\nKANNUR - 670142",
+    "country": "INDIA",
+    "state": "KERALA",
+    "phone": "04602224904",
+    "mobile": "9020877748",
+    "email": "",
+    "dlNo": "",
+    "pincode": "670142",
+    "website": "http://",
+    "currencyName": "Rupees",
+    "financialYearStarts": "2026-04-01",
+    "financialYearEnds": "2027-03-31",
+    "maintain": "Inventory with Accounts",
+    "taxApplicable": "GST(Goods and Service TAX)",
+    "gstin": "32AFUPH3623R1ZX",
+    "fssaiLicNo": "",
+    "username": "admin",
+    "password": "123",
+    "users": [
+      {
+        "id": "USR-1",
+        "username": "admin",
+        "password": "123",
+        "fullName": "Administrator",
+        "role": "Admin",
+        "status": "Active"
+      }
+    ],
+    "financialYears": [
+      {
+        "id": "default",
+        "name": "Current F.Y",
+        "startDate": "2026-04-01",
+        "endDate": "2027-03-31"
+      }
+    ],
+    "district": "Kannur",
+    "serverUrl": "http://100.66.24.43:3001"
+  },
+  {
+    "id": "2",
+    "name": "SAMPLE",
+    "subName": "",
+    "address": "VALAKA",
+    "country": "INDIA",
+    "state": "KERALA",
+    "phone": "",
+    "mobile": "",
+    "email": "",
+    "dlNo": "",
+    "pincode": "",
+    "website": "http://",
+    "currencyName": "Rupees",
+    "financialYearStarts": "2026-04-01",
+    "financialYearEnds": "2027-03-31",
+    "maintain": "Inventory with Accounts",
+    "taxApplicable": "UNREGISTERED",
+    "gstin": "",
+    "fssaiLicNo": "",
+    "username": "admin",
+    "password": "123",
+    "users": [
+      {
+        "id": "USR-1",
+        "username": "admin",
+        "password": "123",
+        "fullName": "Administrator",
+        "role": "Admin",
+        "status": "Active"
+      }
+    ],
+    "financialYears": [
+      {
+        "id": "default",
+        "name": "Current F.Y",
+        "startDate": "2026-04-01",
+        "endDate": "2027-03-31"
+      }
+    ],
+    "serverUrl": "http://100.66.24.43:3001"
+  }
+]

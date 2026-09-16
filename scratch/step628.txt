@@ -1,0 +1,56 @@
+Created At: 2026-08-20T12:41:21+05:30
+Completed At: 2026-08-20T12:41:21+05:30
+
+				The command exited with code 0.
+				Output:
+				<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Material Ledger | Building Materials ERP</title>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- App Custom Style -->
+    <link rel="stylesheet" href="/src/style.css" />
+    <script>
+      // Clear session on load to ensure login page is shown first
+      localStorage.removeItem("erp_active_company_id");
+      
+      // Inject CSS immediately to hide the main app layout
+      const style = document.createElement("style");
+      style.id = "hide-app-style";
+      style.innerHTML = "#app { display: none !important; }";
+      document.head.appendChild(style);
+    </script>
+  </head>
+  <body>
+    <div id="app">
+      <!-- Top Horizontal Menu Bar -->
+      <nav class="erp-menu-bar">
+        <div class="menu-item">
+          <span class="menu-title">Masters</span>
+          <div class="dropdown-content">
+            <a href="#" id="menu-product-master">Product Master <span class="shortcut">F2</span></a>
+            <a href="#inventory" id="menu-products-list">Products List <span class="shortcut">F10</span></a>
+            <a href="#" id="menu-unit-settings">Unit Settings</a>
+            <a href="#" id="menu-customer">Customer <span class="shortcut">Ctrl+U</span></a>
+            <a href="#" id="menu-vendor">Vendor <span class="shortcut">Ctrl+O</span></a>
+            <a href="#contacts" id="menu-contacts-directory">Contacts Directory</a>
+            <a href="#" id="menu-employee">Employee <span class="shortcut">Ctrl+M</span></a>
+            <a href="#" id="menu-influencers">Influencer Master</a>
+            <a href="#" id="menu-series-master">Invoice Series Setting</a>
+            <div class="dropdown-divider"></div>
+            <a href="#" id="menu-exit">Exit <span class="shortcut">Ctrl+X</span></a>
+          </div>
+        </div>
+        <div class="menu-item">
+          <span class="menu-title">Accounts</span>
+          <div class="dropdown-content">
+            <a href="#groups" id="menu-groups">Group Creation</a>
+            <a href="#ledgers" id="menu-ledgers">Ledger Creation</a>
+            <a href="#adjustments" id="menu-adjustments">Sale/Purchase Adjustment Master</a>
+            <a href="#" id="menu-opening-stock-register">Opening Stock Entry</a>
+          </div>
+

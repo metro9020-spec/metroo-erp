@@ -1,0 +1,208 @@
+Created At: 2026-08-15T11:45:31+05:30
+Completed At: 2026-08-15T11:45:31+05:30
+File Path: `file:///g:/sw%20m/erp/src/main.js`
+Total Lines: 1298
+Total Bytes: 43539
+Showing lines 1 to 200
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: import { state } from "./state.js";
+2: import { renderDashboard } from "./views/dashboard.js";
+3: import { renderInventory, showProductMasterModal } from "./views/inventory.js";
+4: import { renderTransactions } from "./views/transactions.js";
+5: import { renderVouchers } from "./views/vouchers.js";
+6: import { renderContacts, showAddContactModal, setContactTypeFilter } from "./views/contacts.js";
+7: import { renderReports, setReportsActiveTab, setPartyReportTab } from "./views/reports.js";
+8: import { renderAdmin } from "./views/admin.js";
+9: import { renderGroups, renderLedger } from "./views/ledger.js";
+10: import { renderAdjustments } from "./views/adjustments.js";
+11: import { renderPresetLoading } from "./views/presetLoading.js";
+12: import { renderSearchVouchers } from "./views/searchVouchers.js";
+13: import { showWelcomeScreen, showEditCompanyModal } from "./views/login.js";
+14: 
+15: // Stackable Modal System polyfill
+16: const modalRoot = document.getElementById("modal-container-root");
+17: if (modalRoot) {
+18:   const originalDescriptor = Object.getOwnPropertyDescriptor(Element.prototype, "innerHTML");
+19:   
+20:   Object.defineProperty(modalRoot, "innerHTML", {
+21:     get() {
+22:       return originalDescriptor.get.call(modalRoot);
+23:     },
+24:     set(value) {
+25:       if (value === "") {
+26:         // Close/remove the topmost modal
+27:         if (modalRoot.lastElementChild) {
+28:           modalRoot.lastElementChild.remove();
+29:         }
+30:         return;
+31:       }
+32: 
+33:       // Parse the incoming HTML
+34:       const tempDiv = document.createElement("div");
+35:       tempDiv.innerHTML = value;
+36: 
+37:       // Extract all top-level elements (usually a div.modal-overlay)
+38:       const children = Array.from(tempDiv.children);
+39:       children.forEach((child) => {
+40:         if (child.id) {
+41:           // Remove existing modal with the same ID to prevent duplicates
+42:           const existing = modalRoot.querySelector(`#${child.id}`);
+43:           if (existing) {
+44:             existing.remove();
+45:           }
+46:         }
+47:         
+48:         // Increase z-index of the stacked modal to ensure it lays on top
+49:         if (child.classList.contains("modal-overlay")) {
+50:           const currentCount = modalRoot.children.length;
+51:           child.style.zIndex = String(2000 + currentCount * 10);
+52:         }
+53:         
+54:         modalRoot.appendChild(child);
+55:       });
+56:     }
+57:   });
+58: }
+59: 
+60: // Routes Mapping
+61: const routes = {
+62:   dashboard: { title: "Dashboard Overview", render: renderDashboard },
+63:   inventory: { title: "Inventory Stock Ledger", render: renderInventory },
+64:   transactions: { title: "Transactions Log", render: renderTransactions },
+65:   vouchers: { title: "Vouchers Ledger", render: renderVouchers },
+66:   contacts: { title: "Contacts Directory", render: renderContacts },
+67:   reports: { title: "Accounting Financial Statements", render: renderReports },
+68:   admin: { title: "Admin Panel & Security Settings", render: renderAdmin },
+69:   groups: { title: "Account Group Master", render: renderGroups },
+70:   ledgers: { title: "Ledger Creation", render: renderLedger },
+71:   adjustments: { title: "Sale/Purchase Adjustment Master", render: renderAdjustments },
+72:   "preset-loading": { title: "Preset Loading Charges Configuration", render: renderPresetLoading },
+73:   "search-vouchers": { title: "Search Vouchers", render: renderSearchVouchers }
+74: };
+75: 
+76: const windowContainerEl = document.getElementById("active-window");
+77: const windowTitleEl = document.getElementById("window-title-text");
+78: const windowContentEl = document.getElementById("window-content-area");
+79: 
+80: // Route renderer
+81: export function renderCurrentView() {
+82:   const activeCompanyId = state.getActiveCompanyId();
+83:   if (!activeCompanyId) {
+84:     if (windowContainerEl) {
+85:       windowContainerEl.classList.add("hidden");
+86:     }
+87:     return;
+88:   }
+89: 
+90:   const hash = window.location.hash.substring(1) || "";
+91:   
+92:   if (!hash || hash === "home") {
+93:     if (windowContainerEl) {
+94:       windowContainerEl.classList.add("hidden");
+95:     }
+96:     return;
+97:   }
+98: 
+99:   const route = routes[hash];
+100:   if (!route) {
+101:     if (windowContainerEl) {
+102:       windowContainerEl.classList.add("hidden");
+103:     }
+104:     return;
+105:   }
+106: 
+107:   if (windowContainerEl) {
+108:     windowContainerEl.classList.remove("hidden");
+109:   }
+110:   if (windowTitleEl) {
+111:     windowTitleEl.innerText = route.title;
+112:   }
+113: 
+114:   // Render view template inside window body
+115:   if (windowContentEl) {
+116:     route.render(windowContentEl);
+117:   }
+118: }
+119: 
+120: // Router Event Listeners
+121: window.addEventListener("hashchange", renderCurrentView);
+122: 
+123: state.subscribe(() => {
+124:   const hasModal = document.getElementById("modal-container-root")?.children.length > 0;
+125:   if (!hasModal) {
+126:     renderCurrentView();
+127:   }
+128: });
+129: 
+130: // Initialize Theme Toggle
+131: const themeToggleBtn = document.getElementById("theme-toggle");
+132: const themeIcon = document.getElementById("theme-icon");
+133: 
+134: function initTheme() {
+135:   document.documentElement.setAttribute("data-theme", "light");
+136:   localStorage.setItem("erp_theme", "light");
+137:   updateThemeIcon("light");
+138: }
+139: 
+140: function updateThemeIcon(theme) {
+141:   if (themeIcon) {
+142:     if (theme === "light") {
+143:       themeIcon.className = "fa-solid fa-moon";
+144:       themeToggleBtn.setAttribute("title", "Switch to Dark Mode");
+145:     } else {
+146:       themeIcon.className = "fa-solid fa-sun";
+147:       themeToggleBtn.setAttribute("title", "Switch to Light Mode");
+148:     }
+149:   }
+150: }
+151: 
+152: if (themeToggleBtn) {
+153:   themeToggleBtn.addEventListener("click", () => {
+154:     document.documentElement.setAttribute("data-theme", "light");
+155:     localStorage.setItem("erp_theme", "light");
+156:     updateThemeIcon("light");
+157:   });
+158: }
+159: 
+160: // Window controls click actions
+161: const closeBtn = document.getElementById("win-btn-close");
+162: const minimizeBtn = document.getElementById("win-btn-minimize");
+163: const maximizeBtn = document.getElementById("win-btn-maximize");
+164: 
+165: if (closeBtn) {
+166:   closeBtn.addEventListener("click", () => {
+167:     window.location.hash = "";
+168:   });
+169: }
+170: if (minimizeBtn) {
+171:   minimizeBtn.addEventListener("click", () => {
+172:     if (windowContainerEl) {
+173:       windowContainerEl.classList.add("hidden");
+174:     }
+175:   });
+176: }
+177: if (maximizeBtn) {
+178:   maximizeBtn.addEventListener("click", () => {
+179:     if (windowContainerEl) {
+180:       windowContainerEl.classList.toggle("maximized");
+181:     }
+182:   });
+183: }
+184: 
+185: // Left master sidebar buttons clicks
+186: const btnProd = document.getElementById("sidebar-btn-product");
+187: if (btnProd) {
+188:   btnProd.addEventListener("click", () => {
+189:     showProductMasterModal(windowContentEl, null, null);
+190:   });
+191: }
+192: 
+193: const btnCust = document.getElementById("sidebar-btn-customer");
+194: if (btnCust) {
+195:   btnCust.addEventListener("click", () => {
+196:     showAddContactModal(document.getElementById("modal-container-root"), null, "customer");
+197:   });
+198: }
+199: 
+200: const btnVend = document.getElementById("sidebar-btn-vendor");
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

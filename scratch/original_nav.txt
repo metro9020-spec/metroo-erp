@@ -1,0 +1,3 @@
+Top Horizontal Menu Bar") && l.includes("menu-products-list")) {
+    const startIdx = l.indexOf("Top Horizontal Menu Bar");
+    const endIdx = l.indexOf("

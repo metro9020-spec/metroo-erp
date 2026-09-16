@@ -1,0 +1,96 @@
+// Keyboard shortcuts handlers
+707: window.addEventListener("keydown", (e) => {
+708:   // Enter key navigates to next form field
+709:   if (e.key === "Enter" && e.target.tagName !== "TEXTAREA" && e.target.type !== "submit" && e.target.type !== "button" && !e.target.id.startsWith("ribbon-sale-") && !e.target.id.startsWith("ret-ribbon-")) {
+710:     const form = e.target.closest("form");
+711:     if (form) {
+712:       e.preventDefault();
+713:       const focusables = Array.from(form.querySelectorAll("input:not([disabled]):not([readonly]), select, textarea, button:not([type='button'])"));
+714:       const idx = focusables.indexOf(e.target);
+715:       if (idx > -1 && idx < focusables.length - 1) {
+716:         focusables[idx + 1].focus();
+717:       }
+718:     }
+719:   }
+720: 
+721:   // Ctrl+A saves the active form immediately if all mandatory fields are valid
+722:   if (e.ctrlKey && e.key.toLowerCase() === "a") {
+723:     let form = e.target.closest("form");
+724:     if (!form) {
+725:       const activeOverlay = document.querySelector(".modal-overlay.active");
+726:       if (activeOverlay) {
+727:         form = activeOverlay.querySelector("form");
+728:       }
+729:     }
+730:     if (!form) {
+731:       form = document.querySelector("form");
+732:     }
+733: 
+734:     if (form) {
+735:       e.preventDefault();
+736:       if (form.checkValidity()) {
+737:         if (typeof form.requestSubmit === "function") {
+738:           form.requestSubmit();
+739:         } else {
+740:           const submitEvent = new Event("submit", { cancelable: true });
+741:           form.dispatchEvent(submitEvent);
+742:         }
+743:       } else {
+744:         form.reportValidity();
+745:       }
+746:     }
+747:   }
+748: 
+749:   // ESC key: close modal or active window
+750:   if (e.key === "Escape") {
+751:     const root = document.getElementById("modal-container-root");
+752:     const activeModals = root ? Array.from(root.children) : [];
+753:     if (activeModals.length > 0) {
+754:       const topmostModal = activeModals[activeModals.length - 1];
+755:       const closeBtn = topmostModal.querySelector(".btn-secondary, button[id$='close-btn-header'], .modal-close-btn, #pl-groups-modal-close");
+756:       if (closeBtn) {
+757:         closeBtn.click();
+758:       } else {
+759:         topmostModal.remove();
+760:       }
+761:     } else {
+762:       window.location.hash = "";
+763:     }
+764:   }
+765: 
+766:   // F2: Product Master
+767:   if (e.key === "F2") {
+768:     e.preventDefault();
+769:     showProductMasterModal(windowContentEl, null, null);
+770:   }
+771: 
+772:   // F10: Products List
+773:   if (e.key === "F10") {
+774:     e.preventDefault();
+775:     const modalActive = document.querySelector(".modal-overlay.active");
+776:     if (modalActive) {
+777:       modalActive.classList.remove("active");
+778:       const root = document.getElementById("modal-container-root");
+779:       if (root) root.innerHTML = "";
+780:     }
+781:     window.location.hash = "#inventory";
+782:   }
+783: 
+784:   // F3: Purchase Bill
+785:   if (e.key === "F3") {
+786:     e.preventDefault();
+787:     import("./views/transactions.js").then(m => {
+788:       m.setTransactionsActiveTab("purchase");
+789:       window.location.hash = "#transactions";
+790:       setTimeout(() => {
+791:         const btn = document.getElementById("btn-add-purchase");
+792:         if (btn) btn.click();
+793:       }, 50);
+794:     });
+795:   }
+796: 
+797:   // F4: Sales Invoice
+798:   if (e.key === "F4") {
+799:     e.preventDefault();
+800:     import("./views/transactions.js").then(m => {
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

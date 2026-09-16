@@ -1,0 +1,96 @@
+// Keyboard shortcuts handlers
+window.addEventListener("keydown", (e) => {
+// Enter key navigates to next form field
+if (e.key === "Enter" && e.target.tagName !== "TEXTAREA" && e.target.type !== "submit" && e.target.type !== "button" && !e.target.id.startsWith("ribbon-sale-") && !e.target.id.startsWith("ret-ribbon-")) {
+const form = e.target.closest("form");
+if (form) {
+e.preventDefault();
+const focusables = Array.from(form.querySelectorAll("input:not([disabled]):not([readonly]), select, textarea, button:not([type='button'])"));
+const idx = focusables.indexOf(e.target);
+if (idx > -1 && idx < focusables.length - 1) {
+focusables[idx + 1].focus();
+}
+}
+}
+
+// Ctrl+A saves the active form immediately if all mandatory fields are valid
+if (e.ctrlKey && e.key.toLowerCase() === "a") {
+let form = e.target.closest("form");
+if (!form) {
+const activeOverlay = document.querySelector(".modal-overlay.active");
+if (activeOverlay) {
+form = activeOverlay.querySelector("form");
+}
+}
+if (!form) {
+form = document.querySelector("form");
+}
+
+if (form) {
+e.preventDefault();
+if (form.checkValidity()) {
+if (typeof form.requestSubmit === "function") {
+form.requestSubmit();
+} else {
+const submitEvent = new Event("submit", { cancelable: true });
+form.dispatchEvent(submitEvent);
+}
+} else {
+form.reportValidity();
+}
+}
+}
+
+// ESC key: close modal or active window
+if (e.key === "Escape") {
+const root = document.getElementById("modal-container-root");
+const activeModals = root ? Array.from(root.children) : [];
+if (activeModals.length > 0) {
+const topmostModal = activeModals[activeModals.length - 1];
+const closeBtn = topmostModal.querySelector(".btn-secondary, button[id$='close-btn-header'], .modal-close-btn, #pl-groups-modal-close");
+if (closeBtn) {
+closeBtn.click();
+} else {
+topmostModal.remove();
+}
+} else {
+window.location.hash = "";
+}
+}
+
+// F2: Product Master
+if (e.key === "F2") {
+e.preventDefault();
+showProductMasterModal(windowContentEl, null, null);
+}
+
+// F10: Products List
+if (e.key === "F10") {
+e.preventDefault();
+const modalActive = document.querySelector(".modal-overlay.active");
+if (modalActive) {
+modalActive.classList.remove("active");
+const root = document.getElementById("modal-container-root");
+if (root) root.innerHTML = "";
+}
+window.location.hash = "#inventory";
+}
+
+// F3: Purchase Bill
+if (e.key === "F3") {
+e.preventDefault();
+import("./views/transactions.js").then(m => {
+m.setTransactionsActiveTab("purchase");
+window.location.hash = "#transactions";
+setTimeout(() => {
+const btn = document.getElementById("btn-add-purchase");
+if (btn) btn.click();
+}, 50);
+});
+}
+
+// F4: Sales Invoice
+if (e.key === "F4") {
+e.preventDefault();
+import("./views/transactions.js").then(m => {
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

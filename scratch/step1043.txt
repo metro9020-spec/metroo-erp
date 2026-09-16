@@ -1,0 +1,33 @@
+Created At: 2026-08-21T10:56:23+05:30
+Completed At: 2026-08-21T10:56:25+05:30
+
+				The command exited with code 0.
+				Output:
+				
+              <a href="#inventory" id="menu-products-list">Products List <span class="shortcut">F10</span></a>
+              <a href="#" id="menu-unit-settings">Unit Settings</a>
+              <a href="#" id="menu-customer">Customer <span class="shortcut">Ctrl+U</span></a>
+              <a href="#" id="menu-vendor">Vendor <span class="shortcut">Ctrl+O</span></a>
+              <a href="#contacts" id="menu-contacts-directory">Contacts Directory</a>
+>             <a href="#" id="menu-employee">Employee <span class="shortcut">Ctrl+M</span></a>
+              <a href="#" id="menu-influencers">Influencer Master</a>
+              <a href="#" id="menu-series-master">Invoice Series Setting</a>
+              <div class="dropdown-divider"></div>
+              <a href="#" id="menu-exit">Exit <span class="shortcut">Ctrl+X</span></a>
+            </div>
+            </button>
+            <button class="sidebar-btn" id="sidebar-btn-vendor" title="Vendor Directory (Ctrl+O)">
+              <div class="btn-icon-wrapper"><i class="fa-solid fa-truck-field" style="color: #3b82f6;"></i></div>
+              <span class="btn-text">Vendor</span>
+            </button>
+>           <button class="sidebar-btn" id="sidebar-btn-employee" title="Employee Registry (Ctrl+M)">
+              <div class="btn-icon-wrapper"><i class="fa-solid fa-id-card" style="color: #ec4899;"></i></div>
+>             <span class="btn-text">Employee</span>
+            </button>
+            <button class="sidebar-btn" id="sidebar-btn-cashbook" title="Cash Book">
+              <div class="btn-icon-wrapper"><i class="fa-solid fa-money-bill-wave" style="color: #14b8a6;"></i></div>
+              <span class="btn-text">Cash Book</span>
+            </button>
+
+
+

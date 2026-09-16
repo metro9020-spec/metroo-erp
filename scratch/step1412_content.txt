@@ -1,0 +1,33 @@
+Created At: 2026-08-21T17:40:08+05:30
+Completed At: 2026-08-21T17:40:09+05:30
+
+				The command exited with code 0.
+				Output:
+				
+  });
+  
+  function updateCompanyHeaderIndicator() {
+>   const label = document.getElementById("header-company-name");
+    const activeId = state.getActiveCompanyId();
+    if (label && activeId) {
+      const companies = state.getRegisteredCompanies();
+      const current = companies.find(c => c.id === activeId);
+      if (current) {
+        label.textContent = current.name + " (" + state.getLoginDate() + ")";
+      }
+    }
+  }
+  
+  export function checkLoginAndRender() {
+    const activeCompanyId = state.getActiveCompanyId();
+    const appContainer = document.getElementById("app");
+    
+    let welcomeContainer = document.getElementById("welcome-login-root");
+    if (!welcomeContainer) {
+      welcomeContainer = document.createElement("div");
+      welcomeContainer.id = "welcome-login-root";
+      document.body.appendChild(welcomeContainer);
+    }
+
+
+

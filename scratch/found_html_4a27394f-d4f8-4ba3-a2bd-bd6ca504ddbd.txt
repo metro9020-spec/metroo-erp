@@ -1,0 +1,58 @@
+Created At: 2026-08-13T10:25:56+05:30
+Completed At: 2026-08-13T10:25:56+05:30
+File Path: `file:///G:/sw%20m/erp/index.html`
+Total Lines: 279
+Total Bytes: 16441
+Showing lines 1 to 50
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: <!doctype html>
+2: <html lang="en" data-theme="dark">
+3:   <head>
+4:     <meta charset="UTF-8" />
+5:     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+6:     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+7:     <title>Material Ledger | Building Materials ERP</title>
+8:     <!-- FontAwesome Icons -->
+9:     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+10:     <!-- App Custom Style -->
+11:     <link rel="stylesheet" href="/src/style.css" />
+12:     <script>
+13:       // Clear session on load to ensure login page is shown first
+14:       localStorage.removeItem("erp_active_company_id");
+15:       
+16:       // Inject CSS immediately to hide the main app layout
+17:       const style = document.createElement("style");
+18:       style.id = "hide-app-style";
+19:       style.innerHTML = "#app { display: none !important; }";
+20:       document.head.appendChild(style);
+21:     </script>
+22:   </head>
+23:   <body>
+24:     <div id="app">
+25:       <!-- Top Horizontal Menu Bar -->
+26:       <nav class="erp-menu-bar">
+27:         <div class="menu-item">
+28:           <span class="menu-title">Masters</span>
+29:           <div class="dropdown-content">
+30:             <a href="#" id="menu-product-master">Product Master <span class="shortcut">F2</span></a>
+31:             <a href="#inventory" id="menu-products-list">Products List <span class="shortcut">F10</span></a>
+32:             <a href="#" id="menu-unit-settings">Unit Settings</a>
+33:             <a href="#" id="menu-customer">Customer <span class="shortcut">Ctrl+U</span></a>
+34:             <a href="#" id="menu-vendor">Vendor <span class="shortcut">Ctrl+O</span></a>
+35:             <a href="#contacts" id="menu-contacts-directory">Contacts Directory</a>
+36:             <a href="#" id="menu-employee">Employee <span class="shortcut">Ctrl+M</span></a>
+37:             <a href="#" id="menu-influencers">Influencer Master</a>
+38:             <a href="#" id="menu-series-master">Invoice Series Setting</a>
+39:             <div class="dropdown-divider"></div>
+40:             <a href="#" id="menu-exit">Exit <span class="shortcut">Ctrl+X</span></a>
+41:           </div>
+42:         </div>
+43:         <div class="menu-item">
+44:           <span class="menu-title">Accounts</span>
+45:           <div class="dropdown-content">
+46:             <a href="#groups" id="menu-groups">Group Creation</a>
+47:             <a href="#ledgers" id="menu-ledgers">Ledger Creation</a>
+48:             <a href="#adjustments" id="menu-adjustments">Sale/Purchase Adjustment Master</a>
+49:             <a href="#" id="menu-opening-stock-register">Opening Stock Entry</a>
+50:           </div>
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
