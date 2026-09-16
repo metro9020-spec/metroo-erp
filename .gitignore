@@ -16,6 +16,7 @@ dist-ssr
 *.bak*
 BACKUP/
 COMPANY DATA BASE_BACKUP/
+src_broken_backup/
 browser_errors.log
 
 # Editor directories and files
