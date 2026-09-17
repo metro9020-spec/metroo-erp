@@ -18,6 +18,7 @@ BACKUP/
 COMPANY DATA BASE_BACKUP/
 src_broken_backup/
 browser_errors.log
+cloudflared.exe
 
 # Editor directories and files
 .vscode/*

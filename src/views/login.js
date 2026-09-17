@@ -87,11 +87,31 @@ function renderLoginPanel(parent, onLoginSuccess) {
     ? window._getApiUrl("/api/companies") 
     : `http://${host}:3001/api/companies`;
 
-  fetch(apiUrl, {
-    headers: { "Bypass-Tunnel-Reminder": "true" },
-    signal: controller.signal
-  })
-    .then(r => r.ok ? r.json() : null)
+  const fetchCompaniesData = async () => {
+    try {
+      const r = await fetch(apiUrl, {
+        headers: { "Bypass-Tunnel-Reminder": "true" },
+        signal: controller.signal
+      });
+      if (r.ok) {
+        const data = await r.json();
+        if (Array.isArray(data) && data.length > 0) return data;
+      }
+    } catch (e) {}
+
+    // Static hosting fallback (e.g. Netlify deployment without live server)
+    try {
+      const staticRes = await fetch("/data/companies.json");
+      if (staticRes.ok) {
+        const staticData = await staticRes.json();
+        if (Array.isArray(staticData) && staticData.length > 0) return staticData;
+      }
+    } catch (e) {}
+
+    return null;
+  };
+
+  fetchCompaniesData()
     .then(serverCompanies => {
       clearTimeout(timeoutId);
       if (Array.isArray(serverCompanies) && serverCompanies.length > 0) {
@@ -449,8 +469,8 @@ function _renderLoginForm(parent, onLoginSuccess) {
         okBtn.textContent = "OK";
       }
 
-      // Start auto-sync to keep this browser in sync with server every 30s
-      state.startAutoSync(30000);
+      // Start auto-sync to keep this browser in sync with server every 4s
+      state.startAutoSync(4000);
       onLoginSuccess();
     } else {
       alert("Invalid Username or Password!");

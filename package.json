@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host --open",
-    "build": "vite build",
+    "build": "node scripts/sync-static-data.js && vite build",
     "preview": "vite preview",
     "start": "node server.js"
   },

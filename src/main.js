@@ -38,8 +38,8 @@ import { renderOpeningStockRegisterReport } from "./views/openingStock.js";
 import { initGlobalWindowManager } from "./utils/draggable.js";
 
 window._getApiUrl = function(endpoint) {
-  // If loaded directly from server.js (e.g. port 3001), always use relative endpoint to avoid IP mismatch
-  if (window.location.port === "3001") {
+  // If loaded directly from production server (port 3001 or cloud host on 80/443), use relative endpoint
+  if (window.location.port === "3001" || window.location.port === "") {
     return endpoint;
   }
 
@@ -57,7 +57,7 @@ window._getApiUrl = function(endpoint) {
       let targetCo = companies.find(c => String(c.id) === String(activeCompId));
       if (!targetCo) targetCo = companies[0];
       
-      if (targetCo && targetCo.serverUrl) {
+      if (targetCo && targetCo.serverUrl && targetCo.serverUrl.trim()) {
         const cleanBase = String(targetCo.serverUrl).trim().replace(/\/+$/, "");
         if (cleanBase && !cleanBase.includes(window.location.host)) {
           return `${cleanBase}${endpoint}`;
@@ -66,11 +66,8 @@ window._getApiUrl = function(endpoint) {
     }
   } catch (e) {}
 
-  // If running locally in Vite dev server (e.g. port 5173, 5174), target backend on port 3001
-  if (window.location.port === "5173" || window.location.port === "5174") {
-    return `${window.location.protocol}//${window.location.hostname}:3001${endpoint}`;
-  }
-  return endpoint;
+  // If running locally in Vite dev server (e.g. port 5173, etc.), target backend on port 3001
+  return `${window.location.protocol}//${window.location.hostname}:3001${endpoint}`;
 };
 
 // DOM Elements helper
@@ -1628,9 +1625,9 @@ async function startApp() {
   }
   renderCurrentView();
 
-  // Start auto-sync: keeps this browser refreshed every 30s from server if logged in
+  // Start auto-sync: keeps this browser refreshed every 4s from server if logged in
   if (state.getCurrentUser() && state.getActiveCompanyId()) {
-    state.startAutoSync(30000);
+    state.startAutoSync(4000);
   }
 }
 

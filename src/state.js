@@ -296,22 +296,32 @@ class StateManager {
       : `http://${host}:3001/api/companies`;
 
     try {
-      const res = await fetch(apiUrl, {
-        headers: { "Bypass-Tunnel-Reminder": "true" },
-        signal: AbortSignal.timeout(15000)
-      });
-      if (res.ok) {
-        const serverCompanies = await res.json();
-        if (Array.isArray(serverCompanies) && serverCompanies.length > 0) {
-          const localStr = localStorage.getItem("erp_companies");
-          const localCompanies = localStr ? JSON.parse(localStr) : [];
-          const merged = serverCompanies.map(sc => {
-            const lc = localCompanies.find(c => String(c.id) === String(sc.id));
-            if (lc && lc.serverUrl) sc.serverUrl = lc.serverUrl;
-            return sc;
-          });
-          localStorage.setItem("erp_companies", JSON.stringify(merged));
-        }
+      let serverCompanies = null;
+      try {
+        const res = await fetch(apiUrl, {
+          headers: { "Bypass-Tunnel-Reminder": "true" },
+          signal: AbortSignal.timeout(10000)
+        });
+        if (res.ok) serverCompanies = await res.json();
+      } catch (e) {}
+
+      if (!Array.isArray(serverCompanies) || serverCompanies.length === 0) {
+        // Fallback for static Netlify deployment
+        try {
+          const staticRes = await fetch("/data/companies.json");
+          if (staticRes.ok) serverCompanies = await staticRes.json();
+        } catch (e) {}
+      }
+
+      if (Array.isArray(serverCompanies) && serverCompanies.length > 0) {
+        const localStr = localStorage.getItem("erp_companies");
+        const localCompanies = localStr ? JSON.parse(localStr) : [];
+        const merged = serverCompanies.map(sc => {
+          const lc = localCompanies.find(c => String(c.id) === String(sc.id));
+          if (lc && lc.serverUrl) sc.serverUrl = lc.serverUrl;
+          return sc;
+        });
+        localStorage.setItem("erp_companies", JSON.stringify(merged));
       }
     } catch (e) {
       // Server unreachable
@@ -334,15 +344,33 @@ class StateManager {
         const dataUrl = (typeof window._getApiUrl === "function")
           ? window._getApiUrl(`/api/data/${activeId}/${fyId}`)
           : `http://${host}:3001/api/data/${activeId}/${fyId}`;
-        const dataRes = await fetch(dataUrl, {
-          headers: { "Bypass-Tunnel-Reminder": "true" },
-          signal: AbortSignal.timeout(30000)
-        });
-        if (dataRes.ok) {
-          const data = await dataRes.json();
-          if (data && typeof data === "object") {
-            this._serverLoadedData = data;
+        
+        let loadedData = null;
+        try {
+          const dataRes = await fetch(dataUrl, {
+            headers: { "Bypass-Tunnel-Reminder": "true" },
+            signal: AbortSignal.timeout(15000)
+          });
+          if (dataRes.ok) {
+            loadedData = await dataRes.json();
           }
+        } catch (e) {}
+
+        // Fallback for static Netlify deployment without backend server
+        if (!loadedData || typeof loadedData !== "object") {
+          try {
+            const staticDataRes = await fetch(`/data/${activeId}_${fyId}.json`);
+            if (staticDataRes.ok) {
+              loadedData = await staticDataRes.json();
+            } else {
+              const staticDefRes = await fetch(`/data/${activeId}.json`);
+              if (staticDefRes.ok) loadedData = await staticDefRes.json();
+            }
+          } catch (e) {}
+        }
+
+        if (loadedData && typeof loadedData === "object") {
+          this._serverLoadedData = loadedData;
         }
       } catch (e) {}
     }
@@ -732,9 +760,10 @@ class StateManager {
       this.setActiveFyId(remainingFy.id);
     }
 
-    // Call server to delete file from disk and update companies.json
-    const host = window.location.hostname || "localhost";
-    fetch(`http://${host}:3001/api/data/${targetCompanyId}/${fyId}`, {
+    const deleteApiUrl = (typeof window !== "undefined" && typeof window._getApiUrl === "function")
+      ? window._getApiUrl(`/api/data/${targetCompanyId}/${fyId}`)
+      : `/api/data/${targetCompanyId}/${fyId}`;
+    fetch(deleteApiUrl, {
       method: "DELETE"
     }).catch(e => console.error("Server financial year delete failed:", e));
 
@@ -3674,9 +3703,11 @@ class StateManager {
     const activeId = this.getActiveCompanyId();
     if (!activeId) return;
     const fyId = this.getActiveFyId();
-    const host = window.location.hostname || "localhost";
     try {
-      const res = await fetch(`http://${host}:3001/api/data/${activeId}/${fyId}`);
+      const apiUrl = (typeof window !== "undefined" && typeof window._getApiUrl === "function")
+        ? window._getApiUrl(`/api/data/${activeId}/${fyId}`)
+        : `/api/data/${activeId}/${fyId}`;
+      const res = await fetch(apiUrl);
       if (res.ok) {
         const data = await res.json();
         if (data && data.ledgers) {
@@ -3693,8 +3724,11 @@ class StateManager {
 
   async syncCompanies() {
     try {
-      const res = await fetch(`http://${window.location.hostname || "localhost"}:3001/api/companies`, {
-        signal: AbortSignal.timeout(500)
+      const apiUrl = (typeof window !== "undefined" && typeof window._getApiUrl === "function")
+        ? window._getApiUrl("/api/companies")
+        : "/api/companies";
+      const res = await fetch(apiUrl, {
+        signal: AbortSignal.timeout(1500)
       });
       if (res.ok) {
         const data = await res.json();
@@ -3807,8 +3841,9 @@ class StateManager {
   // pushes it to the local server's disk files. Use this when server files
   // are missing or out of date (e.g. server was offline during saves).
   async forceSyncAllToServer() {
-    const host = window.location.hostname || "localhost";
-    const baseUrl = `http://${host}:3001`;
+    const getUrl = (endpoint) => (typeof window !== "undefined" && typeof window._getApiUrl === "function")
+      ? window._getApiUrl(endpoint)
+      : endpoint;
     const results = { success: [], failed: [] };
 
     // 1. Sync companies list (always includes financialYears now)
@@ -3829,9 +3864,9 @@ class StateManager {
         return c;
       });
 
-      const res = await fetch(`${baseUrl}/api/companies`, {
+      const res = await fetch(getUrl("/api/companies"), {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "Bypass-Tunnel-Reminder": "true" },
         body: JSON.stringify(companiesWithFy)
       });
       if (res.ok) {
@@ -3852,9 +3887,9 @@ class StateManager {
           if (stored) {
             try {
               const data = JSON.parse(stored);
-              const saveRes = await fetch(`${baseUrl}/api/data/${company.id}/${fyId}`, {
+              const saveRes = await fetch(getUrl(`/api/data/${company.id}/${fyId}`), {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "Bypass-Tunnel-Reminder": "true" },
                 body: JSON.stringify(data)
               });
               if (saveRes.ok) {
@@ -4060,8 +4095,10 @@ class StateManager {
     localStorage.setItem(`erp_company_data_${activeId}_${newFyId}`, JSON.stringify(newState));
     
     // Sync with the server API for this new fyId
-    const host = window.location.hostname || "localhost";
-    fetch(`http://${host}:3001/api/data/${activeId}/${newFyId}`, {
+    const fyApiUrl = (typeof window !== "undefined" && typeof window._getApiUrl === "function")
+      ? window._getApiUrl(`/api/data/${activeId}/${newFyId}`)
+      : `/api/data/${activeId}/${newFyId}`;
+    fetch(fyApiUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newState)
@@ -4393,8 +4430,10 @@ class StateManager {
     // Save and sync the next year state
     localStorage.setItem(`erp_company_data_${activeId}_${nextFyId}`, JSON.stringify(nextData));
     
-    const host = window.location.hostname || "localhost";
-    fetch(`http://${host}:3001/api/data/${activeId}/${nextFyId}`, {
+    const updateApiUrl = (typeof window !== "undefined" && typeof window._getApiUrl === "function")
+      ? window._getApiUrl(`/api/data/${activeId}/${nextFyId}`)
+      : `/api/data/${activeId}/${nextFyId}`;
+    fetch(updateApiUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(nextData)
