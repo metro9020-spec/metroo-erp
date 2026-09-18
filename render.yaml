@@ -1,9 +1,9 @@
 services:
   - type: web
     name: metro-erp
-    env: node
+    runtime: node
     plan: free
-    buildCommand: npm install && npm run build
+    buildCommand: npm run build
     startCommand: node server.js
     envVars:
       - key: NODE_ENV
