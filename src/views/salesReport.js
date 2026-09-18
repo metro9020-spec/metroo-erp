@@ -1,6 +1,7 @@
 import { state } from "../state.js";
 import { renderPrintHeaderHtml, formatDateDisplay } from "./reports.js";
 import { renderTallyDatePickerHtml, initTallyDatePickers } from "../utils/datePicker.js";
+import { showInvoicePrintPreview } from "./invoices.js";
 
 export function showSalesReportModal(container) {
   const root = document.getElementById("modal-container-root");
@@ -119,12 +120,25 @@ export function showSalesReportModal(container) {
   const overlay = modalEl;
   initTallyDatePickers(overlay);
 
+  let selectedInvoiceId = null;
+
   const close = () => { overlay.remove(); };
 
   modalEl.querySelector("#rep-close-btn")?.addEventListener("click", close);
   modalEl.querySelector("#btn-rep-close")?.addEventListener("click", close);
   modalEl.querySelector("#btn-rep-print")?.addEventListener("click", () => window.print());
-  modalEl.querySelector("#btn-rep-print-bill")?.addEventListener("click", () => window.print());
+  modalEl.querySelector("#btn-rep-print-bill")?.addEventListener("click", () => {
+    if (selectedInvoiceId) {
+      showInvoicePrintPreview(document.body, selectedInvoiceId);
+    } else {
+      const invs = state.getInvoices();
+      if (invs && invs.length > 0) {
+        showInvoicePrintPreview(document.body, invs[invs.length - 1].id);
+      } else {
+        alert("No invoice selected to print.");
+      }
+    }
+  });
 
 
 
@@ -639,7 +653,7 @@ export function showSalesReportModal(container) {
         </thead>
         <tbody>
           ${rows.map(r => `
-            <tr style="border-bottom:1px solid #cbd5e1;">
+            <tr style="border-bottom:1px solid #cbd5e1; cursor:pointer;" class="sales-rep-row" data-inv-id="${r.billNo}">
               <td style="padding:4px 6px; border:1px solid #cbd5e1;">${r.slNo}</td>
               <td style="padding:4px 6px; border:1px solid #cbd5e1; font-weight:bold; color:#1e3b8b;">${r.billNo}</td>
               <td style="padding:4px 6px; border:1px solid #cbd5e1;">${r.billDate}</td>
@@ -657,6 +671,7 @@ export function showSalesReportModal(container) {
           </tr>
         </tbody>
       `;
+      bindRowEvents();
       return;
     }
 
@@ -681,7 +696,7 @@ export function showSalesReportModal(container) {
         </thead>
         <tbody>
           ${rows.map(r => `
-            <tr style="border-bottom:1px solid #cbd5e1;">
+            <tr style="border-bottom:1px solid #cbd5e1; cursor:pointer;" class="sales-rep-row" data-inv-id="${r.billNo}">
               <td style="padding:4px 6px; border:1px solid #cbd5e1;"><strong>${r.customerName}</strong></td>
               <td style="padding:4px 6px; border:1px solid #cbd5e1;">${r.billDate}</td>
               <td style="padding:4px 6px; border:1px solid #cbd5e1;">${r.billNo}</td>
@@ -694,6 +709,7 @@ export function showSalesReportModal(container) {
           </tr>
         </tbody>
       `;
+      bindRowEvents();
       return;
     }
 
@@ -720,7 +736,7 @@ export function showSalesReportModal(container) {
       </thead>
       <tbody>
         ${rows.map(r => `
-          <tr style="border-bottom:1px solid #cbd5e1;">
+          <tr style="border-bottom:1px solid #cbd5e1; cursor:pointer;" class="sales-rep-row" data-inv-id="${r.billNo}">
             <td style="padding:4px 6px; border:1px solid #cbd5e1;">${r.billDate}</td>
             <td style="padding:4px 6px; border:1px solid #cbd5e1; font-weight:bold; color:#1e3b8b;">${r.billNo}</td>
             <td style="padding:4px 6px; border:1px solid #cbd5e1;">${r.refNo}</td>
@@ -734,6 +750,21 @@ export function showSalesReportModal(container) {
         </tr>
       </tbody>
     `;
+    bindRowEvents();
+
+    function bindRowEvents() {
+      tableEl.querySelectorAll(".sales-rep-row").forEach(row => {
+        row.addEventListener("click", () => {
+          tableEl.querySelectorAll(".sales-rep-row").forEach(r => r.style.background = "");
+          row.style.background = "#dbeafe";
+          selectedInvoiceId = row.getAttribute("data-inv-id");
+        });
+        row.addEventListener("dblclick", () => {
+          const invId = row.getAttribute("data-inv-id");
+          if (invId) showInvoicePrintPreview(document.body, invId);
+        });
+      });
+    }
   }
 
   // Bind radio events

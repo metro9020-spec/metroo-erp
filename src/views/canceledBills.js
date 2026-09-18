@@ -1,5 +1,6 @@
 import { state } from "../state.js";
 import { formatDate } from "../utils/dateUtils.js";
+import { showInvoicePrintPreview } from "./invoices.js";
 
 export function showCanceledBillsReportModal(type = "sales", container = null) {
   const root = document.getElementById("modal-container-root");
@@ -11,6 +12,8 @@ export function showCanceledBillsReportModal(type = "sales", container = null) {
   const title = isSales ? "CANCELED SALES BILLS REPORT" : "CANCELED PURCHASE BILLS REPORT";
   const partyLabel = isSales ? "Customer" : "Vendor";
 
+  let selectedCanceledId = null;
+
   const renderHTML = () => {
     root.innerHTML = `
       <div class="modal-overlay active" id="canceled-report-overlay" style="display:flex; justify-content:center; align-items:center; background: rgba(15,23,42,0.35); backdrop-filter: blur(1px); z-index:2000; position:fixed; top:0; left:0; width:100%; height:100%;">
@@ -18,25 +21,27 @@ export function showCanceledBillsReportModal(type = "sales", container = null) {
           
           <!-- Header ribbon -->
           <div style="background: linear-gradient(180deg, #1e3a8a 0%, #3b82f6 100%); color:white; padding:4px 8px; font-weight:700; display:flex; justify-content:space-between; align-items:center; border-radius: 2px;">
-            <div style="display:flex; align-items:center; gap:6px;"><i class="fa-solid fa-ban"></i> ${title}</div>
-            <button type="button" style="background:none; border:none; color:white; font-size:1.2rem; cursor:pointer;" id="can-close-x-btn">&times;</button>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <i class="fa-solid fa-ban" style="color:#f87171;"></i>
+              <span style="font-size:0.85rem;">${title}</span>
+            </div>
+            <button id="can-close-x-btn" style="background:none; border:none; color:white; font-size:1.1rem; cursor:pointer; padding:0 4px;">&times;</button>
           </div>
 
-          <!-- Upper Filters Row -->
-          <div style="display:flex; gap:15px; background:#b4c6e7; padding:8px 12px; border:1px solid #8faadc; border-radius:2px; align-items:center; justify-content:space-between;">
-            
-            <!-- Date Range Group -->
-            <div style="display:flex; align-items:center; gap:8px; border:1px solid #8faadc; background:#d9e1f2; padding:4px 8px; border-radius:3px; position:relative;">
-              <span style="position:absolute; top:-8px; left:8px; background:#cbd5e1; padding:0 4px; font-size:0.7rem; font-weight:bold; border:1px solid #8faadc; border-radius:3px; color:#1e3a8a;">Date Range</span>
-              <label style="font-weight:bold; margin-top:4px;">From</label>
-              <input type="date" id="can-date-from" class="form-control" style="background:white; color:black; padding:2px 4px; font-size:0.78rem; width:125px; margin-top:4px;" value="${today}">
-              <label style="font-weight:bold; margin-top:4px;">To</label>
-              <input type="date" id="can-date-to" class="form-control" style="background:white; color:black; padding:2px 4px; font-size:0.78rem; width:125px; margin-top:4px;" value="${today}">
+          <!-- Filter section bar -->
+          <div style="background-color: #e2e8f0; border: 1px solid #94a3b8; padding: 6px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 8px;">
+            <div style="display:flex; gap:12px; align-items:center;">
+              <div>
+                <label style="font-weight:bold;">From Date:</label>
+                <input type="date" id="can-date-from" value="${today}" class="form-control" style="background:white; color:black; padding:2px 4px; font-size:0.78rem;">
+              </div>
+              <div>
+                <label style="font-weight:bold;">To Date:</label>
+                <input type="date" id="can-date-to" value="${today}" class="form-control" style="background:white; color:black; padding:2px 4px; font-size:0.78rem;">
+              </div>
             </div>
 
-            <!-- Search Group -->
-            <div style="display:flex; align-items:center; gap:8px; border:1px solid #8faadc; background:#d9e1f2; padding:4px 8px; border-radius:3px; position:relative; flex-grow:1; max-width:250px;">
-              <span style="position:absolute; top:-8px; left:8px; background:#cbd5e1; padding:0 4px; font-size:0.7rem; font-weight:bold; border:1px solid #8faadc; border-radius:3px; color:#1e3a8a;">Search</span>
+            <div>
               <label style="font-weight:bold; margin-top:4px;">Bill No.</label>
               <input type="text" id="can-search-bill" class="form-control" style="background:white; color:black; padding:2px 4px; font-size:0.78rem; margin-top:4px;" placeholder="Search...">
             </div>
@@ -132,16 +137,18 @@ export function showCanceledBillsReportModal(type = "sales", container = null) {
       `;
     }
 
-    // Attach row double-click to view the invoice details (read-only)
+    // Attach row selection and double-click handlers
     tbody.querySelectorAll(".canceled-bill-row").forEach(row => {
+      row.addEventListener("click", () => {
+        tbody.querySelectorAll(".canceled-bill-row").forEach(r => r.style.background = "");
+        row.style.background = "#dbeafe";
+        selectedCanceledId = row.getAttribute("data-id");
+      });
       row.addEventListener("dblclick", (e) => {
         if (e.target.classList.contains("btn-restore")) return;
         const id = row.getAttribute("data-id");
         if (isSales) {
-          import("./transactions.js").then(m => {
-            const inv = state.getInvoices().find(i => i.id === id);
-            m.showInvoiceBuilderModal(container, null, null, null, inv);
-          });
+          showInvoicePrintPreview(document.body, id);
         } else {
           import("./transactions.js").then(m => {
             const pur = state.getPurchases().find(p => p.id === id);
@@ -181,6 +188,20 @@ export function showCanceledBillsReportModal(type = "sales", container = null) {
   };
 
   document.getElementById("btn-can-view").addEventListener("click", renderData);
+  document.getElementById("btn-can-preview").addEventListener("click", () => {
+    if (selectedCanceledId && isSales) {
+      showInvoicePrintPreview(document.body, selectedCanceledId);
+    } else if (isSales) {
+      const canceledInvoices = state.getInvoices().filter(i => i.isCancelled);
+      if (canceledInvoices.length > 0) {
+        showInvoicePrintPreview(document.body, canceledInvoices[0].id);
+      } else {
+        alert("No canceled sales invoice selected.");
+      }
+    } else {
+      alert("Print preview is available for sales invoices.");
+    }
+  });
   
   // Date range inputs change trigger automatic refresh
   document.getElementById("can-date-from").addEventListener("change", renderData);

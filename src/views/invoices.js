@@ -97,7 +97,11 @@ export function renderInvoices(container) {
                 <td colspan="11" style="text-align: center; color: var(--text-muted); padding: 3rem;">No invoices found.</td>
               </tr>
             ` : filteredInvoices.map(inv => {
-              const bal = inv.total - inv.paidAmount;
+              const subtotalVal = parseFloat(inv.subtotal ?? inv.amount ?? 0) || 0;
+              const taxAmtVal = parseFloat(inv.totalGst ?? inv.taxAmount ?? 0) || 0;
+              const totalVal = parseFloat(inv.total ?? 0) || 0;
+              const paidAmtVal = parseFloat(inv.paidAmount ?? 0) || 0;
+              const bal = totalVal - paidAmtVal;
               let statusBadge = "";
               if (inv.status === "paid") {
                 statusBadge = '<span class="badge success">Paid</span>';
@@ -114,11 +118,11 @@ export function renderInvoices(container) {
                   <td><code class="highlight-text" style="font-weight: 700;">${inv.voucherNo || inv.id}</code></td>
                   <td>${formatDate(inv.date)}</td>
                   <td>${formatDate(inv.dueDate)}</td>
-                  <td><strong>${inv.contactName}</strong></td>
-                  <td style="text-align: right;">\u20B9${inv.subtotal.toFixed(2)}</td>
-                  <td style="text-align: right;">\u20B9${inv.taxAmount.toFixed(2)}</td>
-                  <td style="text-align: right; font-weight: 600;">\u20B9${inv.total.toFixed(2)}</td>
-                  <td style="text-align: right; color: var(--success); font-weight: 500;">\u20B9${inv.paidAmount.toFixed(2)}</td>
+                  <td><strong>${inv.contactName || "Cash / Customer"}</strong></td>
+                  <td style="text-align: right;">\u20B9${subtotalVal.toFixed(2)}</td>
+                  <td style="text-align: right;">\u20B9${taxAmtVal.toFixed(2)}</td>
+                  <td style="text-align: right; font-weight: 600;">\u20B9${totalVal.toFixed(2)}</td>
+                  <td style="text-align: right; color: var(--success); font-weight: 500;">\u20B9${paidAmtVal.toFixed(2)}</td>
                   <td style="text-align: right; color: ${bal > 0 ? 'var(--text-primary)' : 'var(--text-secondary)'}; font-weight: 600;">\u20B9${bal.toFixed(2)}</td>
                   <td style="text-align: center;">${statusBadge}</td>
                   <td style="text-align: center;">
@@ -210,10 +214,17 @@ export function generateInvoiceHtml(inv, printMode = 'standard') {
   const companyState = activeCompany?.state || "KERALA";
   const companyStateCode = activeCompany?.stateCode || "32";
 
+  const invSubtotal = parseFloat(inv.subtotal ?? inv.taxableTotal ?? inv.amount ?? 0) || 0;
+  const invTotalGst = parseFloat(inv.totalGst ?? inv.taxAmount ?? inv.totalTax ?? 0) || 0;
+  const invTotal = parseFloat(inv.total ?? inv.grandTotal ?? inv.amount ?? 0) || 0;
+  const invPaidAmount = parseFloat(inv.paidAmount ?? 0) || 0;
+  const invRoundOff = parseFloat(inv.roundOff ?? 0) || 0;
+  const invAdjustments = parseFloat(inv.adjustments ?? 0) || 0;
+
   const isSingleItem = (inv.items || []).length === 1;
   const activeAdjustments = (inv.adjustmentsList && inv.adjustmentsList.length > 0)
     ? inv.adjustmentsList.filter(a => parseFloat(a.amount || 0) !== 0)
-    : (parseFloat(inv.adjustments || 0) !== 0 ? [{ name: "Adjustments", amount: parseFloat(inv.adjustments), type: parseFloat(inv.adjustments) >= 0 ? "Add" : "Deduct" }] : []);
+    : (invAdjustments !== 0 ? [{ name: "Adjustments", amount: invAdjustments, type: invAdjustments >= 0 ? "Add" : "Deduct" }] : []);
   
   const shouldInlineAdjustments = isSingleItem && activeAdjustments.length > 0;
   
@@ -502,12 +513,12 @@ export function generateInvoiceHtml(inv, printMode = 'standard') {
           }).join("")}
           <tr style="background: #f8fafc; font-weight: bold; border-top: 1.5px solid #000;">
             <td colspan="5" style="padding: 0.35rem 0.4rem; border: 1px solid #000; text-align: right; font-weight: bold;">Total</td>
-            <td style="padding: 0.35rem 0.2rem; border: 1px solid #000; text-align: right; font-weight: bold;">\u20B9${(inv.subtotal + (shouldInlineAdjustments ? totalAdjustments : 0)).toFixed(2)}</td>
+            <td style="padding: 0.35rem 0.2rem; border: 1px solid #000; text-align: right; font-weight: bold;">\u20B9${(invSubtotal + (shouldInlineAdjustments ? totalAdjustments : 0)).toFixed(2)}</td>
             <td style="padding: 0.35rem 0.2rem; border: 1px solid #000;"></td>
-            <td style="padding: 0.35rem 0.2rem; border: 1px solid #000; text-align: right; font-weight: bold;">\u20B9${(inv.totalGst / 2).toFixed(2)}</td>
+            <td style="padding: 0.35rem 0.2rem; border: 1px solid #000; text-align: right; font-weight: bold;">\u20B9${(invTotalGst / 2).toFixed(2)}</td>
             <td style="padding: 0.35rem 0.2rem; border: 1px solid #000;"></td>
-            <td style="padding: 0.35rem 0.2rem; border: 1px solid #000; text-align: right; font-weight: bold;">\u20B9${(inv.totalGst / 2).toFixed(2)}</td>
-            <td style="padding: 0.35rem 0.2rem; border: 1px solid #000; text-align: right; font-weight: bold;">\u20B9${(inv.subtotal + inv.totalGst + (shouldInlineAdjustments ? totalAdjustments : 0)).toFixed(2)}</td>
+            <td style="padding: 0.35rem 0.2rem; border: 1px solid #000; text-align: right; font-weight: bold;">\u20B9${(invTotalGst / 2).toFixed(2)}</td>
+            <td style="padding: 0.35rem 0.2rem; border: 1px solid #000; text-align: right; font-weight: bold;">\u20B9${(invSubtotal + invTotalGst + (shouldInlineAdjustments ? totalAdjustments : 0)).toFixed(2)}</td>
           </tr>
         </tbody>
         `}
@@ -578,7 +589,7 @@ export function generateInvoiceHtml(inv, printMode = 'standard') {
           </tr>
           <tr style="background: #f8fafc; font-weight: bold; border-top: 1.5px solid #000;">
             <td colspan="7" style="padding: 0.35rem 0.4rem; border: 1px solid #000; text-align: right; font-weight: bold;">Total</td>
-            <td style="padding: 0.35rem 0.2rem; border: 1px solid #000; text-align: right; font-weight: bold;">\u20B9${inv.total.toFixed(2)}</td>
+            <td style="padding: 0.35rem 0.2rem; border: 1px solid #000; text-align: right; font-weight: bold;">\u20B9${invTotal.toFixed(2)}</td>
           </tr>
         </tbody>
       </table>
@@ -589,15 +600,15 @@ export function generateInvoiceHtml(inv, printMode = 'standard') {
           ${isNontaxable ? `
             <div>
               <span style="font-size: 0.7rem; color: #555; display: block; margin-bottom: 2px;">Grand Total in words :</span>
-              <strong style="font-size: 0.75rem; text-transform: uppercase;">${getAmountInWords(inv.total)}</strong>
+              <strong style="font-size: 0.75rem; text-transform: uppercase;">${getAmountInWords(invTotal)}</strong>
             </div>
           ` : `
             <div style="font-size: 0.7rem; font-weight: bold; background-color: #f8fafc; padding: 3px 5px; border: 1px solid #cbd5e1; border-radius: 2px;">
-              [GST Summary : 18% of ${inv.subtotal.toFixed(2)} = ${inv.totalGst.toFixed(2)}]
+              [GST Summary : 18% of ${invSubtotal.toFixed(2)} = ${invTotalGst.toFixed(2)}]
             </div>
             <div>
               <span style="font-size: 0.7rem; color: #555; display: block; margin-bottom: 2px;">Grand Total in words :</span>
-              <strong style="font-size: 0.75rem; text-transform: uppercase;">${getAmountInWords(inv.total)}</strong>
+              <strong style="font-size: 0.75rem; text-transform: uppercase;">${getAmountInWords(invTotal)}</strong>
             </div>
           `}
         </div>
@@ -607,19 +618,19 @@ export function generateInvoiceHtml(inv, printMode = 'standard') {
               <span>${adj.name}</span>
               <span>: \u20B9${parseFloat(adj.amount || 0).toFixed(2)}</span>
             </div>
-          `).join("") : (parseFloat(inv.adjustments || 0) !== 0 ? `
+          `).join("") : (invAdjustments !== 0 ? `
             <div style="display: flex; justify-content: space-between; font-size: 0.7rem;">
               <span>Adjustments</span>
-              <span>: \u20B9${parseFloat(inv.adjustments || 0).toFixed(2)}</span>
+              <span>: \u20B9${invAdjustments.toFixed(2)}</span>
             </div>
           ` : "")) : ""}
           <div style="display: flex; justify-content: space-between; font-size: 0.7rem;">
             <span>Round Off</span>
-            <span>: \u20B9${(inv.roundOff || 0).toFixed(2)}</span>
+            <span>: \u20B9${invRoundOff.toFixed(2)}</span>
           </div>
           <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: bold; border-top: 1px solid #000; padding-top: 3px; margin-top: 1px;">
             <span style="border: 1px solid #000; padding: 1px 4px; font-weight: bold; background-color: #f8fafc; font-size: 0.75rem;">Grand Total</span>
-            <span style="font-size: 0.9rem; font-weight: bold;">\u20B9${inv.total.toFixed(2)}</span>
+            <span style="font-size: 0.9rem; font-weight: bold;">\u20B9${invTotal.toFixed(2)}</span>
           </div>
         </div>
       </div>
@@ -633,15 +644,15 @@ export function generateInvoiceHtml(inv, printMode = 'standard') {
               <span>${adj.name}</span>
               <span>: \u20B9${parseFloat(adj.amount || 0).toFixed(2)}</span>
             </div>
-          `).join("") : (parseFloat(inv.adjustments || 0) !== 0 ? `
+          `).join("") : (invAdjustments !== 0 ? `
             <div style="display: flex; justify-content: space-between; font-size: 0.7rem;">
               <span>Adjustments</span>
-              <span>: \u20B9${parseFloat(inv.adjustments || 0).toFixed(2)}</span>
+              <span>: \u20B9${invAdjustments.toFixed(2)}</span>
             </div>
           ` : "")) : ""}
           <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: bold; border-top: 1px solid #000; padding-top: 3px; margin-top: 1px;">
             <span style="border: 1px solid #000; padding: 1px 4px; font-weight: bold; background-color: #f8fafc; font-size: 0.75rem;">Net Value</span>
-            <span style="font-size: 0.9rem; font-weight: bold;">\u20B9${inv.total.toFixed(2)}</span>
+            <span style="font-size: 0.9rem; font-weight: bold;">\u20B9${invTotal.toFixed(2)}</span>
           </div>
         </div>
       </div>
@@ -680,7 +691,7 @@ function printHtmlDocument(bodyContent, printMode = 'standard') {
 
   const iframe = document.createElement("iframe");
   iframe.id = "erp-bill-print-frame";
-  iframe.style.cssText = "position:fixed; top:0; left:0; width:210mm; height:297mm; opacity:0; pointer-events:none; border:none; z-index:-9999;";
+  iframe.style.cssText = "position:absolute; top:-9999px; left:-9999px; width:800px; height:1000px; border:none; opacity:0; pointer-events:none;";
   document.body.appendChild(iframe);
 
   let pageMargin = "6mm";
@@ -741,9 +752,7 @@ function printHtmlDocument(bodyContent, printMode = 'standard') {
     }
   };
 
-  requestAnimationFrame(() => {
-    setTimeout(triggerPrint, 10);
-  });
+  setTimeout(triggerPrint, 250);
 }
 
 /**
@@ -766,7 +775,7 @@ export function showInvoicePrintPreview(container, invoiceId, printMode = 'stand
 
   const overlay = document.createElement("div");
   overlay.id = "invoice-preview-modal-overlay";
-  overlay.className = "modal-overlay active";
+  overlay.className = "modal-overlay active blocking-modal";
   overlay.style.cssText = `
     position: fixed;
     top: 0;
@@ -782,14 +791,15 @@ export function showInvoicePrintPreview(container, invoiceId, printMode = 'stand
     overflow-y: auto;
     padding: 20px 10px;
     box-sizing: border-box;
+    pointer-events: auto !important;
   `;
 
   function renderPreview() {
     overlay.innerHTML = `
-      <div style="width: 100%; max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px;">
+      <div style="width: 100%; max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; pointer-events: auto;">
         
         <!-- Action Header Bar -->
-        <div style="background: #1e293b; border-radius: 6px; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.3); flex-wrap: wrap; gap: 8px;">
+        <div class="no-print" style="background: #1e293b; border-radius: 6px; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.3); flex-wrap: wrap; gap: 8px; pointer-events: auto;">
           <div style="display: flex; align-items: center; gap: 8px;">
             <button type="button" class="btn btn-secondary" id="btn-preview-close" style="padding: 6px 14px; font-weight: 700; background: #475569; border: none; color: white; cursor: pointer; border-radius: 4px;">
               <i class="fa-solid fa-arrow-left"></i> Close (Esc)
@@ -814,7 +824,7 @@ export function showInvoicePrintPreview(container, invoiceId, printMode = 'stand
         </div>
 
         <!-- Printable Invoice Container Sheet -->
-        <div id="invoice-sheet-container" style="background: white; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); overflow: hidden;">
+        <div id="invoice-sheet-container" style="background: white; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); overflow: hidden; pointer-events: auto;">
           ${generateInvoiceHtml(inv, activeMode)}
         </div>
 
@@ -837,31 +847,38 @@ export function showInvoicePrintPreview(container, invoiceId, printMode = 'stand
   }
 
   function bindPreviewEvents() {
-    overlay.querySelector("#btn-preview-close")?.addEventListener("click", closePreview);
+    overlay.querySelector("#btn-preview-close")?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      closePreview();
+    });
     
     overlay.addEventListener("click", (e) => {
       if (e.target === overlay) closePreview();
     });
 
-    overlay.querySelector("#btn-preview-print-a4")?.addEventListener("click", () => {
+    overlay.querySelector("#btn-preview-print-a4")?.addEventListener("click", (e) => {
+      e.stopPropagation();
       activeMode = 'standard';
       renderPreview();
       executeInstantPrint(inv, 'standard');
     });
 
-    overlay.querySelector("#btn-preview-print-a5")?.addEventListener("click", () => {
+    overlay.querySelector("#btn-preview-print-a5")?.addEventListener("click", (e) => {
+      e.stopPropagation();
       activeMode = 'a5';
       renderPreview();
       executeInstantPrint(inv, 'a5');
     });
 
-    overlay.querySelector("#btn-preview-print-notax")?.addEventListener("click", () => {
+    overlay.querySelector("#btn-preview-print-notax")?.addEventListener("click", (e) => {
+      e.stopPropagation();
       activeMode = 'notax';
       renderPreview();
       executeInstantPrint(inv, 'notax');
     });
 
-    overlay.querySelector("#btn-preview-whatsapp")?.addEventListener("click", () => {
+    overlay.querySelector("#btn-preview-whatsapp")?.addEventListener("click", (e) => {
+      e.stopPropagation();
       handleWhatsAppShare(inv);
     });
   }
@@ -893,7 +910,8 @@ function handleWhatsAppShare(inv) {
     return `- ${item.name} (${item.quantity} ${item.unit || 'pcs'}): \u20B9${itemTotal.toFixed(2)}`;
   }).join("\n");
   
-  const msg = `Dear *${inv.contactName}*,\n\nHere is your *Invoice ${inv.voucherNo || inv.id}* dated *${formatDate(inv.date)}*.\n\n*Items Summary*:\n${itemsList}\n\n*Total Net*: *\u20B9${inv.total.toFixed(2)}*\n\n*Material Ledger ERP*`;
+  const invTotal = parseFloat(inv.total ?? inv.grandTotal ?? inv.amount ?? 0) || 0;
+  const msg = `Dear *${inv.contactName || "Customer"}*,\n\nHere is your *Invoice ${inv.voucherNo || inv.id}* dated *${formatDate(inv.date)}*.\n\n*Items Summary*:\n${itemsList}\n\n*Total Net*: *\u20B9${invTotal.toFixed(2)}*\n\n*Material Ledger ERP*`;
   
   const waUrl = `https://wa.me/${cleanNum}?text=${encodeURIComponent(msg)}`;
   window.open(waUrl, "_blank");

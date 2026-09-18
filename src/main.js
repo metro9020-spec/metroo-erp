@@ -35,6 +35,7 @@ import { renderSearchVouchers } from "./views/searchVouchers.js";
 import { showWelcomeScreen, showEditCompanyModal } from "./views/login.js";
 import { showGstr1OfflineModal } from "./views/gstr1OfflineModal.js";
 import { renderOpeningStockRegisterReport } from "./views/openingStock.js";
+import { renderSalesOrders } from "./views/salesOrders.js";
 import { initGlobalWindowManager } from "./utils/draggable.js";
 
 window._getApiUrl = function(endpoint) {
@@ -59,15 +60,20 @@ window._getApiUrl = function(endpoint) {
       
       if (targetCo && targetCo.serverUrl && targetCo.serverUrl.trim()) {
         const cleanBase = String(targetCo.serverUrl).trim().replace(/\/+$/, "");
-        if (cleanBase && !cleanBase.includes(window.location.host)) {
+        // Ignore stale local port 3001 URLs (e.g. http://100.66.24.43:3001) so we dynamically use current hostname
+        const isLocalNodePort = /^http:\/\/[^/]+:3001$/i.test(cleanBase);
+        if (cleanBase && !cleanBase.includes(window.location.host) && !isLocalNodePort) {
           return `${cleanBase}${endpoint}`;
         }
       }
     }
   } catch (e) {}
 
-  // If running locally in Vite dev server (e.g. port 5173, etc.), target backend on port 3001
-  return `${window.location.protocol}//${window.location.hostname}:3001${endpoint}`;
+  // If running in Vite dev/preview server (or any non-3001 port), target backend on port 3001 of current hostname
+  if (window.location.port !== "3001") {
+    return `${window.location.protocol}//${window.location.hostname}:3001${endpoint}`;
+  }
+  return endpoint;
 };
 
 // DOM Elements helper
@@ -126,7 +132,9 @@ export function renderCurrentView() {
       "loading-unloading-report": "HEADLOADER (LOADING & UNLOADING) REPORT",
       "search-vouchers": "VOUCHER SEARCH REGISTRY",
       "opening-stock-register": "OPENING STOCK REGISTER & ENTRY",
-      "opening-stock": "OPENING STOCK REGISTER & ENTRY"
+      "opening-stock": "OPENING STOCK REGISTER & ENTRY",
+      "sales-orders": "FIELD SALES ORDERS (MOBILE & TABLET)",
+      "field-orders": "FIELD SALES ORDERS (MOBILE & TABLET)"
     };
     titleTextEl.textContent = titleMap[hash] || hash.toUpperCase();
   }
@@ -171,6 +179,10 @@ export function renderCurrentView() {
       break;
     case "dashboard":
       renderDashboard(windowContentEl);
+      break;
+    case "sales-orders":
+    case "field-orders":
+      renderSalesOrders(windowContentEl);
       break;
     case "inventory":
     case "products-list":

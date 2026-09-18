@@ -1010,8 +1010,7 @@ select option {
   [data-no-print],
   #party-combobox-menu,
   #btn-clear-combobox-query,
-  input,
-  select {
+  input[type="hidden"] {
     display: none !important;
   }
   

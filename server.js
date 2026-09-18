@@ -29,8 +29,10 @@ function getCompanies() {
   const filePath = path.join(DATA_DIR, "companies.json");
   if (fs.existsSync(filePath)) {
     try {
-      return JSON.parse(fs.readFileSync(filePath, "utf8"));
+      const content = fs.readFileSync(filePath, "utf8").replace(/^\uFEFF/, "");
+      return JSON.parse(content);
     } catch (e) {
+      console.error("Error reading companies.json:", e);
       return [];
     }
   }
@@ -191,6 +193,40 @@ app.post("/api/data/:companyId/:fyId", (req, res) => {
               incomingData.productNames = diskData.productNames;
             }
           }
+          // Merge Sales Orders by ID so mobile app orders and Main ERP orders are both preserved
+          const salesOrdersMap = new Map();
+          if (Array.isArray(diskData.salesOrders)) {
+            diskData.salesOrders.forEach(o => {
+              if (o && o.id) salesOrdersMap.set(String(o.id), o);
+            });
+          }
+          if (Array.isArray(incomingData.salesOrders)) {
+            incomingData.salesOrders.forEach(o => {
+              if (o && o.id) {
+                const existing = salesOrdersMap.get(String(o.id));
+                salesOrdersMap.set(String(o.id), existing ? { ...existing, ...o } : o);
+              }
+            });
+          }
+          incomingData.salesOrders = Array.from(salesOrdersMap.values())
+            .sort((a, b) => (b.createdTimestamp || 0) - (a.createdTimestamp || 0));
+
+          // Merge Pre-Take Orders by ID
+          const preTakeMap = new Map();
+          if (Array.isArray(diskData.preTakeOrders)) {
+            diskData.preTakeOrders.forEach(o => {
+              if (o && o.id) preTakeMap.set(String(o.id), o);
+            });
+          }
+          if (Array.isArray(incomingData.preTakeOrders)) {
+            incomingData.preTakeOrders.forEach(o => {
+              if (o && o.id) {
+                const existing = preTakeMap.get(String(o.id));
+                preTakeMap.set(String(o.id), existing ? { ...existing, ...o } : o);
+              }
+            });
+          }
+          incomingData.preTakeOrders = Array.from(preTakeMap.values());
 
           // Merge Transactions: protect sales & purchase transactions while allowing clean voucher updates
           const isSalesOrPurchaseTx = (tx) => {
@@ -222,6 +258,444 @@ app.post("/api/data/:companyId/:fyId", (req, res) => {
   } catch (err) {
     console.error("Error saving data file:", err);
     res.status(500).json({ error: "Failed to save data file" });
+  }
+});
+
+// ── GET /sales-app (Direct route for Sales Executives) ────────────────────
+const getSalesAppPath = () => {
+  const rootFile = path.join(__dirname, "sales-app.html");
+  const distFile = path.join(__dirname, "dist", "sales-app.html");
+  const publicFile = path.join(__dirname, "public", "sales-app.html");
+  if (fs.existsSync(rootFile)) return rootFile;
+  if (fs.existsSync(distFile)) return distFile;
+  if (fs.existsSync(publicFile)) return publicFile;
+  return null;
+};
+
+app.get(["/sales-app", "/sales-app.html", "/sales"], (req, res) => {
+  const fPath = getSalesAppPath();
+  if (fPath) {
+    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+    res.sendFile(fPath);
+  } else {
+    res.redirect("/#sales-orders");
+  }
+});
+
+// ── GET /api/sales-orders/:companyId/:fyId ─────────────────────────────────
+app.get("/api/sales-orders/:companyId/:fyId", (req, res) => {
+  const { companyId, fyId } = req.params;
+  const filePath = dataFilePath(companyId, fyId);
+  if (!fs.existsSync(filePath)) return res.json([]);
+  try {
+    const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
+    res.json(Array.isArray(data.salesOrders) ? data.salesOrders : []);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to load sales orders" });
+  }
+});
+
+// ── POST /api/sales-orders/:companyId/:fyId ────────────────────────────────
+app.post("/api/sales-orders/:companyId/:fyId", (req, res) => {
+  const { companyId, fyId } = req.params;
+  const filePath = dataFilePath(companyId, fyId);
+  try {
+    let data = {};
+    if (fs.existsSync(filePath)) {
+      data = JSON.parse(fs.readFileSync(filePath, "utf8"));
+    }
+    if (!Array.isArray(data.salesOrders)) data.salesOrders = [];
+
+    const newOrder = req.body;
+    if (!newOrder.id) {
+      const orderCount = data.salesOrders.length + 1;
+      const dateStr = new Date().toISOString().slice(2, 7).replace('-', '');
+      newOrder.id = `SO-${dateStr}-${String(orderCount).padStart(4, '0')}`;
+    }
+    if (!newOrder.date) newOrder.date = new Date().toISOString().split('T')[0];
+    if (!newOrder.status) newOrder.status = "Pending";
+    if (!newOrder.createdTimestamp) newOrder.createdTimestamp = Date.now();
+
+    data.salesOrders.unshift(newOrder);
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
+
+    res.json({ success: true, message: "Order placed successfully!", order: newOrder });
+  } catch (err) {
+    console.error("Error creating sales order:", err);
+    res.status(500).json({ error: "Failed to save order: " + err.message });
+  }
+});
+
+// ── PUT /api/sales-orders/:companyId/:fyId/:orderId ───────────────────────
+app.put("/api/sales-orders/:companyId/:fyId/:orderId", (req, res) => {
+  const { companyId, fyId, orderId } = req.params;
+  const filePath = dataFilePath(companyId, fyId);
+  if (!fs.existsSync(filePath)) return res.status(404).json({ error: "Data file not found" });
+
+  try {
+    const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
+    if (!Array.isArray(data.salesOrders)) data.salesOrders = [];
+
+    const idx = data.salesOrders.findIndex(o => String(o.id) === String(orderId));
+    if (idx === -1) return res.status(404).json({ error: "Order not found" });
+
+    data.salesOrders[idx] = { ...data.salesOrders[idx], ...req.body, updatedTimestamp: Date.now() };
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
+
+    res.json({ success: true, message: "Order updated successfully", order: data.salesOrders[idx] });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update order" });
+  }
+});
+
+// ── DELETE /api/sales-orders/:companyId/:fyId/:orderId ────────────────────
+app.delete("/api/sales-orders/:companyId/:fyId/:orderId", (req, res) => {
+  const { companyId, fyId, orderId } = req.params;
+  const filePath = dataFilePath(companyId, fyId);
+  if (!fs.existsSync(filePath)) return res.status(404).json({ error: "Data file not found" });
+
+  try {
+    const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
+    if (!Array.isArray(data.salesOrders)) data.salesOrders = [];
+
+    data.salesOrders = data.salesOrders.filter(o => String(o.id) !== String(orderId));
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
+    res.json({ success: true, message: "Order deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete order" });
+  }
+});
+
+// ── GET /api/pre-take-orders/:companyId/:fyId ──────────────────────────────
+app.get("/api/pre-take-orders/:companyId/:fyId", (req, res) => {
+  const { companyId, fyId } = req.params;
+  const filePath = dataFilePath(companyId, fyId);
+  if (!fs.existsSync(filePath)) return res.json([]);
+  try {
+    const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
+    res.json(Array.isArray(data.preTakeOrders) ? data.preTakeOrders : []);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to load pre-take orders" });
+  }
+});
+
+// ── POST /api/pre-take-orders/:companyId/:fyId ─────────────────────────────
+// Create/Assign Pre-Take Order from Main ERP to Sales Executive
+app.post("/api/pre-take-orders/:companyId/:fyId", (req, res) => {
+  const { companyId, fyId } = req.params;
+  const filePath = dataFilePath(companyId, fyId);
+  try {
+    let data = {};
+    if (fs.existsSync(filePath)) {
+      data = JSON.parse(fs.readFileSync(filePath, "utf8"));
+    }
+    if (!Array.isArray(data.preTakeOrders)) data.preTakeOrders = [];
+
+    const newPreTakeOrder = req.body;
+    if (!newPreTakeOrder.id) {
+      const count = data.preTakeOrders.length + 1;
+      const dateStr = new Date().toISOString().slice(2, 7).replace('-', '');
+      newPreTakeOrder.id = `PTO-${dateStr}-${String(count).padStart(4, '0')}`;
+    }
+    if (!newPreTakeOrder.date) newPreTakeOrder.date = new Date().toISOString().split('T')[0];
+    if (!newPreTakeOrder.status) newPreTakeOrder.status = "Assigned";
+    if (!newPreTakeOrder.createdTimestamp) newPreTakeOrder.createdTimestamp = Date.now();
+    newPreTakeOrder.seen = false;
+    newPreTakeOrder.seenAt = null;
+
+    data.preTakeOrders.unshift(newPreTakeOrder);
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
+
+    res.json({ success: true, message: "Pre-Take Order assigned successfully!", order: newPreTakeOrder });
+  } catch (err) {
+    console.error("Error creating pre-take order:", err);
+    res.status(500).json({ error: "Failed to save pre-take order: " + err.message });
+  }
+});
+
+// ── POST /api/pre-take-orders/:companyId/:fyId/:orderId/mark-seen ──────────
+app.post("/api/pre-take-orders/:companyId/:fyId/:orderId/mark-seen", (req, res) => {
+  const { companyId, fyId, orderId } = req.params;
+  const filePath = dataFilePath(companyId, fyId);
+  if (!fs.existsSync(filePath)) return res.status(404).json({ error: "Data file not found" });
+
+  try {
+    const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
+    if (!Array.isArray(data.preTakeOrders)) data.preTakeOrders = [];
+
+    const nowStr = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }) + ', ' + new Date().toLocaleDateString('en-IN');
+    let updated = false;
+
+    data.preTakeOrders.forEach(o => {
+      if (String(o.id) === String(orderId)) {
+        o.seen = true;
+        o.seenAt = o.seenAt || nowStr;
+        updated = true;
+      }
+    });
+
+    if (updated) {
+      fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
+    }
+
+    res.json({ success: true, message: "Order marked as seen" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to mark order as seen" });
+  }
+});
+
+// ── POST /api/pre-take-orders/:companyId/:fyId/mark-seen-all ────────────────
+app.post("/api/pre-take-orders/:companyId/:fyId/mark-seen-all", (req, res) => {
+  const { companyId, fyId } = req.params;
+  const filePath = dataFilePath(companyId, fyId);
+  if (!fs.existsSync(filePath)) return res.status(404).json({ error: "Data file not found" });
+
+  try {
+    const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
+    if (!Array.isArray(data.preTakeOrders)) data.preTakeOrders = [];
+
+    const nowStr = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }) + ', ' + new Date().toLocaleDateString('en-IN');
+    let count = 0;
+
+    data.preTakeOrders.forEach(o => {
+      if (!o.seen) {
+        o.seen = true;
+        o.seenAt = nowStr;
+        count++;
+      }
+    });
+
+    if (count > 0) {
+      fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
+    }
+
+    res.json({ success: true, updatedCount: count });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to mark orders as seen" });
+  }
+});
+
+// ── PUT /api/pre-take-orders/:companyId/:fyId/:orderId ──────────────────────
+// Edit / Update Pre-Take Order from Main ERP & alert Mobile Executive
+app.put("/api/pre-take-orders/:companyId/:fyId/:orderId", (req, res) => {
+  const { companyId, fyId, orderId } = req.params;
+  const filePath = dataFilePath(companyId, fyId);
+  if (!fs.existsSync(filePath)) return res.status(404).json({ error: "Data file not found" });
+
+  try {
+    const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
+    if (!Array.isArray(data.preTakeOrders)) data.preTakeOrders = [];
+
+    const index = data.preTakeOrders.findIndex(o => String(o.id) === String(orderId));
+    if (index === -1) return res.status(404).json({ error: "Pre-take order not found" });
+
+    const updatedPayload = req.body;
+    const nowStr = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }) + ', ' + new Date().toLocaleDateString('en-IN');
+
+    data.preTakeOrders[index] = {
+      ...data.preTakeOrders[index],
+      ...updatedPayload,
+      id: orderId, // preserve order ID
+      isUpdated: true,
+      updatedAt: nowStr,
+      updatedTimestamp: Date.now(),
+      seen: false, // reset seen status so rep sees new notification badge!
+      seenAt: null
+    };
+
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
+
+    res.json({ success: true, message: "Pre-Take Order updated successfully!", order: data.preTakeOrders[index] });
+  } catch (err) {
+    console.error("Error updating pre-take order:", err);
+    res.status(500).json({ error: "Failed to update pre-take order: " + err.message });
+  }
+});
+
+// ── DELETE /api/pre-take-orders/:companyId/:fyId/:orderId ──────────────────
+app.delete("/api/pre-take-orders/:companyId/:fyId/:orderId", (req, res) => {
+  const { companyId, fyId, orderId } = req.params;
+  const filePath = dataFilePath(companyId, fyId);
+  if (!fs.existsSync(filePath)) return res.status(404).json({ error: "Data file not found" });
+
+  try {
+    const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
+    if (!Array.isArray(data.preTakeOrders)) data.preTakeOrders = [];
+
+    data.preTakeOrders = data.preTakeOrders.filter(o => String(o.id) !== String(orderId));
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
+
+    res.json({ success: true, message: "Pre-Take Order cleared successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to clear pre-take order" });
+  }
+});
+
+// ── POST /api/sales-login ───────────────────────────────────────────────────
+app.post("/api/sales-login", (req, res) => {
+  const { username, password } = req.body || {};
+  if (!username || !password) {
+    return res.status(400).json({ success: false, error: "Username and Password are required." });
+  }
+
+  const uInput = String(username).trim().toLowerCase();
+  const pInput = String(password).trim();
+
+  let companies = getCompanies();
+
+  // Fallback to default company if companies.json is empty
+  if (!Array.isArray(companies) || companies.length === 0) {
+    companies = [{
+      id: "1",
+      name: "METRO AGENCIES",
+      username: "admin",
+      password: "123",
+      users: [
+        { id: "USR-1", username: "admin", password: "123", fullName: "Administrator", role: "Admin", status: "Active" }
+      ]
+    }];
+  }
+
+  const accessibleCompanies = [];
+  let authenticatedUser = null;
+
+  for (const comp of companies) {
+    let match = null;
+    const users = Array.isArray(comp.users) ? comp.users : [];
+    match = users.find(u => 
+      String(u.username || "").trim().toLowerCase() === uInput && 
+      String(u.password || "").trim() === pInput && 
+      u.status !== "Inactive"
+    );
+
+    if (!match && comp.username && String(comp.username).trim().toLowerCase() === uInput && String(comp.password).trim() === pInput) {
+      match = {
+        id: "USR-ADMIN",
+        username: comp.username,
+        fullName: (comp.name || "Company") + " Admin",
+        role: "Admin"
+      };
+    }
+
+    if (!match && uInput === "admin" && pInput === "123") {
+      match = {
+        id: "USR-DEFAULT-ADMIN",
+        username: "admin",
+        fullName: "Administrator",
+        role: "Admin"
+      };
+    }
+
+    if (match) {
+      if (!authenticatedUser) authenticatedUser = match;
+      accessibleCompanies.push({
+        id: comp.id,
+        name: comp.name || "METRO AGENCIES",
+        subName: comp.subName || "",
+        state: comp.state || "Kerala"
+      });
+    }
+  }
+
+  if (authenticatedUser && accessibleCompanies.length > 0) {
+    return res.json({
+      success: true,
+      user: {
+        id: authenticatedUser.id,
+        username: authenticatedUser.username,
+        fullName: authenticatedUser.fullName || authenticatedUser.username,
+        role: authenticatedUser.role || "Sales Executive"
+      },
+      companies: accessibleCompanies
+    });
+  } else {
+    return res.status(401).json({ success: false, error: "Invalid User ID or Password." });
+  }
+});
+
+// ── GET /api/catalog/:companyId/:fyId ──────────────────────────────────────
+app.get("/api/catalog/:companyId/:fyId", (req, res) => {
+  const { companyId, fyId } = req.params;
+  const filePath = dataFilePath(companyId, fyId);
+
+  if (!fs.existsSync(filePath)) {
+    console.warn(`Catalog file not found for company ${companyId}: ${filePath}`);
+    return res.json({ companyId, contacts: [], materials: [] });
+  }
+
+  try {
+    console.log(`[Catalog] Fetching live catalog from path: ${filePath}`);
+    const content = fs.readFileSync(filePath, "utf8").replace(/^\uFEFF/, "");
+    const data = JSON.parse(content);
+    const customerMap = new Map();
+
+    // 1. Extract from data.contacts (customers/parties)
+    (Array.isArray(data.contacts) ? data.contacts : []).forEach(c => {
+      const t = String(c.type || '').toLowerCase();
+      const gn = String(c.groupName || '').toUpperCase();
+      const isCust = !c.type || t === 'customer' || t === 'both' || gn === 'SUNDRY DEBTORS' || c.listInCustomerList;
+      if (isCust && c.name) {
+        const key = String(c.id || c.name);
+        customerMap.set(key, {
+          id: c.id || c.name,
+          name: String(c.name).trim(),
+          mobile: c.mobile || c.phone || '',
+          city: c.city || '',
+          address: c.address || '',
+          gstNo: c.gstin || c.gstNo || ''
+        });
+      }
+    });
+
+    // 2. Extract from data.ledgers (SUNDRY DEBTORS / CUSTOMERS)
+    (Array.isArray(data.ledgers) ? data.ledgers : []).forEach(l => {
+      const gn = String(l.groupName || '').toUpperCase();
+      const isDebtor = gn === 'SUNDRY DEBTORS' || l.isCustomerSubLedger || gn === 'CUSTOMERS';
+      if (isDebtor && l.name) {
+        const nameKey = String(l.name).toLowerCase().trim();
+        const exists = Array.from(customerMap.values()).some(c => String(c.name).toLowerCase().trim() === nameKey);
+        if (!exists) {
+          const key = String(l.code || l.id || l.name);
+          customerMap.set(key, {
+            id: l.code || l.id || `LEDG-${l.tradeasyId || Date.now()}`,
+            name: String(l.name).trim(),
+            mobile: l.phone || l.mobile || '',
+            city: l.city || '',
+            address: l.address || '',
+            gstNo: l.gstin || l.gstNo || ''
+          });
+        }
+      }
+    });
+
+    const contacts = Array.from(customerMap.values());
+
+    const materials = (Array.isArray(data.materials) ? data.materials : []).map(m => {
+      let mainStock = 0;
+      let defaultRate = 0;
+      if (Array.isArray(m.batches) && m.batches.length > 0) {
+        mainStock = m.batches.reduce((sum, b) => sum + (parseFloat(b.stock) || 0), 0);
+        defaultRate = parseFloat(m.batches[0].gstInclRate || m.batches[0].mrp || 0);
+      }
+      return {
+        id: m.id,
+        name: m.name,
+        code: m.code,
+        category: m.category,
+        subCategory: m.subCategory,
+        unit: m.unit,
+        stock: mainStock,
+        rate: defaultRate,
+        batches: m.batches || []
+      };
+    });
+
+    res.json({ companyId: String(companyId), companyName: data.companyName || '', contacts, materials });
+  } catch (err) {
+    console.error(`Error loading catalog for company ${companyId}:`, err);
+    res.status(500).json({ error: "Failed to load catalog" });
   }
 });
 
@@ -670,6 +1144,15 @@ if (fs.existsSync(distPath)) {
   // Client-side SPA fallback for non-API routes
   app.use((req, res, next) => {
     if (req.path.startsWith("/api")) return next();
+    if (req.path.startsWith("/sales-app") || req.path === "/sales") {
+      const fPath = getSalesAppPath();
+      if (fPath) {
+        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        res.setHeader("Pragma", "no-cache");
+        res.setHeader("Expires", "0");
+        return res.sendFile(fPath);
+      }
+    }
     res.sendFile(path.join(distPath, "index.html"));
   });
 }

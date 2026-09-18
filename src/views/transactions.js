@@ -1073,6 +1073,7 @@ export function showInvoiceBuilderModal(container, customers = null, materials =
     return;
   }
 
+  const isEditingSavedInvoice = Boolean(editInvoice && !editInvoice.isDraft && (editInvoice.voucherNo || editInvoice.id));
   const activeCompanyId = state.getActiveCompanyId();
   const activeCompany = state.getRegisteredCompanies().find(c => c.id === activeCompanyId);
   const isCompUnregistered = state.isCompanyUnregistered ? state.isCompanyUnregistered() : false;
@@ -1149,7 +1150,7 @@ export function showInvoiceBuilderModal(container, customers = null, materials =
               <div style="height:15px; margin-bottom:3px; text-align:center;">
                 <label style="font-weight:700; font-size:0.72rem; color:#1e3a8a; text-transform:uppercase; letter-spacing:0.3px; display:block; white-space:nowrap;">S. No.</label>
               </div>
-              <input type="text" id="inv-refno" class="form-control" style="background-color:#e0e7ff; color:#1e3a8a; font-weight:800; text-align:center; height:28px; font-size:0.85rem; width:100%; border:1px solid #93c5fd; border-radius:4px; box-sizing:border-box; letter-spacing:0.5px;" value="${editInvoice ? (editInvoice.voucherNo || editInvoice.id) : defaultInvNo}" readonly tabindex="-1">
+              <input type="text" id="inv-refno" class="form-control" style="background-color:#e0e7ff; color:#1e3a8a; font-weight:800; text-align:center; height:28px; font-size:0.85rem; width:100%; border:1px solid #93c5fd; border-radius:4px; box-sizing:border-box; letter-spacing:0.5px;" value="${isEditingSavedInvoice ? (editInvoice.voucherNo || editInvoice.id) : defaultInvNo}" readonly tabindex="-1">
             </div>
 
             <div style="position:relative;" id="inv-customer-combobox-wrapper">
@@ -1454,7 +1455,7 @@ export function showInvoiceBuilderModal(container, customers = null, materials =
               <button type="button" class="btn btn-secondary" id="btn-inv-search" style="padding:4px 12px; font-weight:700; background-color: #0284c7; border: none; color: white;"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
               <button type="button" class="btn btn-secondary" id="btn-inv-prev" style="padding:4px 12px; font-weight:700; background-color: #475569; border: none; color: white;">&lt;</button>
               <button type="button" class="btn btn-secondary" id="btn-inv-next" style="padding:4px 12px; font-weight:700; background-color: #475569; border: none; color: white;">&gt;</button>
-              <button type="button" class="btn btn-secondary" id="btn-inv-print" style="padding:4px 12px; font-weight:700; background-color: #64748b; border: none; color: white;" ${editInvoice ? '' : 'disabled'}><i class="fa-solid fa-print"></i> Print</button>
+              <button type="button" class="btn btn-secondary" id="btn-inv-print" style="padding:4px 12px; font-weight:700; background-color: #64748b; border: none; color: white;"><i class="fa-solid fa-print"></i> Print</button>
               <button type="button" class="btn btn-secondary" id="btn-inv-new" style="padding:4px 12px; font-weight:700; background-color: #0d9488; border: none; color: white;">New</button>
               <button type="button" class="btn btn-secondary" id="btn-inv-cancel" style="padding:4px 12px; font-weight:700;">Close</button>
               <button type="submit" class="btn btn-primary" style="padding:4px 16px; font-weight:700;">Save Invoice</button>
@@ -1799,9 +1800,17 @@ export function showInvoiceBuilderModal(container, customers = null, materials =
   });
 
   // Bind Print Button
-  if (editInvoice) {
-    document.getElementById("btn-inv-print").addEventListener("click", () => {
-      showInvoicePrintPreview(document.getElementById("modal-container-root"), editInvoice.id);
+  const printInvBtn = document.getElementById("btn-inv-print");
+  if (printInvBtn) {
+    printInvBtn.addEventListener("click", () => {
+      if (editInvoice && editInvoice.id) {
+        showInvoicePrintPreview(document.getElementById("modal-container-root"), editInvoice.id);
+      } else {
+        const formEl = document.getElementById("create-invoice-form");
+        if (formEl) {
+          formEl.requestSubmit ? formEl.requestSubmit() : formEl.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+        }
+      }
     });
   }
 
@@ -2969,24 +2978,36 @@ export function showInvoiceBuilderModal(container, customers = null, materials =
   });
 
   let gridItems = editInvoice ? editInvoice.items.map(item => {
-    const qty = parseFloat(item.quantity) || 0;
-    const price = parseFloat(item.price) || 0;
+    const freshMaterials = state.getMaterials() || materials || [];
+    const mat = freshMaterials.find(m => 
+      (item.materialId && m.id === item.materialId) || 
+      (item.name && String(m.name).toLowerCase() === String(item.name).toLowerCase()) || 
+      (item.materialName && String(m.name).toLowerCase() === String(item.materialName).toLowerCase())
+    );
+
+    const itemName = item.name || item.materialName || (mat ? mat.name : "Item");
+    const itemCode = item.code || item.codeModel || item.model || (mat ? mat.code : "");
+    const defaultBatch = mat && mat.batches && mat.batches.length > 0 ? mat.batches[0] : null;
+    const batchNo = item.batchNo || item.batch || (defaultBatch ? defaultBatch.batchNo : "");
+
+    const qty = parseFloat(item.quantity || item.actualQty || item.preTakeQty) || 0;
+    const price = parseFloat(item.price || item.rate || (mat ? mat.sellingPrice : 0)) || 0;
     const disP = parseFloat(item.discountPercent) || 0;
     const disA = parseFloat(item.discountAmount) || 0;
     const netVal = item.netValue !== undefined ? parseFloat(item.netValue) : (item.amount !== undefined ? parseFloat(item.amount) : ((qty * price) - disA));
-    const gstPct = item.gstPercent !== undefined && item.gstPercent !== null && !isNaN(item.gstPercent) && Number(item.gstPercent) > 0 ? parseFloat(item.gstPercent) : (item.taxRate !== undefined ? parseFloat(item.taxRate) : 0);
+    const gstPct = item.gstPercent !== undefined && item.gstPercent !== null && !isNaN(item.gstPercent) && Number(item.gstPercent) > 0 ? parseFloat(item.gstPercent) : (item.gstRate !== undefined ? parseFloat(item.gstRate) : (mat ? mat.taxRate || 18 : 18));
     const existingGstAmt = (parseFloat(item.cgst) || 0) + (parseFloat(item.sgst) || 0) + (parseFloat(item.igst) || 0);
     const gstAmt = item.gstAmount !== undefined && item.gstAmount !== null && !isNaN(item.gstAmount) && Number(item.gstAmount) > 0 ? parseFloat(item.gstAmount) : (existingGstAmt > 0 ? existingGstAmt : (netVal * (gstPct / 100)));
-    const cessPct = parseFloat(item.cessPercent) || 0;
+    const cessPct = parseFloat(item.cessPercent) || (mat ? mat.cess || 0 : 0);
     const netAmt = item.netAmount !== undefined ? parseFloat(item.netAmount) : (netVal + gstAmt);
 
     return {
-      materialId: item.materialId,
-      name: item.name,
-      code: item.code || item.model || "",
-      batchNo: item.batchNo || "",
+      materialId: mat ? mat.id : item.materialId,
+      name: itemName,
+      code: itemCode,
+      batchNo: batchNo,
       quantity: qty,
-      unit: item.unit || "Bags",
+      unit: item.unit || (mat ? mat.unit : "Pcs"),
       price: price,
       mrp: parseFloat(item.mrp) || (price * 1.25),
       discountPercent: disP,
@@ -3002,10 +3023,33 @@ export function showInvoiceBuilderModal(container, customers = null, materials =
   let adjustmentsList = editInvoice ? (editInvoice.adjustmentsList || []) : [];
   let isSalesManualRoundOff = false;
 
-  // Pre-fill existing metadata if editing
+  // Pre-fill existing metadata if editing or converting draft
   if (editInvoice) {
-    document.getElementById("inv-customer").value = editInvoice.contactId;
-    document.getElementById("inv-customer").dispatchEvent(new Event("change"));
+    if (editInvoice.contactId) {
+      const custSelect = document.getElementById("inv-customer");
+      if (custSelect) {
+        let matched = false;
+        for (let opt of custSelect.options) {
+          if (opt.value === editInvoice.contactId) {
+            custSelect.value = opt.value;
+            matched = true;
+            break;
+          }
+        }
+        if (!matched && (editInvoice.contactId === "__CASH__" || (editInvoice.contactName && editInvoice.contactName.toUpperCase().includes("CASH")))) {
+          custSelect.value = "__CASH__";
+        }
+        custSelect.dispatchEvent(new Event("change"));
+      }
+      if (invCustomerSearch) {
+        const matchedCust = getCustomerSearchList().find(c => c.id === editInvoice.contactId);
+        if (matchedCust) {
+          invCustomerSearch.value = matchedCust.id === "__CASH__" ? "-- CASH SALES --" : matchedCust.name;
+        } else if (editInvoice.contactName) {
+          invCustomerSearch.value = editInvoice.contactName;
+        }
+      }
+    }
     if (editInvoice.siteName) {
       document.getElementById("inv-site").value = editInvoice.siteName;
     }
@@ -3702,8 +3746,8 @@ addRowBtn.innerText = "Modify";
 
     try {
       const payload = {
-        id: editInvoice ? editInvoice.id : undefined,
-        voucherNo: editInvoice ? editInvoice.voucherNo : undefined,
+        id: isEditingSavedInvoice ? editInvoice.id : undefined,
+        voucherNo: isEditingSavedInvoice ? editInvoice.voucherNo : undefined,
         seriesId: activeSeries ? activeSeries.id : undefined,
         postingLedger: activeSeries ? activeSeries.ledgerCode : undefined,
         contactId: document.getElementById("inv-customer").value,
@@ -3729,7 +3773,7 @@ addRowBtn.innerText = "Modify";
         items: gridItems
       };
 
-      if (editInvoice) {
+      if (isEditingSavedInvoice) {
         const pass = prompt("Enter Admin Password to update this invoice:");
         if (pass === null) {
           isInvoiceSubmitting = false;

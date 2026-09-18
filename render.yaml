@@ -1,16 +1,10 @@
 services:
   - type: web
-    name: erp-system
+    name: metro-erp
     env: node
-    plan: starter
+    plan: free
     buildCommand: npm install && npm run build
     startCommand: node server.js
-    disk:
-      name: erp-data
-      mountPath: /var/data
-      sizeGB: 1
     envVars:
       - key: NODE_ENV
         value: production
-      - key: DATA_DIR
-        value: /var/data

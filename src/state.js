@@ -183,6 +183,7 @@ class StateManager {
     this.materials = [];
     this.contacts = [];
     this.invoices = [];
+    this.salesOrders = [];
     this.transactions = [];
     this.purchases = [];
     this.salesReturns = [];
@@ -760,9 +761,11 @@ class StateManager {
       this.setActiveFyId(remainingFy.id);
     }
 
-    const deleteApiUrl = (typeof window !== "undefined" && typeof window._getApiUrl === "function")
+    // Call server to delete file from disk and update companies.json
+    const host = window.location.hostname || "localhost";
+    const deleteApiUrl = (typeof window._getApiUrl === "function")
       ? window._getApiUrl(`/api/data/${targetCompanyId}/${fyId}`)
-      : `/api/data/${targetCompanyId}/${fyId}`;
+      : `http://${host}:3001/api/data/${targetCompanyId}/${fyId}`;
     fetch(deleteApiUrl, {
       method: "DELETE"
     }).catch(e => console.error("Server financial year delete failed:", e));
@@ -2814,6 +2817,7 @@ class StateManager {
       this.materials = parsed.materials || [];
       this.contacts = parsed.contacts || [];
       this.invoices = parsed.invoices || [];
+      this.salesOrders = parsed.salesOrders || [];
       this.transactions = parsed.transactions || [];
       this.purchases = parsed.purchases || [];
       this.salesReturns = parsed.salesReturns || [];
@@ -3704,10 +3708,11 @@ class StateManager {
     if (!activeId) return;
     const fyId = this.getActiveFyId();
     try {
-      const apiUrl = (typeof window !== "undefined" && typeof window._getApiUrl === "function")
+      const host = window.location.hostname || "localhost";
+      const dataUrl = (typeof window._getApiUrl === "function")
         ? window._getApiUrl(`/api/data/${activeId}/${fyId}`)
-        : `/api/data/${activeId}/${fyId}`;
-      const res = await fetch(apiUrl);
+        : `http://${host}:3001/api/data/${activeId}/${fyId}`;
+      const res = await fetch(dataUrl);
       if (res.ok) {
         const data = await res.json();
         if (data && data.ledgers) {
@@ -3724,11 +3729,12 @@ class StateManager {
 
   async syncCompanies() {
     try {
-      const apiUrl = (typeof window !== "undefined" && typeof window._getApiUrl === "function")
+      const host = window.location.hostname || "localhost";
+      const apiUrl = (typeof window._getApiUrl === "function")
         ? window._getApiUrl("/api/companies")
-        : "/api/companies";
+        : `http://${host}:3001/api/companies`;
       const res = await fetch(apiUrl, {
-        signal: AbortSignal.timeout(1500)
+        signal: AbortSignal.timeout(500)
       });
       if (res.ok) {
         const data = await res.json();
@@ -3769,6 +3775,7 @@ class StateManager {
         materials: this.materials,
         contacts: this.contacts,
         invoices: this.invoices,
+        salesOrders: this.salesOrders || [],
         transactions: this.transactions,
         purchases: this.purchases,
         salesReturns: this.salesReturns,
@@ -3817,9 +3824,11 @@ class StateManager {
         if (resData && resData.data && resData.data.invoices) {
           const merged = resData.data;
           this.invoices = merged.invoices || this.invoices;
+          this.salesOrders = merged.salesOrders || this.salesOrders;
           this.purchases = merged.purchases || this.purchases;
           this.transactions = merged.transactions || this.transactions;
           stateToSave.invoices = this.invoices;
+          stateToSave.salesOrders = this.salesOrders;
           stateToSave.purchases = this.purchases;
         }
       })
@@ -4095,10 +4104,11 @@ class StateManager {
     localStorage.setItem(`erp_company_data_${activeId}_${newFyId}`, JSON.stringify(newState));
     
     // Sync with the server API for this new fyId
-    const fyApiUrl = (typeof window !== "undefined" && typeof window._getApiUrl === "function")
+    const host = window.location.hostname || "localhost";
+    const saveFyUrl = (typeof window._getApiUrl === "function")
       ? window._getApiUrl(`/api/data/${activeId}/${newFyId}`)
-      : `/api/data/${activeId}/${newFyId}`;
-    fetch(fyApiUrl, {
+      : `http://${host}:3001/api/data/${activeId}/${newFyId}`;
+    fetch(saveFyUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newState)
@@ -4430,10 +4440,11 @@ class StateManager {
     // Save and sync the next year state
     localStorage.setItem(`erp_company_data_${activeId}_${nextFyId}`, JSON.stringify(nextData));
     
-    const updateApiUrl = (typeof window !== "undefined" && typeof window._getApiUrl === "function")
+    const host = window.location.hostname || "localhost";
+    const saveNextUrl = (typeof window._getApiUrl === "function")
       ? window._getApiUrl(`/api/data/${activeId}/${nextFyId}`)
-      : `/api/data/${activeId}/${nextFyId}`;
-    fetch(updateApiUrl, {
+      : `http://${host}:3001/api/data/${activeId}/${nextFyId}`;
+    fetch(saveNextUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(nextData)
