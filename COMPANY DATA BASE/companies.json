@@ -7,55 +7,6 @@
     "country": "INDIA",
     "state": "KERALA",
     "phone": "04602224904",
-    "mobile": "9020877748",
-    "email": "",
-    "dlNo": "",
-    "pincode": "670142",
-    "website": "http://",
-    "currencyName": "Rupees",
-    "financialYearStarts": "2027-09-20",
-    "financialYearEnds": "2028-09-19",
-    "maintain": "Inventory with Accounts",
-    "taxApplicable": "GST(Goods and Service TAX)",
-    "gstin": "32AFUPH3623R1ZX",
-    "fssaiLicNo": "",
-    "username": "admin",
-    "password": "123",
-    "users": [
-      {
-        "id": "USR-1",
-        "username": "admin",
-        "password": "123",
-        "fullName": "Administrator",
-        "role": "Admin",
-        "status": "Active"
-      }
-    ],
-    "financialYears": [
-      {
-        "id": "default",
-        "name": "01/04/2026 to 19/09/2027",
-        "startDate": "2026-04-01",
-        "endDate": "2027-09-19"
-      },
-      {
-        "id": "fy_Current_F_Y_1789911128198",
-        "name": "Current F.Y",
-        "startDate": "2027-09-20",
-        "endDate": "2028-09-19"
-      }
-    ],
-    "district": "Kannur",
-    "serverUrl": "http://100.66.24.43:3001"
-  },
-  {
-    "id": "2",
-    "name": "SAMPLE",
-    "subName": "",
-    "address": "VALAKA",
-    "country": "INDIA",
-    "state": "KERALA",
-    "phone": "",
     "mobile": "",
     "email": "",
     "dlNo": "",
@@ -65,11 +16,12 @@
     "financialYearStarts": "2026-04-01",
     "financialYearEnds": "2027-03-31",
     "maintain": "Inventory with Accounts",
-    "taxApplicable": "UNREGISTERED",
-    "gstin": "",
+    "taxApplicable": "GST(Goods and Service TAX)",
+    "gstin": "32AFUPH3623R1ZX",
     "fssaiLicNo": "",
     "username": "admin",
     "password": "123",
+    "serverUrl": "http://100.66.24.43:3001",
     "users": [
       {
         "id": "USR-1",
@@ -87,7 +39,6 @@
         "startDate": "2026-04-01",
         "endDate": "2027-03-31"
       }
-    ],
-    "serverUrl": "http://100.66.24.43:3001"
+    ]
   }
 ]
