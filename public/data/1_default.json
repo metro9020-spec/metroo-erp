@@ -34271,7 +34271,7 @@
       "gstin": "32AADCP5210D1Z5",
       "creditLimit": 0,
       "creditPeriod": 0,
-      "balance": 8309.535456000001,
+      "balance": 8409.535456000001,
       "openingBalance": 0,
       "balanceType": "Credit",
       "bankName": "STATE BANK OF INDIA",
@@ -106912,7 +106912,7 @@
       "entries": [
         {
           "accountId": "VEND-0068",
-          "debit": 8309.535456000001,
+          "debit": 8409.535456000001,
           "credit": 0
         },
         {
@@ -106929,6 +106929,11 @@
           "accountId": "L0033",
           "debit": 0,
           "credit": 633.778128
+        },
+        {
+          "accountId": "L031",
+          "debit": 0,
+          "credit": 100
         }
       ]
     }
@@ -109059,9 +109064,16 @@
       "subtotal": 7041.979200000001,
       "taxRate": 18,
       "taxAmount": 1267.556256,
-      "adjustmentsList": [],
+      "adjustmentsList": [
+        {
+          "type": "Add",
+          "name": "FREIGHT",
+          "amount": 100,
+          "ledgerCode": "L031"
+        }
+      ],
       "roundOff": 0,
-      "total": 8309.535456000001
+      "total": 8409.535456000001
     }
   ],
   "conversions": [],
