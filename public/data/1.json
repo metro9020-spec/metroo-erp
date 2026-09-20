@@ -1611,7 +1611,7 @@
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
       "openingStock": 358,
-      "stock": 126,
+      "stock": 107,
       "landingCost": 294.24,
       "costPrice": 294.24,
       "sellingPrice": 330,
@@ -2249,7 +2249,7 @@
           "batchNo": "266.95",
           "landingCost": 266.95,
           "openingStock": 0,
-          "stock": 67,
+          "stock": 53,
           "marginPercent": 3.491291,
           "marginAmount": 9.31999999999999,
           "gstExclRate": 266.95,
@@ -2262,7 +2262,7 @@
           "batchNo": "271.187",
           "landingCost": 271.187,
           "openingStock": 0,
-          "stock": 89,
+          "stock": 84,
           "marginPercent": 3.751286,
           "marginAmount": 10.173,
           "gstExclRate": 271.187,
@@ -8233,7 +8233,7 @@
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
       "openingStock": 220,
-      "stock": 239,
+      "stock": 235,
       "landingCost": 76.79,
       "costPrice": 76.79,
       "sellingPrice": 89,
@@ -8585,7 +8585,7 @@
           "batchNo": "76.79",
           "landingCost": 76.79,
           "openingStock": 0,
-          "stock": 239,
+          "stock": 235,
           "marginPercent": 3.477015,
           "marginAmount": 2.66999999999999,
           "gstExclRate": 76.79,
@@ -33992,7 +33992,7 @@
       "gstin": "",
       "creditLimit": 0,
       "creditPeriod": 0,
-      "balance": -1815,
+      "balance": 23,
       "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1305,
@@ -34112,7 +34112,7 @@
       "gstin": "",
       "creditLimit": 0,
       "creditPeriod": 0,
-      "balance": -4734,
+      "balance": 8.0007999999998,
       "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1311,
@@ -56506,7 +56506,8 @@
       "status": "unpaid",
       "cancelFlag": false,
       "payMode": "Credit",
-      "paymode": "Credit"
+      "paymode": "Credit",
+      "isCancelled": false
     },
     {
       "id": "LSL-0337",
@@ -56580,7 +56581,7 @@
       "cancelFlag": false,
       "payMode": "Credit",
       "paymode": "Credit",
-      "isCancelled": true
+      "isCancelled": false
     },
     {
       "id": "LSL-0316",
@@ -56751,7 +56752,7 @@
       "total": 4742.0008,
       "paidAmount": 0,
       "status": "unpaid",
-      "isCancelled": true
+      "isCancelled": false
     },
     {
       "id": "LSL-0003",
@@ -78566,43 +78567,6 @@
       ]
     },
     {
-      "id": "LSL-0336",
-      "voucherId": "LSL-0336",
-      "voucherType": "SALE",
-      "voucherNo": "LSL-0336",
-      "date": "2026-08-20",
-      "reference": "LSL-0336",
-      "description": "",
-      "siteName": "",
-      "entries": [
-        {
-          "accountId": "CUST-1049",
-          "debit": 2282,
-          "credit": 0
-        },
-        {
-          "accountId": "L0004",
-          "debit": 0,
-          "credit": 1933.89
-        },
-        {
-          "accountId": "L0053",
-          "debit": 0,
-          "credit": 174.05
-        },
-        {
-          "accountId": "L0048",
-          "debit": 0,
-          "credit": 174.05
-        },
-        {
-          "accountId": "L0012",
-          "debit": 0,
-          "credit": 0.01
-        }
-      ]
-    },
-    {
       "id": "TX-1351",
       "date": "2026-08-20",
       "reference": "LSL-0335 COGS",
@@ -78620,25 +78584,6 @@
         }
       ],
       "voucherNo": "LSL-0335"
-    },
-    {
-      "id": "TX-1352",
-      "date": "2026-08-20",
-      "reference": "LSL-0336 COGS",
-      "description": "Cost of Goods Sold for invoice LSL-0367",
-      "entries": [
-        {
-          "accountId": "5100",
-          "debit": 2059.6800000000003,
-          "credit": 0
-        },
-        {
-          "accountId": "1200",
-          "debit": 0,
-          "credit": 2059.6800000000003
-        }
-      ],
-      "voucherNo": "LSL-0336"
     },
     {
       "id": "B2B0026",
@@ -106852,6 +106797,191 @@
           "accountId": "5100",
           "debit": 0,
           "credit": 2942.4
+        }
+      ]
+    },
+    {
+      "id": "LSL-0336",
+      "voucherId": "LSL-0336",
+      "voucherType": "SALE",
+      "voucherNo": "LSL-0336",
+      "date": "2026-08-20",
+      "reference": "LSL-0336",
+      "description": "",
+      "siteName": "",
+      "entries": [
+        {
+          "accountId": "CUST-1049",
+          "debit": 2282,
+          "credit": 0
+        },
+        {
+          "accountId": "L0004",
+          "debit": 0,
+          "credit": 1933.89
+        },
+        {
+          "accountId": "L0053",
+          "debit": 0,
+          "credit": 174.05
+        },
+        {
+          "accountId": "L0048",
+          "debit": 0,
+          "credit": 174.05
+        },
+        {
+          "accountId": "L0012",
+          "debit": 0,
+          "credit": 0.01
+        }
+      ]
+    },
+    {
+      "id": "LSL-0337",
+      "voucherId": "LSL-0337",
+      "voucherType": "SALE",
+      "voucherNo": "LSL-0337",
+      "date": "2026-08-20",
+      "reference": "LSL-0337",
+      "description": "",
+      "siteName": "",
+      "entries": [
+        {
+          "accountId": "CUST-1305",
+          "debit": 1838,
+          "credit": 0
+        },
+        {
+          "accountId": "L0004",
+          "debit": 0,
+          "credit": 1565.72
+        },
+        {
+          "accountId": "L0052",
+          "debit": 0,
+          "credit": 9.54
+        },
+        {
+          "accountId": "L0047",
+          "debit": 0,
+          "credit": 9.53
+        },
+        {
+          "accountId": "L0053",
+          "debit": 0,
+          "credit": 126.61
+        },
+        {
+          "accountId": "L0048",
+          "debit": 0,
+          "credit": 126.61
+        },
+        {
+          "accountId": "L0012",
+          "debit": 0.01,
+          "credit": 0
+        }
+      ]
+    },
+    {
+      "id": "TX-1376",
+      "date": "2026-08-20",
+      "reference": "LSL-0336 COGS",
+      "description": "Cost of Goods Sold for invoice LSL-0336",
+      "entries": [
+        {
+          "accountId": "5100",
+          "debit": 2059.6800000000003,
+          "credit": 0
+        },
+        {
+          "accountId": "1200",
+          "debit": 0,
+          "credit": 2059.6800000000003
+        }
+      ]
+    },
+    {
+      "id": "TX-1377",
+      "date": "2026-08-20",
+      "reference": "LSL-0337 COGS",
+      "description": "Cost of Goods Sold for invoice LSL-0337",
+      "entries": [
+        {
+          "accountId": "5100",
+          "debit": 1624.78,
+          "credit": 0
+        },
+        {
+          "accountId": "1200",
+          "debit": 0,
+          "credit": 1624.78
+        }
+      ]
+    },
+    {
+      "id": "LSL-0338",
+      "voucherId": "LSL-0338",
+      "voucherType": "SALE",
+      "voucherNo": "LSL-0338",
+      "date": "2026-08-20",
+      "reference": "LSL-0338",
+      "description": "",
+      "siteName": "",
+      "entries": [
+        {
+          "accountId": "CUST-1311",
+          "debit": 4742,
+          "credit": 0
+        },
+        {
+          "accountId": "L0004",
+          "debit": 0,
+          "credit": 4026.7
+        },
+        {
+          "accountId": "L0052",
+          "debit": 0,
+          "credit": 9.54
+        },
+        {
+          "accountId": "L0047",
+          "debit": 0,
+          "credit": 9.53
+        },
+        {
+          "accountId": "L0053",
+          "debit": 0,
+          "credit": 348.1
+        },
+        {
+          "accountId": "L0048",
+          "debit": 0,
+          "credit": 348.1
+        },
+        {
+          "accountId": "L0012",
+          "debit": 0,
+          "credit": 0.03
+        }
+      ]
+    },
+    {
+      "id": "TX-1378",
+      "date": "2026-08-20",
+      "reference": "LSL-0338 COGS",
+      "description": "Cost of Goods Sold for invoice LSL-0338",
+      "entries": [
+        {
+          "accountId": "5100",
+          "debit": 4272.9400000000005,
+          "credit": 0
+        },
+        {
+          "accountId": "1200",
+          "debit": 0,
+          "credit": 4272.9400000000005
         }
       ]
     }
