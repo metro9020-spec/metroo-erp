@@ -2280,13 +2280,15 @@
           "stock": 350
         }
       ],
-      "unloadingCharge": 11,
+      "unloadingCharge": 13,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 11
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 13,
+        "type_1789889054254_coik": 12
       }
     },
     {
@@ -2348,13 +2350,15 @@
           "stock": 0
         }
       ],
-      "unloadingCharge": 11,
+      "unloadingCharge": 12,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 11
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 12,
+        "type_1789889054254_coik": 12
       }
     },
     {
@@ -2434,13 +2438,15 @@
           "costPrice": 234.38
         }
       ],
-      "unloadingCharge": 11,
+      "unloadingCharge": 12,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 11
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 12,
+        "type_1789889054254_coik": 12
       }
     },
     {
@@ -2562,10 +2568,12 @@
       "unloadingCharge": 11,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 0
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 0
       }
     },
     {
@@ -2674,10 +2682,12 @@
       "unloadingCharge": 11,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 0
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 0
       }
     },
     {
@@ -2799,10 +2809,12 @@
       "unloadingCharge": 11,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 0
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 0
       }
     },
     {
@@ -3441,13 +3453,15 @@
           "costPrice": 241.525
         }
       ],
-      "unloadingCharge": 11,
+      "unloadingCharge": 12,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 11
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 12,
+        "type_1789889054254_coik": 12
       }
     },
     {
@@ -3527,13 +3541,15 @@
           "costPrice": 210.938
         }
       ],
-      "unloadingCharge": 11,
+      "unloadingCharge": 12,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 11
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 12,
+        "type_1789889054254_coik": 12
       }
     },
     {
@@ -3803,13 +3819,15 @@
           "stock": 0
         }
       ],
-      "unloadingCharge": 11,
+      "unloadingCharge": 12,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 11
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 12,
+        "type_1789889054254_coik": 12
       }
     },
     {
@@ -3915,13 +3933,15 @@
           "costPrice": 312.5
         }
       ],
-      "unloadingCharge": 11,
+      "unloadingCharge": 12,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 11
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 12,
+        "type_1789889054254_coik": 12
       }
     },
     {
@@ -4568,13 +4588,15 @@
           "stock": 100
         }
       ],
-      "unloadingCharge": 11,
+      "unloadingCharge": 12,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 11
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 12,
+        "type_1789889054254_coik": 12
       }
     },
     {
@@ -4641,13 +4663,15 @@
           "costPrice": 253.91
         }
       ],
-      "unloadingCharge": 11,
+      "unloadingCharge": 12,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 11
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 12,
+        "type_1789889054254_coik": 12
       }
     },
     {
@@ -4717,13 +4741,15 @@
           "stock": 0
         }
       ],
-      "unloadingCharge": 11,
+      "unloadingCharge": 12,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 11
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 12,
+        "type_1789889054254_coik": 12
       }
     },
     {
@@ -4793,10 +4819,12 @@
       "unloadingCharge": 11,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 0
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 0
       }
     },
     {
@@ -5097,13 +5125,15 @@
           "costPrice": 218.75
         }
       ],
-      "unloadingCharge": 11,
+      "unloadingCharge": 12,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 11
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 12,
+        "type_1789889054254_coik": 12
       }
     },
     {
@@ -5627,10 +5657,12 @@
       "unloadingCharge": 11,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 0
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 0
       }
     },
     {
@@ -5700,10 +5732,12 @@
       "unloadingCharge": 11,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 0
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 0
       }
     },
     {
@@ -5773,10 +5807,12 @@
       "unloadingCharge": 11,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 0
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 0
       }
     },
     {
@@ -5846,10 +5882,12 @@
       "unloadingCharge": 11,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 0
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 0
       }
     },
     {
@@ -5903,13 +5941,15 @@
           "costPrice": 242.187
         }
       ],
-      "unloadingCharge": 11,
+      "unloadingCharge": 12,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 11
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 12,
+        "type_1789889054254_coik": 12
       }
     },
     {
@@ -6054,13 +6094,15 @@
           "costPrice": 226.563
         }
       ],
-      "unloadingCharge": 11,
+      "unloadingCharge": 12,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 11
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 12,
+        "type_1789889054254_coik": 12
       }
     },
     {
@@ -6590,13 +6632,15 @@
           "stock": 221
         }
       ],
-      "unloadingCharge": 11,
+      "unloadingCharge": 12,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 11
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 12,
+        "type_1789889054254_coik": 12
       }
     },
     {
@@ -7612,13 +7656,15 @@
           "costPrice": 271.18571428
         }
       ],
-      "unloadingCharge": 11,
+      "unloadingCharge": 12,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 11
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 12,
+        "type_1789889054254_coik": 12
       }
     },
     {
@@ -7688,10 +7734,12 @@
       "unloadingCharge": 11,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 0
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 0
       }
     },
     {
@@ -7918,13 +7966,15 @@
           "costPrice": 236.72
         }
       ],
-      "unloadingCharge": 11,
+      "unloadingCharge": 12,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 11
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 12,
+        "type_1789889054254_coik": 12
       }
     },
     {
@@ -8038,13 +8088,15 @@
           "stock": 185
         }
       ],
-      "unloadingCharge": 11,
+      "unloadingCharge": 12,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 11
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 12,
+        "type_1789889054254_coik": 12
       }
     },
     {
@@ -8213,10 +8265,12 @@
       "unloadingCharge": 11,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 0
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 0
       }
     },
     {
@@ -8309,13 +8363,15 @@
           "costPrice": 203.125
         }
       ],
-      "unloadingCharge": 11,
+      "unloadingCharge": 12,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 11
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 12,
+        "type_1789889054254_coik": 12
       }
     },
     {
@@ -8871,13 +8927,15 @@
           "costPrice": 257.81
         }
       ],
-      "unloadingCharge": 11,
+      "unloadingCharge": 12,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 11
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 12,
+        "type_1789889054254_coik": 12
       }
     },
     {
@@ -8934,10 +8992,12 @@
       "unloadingCharge": 11,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 0
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 0
       }
     },
     {
@@ -9164,13 +9224,15 @@
           "costPrice": 264.844
         }
       ],
-      "unloadingCharge": 11,
+      "unloadingCharge": 12,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 11
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 12,
+        "type_1789889054254_coik": 12
       }
     },
     {
@@ -9904,13 +9966,15 @@
           "costPrice": 199.22
         }
       ],
-      "unloadingCharge": 11,
+      "unloadingCharge": 12,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 11
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 12,
+        "type_1789889054254_coik": 12
       }
     },
     {
@@ -10339,13 +10403,15 @@
           "costPrice": 0
         }
       ],
-      "unloadingCharge": 11,
+      "unloadingCharge": 12,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 11
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 12,
+        "type_1789889054254_coik": 12
       }
     },
     {
@@ -10481,13 +10547,15 @@
           "costPrice": 265.63
         }
       ],
-      "unloadingCharge": 11,
+      "unloadingCharge": 12,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 11
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 12,
+        "type_1789889054254_coik": 12
       }
     },
     {
@@ -11425,13 +11493,15 @@
           "costPrice": 148.31
         }
       ],
-      "unloadingCharge": 11,
+      "unloadingCharge": 12,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 11
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 12,
+        "type_1789889054254_coik": 12
       }
     },
     {
@@ -11485,13 +11555,15 @@
           "costPrice": 203.905
         }
       ],
-      "unloadingCharge": 11,
+      "unloadingCharge": 12,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 11
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 12,
+        "type_1789889054254_coik": 12
       }
     },
     {
@@ -11718,13 +11790,15 @@
           "costPrice": 228.813
         }
       ],
-      "unloadingCharge": 11,
+      "unloadingCharge": 12,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 11
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 12,
+        "type_1789889054254_coik": 12
       }
     },
     {
@@ -11837,10 +11911,12 @@
       "unloadingCharge": 11,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 0
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 0
       }
     },
     {
@@ -11897,10 +11973,12 @@
       "unloadingCharge": 11,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 0
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 0
       }
     },
     {
@@ -11957,10 +12035,12 @@
       "unloadingCharge": 11,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 0
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 0
       }
     },
     {
@@ -12017,10 +12097,12 @@
       "unloadingCharge": 11,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 0
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 0
       }
     },
     {
@@ -12130,13 +12212,15 @@
           "costPrice": 288.136
         }
       ],
-      "unloadingCharge": 11,
+      "unloadingCharge": 12,
       "unloadingChargeEnabled": true,
       "loadingChargesByType": {
-        "std": 11
+        "std": 11,
+        "type_1789889054254_coik": 11
       },
       "unloadingChargesByType": {
-        "std": 11
+        "std": 12,
+        "type_1789889054254_coik": 12
       }
     },
     {
@@ -59980,12 +60064,12 @@
         },
         {
           "accountId": "L0038",
-          "debit": 13271.2,
+          "debit": 13271.202,
           "credit": 0
         },
         {
           "accountId": "L0033",
-          "debit": 13271.2,
+          "debit": 13271.202,
           "credit": 0
         },
         {
@@ -60201,12 +60285,12 @@
         },
         {
           "accountId": "L0038",
-          "debit": 1464.41,
+          "debit": 1464.408,
           "credit": 0
         },
         {
           "accountId": "L0033",
-          "debit": 1464.41,
+          "debit": 1464.408,
           "credit": 0
         },
         {
@@ -60538,12 +60622,12 @@
         },
         {
           "accountId": "L0038",
-          "debit": 4957.6,
+          "debit": 4957.605,
           "credit": 0
         },
         {
           "accountId": "L0033",
-          "debit": 4957.61,
+          "debit": 4957.605,
           "credit": 0
         },
         {
@@ -60572,16 +60656,16 @@
         {
           "accountId": "VEND-0069",
           "debit": 0,
-          "credit": 64999.41
+          "credit": 64999.409999999996
         },
         {
           "accountId": "L0038",
-          "debit": 4957.56,
+          "debit": 4957.5599999999995,
           "credit": 0
         },
         {
           "accountId": "L0033",
-          "debit": 4957.56,
+          "debit": 4957.5599999999995,
           "credit": 0
         },
         {
@@ -62331,7 +62415,7 @@
         },
         {
           "accountId": "L0042",
-          "debit": 6942.89,
+          "debit": 6942.888,
           "credit": 0
         },
         {
@@ -62360,16 +62444,16 @@
         {
           "accountId": "VEND-0068",
           "debit": 0,
-          "credit": 590935
+          "credit": 590934.9979999999
         },
         {
           "accountId": "L0038",
-          "debit": 45071.33,
+          "debit": 45071.333999999995,
           "credit": 0
         },
         {
           "accountId": "L0033",
-          "debit": 45071.34,
+          "debit": 45071.333999999995,
           "credit": 0
         },
         {
@@ -63038,12 +63122,12 @@
         },
         {
           "accountId": "L0038",
-          "debit": 13194.94,
+          "debit": 13194.945,
           "credit": 0
         },
         {
           "accountId": "L0033",
-          "debit": 13194.95,
+          "debit": 13194.945,
           "credit": 0
         },
         {
@@ -64638,12 +64722,12 @@
         },
         {
           "accountId": "L0038",
-          "debit": 14415.25,
+          "debit": 14415.246,
           "credit": 0
         },
         {
           "accountId": "L0033",
-          "debit": 14415.24,
+          "debit": 14415.246,
           "credit": 0
         },
         {
@@ -66884,12 +66968,12 @@
         },
         {
           "accountId": "L0038",
-          "debit": 13213.98,
+          "debit": 13213.9755,
           "credit": 0
         },
         {
           "accountId": "L0033",
-          "debit": 13213.97,
+          "debit": 13213.9755,
           "credit": 0
         },
         {
@@ -68096,12 +68180,12 @@
         },
         {
           "accountId": "L0038",
-          "debit": 457.63,
+          "debit": 457.632,
           "credit": 0
         },
         {
           "accountId": "L0033",
-          "debit": 457.63,
+          "debit": 457.632,
           "credit": 0
         },
         {
@@ -68340,12 +68424,12 @@
         },
         {
           "accountId": "L0038",
-          "debit": 13004.25,
+          "debit": 13004.244,
           "credit": 0
         },
         {
           "accountId": "L0033",
-          "debit": 13004.24,
+          "debit": 13004.244,
           "credit": 0
         },
         {
@@ -68916,12 +69000,12 @@
         },
         {
           "accountId": "L0038",
-          "debit": 3603.82,
+          "debit": 3603.825,
           "credit": 0
         },
         {
           "accountId": "L0033",
-          "debit": 3603.83,
+          "debit": 3603.825,
           "credit": 0
         },
         {
@@ -69740,7 +69824,7 @@
       "entries": [
         {
           "accountId": "L0005",
-          "debit": 403360.27,
+          "debit": 403360.2700000003,
           "credit": 0
         },
         {
@@ -69750,12 +69834,12 @@
         },
         {
           "accountId": "L0038",
-          "debit": 36302.43,
+          "debit": 36302.4243,
           "credit": 0
         },
         {
           "accountId": "L0033",
-          "debit": 36302.42,
+          "debit": 36302.4243,
           "credit": 0
         },
         {
@@ -70684,12 +70768,12 @@
         },
         {
           "accountId": "L0038",
-          "debit": 9457.63,
+          "debit": 9457.632,
           "credit": 0
         },
         {
           "accountId": "L0033",
-          "debit": 9457.63,
+          "debit": 9457.632,
           "credit": 0
         },
         {
@@ -72048,12 +72132,12 @@
         },
         {
           "accountId": "L0038",
-          "debit": 20966.76,
+          "debit": 20966.759100000003,
           "credit": 0
         },
         {
           "accountId": "L0033",
-          "debit": 20966.76,
+          "debit": 20966.759100000003,
           "credit": 0
         },
         {
@@ -72300,17 +72384,17 @@
       "entries": [
         {
           "accountId": "L0062",
-          "debit": 39856.8,
+          "debit": 39856.799999999996,
           "credit": 0
         },
         {
           "accountId": "VEND-1219",
           "debit": 0,
-          "credit": 44640
+          "credit": 44639.99599999999
         },
         {
           "accountId": "L0042",
-          "debit": 4782.82,
+          "debit": 4782.815999999999,
           "credit": 0
         },
         {
@@ -72384,7 +72468,7 @@
       "entries": [
         {
           "accountId": "L0005",
-          "debit": 693996.01,
+          "debit": 693996.009999106,
           "credit": 0
         },
         {
@@ -72394,12 +72478,12 @@
         },
         {
           "accountId": "L0038",
-          "debit": 62459.62,
+          "debit": 62459.622,
           "credit": 0
         },
         {
           "accountId": "L0033",
-          "debit": 62459.62,
+          "debit": 62459.622,
           "credit": 0
         },
         {
@@ -76597,12 +76681,12 @@
         },
         {
           "accountId": "L0038",
-          "debit": 7207.63,
+          "debit": 7207.623,
           "credit": 0
         },
         {
           "accountId": "L0033",
-          "debit": 7207.62,
+          "debit": 7207.623,
           "credit": 0
         },
         {
@@ -76920,12 +77004,12 @@
         },
         {
           "accountId": "L0038",
-          "debit": 9762.73,
+          "debit": 9762.732,
           "credit": 0
         },
         {
           "accountId": "L0033",
-          "debit": 9762.73,
+          "debit": 9762.732,
           "credit": 0
         },
         {
@@ -78367,16 +78451,16 @@
         {
           "accountId": "VEND-1182",
           "debit": 0,
-          "credit": 5220
+          "credit": 5219.9996
         },
         {
           "accountId": "L0038",
-          "debit": 398.13,
+          "debit": 398.1348,
           "credit": 0
         },
         {
           "accountId": "L0033",
-          "debit": 398.14,
+          "debit": 398.1348,
           "credit": 0
         },
         {
@@ -79168,12 +79252,12 @@
         },
         {
           "accountId": "L0038",
-          "debit": 1724.48,
+          "debit": 1724.4846,
           "credit": 0
         },
         {
           "accountId": "L0033",
-          "debit": 1724.49,
+          "debit": 1724.4846,
           "credit": 0
         },
         {
@@ -79205,12 +79289,12 @@
         },
         {
           "accountId": "L0038",
-          "debit": 914.88,
+          "debit": 914.8788,
           "credit": 0
         },
         {
           "accountId": "L0033",
-          "debit": 914.88,
+          "debit": 914.8788,
           "credit": 0
         },
         {
