@@ -1608,8 +1608,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 358,
       "stock": 107,
       "landingCost": 294.24,
@@ -2280,10 +2280,14 @@
           "stock": 350
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0004",
@@ -2309,8 +2313,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 0,
       "stock": 0,
       "landingCost": 56.04,
@@ -2344,10 +2348,14 @@
           "stock": 0
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0005",
@@ -2373,8 +2381,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 0,
       "stock": 0,
       "landingCost": 234.38,
@@ -2426,10 +2434,14 @@
           "costPrice": 234.38
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0006",
@@ -2455,8 +2467,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 8,
       "stock": 8,
       "landingCost": 723.75,
@@ -2547,10 +2559,14 @@
           "costPrice": 750
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0007",
@@ -2576,8 +2592,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 0,
       "stock": 0,
       "landingCost": 1330,
@@ -2655,10 +2671,14 @@
           "costPrice": 1330
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0008",
@@ -2684,8 +2704,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 9,
       "stock": 9,
       "landingCost": 400.48,
@@ -2776,10 +2796,14 @@
           "costPrice": 415
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0009",
@@ -2805,8 +2829,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 203,
       "stock": 0,
       "landingCost": 241.525,
@@ -3417,10 +3441,14 @@
           "costPrice": 241.525
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0010",
@@ -3446,8 +3474,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 0,
       "stock": 0,
       "landingCost": 210.938,
@@ -3499,10 +3527,14 @@
           "costPrice": 210.938
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0011",
@@ -3528,8 +3560,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 0,
       "stock": 0,
       "landingCost": 310,
@@ -3771,10 +3803,14 @@
           "stock": 0
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0012",
@@ -3800,8 +3836,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 0,
       "stock": 0,
       "landingCost": 312.5,
@@ -3879,10 +3915,14 @@
           "costPrice": 312.5
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0013",
@@ -3908,8 +3948,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 151,
       "stock": -8,
       "landingCost": 250.88,
@@ -4528,10 +4568,14 @@
           "stock": 100
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0018",
@@ -4557,8 +4601,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 0,
       "stock": 0,
       "landingCost": 253.91,
@@ -4597,10 +4641,14 @@
           "costPrice": 253.91
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0027",
@@ -4626,8 +4674,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 0,
       "stock": 0,
       "landingCost": 281.25,
@@ -4669,10 +4717,14 @@
           "stock": 0
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0032",
@@ -4698,8 +4750,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 0,
       "stock": 0,
       "landingCost": 117,
@@ -4738,10 +4790,14 @@
           "costPrice": 117
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0033",
@@ -4767,8 +4823,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 0,
       "stock": 0,
       "landingCost": 218.75,
@@ -5041,10 +5097,14 @@
           "costPrice": 218.75
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0052",
@@ -5524,8 +5584,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 0,
       "stock": 0,
       "landingCost": 107.12,
@@ -5564,10 +5624,14 @@
           "costPrice": 107.12
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0083",
@@ -5593,8 +5657,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 21,
       "stock": 21,
       "landingCost": 212.3,
@@ -5633,10 +5697,14 @@
           "costPrice": 212.3
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0084",
@@ -5662,8 +5730,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 0,
       "stock": 0,
       "landingCost": 23.64,
@@ -5702,10 +5770,14 @@
           "costPrice": 23.64
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0085",
@@ -5731,8 +5803,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 0,
       "stock": 0,
       "landingCost": 92.64,
@@ -5771,10 +5843,14 @@
           "costPrice": 92.64
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0093",
@@ -5800,8 +5876,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 0,
       "stock": 0,
       "landingCost": 242.187,
@@ -5827,10 +5903,14 @@
           "costPrice": 242.187
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0094",
@@ -5856,8 +5936,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 0,
       "stock": 0,
       "landingCost": 226.563,
@@ -5974,10 +6054,14 @@
           "costPrice": 226.563
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0099",
@@ -6003,8 +6087,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 225,
       "stock": 80,
       "landingCost": 290,
@@ -6506,10 +6590,14 @@
           "stock": 221
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0108",
@@ -6535,8 +6623,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 31,
       "stock": 8,
       "landingCost": 271.186,
@@ -7524,10 +7612,14 @@
           "costPrice": 271.18571428
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0119",
@@ -7553,8 +7645,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 0,
       "stock": 0,
       "landingCost": 1013.25,
@@ -7593,10 +7685,14 @@
           "costPrice": 1013.25
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0193",
@@ -7743,8 +7839,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 0,
       "stock": 0,
       "landingCost": 236.72,
@@ -7822,10 +7918,14 @@
           "costPrice": 236.72
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0247",
@@ -7851,8 +7951,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 185,
       "stock": 131,
       "landingCost": 280,
@@ -7938,10 +8038,14 @@
           "stock": 185
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0248",
@@ -8079,8 +8183,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 0,
       "stock": 0,
       "landingCost": 109.53,
@@ -8106,10 +8210,14 @@
           "costPrice": 109.53
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0269",
@@ -8135,8 +8243,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 0,
       "stock": 0,
       "landingCost": 203.125,
@@ -8201,10 +8309,14 @@
           "costPrice": 203.125
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0298",
@@ -8693,8 +8805,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 0,
       "stock": 0,
       "landingCost": 257.81,
@@ -8759,10 +8871,14 @@
           "costPrice": 257.81
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0323",
@@ -8788,8 +8904,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 0,
       "stock": 0,
       "landingCost": 275.03,
@@ -8815,10 +8931,14 @@
           "costPrice": 275.03
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0328",
@@ -8900,8 +9020,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 0,
       "stock": 0,
       "landingCost": 264.844,
@@ -9044,10 +9164,14 @@
           "costPrice": 264.844
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0428",
@@ -9740,8 +9864,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 0,
       "stock": 0,
       "landingCost": 199.22,
@@ -9780,10 +9904,14 @@
           "costPrice": 199.22
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0516",
@@ -10184,8 +10312,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 0,
       "stock": 0,
       "landingCost": 0,
@@ -10211,10 +10339,14 @@
           "costPrice": 0
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0572",
@@ -10296,8 +10428,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 0,
       "stock": 0,
       "landingCost": 265.63,
@@ -10349,10 +10481,14 @@
           "costPrice": 265.63
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0575",
@@ -11262,8 +11398,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 0,
       "stock": 0,
       "landingCost": 148.31,
@@ -11289,10 +11425,14 @@
           "costPrice": 148.31
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0718",
@@ -11318,8 +11458,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 0,
       "stock": 0,
       "landingCost": 203.905,
@@ -11345,10 +11485,14 @@
           "costPrice": 203.905
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0723",
@@ -11534,8 +11678,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 0,
       "stock": 0,
       "landingCost": 228.813,
@@ -11574,10 +11718,14 @@
           "costPrice": 228.813
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0770",
@@ -11659,8 +11807,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 0,
       "stock": 0,
       "landingCost": 118.64,
@@ -11686,10 +11834,14 @@
           "costPrice": 118.64
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0793",
@@ -11715,8 +11867,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 7,
       "stock": 7,
       "landingCost": 508.47,
@@ -11742,10 +11894,14 @@
           "costPrice": 508.47
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0794",
@@ -11771,8 +11927,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 3,
       "stock": 2,
       "landingCost": 932.2,
@@ -11798,10 +11954,14 @@
           "costPrice": 932.2
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0795",
@@ -11827,8 +11987,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 3,
       "stock": 3,
       "landingCost": 1779.66,
@@ -11854,10 +12014,14 @@
           "costPrice": 1779.66
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0845",
@@ -11939,8 +12103,8 @@
       "addlCess": 0,
       "cessOn": "NetValue",
       "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
+      "loadingChargeEnabled": true,
+      "loadingCharge": 11,
       "openingStock": 0,
       "stock": 0,
       "landingCost": 288.136,
@@ -11966,10 +12130,14 @@
           "costPrice": 288.136
         }
       ],
-      "unloadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
+      "unloadingCharge": 11,
+      "unloadingChargeEnabled": true,
+      "loadingChargesByType": {
+        "std": 11
+      },
+      "unloadingChargesByType": {
+        "std": 11
+      }
     },
     {
       "id": "MAT-0867",
@@ -34112,7 +34280,7 @@
       "gstin": "",
       "creditLimit": 0,
       "creditPeriod": 0,
-      "balance": 8.0007999999998,
+      "balance": 8,
       "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1311,
@@ -56687,74 +56855,6 @@
       "status": "unpaid"
     },
     {
-      "id": "LSL-0338",
-      "seriesId": "SER-LOCAL-SALES",
-      "voucherNo": "LSL-0338",
-      "refNo": "LSL-0338",
-      "employee": "",
-      "influencer": "",
-      "date": "2026-08-20",
-      "dueDate": "2026-08-20",
-      "contactId": "CUST-1311",
-      "contactName": "ATHIRA AGUSTIN",
-      "siteName": "",
-      "state": "KERALA",
-      "payMode": "Credit",
-      "creditPeriod": "0",
-      "narration": "",
-      "headloaderType": "std",
-      "discountPercent": "0",
-      "discountAmount": "0.00",
-      "shippingAddress": "",
-      "vehicleNo": "",
-      "items": [
-        {
-          "materialId": "MAT-0003",
-          "name": "CEMENT",
-          "code": "ACC",
-          "batchNo": "266.95",
-          "quantity": 14,
-          "unit": "Nos",
-          "price": 276.27,
-          "mrp": 345.3375,
-          "discountPercent": 0,
-          "discountAmount": 0,
-          "netValue": 3867.7799999999997,
-          "gstPercent": 18,
-          "gstAmount": 696.2004,
-          "netAmount": 4563.9803999999995
-        },
-        {
-          "materialId": "MAT-0298",
-          "name": "BLOCK",
-          "code": "AAC",
-          "batchNo": "76.79",
-          "quantity": 2,
-          "unit": "Nos",
-          "price": 79.46,
-          "mrp": 99.32499999999999,
-          "discountPercent": 0,
-          "discountAmount": 0,
-          "netValue": 158.92,
-          "gstPercent": 12,
-          "gstAmount": 19.0704,
-          "netAmount": 177.9904
-        }
-      ],
-      "subtotal": 4026.7,
-      "totalDiscount": 0,
-      "totalGst": 715.2707999999999,
-      "totalCess": 0,
-      "adjustments": 0,
-      "adjustmentsList": [],
-      "additionalCess": 0,
-      "roundOff": 0.03,
-      "total": 4742.0008,
-      "paidAmount": 0,
-      "status": "unpaid",
-      "isCancelled": false
-    },
-    {
       "id": "LSL-0003",
       "seriesId": "SER-LOCAL-SALES",
       "voucherNo": "LSL-0003",
@@ -57577,6 +57677,73 @@
       "additionalCess": 0,
       "roundOff": -0.41,
       "total": 3299.9959999999996,
+      "paidAmount": 0,
+      "status": "unpaid"
+    },
+    {
+      "id": "LSL-0338",
+      "seriesId": "SER-LOCAL-SALES",
+      "voucherNo": "LSL-0338",
+      "refNo": "LSL-0338",
+      "employee": "",
+      "influencer": "",
+      "date": "2026-08-20",
+      "dueDate": "2026-08-20",
+      "contactId": "CUST-1311",
+      "contactName": "ATHIRA AGUSTIN",
+      "siteName": "",
+      "state": "KERALA",
+      "payMode": "Credit",
+      "creditPeriod": "0",
+      "narration": "",
+      "headloaderType": "std",
+      "discountPercent": "0",
+      "discountAmount": "0.00",
+      "shippingAddress": "",
+      "vehicleNo": "KL59V1757",
+      "items": [
+        {
+          "materialId": "MAT-0003",
+          "name": "CEMENT",
+          "code": "ACC",
+          "batchNo": "266.95",
+          "quantity": 14,
+          "unit": "Nos",
+          "price": 276.27,
+          "mrp": 345.3375,
+          "discountPercent": 0,
+          "discountAmount": 0,
+          "netValue": 3867.7799999999997,
+          "gstPercent": 18,
+          "gstAmount": 696.2004,
+          "netAmount": 4563.9803999999995
+        },
+        {
+          "materialId": "MAT-0298",
+          "name": "BLOCK",
+          "code": "AAC",
+          "batchNo": "76.79",
+          "quantity": 2,
+          "unit": "Nos",
+          "price": 79.46,
+          "mrp": 99.32499999999999,
+          "discountPercent": 0,
+          "discountAmount": 0,
+          "netValue": 158.92,
+          "gstPercent": 12,
+          "gstAmount": 19.0704,
+          "netAmount": 177.9904
+        }
+      ],
+      "subtotal": 4026.7,
+      "totalDiscount": 0,
+      "totalGst": 715.2707999999999,
+      "totalCess": 0,
+      "adjustments": 0,
+      "adjustmentsList": [],
+      "additionalCess": 0,
+      "roundOff": 0.03,
+      "total": 4742.0008,
       "paidAmount": 0,
       "status": "unpaid"
     }
@@ -106968,10 +107135,13 @@
       ]
     },
     {
-      "id": "TX-1378",
+      "id": "TX-1379",
+      "voucherId": "LSL-0338",
+      "voucherType": "SALE",
+      "voucherNo": "LSL-0338",
       "date": "2026-08-20",
       "reference": "LSL-0338 COGS",
-      "description": "Cost of Goods Sold for invoice LSL-0338",
+      "description": "",
       "entries": [
         {
           "accountId": "5100",
@@ -111826,13 +111996,62 @@
       "isActive": false
     }
   ],
-  "headloaderProductIds": [],
+  "headloaderProductIds": [
+    "MAT-0003",
+    "MAT-0004",
+    "MAT-0005",
+    "MAT-0006",
+    "MAT-0007",
+    "MAT-0008",
+    "MAT-0009",
+    "MAT-0010",
+    "MAT-0011",
+    "MAT-0012",
+    "MAT-0013",
+    "MAT-0018",
+    "MAT-0027",
+    "MAT-0032",
+    "MAT-0033",
+    "MAT-0082",
+    "MAT-0083",
+    "MAT-0084",
+    "MAT-0085",
+    "MAT-0093",
+    "MAT-0094",
+    "MAT-0099",
+    "MAT-0108",
+    "MAT-0119",
+    "MAT-0233",
+    "MAT-0247",
+    "MAT-0259",
+    "MAT-0269",
+    "MAT-0317",
+    "MAT-0323",
+    "MAT-0369",
+    "MAT-0506",
+    "MAT-0565",
+    "MAT-0574",
+    "MAT-0689",
+    "MAT-0718",
+    "MAT-0730",
+    "MAT-0792",
+    "MAT-0793",
+    "MAT-0794",
+    "MAT-0795",
+    "MAT-0860"
+  ],
   "headloaderTypes": [
     {
       "id": "std",
       "name": "Standard",
       "isDefault": true,
       "category": "both"
+    },
+    {
+      "id": "type_1789889054254_coik",
+      "name": "TORRUS",
+      "category": "both",
+      "isDefault": false
     }
   ],
   "gstMaster": [
