@@ -1,5 +1,5 @@
 {
-  "_lastSaved": 1789990994648,
+  "_lastSaved": 1789991018661,
   "materials": [
     {
       "id": "MAT-0001",
@@ -27,8 +27,8 @@
       "alternateUnits": [],
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
-      "openingStock": 5831.03,
-      "stock": 4479.760000000002,
+      "openingStock": 7182.3,
+      "stock": 5831.03,
       "landingCost": 70,
       "costPrice": 70,
       "sellingPrice": 60.8,
@@ -496,8 +496,8 @@
         {
           "batchNo": "48.305",
           "landingCost": 48.305,
-          "openingStock": -24.999999999999986,
-          "stock": -173.7,
+          "openingStock": 123.7,
+          "stock": -24.999999999999986,
           "marginPercent": 1.749301,
           "marginAmount": 0.844999999999999,
           "gstExclRate": 48.305,
@@ -535,8 +535,8 @@
         {
           "batchNo": "50",
           "landingCost": 50,
-          "openingStock": 5.684341886080802e-14,
-          "stock": -566.9,
+          "openingStock": 566.9000000000001,
+          "stock": 5.684341886080802e-14,
           "marginPercent": 2,
           "marginAmount": 1,
           "gstExclRate": 50,
@@ -587,7 +587,7 @@
         {
           "batchNo": "55.932",
           "landingCost": 55.932,
-          "openingStock": -1.1368683772161603e-13,
+          "openingStock": 0,
           "stock": -1.1368683772161603e-13,
           "marginPercent": 1.998856,
           "marginAmount": 1.118,
@@ -626,8 +626,8 @@
         {
           "batchNo": "54.237",
           "landingCost": 54.237,
-          "openingStock": 2129.83,
-          "stock": 4259.660000000002,
+          "openingStock": 0,
+          "stock": 2129.83,
           "marginPercent": 2.347106,
           "marginAmount": 1.273,
           "gstExclRate": 54.237,
@@ -1223,19 +1223,19 @@
         },
         {
           "batchNo": "70",
-          "openingStock": 3726.2,
+          "openingStock": 6268,
           "landingCost": 70,
           "sellingPrice": 60.8,
           "mrp": 51.53,
-          "stock": 1184.3999999999999
+          "stock": 3726.2
         },
         {
           "batchNo": "69.72",
-          "openingStock": 0,
+          "openingStock": 223.7,
           "landingCost": 69.72,
           "sellingPrice": 63.18,
           "mrp": 53.54,
-          "stock": -223.7
+          "stock": 0
         }
       ],
       "unloadingCharge": 0,
@@ -1611,8 +1611,8 @@
       "alternateUnits": [],
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
-      "openingStock": 97,
-      "stock": -164,
+      "openingStock": 358,
+      "stock": 97,
       "landingCost": 294.24,
       "costPrice": 294.24,
       "sellingPrice": 330,
@@ -1742,8 +1742,8 @@
         {
           "batchNo": "285.16",
           "landingCost": 285.16,
-          "openingStock": 1,
-          "stock": 0,
+          "openingStock": 2,
+          "stock": 1,
           "marginPercent": 2.738813,
           "marginAmount": 7.81,
           "gstExclRate": 285.16,
@@ -2171,8 +2171,8 @@
         {
           "batchNo": "250",
           "landingCost": 250,
-          "openingStock": 0,
-          "stock": -4,
+          "openingStock": 4,
+          "stock": 0,
           "marginPercent": 3.436,
           "marginAmount": 8.58999999999998,
           "gstExclRate": 250,
@@ -2197,8 +2197,8 @@
         {
           "batchNo": "254.24",
           "landingCost": 254.24,
-          "openingStock": -400,
-          "stock": -800,
+          "openingStock": 0,
+          "stock": -400,
           "marginPercent": 6.666929,
           "marginAmount": 16.95,
           "gstExclRate": 254.24,
@@ -2236,8 +2236,8 @@
         {
           "batchNo": "275.42",
           "landingCost": 275.42,
-          "openingStock": 7,
-          "stock": 14,
+          "openingStock": 0,
+          "stock": 7,
           "marginPercent": 3.387553,
           "marginAmount": 9.32999999999998,
           "gstExclRate": 275.42,
@@ -2249,8 +2249,8 @@
         {
           "batchNo": "266.95",
           "landingCost": 266.95,
-          "openingStock": 53,
-          "stock": 106,
+          "openingStock": 0,
+          "stock": 53,
           "marginPercent": 3.491291,
           "marginAmount": 9.31999999999999,
           "gstExclRate": 266.95,
@@ -2262,8 +2262,8 @@
         {
           "batchNo": "271.187",
           "landingCost": 271.187,
-          "openingStock": 84,
-          "stock": 168,
+          "openingStock": 0,
+          "stock": 84,
           "marginPercent": 3.751286,
           "marginAmount": 10.173,
           "gstExclRate": 271.187,
@@ -2808,8 +2808,8 @@
       "alternateUnits": [],
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
-      "openingStock": 0,
-      "stock": -203,
+      "openingStock": 203,
+      "stock": 0,
       "landingCost": 241.525,
       "costPrice": 241.525,
       "sellingPrice": 300,
@@ -3407,8 +3407,8 @@
         {
           "batchNo": "241.525",
           "landingCost": 241.525,
-          "openingStock": 0,
-          "stock": -203,
+          "openingStock": 203,
+          "stock": 0,
           "marginPercent": 5.264465,
           "marginAmount": 12.715,
           "gstExclRate": 241.525,
@@ -3911,8 +3911,8 @@
       "alternateUnits": [],
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
-      "openingStock": -8,
-      "stock": -167,
+      "openingStock": 151,
+      "stock": -8,
       "landingCost": 250.88,
       "costPrice": 250.88,
       "sellingPrice": 261,
@@ -4458,8 +4458,8 @@
         {
           "batchNo": "203.39",
           "landingCost": 203.39,
-          "openingStock": -100,
-          "stock": -200,
+          "openingStock": 0,
+          "stock": -100,
           "marginPercent": 4.58233,
           "marginAmount": 9.32000000000002,
           "gstExclRate": 203.39,
@@ -4471,8 +4471,8 @@
         {
           "batchNo": "194.91",
           "landingCost": 194.91,
-          "openingStock": 0,
-          "stock": -59,
+          "openingStock": 59,
+          "stock": 0,
           "marginPercent": 6.526089,
           "marginAmount": 12.72,
           "gstExclRate": 194.91,
@@ -5073,8 +5073,8 @@
       "alternateUnits": [],
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
-      "openingStock": 0,
-      "stock": -26,
+      "openingStock": 26,
+      "stock": 0,
       "landingCost": 477.966,
       "costPrice": 477.966,
       "sellingPrice": 576,
@@ -5178,8 +5178,8 @@
         {
           "batchNo": "477.966",
           "landingCost": 477.966,
-          "openingStock": 0,
-          "stock": -26,
+          "openingStock": 26,
+          "stock": 0,
           "marginPercent": 2.128603,
           "marginAmount": 10.174,
           "gstExclRate": 477.966,
@@ -5380,8 +5380,8 @@
       "alternateUnits": [],
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
-      "openingStock": 0,
-      "stock": -70,
+      "openingStock": 70,
+      "stock": 0,
       "landingCost": 318.644,
       "costPrice": 318.644,
       "sellingPrice": 388,
@@ -5472,8 +5472,8 @@
         {
           "batchNo": "272.915",
           "landingCost": 272.915,
-          "openingStock": 0,
-          "stock": -70,
+          "openingStock": 70,
+          "stock": 0,
           "marginPercent": 2.782918,
           "marginAmount": 7.59499999999997,
           "gstExclRate": 272.915,
@@ -6006,8 +6006,8 @@
       "alternateUnits": [],
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
-      "openingStock": 80,
-      "stock": -65,
+      "openingStock": 225,
+      "stock": 80,
       "landingCost": 290,
       "costPrice": 290,
       "sellingPrice": 302,
@@ -6020,8 +6020,8 @@
         {
           "batchNo": "265.623",
           "landingCost": 265.623,
-          "openingStock": 0,
-          "stock": -4,
+          "openingStock": 4,
+          "stock": 0,
           "marginPercent": 2.942893,
           "marginAmount": 7.81700000000001,
           "gstExclRate": 265.623,
@@ -6449,8 +6449,8 @@
         {
           "batchNo": "245.763",
           "landingCost": 245.763,
-          "openingStock": -226,
-          "stock": -452,
+          "openingStock": 0,
+          "stock": -226,
           "marginPercent": 4.136912,
           "marginAmount": 10.167,
           "gstExclRate": 245.763,
@@ -6488,8 +6488,8 @@
         {
           "batchNo": "262.712",
           "landingCost": 262.712,
-          "openingStock": 85,
-          "stock": 170,
+          "openingStock": 0,
+          "stock": 85,
           "marginPercent": 3.54685,
           "marginAmount": 9.31799999999998,
           "gstExclRate": 262.712,
@@ -6538,14 +6538,14 @@
       "alternateUnits": [],
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
-      "openingStock": 8,
-      "stock": -15,
-      "landingCost": 271.18571428,
-      "costPrice": 271.18571428,
-      "sellingPrice": 288,
-      "gstExclRate": 288,
+      "openingStock": 31,
+      "stock": 8,
+      "landingCost": 271.186,
+      "costPrice": 271.186,
+      "sellingPrice": 293.01,
+      "gstExclRate": 293.01,
       "gstInclRate": 312,
-      "mrp": 244.07,
+      "mrp": 248.31,
       "marginPercent": -23.90256,
       "marginAmount": -76.563,
       "batches": [
@@ -7488,8 +7488,8 @@
         {
           "batchNo": "271.186",
           "landingCost": 271.186,
-          "openingStock": 8,
-          "stock": -15,
+          "openingStock": 31,
+          "stock": 8,
           "marginPercent": -8.435538,
           "marginAmount": -22.876,
           "gstExclRate": 271.186,
@@ -7854,8 +7854,8 @@
       "alternateUnits": [],
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
-      "openingStock": 131,
-      "stock": 77,
+      "openingStock": 185,
+      "stock": 131,
       "landingCost": 280,
       "costPrice": 280,
       "sellingPrice": 290,
@@ -7920,8 +7920,8 @@
         {
           "batchNo": "204.688",
           "landingCost": 204.688,
-          "openingStock": -54,
-          "stock": -108,
+          "openingStock": 0,
+          "stock": -54,
           "marginPercent": 4.197608,
           "marginAmount": 8.59200000000001,
           "gstExclRate": 204.688,
@@ -8233,8 +8233,8 @@
       "alternateUnits": [],
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
-      "openingStock": 235,
-      "stock": 250,
+      "openingStock": 220,
+      "stock": 235,
       "landingCost": 76.79,
       "costPrice": 76.79,
       "sellingPrice": 89,
@@ -8520,8 +8520,8 @@
         {
           "batchNo": "49.554",
           "landingCost": 49.554,
-          "openingStock": 0,
-          "stock": -8,
+          "openingStock": 8,
+          "stock": 0,
           "marginPercent": 3.604149,
           "marginAmount": 1.786,
           "gstExclRate": 49.554,
@@ -8572,8 +8572,8 @@
         {
           "batchNo": "51.334",
           "landingCost": 51.334,
-          "openingStock": 0,
-          "stock": -212,
+          "openingStock": 212,
+          "stock": 0,
           "marginPercent": 4.355788,
           "marginAmount": 2.236,
           "gstExclRate": 51.334,
@@ -8585,8 +8585,8 @@
         {
           "batchNo": "76.79",
           "landingCost": 76.79,
-          "openingStock": 235,
-          "stock": 470,
+          "openingStock": 0,
+          "stock": 235,
           "marginPercent": 3.477015,
           "marginAmount": 2.66999999999999,
           "gstExclRate": 76.79,
@@ -9549,8 +9549,8 @@
       "alternateUnits": [],
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
-      "openingStock": 14,
-      "stock": 13,
+      "openingStock": 15,
+      "stock": 14,
       "landingCost": 396.125,
       "costPrice": 396.125,
       "sellingPrice": 477,
@@ -9589,8 +9589,8 @@
         {
           "batchNo": "433.255",
           "landingCost": 433.255,
-          "openingStock": 0,
-          "stock": -1,
+          "openingStock": 1,
+          "stock": 0,
           "marginPercent": 3.66874,
           "marginAmount": 15.895,
           "gstExclRate": 433.255,
@@ -9631,8 +9631,8 @@
       "alternateUnits": [],
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
-      "openingStock": 0,
-      "stock": -1,
+      "openingStock": 1,
+      "stock": 0,
       "landingCost": 206.33,
       "costPrice": 206.33,
       "sellingPrice": 249,
@@ -9645,8 +9645,8 @@
         {
           "batchNo": "206.33",
           "landingCost": 206.33,
-          "openingStock": 0,
-          "stock": -1,
+          "openingStock": 1,
+          "stock": 0,
           "marginPercent": 2.273058,
           "marginAmount": 4.69,
           "gstExclRate": 206.33,
@@ -9881,8 +9881,8 @@
       "alternateUnits": [],
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
-      "openingStock": 0,
-      "stock": -4,
+      "openingStock": 4,
+      "stock": 0,
       "landingCost": 101.323,
       "costPrice": 101.323,
       "sellingPrice": 124,
@@ -9921,8 +9921,8 @@
         {
           "batchNo": "101.323",
           "landingCost": 101.323,
-          "openingStock": 0,
-          "stock": -4,
+          "openingStock": 4,
+          "stock": 0,
           "marginPercent": 3.707944,
           "marginAmount": 3.75700000000001,
           "gstExclRate": 101.323,
@@ -9963,8 +9963,8 @@
       "alternateUnits": [],
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
-      "openingStock": 2,
-      "stock": 1,
+      "openingStock": 3,
+      "stock": 2,
       "landingCost": 713.56,
       "costPrice": 713.56,
       "sellingPrice": 860,
@@ -9977,8 +9977,8 @@
         {
           "batchNo": "713.56",
           "landingCost": 713.56,
-          "openingStock": 2,
-          "stock": 1,
+          "openingStock": 3,
+          "stock": 2,
           "marginPercent": 2.137171,
           "marginAmount": 15.25,
           "gstExclRate": 713.56,
@@ -10019,8 +10019,8 @@
       "alternateUnits": [],
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
-      "openingStock": 0,
-      "stock": -3,
+      "openingStock": 3,
+      "stock": 0,
       "landingCost": 208.47,
       "costPrice": 208.47,
       "sellingPrice": 252,
@@ -10033,8 +10033,8 @@
         {
           "batchNo": "208.47",
           "landingCost": 208.47,
-          "openingStock": 0,
-          "stock": -3,
+          "openingStock": 3,
+          "stock": 0,
           "marginPercent": 2.441598,
           "marginAmount": 5.09,
           "gstExclRate": 208.47,
@@ -10075,8 +10075,8 @@
       "alternateUnits": [],
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
-      "openingStock": 18,
-      "stock": 17,
+      "openingStock": 19,
+      "stock": 18,
       "landingCost": 109.32,
       "costPrice": 109.32,
       "sellingPrice": 135,
@@ -10089,8 +10089,8 @@
         {
           "batchNo": "109.32",
           "landingCost": 109.32,
-          "openingStock": 18,
-          "stock": 17,
+          "openingStock": 19,
+          "stock": 18,
           "marginPercent": 4.656055,
           "marginAmount": 5.09,
           "gstExclRate": 109.32,
@@ -10131,8 +10131,8 @@
       "alternateUnits": [],
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
-      "openingStock": 37,
-      "stock": 32,
+      "openingStock": 42,
+      "stock": 37,
       "landingCost": 52.54,
       "costPrice": 52.54,
       "sellingPrice": 65,
@@ -10145,8 +10145,8 @@
         {
           "batchNo": "52.54",
           "landingCost": 52.54,
-          "openingStock": 37,
-          "stock": 32,
+          "openingStock": 42,
+          "stock": 37,
           "marginPercent": 4.834412,
           "marginAmount": 2.54,
           "gstExclRate": 52.54,
@@ -10381,8 +10381,8 @@
       "alternateUnits": [],
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
-      "openingStock": 1,
-      "stock": 0,
+      "openingStock": 2,
+      "stock": 1,
       "landingCost": 1742.57,
       "costPrice": 1742.57,
       "sellingPrice": 2130,
@@ -10395,8 +10395,8 @@
         {
           "batchNo": "1742.57",
           "landingCost": 1742.57,
-          "openingStock": 1,
-          "stock": 0,
+          "openingStock": 2,
+          "stock": 1,
           "marginPercent": 3.58723,
           "marginAmount": 62.51,
           "gstExclRate": 1742.57,
@@ -10605,8 +10605,8 @@
       "alternateUnits": [],
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
-      "openingStock": 763,
-      "stock": 228,
+      "openingStock": 1298,
+      "stock": 763,
       "landingCost": 54.88,
       "costPrice": 54.88,
       "sellingPrice": 57,
@@ -10814,8 +10814,8 @@
         {
           "batchNo": "34.198",
           "landingCost": 34.198,
-          "openingStock": -202,
-          "stock": -1702,
+          "openingStock": 1298,
+          "stock": -202,
           "marginPercent": 5.737178,
           "marginAmount": 1.962,
           "gstExclRate": 34.198,
@@ -10840,8 +10840,8 @@
         {
           "batchNo": "50",
           "landingCost": 50,
-          "openingStock": 688,
-          "stock": 1376,
+          "openingStock": 0,
+          "stock": 688,
           "marginPercent": 4.46,
           "marginAmount": 2.23,
           "gstExclRate": 50,
@@ -10853,8 +10853,8 @@
         {
           "batchNo": "54.88",
           "landingCost": 54.88,
-          "openingStock": 277,
-          "stock": 554,
+          "openingStock": 0,
+          "stock": 277,
           "marginPercent": -7.270408,
           "marginAmount": -3.99,
           "gstExclRate": 54.88,
@@ -10895,8 +10895,8 @@
       "alternateUnits": [],
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
-      "openingStock": 68,
-      "stock": -957,
+      "openingStock": 1093,
+      "stock": 68,
       "landingCost": 63.39,
       "costPrice": 63.39,
       "sellingPrice": 53,
@@ -10909,8 +10909,8 @@
         {
           "batchNo": "63.39",
           "landingCost": 63.39,
-          "openingStock": 77,
-          "stock": 154,
+          "openingStock": 0,
+          "stock": 77,
           "marginPercent": -25.351,
           "marginAmount": -16.07,
           "gstExclRate": 63.39,
@@ -11038,19 +11038,19 @@
         },
         {
           "batchNo": "42.76",
-          "openingStock": 0,
+          "openingStock": 290,
           "landingCost": 42.76,
           "sellingPrice": 51,
           "mrp": 45.54,
-          "stock": -290
+          "stock": 0
         },
         {
           "batchNo": "42.75",
-          "openingStock": -9,
+          "openingStock": 803,
           "landingCost": 42.75,
           "sellingPrice": 51,
           "mrp": 45.54,
-          "stock": -821
+          "stock": -9
         }
       ],
       "unloadingCharge": 0,
@@ -11377,8 +11377,8 @@
       "alternateUnits": [],
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
-      "openingStock": 850,
-      "stock": 1361,
+      "openingStock": 339,
+      "stock": 850,
       "landingCost": 66.428,
       "costPrice": 66.428,
       "sellingPrice": 77,
@@ -11404,8 +11404,8 @@
         {
           "batchNo": "68.387",
           "landingCost": 68.387,
-          "openingStock": 156,
-          "stock": -14,
+          "openingStock": 326,
+          "stock": 156,
           "marginPercent": 2.490239,
           "marginAmount": 1.703,
           "gstExclRate": 68.387,
@@ -11456,8 +11456,8 @@
         {
           "batchNo": "64.286",
           "landingCost": 64.286,
-          "openingStock": 48,
-          "stock": 83,
+          "openingStock": 13,
+          "stock": 48,
           "marginPercent": 4.159537,
           "marginAmount": 2.67399999999999,
           "gstExclRate": 64.286,
@@ -11482,8 +11482,8 @@
         {
           "batchNo": "101.78",
           "landingCost": 101.78,
-          "openingStock": 110,
-          "stock": 220,
+          "openingStock": 0,
+          "stock": 110,
           "marginPercent": 3.51739,
           "marginAmount": 3.58,
           "gstExclRate": 101.78,
@@ -11495,8 +11495,8 @@
         {
           "batchNo": "66.428",
           "landingCost": 66.428,
-          "openingStock": 536,
-          "stock": 1072,
+          "openingStock": 0,
+          "stock": 536,
           "marginPercent": 3.495514,
           "marginAmount": 2.322,
           "gstExclRate": 66.428,
@@ -11774,8 +11774,8 @@
       "alternateUnits": [],
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
-      "openingStock": 2,
-      "stock": 1,
+      "openingStock": 3,
+      "stock": 2,
       "landingCost": 932.2,
       "costPrice": 932.2,
       "sellingPrice": 980,
@@ -11788,8 +11788,8 @@
         {
           "batchNo": "932.2",
           "landingCost": 932.2,
-          "openingStock": 2,
-          "stock": 1,
+          "openingStock": 3,
+          "stock": 2,
           "marginPercent": -10.9086,
           "marginAmount": -101.69,
           "gstExclRate": 932.2,
@@ -11886,8 +11886,8 @@
       "alternateUnits": [],
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
-      "openingStock": 123,
-      "stock": 152,
+      "openingStock": 94,
+      "stock": 123,
       "landingCost": 131.36,
       "costPrice": 131.36,
       "sellingPrice": 167,
@@ -11900,8 +11900,8 @@
         {
           "batchNo": "131.36",
           "landingCost": 131.36,
-          "openingStock": 123,
-          "stock": 152,
+          "openingStock": 94,
+          "stock": 123,
           "marginPercent": 7.742083,
           "marginAmount": 10.17,
           "gstExclRate": 131.36,
@@ -11998,8 +11998,8 @@
       "alternateUnits": [],
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
-      "openingStock": 25,
-      "stock": 50,
+      "openingStock": 0,
+      "stock": 25,
       "landingCost": 338.98,
       "costPrice": 338.98,
       "sellingPrice": 410,
@@ -12012,8 +12012,8 @@
         {
           "batchNo": "372.88",
           "landingCost": 372.88,
-          "openingStock": 4,
-          "stock": 8,
+          "openingStock": 0,
+          "stock": 4,
           "marginPercent": 2.27419,
           "marginAmount": 8.48000000000002,
           "gstExclRate": 372.88,
@@ -12025,8 +12025,8 @@
         {
           "batchNo": "338.98",
           "landingCost": 338.98,
-          "openingStock": 21,
-          "stock": 42,
+          "openingStock": 0,
+          "stock": 21,
           "marginPercent": 2.501622,
           "marginAmount": 8.47999999999996,
           "gstExclRate": 338.98,
@@ -12067,8 +12067,8 @@
       "alternateUnits": [],
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
-      "openingStock": 72,
-      "stock": 144,
+      "openingStock": 0,
+      "stock": 72,
       "landingCost": 254.24,
       "costPrice": 254.24,
       "sellingPrice": 310,
@@ -12081,8 +12081,8 @@
         {
           "batchNo": "254.24",
           "landingCost": 254.24,
-          "openingStock": 72,
-          "stock": 144,
+          "openingStock": 0,
+          "stock": 72,
           "marginPercent": 3.331498,
           "marginAmount": 8.46999999999997,
           "gstExclRate": 254.24,
@@ -12123,8 +12123,8 @@
       "alternateUnits": [],
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
-      "openingStock": 7,
-      "stock": 14,
+      "openingStock": 0,
+      "stock": 7,
       "landingCost": 669.49,
       "costPrice": 669.49,
       "sellingPrice": 810,
@@ -12137,8 +12137,8 @@
         {
           "batchNo": "669.49",
           "landingCost": 669.49,
-          "openingStock": 7,
-          "stock": 14,
+          "openingStock": 0,
+          "stock": 7,
           "marginPercent": 2.531778,
           "marginAmount": 16.95,
           "gstExclRate": 669.49,
@@ -12179,8 +12179,8 @@
       "alternateUnits": [],
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
-      "openingStock": 1,
-      "stock": 2,
+      "openingStock": 0,
+      "stock": 1,
       "landingCost": 805.08,
       "costPrice": 805.08,
       "sellingPrice": 975,
@@ -12193,8 +12193,8 @@
         {
           "batchNo": "805.08",
           "landingCost": 805.08,
-          "openingStock": 1,
-          "stock": 2,
+          "openingStock": 0,
+          "stock": 1,
           "marginPercent": 2.632037,
           "marginAmount": 21.1899999999999,
           "gstExclRate": 805.08,
@@ -12235,8 +12235,8 @@
       "alternateUnits": [],
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
-      "openingStock": 1,
-      "stock": 2,
+      "openingStock": 0,
+      "stock": 1,
       "landingCost": 2690.68,
       "costPrice": 2690.68,
       "sellingPrice": 3240,
@@ -12249,8 +12249,8 @@
         {
           "batchNo": "2690.68",
           "landingCost": 2690.68,
-          "openingStock": 1,
-          "stock": 2,
+          "openingStock": 0,
+          "stock": 1,
           "marginPercent": 2.047066,
           "marginAmount": 55.0800000000004,
           "gstExclRate": 2690.68,
@@ -12291,8 +12291,8 @@
       "alternateUnits": [],
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
-      "openingStock": 7,
-      "stock": 14,
+      "openingStock": 0,
+      "stock": 7,
       "landingCost": 93.22,
       "costPrice": 93.22,
       "sellingPrice": 120,
@@ -12305,8 +12305,8 @@
         {
           "batchNo": "93.22",
           "landingCost": 93.22,
-          "openingStock": 7,
-          "stock": 14,
+          "openingStock": 0,
+          "stock": 7,
           "marginPercent": 9.09,
           "marginAmount": 8.47,
           "gstExclRate": 93.22,
@@ -12347,8 +12347,8 @@
       "alternateUnits": [],
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
-      "openingStock": 1,
-      "stock": 2,
+      "openingStock": 0,
+      "stock": 1,
       "landingCost": 2415.25,
       "costPrice": 2415.25,
       "sellingPrice": 2920,
@@ -12361,8 +12361,8 @@
         {
           "batchNo": "2415.25",
           "landingCost": 2415.25,
-          "openingStock": 1,
-          "stock": 2,
+          "openingStock": 0,
+          "stock": 1,
           "marginPercent": 2.456475,
           "marginAmount": 59.3299999999999,
           "gstExclRate": 2415.25,
@@ -12574,7 +12574,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -80,
-      "openingBalance": -80,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 92,
       "ledgerCode": "L0092"
@@ -12594,7 +12594,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -360,
-      "openingBalance": -360,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 93,
       "ledgerCode": "L0093"
@@ -12634,7 +12634,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -50000,
-      "openingBalance": -50000,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 95,
       "ledgerCode": "L0095"
@@ -12674,7 +12674,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 531,
-      "openingBalance": 531,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 104,
       "ledgerCode": "L0104"
@@ -13034,7 +13034,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 49,
-      "openingBalance": 49,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 142,
       "ledgerCode": "L0142"
@@ -13214,7 +13214,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -7189,
-      "openingBalance": -7189,
+      "openingBalance": 3071,
       "balanceType": "Debit",
       "tradeasyLedgerId": 160,
       "ledgerCode": "L0160"
@@ -13234,7 +13234,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 68,
-      "openingBalance": 68,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 161,
       "ledgerCode": "L0161"
@@ -13254,7 +13254,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 51,
-      "openingBalance": 51,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 162,
       "ledgerCode": "L0162"
@@ -13334,7 +13334,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 2,
-      "openingBalance": 2,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 167,
       "ledgerCode": "L0167"
@@ -13394,7 +13394,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -820,
-      "openingBalance": -820,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 170,
       "ledgerCode": "L0170"
@@ -13454,7 +13454,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 16,
-      "openingBalance": 16,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 174,
       "ledgerCode": "L0174"
@@ -13534,7 +13534,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -370,
-      "openingBalance": -370,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 179,
       "ledgerCode": "L0179"
@@ -13694,7 +13694,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -100,
-      "openingBalance": -100,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 203,
       "ledgerCode": "L0203"
@@ -13714,7 +13714,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -40,
-      "openingBalance": -40,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 204,
       "ledgerCode": "L0204"
@@ -13794,7 +13794,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -100,
-      "openingBalance": -100,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 208,
       "ledgerCode": "L0208"
@@ -14014,7 +14014,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -200,
-      "openingBalance": -200,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 219,
       "ledgerCode": "L0219"
@@ -14034,7 +14034,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -180,
-      "openingBalance": -180,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 220,
       "ledgerCode": "L0220"
@@ -14134,7 +14134,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 3,
-      "openingBalance": 3,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 225,
       "ledgerCode": "L0225"
@@ -14254,7 +14254,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 81,
-      "openingBalance": 81,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 231,
       "ledgerCode": "L0231"
@@ -14294,7 +14294,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 54,
-      "openingBalance": 54,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 233,
       "ledgerCode": "L0233"
@@ -14354,7 +14354,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 24222,
-      "openingBalance": 24222,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 238,
       "ledgerCode": "L0238"
@@ -14534,7 +14534,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -170,
-      "openingBalance": -170,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 248,
       "ledgerCode": "L0248"
@@ -14614,7 +14614,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -100,
-      "openingBalance": -100,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 252,
       "ledgerCode": "L0252"
@@ -14654,7 +14654,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 23,
-      "openingBalance": 23,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 254,
       "ledgerCode": "L0254"
@@ -14734,7 +14734,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -260,
-      "openingBalance": -260,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 259,
       "ledgerCode": "L0259"
@@ -14754,7 +14754,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -240,
-      "openingBalance": -240,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 260,
       "ledgerCode": "L0260"
@@ -14774,7 +14774,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -600,
-      "openingBalance": -600,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 262,
       "ledgerCode": "L0262"
@@ -14854,7 +14854,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -20,
-      "openingBalance": -20,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 267,
       "ledgerCode": "L0267"
@@ -14874,7 +14874,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -360,
-      "openingBalance": -360,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 268,
       "ledgerCode": "L0268"
@@ -15174,7 +15174,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 12,
-      "openingBalance": 12,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 284,
       "ledgerCode": "L0284"
@@ -15234,7 +15234,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -20,
-      "openingBalance": -20,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 287,
       "ledgerCode": "L0287"
@@ -15494,7 +15494,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -360,
-      "openingBalance": -360,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 304,
       "ledgerCode": "L0304"
@@ -15574,7 +15574,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 60000,
-      "openingBalance": 60000,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 309,
       "ledgerCode": "L0309"
@@ -15894,7 +15894,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -310,
-      "openingBalance": -310,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 328,
       "ledgerCode": "L0328"
@@ -15934,7 +15934,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 85,
-      "openingBalance": 85,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 330,
       "ledgerCode": "L0330"
@@ -16194,7 +16194,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -615,
-      "openingBalance": -615,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 346,
       "ledgerCode": "L0346"
@@ -16434,7 +16434,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -850,
-      "openingBalance": -850,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 363,
       "ledgerCode": "L0363"
@@ -16514,7 +16514,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -455,
-      "openingBalance": -455,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 367,
       "ledgerCode": "L0367"
@@ -16574,7 +16574,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 17,
-      "openingBalance": 17,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 370,
       "ledgerCode": "L0370"
@@ -16694,7 +16694,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 938,
-      "openingBalance": 938,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 376,
       "ledgerCode": "L0376"
@@ -16754,7 +16754,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -300,
-      "openingBalance": -300,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 380,
       "ledgerCode": "L0380"
@@ -16774,7 +16774,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 609,
-      "openingBalance": 609,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 381,
       "ledgerCode": "L0381"
@@ -16794,7 +16794,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -375,
-      "openingBalance": -375,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 382,
       "ledgerCode": "L0382"
@@ -16954,7 +16954,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 963,
-      "openingBalance": 963,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 390,
       "ledgerCode": "L0390"
@@ -16974,7 +16974,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 616,
-      "openingBalance": 616,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 391,
       "ledgerCode": "L0391"
@@ -17014,7 +17014,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -50,
-      "openingBalance": -50,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 393,
       "ledgerCode": "L0393"
@@ -17114,7 +17114,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -290,
-      "openingBalance": -290,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 399,
       "ledgerCode": "L0399"
@@ -17254,7 +17254,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -275,
-      "openingBalance": -275,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 407,
       "ledgerCode": "L0407"
@@ -17394,7 +17394,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -225,
-      "openingBalance": -225,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 415,
       "ledgerCode": "L0415"
@@ -17434,7 +17434,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 102,
-      "openingBalance": 102,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 417,
       "ledgerCode": "L0417"
@@ -17454,7 +17454,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -300,
-      "openingBalance": -300,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 418,
       "ledgerCode": "L0418"
@@ -17514,7 +17514,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -745,
-      "openingBalance": -745,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 421,
       "ledgerCode": "L0421"
@@ -17534,7 +17534,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 2,
-      "openingBalance": 2,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 422,
       "ledgerCode": "L0422"
@@ -17554,7 +17554,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 18,
-      "openingBalance": 18,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 423,
       "ledgerCode": "L0423"
@@ -17574,7 +17574,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -180,
-      "openingBalance": -180,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 424,
       "ledgerCode": "L0424"
@@ -17614,7 +17614,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 15,
-      "openingBalance": 15,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 426,
       "ledgerCode": "L0426"
@@ -17634,7 +17634,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 318248,
-      "openingBalance": 318248,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 427,
       "ledgerCode": "L0427"
@@ -17654,7 +17654,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 1,
-      "openingBalance": 1,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 428,
       "ledgerCode": "L0428"
@@ -17754,7 +17754,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -500,
-      "openingBalance": -500,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 433,
       "ledgerCode": "L0433"
@@ -17794,7 +17794,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -200,
-      "openingBalance": -200,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 435,
       "ledgerCode": "L0435"
@@ -17814,7 +17814,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -50,
-      "openingBalance": -50,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 436,
       "ledgerCode": "L0436"
@@ -17854,7 +17854,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 48,
-      "openingBalance": 48,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 438,
       "ledgerCode": "L0438"
@@ -17894,7 +17894,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 14,
-      "openingBalance": 14,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 440,
       "ledgerCode": "L0440"
@@ -17934,7 +17934,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -530,
-      "openingBalance": -530,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 442,
       "ledgerCode": "L0442"
@@ -18134,7 +18134,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 14595,
-      "openingBalance": 14595,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 452,
       "ledgerCode": "L0452"
@@ -18214,7 +18214,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -450,
-      "openingBalance": -450,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 456,
       "ledgerCode": "L0456"
@@ -18234,7 +18234,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -32,
-      "openingBalance": -32,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 457,
       "ledgerCode": "L0457"
@@ -18254,7 +18254,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -400,
-      "openingBalance": -400,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 458,
       "ledgerCode": "L0458"
@@ -18294,7 +18294,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -50,
-      "openingBalance": -50,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 461,
       "ledgerCode": "L0461"
@@ -18314,7 +18314,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -1,
-      "openingBalance": -1,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 462,
       "ledgerCode": "L0462"
@@ -18334,7 +18334,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -50,
-      "openingBalance": -50,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 463,
       "ledgerCode": "L0463"
@@ -18434,7 +18434,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 8,
-      "openingBalance": 8,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 469,
       "ledgerCode": "L0469"
@@ -18594,7 +18594,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 118,
-      "openingBalance": 118,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 477,
       "ledgerCode": "L0477"
@@ -18654,7 +18654,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -370,
-      "openingBalance": -370,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 480,
       "ledgerCode": "L0480"
@@ -18734,7 +18734,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -237,
-      "openingBalance": -237,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 484,
       "ledgerCode": "L0484"
@@ -18754,7 +18754,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 48,
-      "openingBalance": 48,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 485,
       "ledgerCode": "L0485"
@@ -18774,7 +18774,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -40,
-      "openingBalance": -40,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 486,
       "ledgerCode": "L0486"
@@ -18794,7 +18794,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 38,
-      "openingBalance": 38,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 487,
       "ledgerCode": "L0487"
@@ -18994,7 +18994,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 48,
-      "openingBalance": 48,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 497,
       "ledgerCode": "L0497"
@@ -19034,7 +19034,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -720,
-      "openingBalance": -720,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 500,
       "ledgerCode": "L0500"
@@ -19054,7 +19054,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -19,
-      "openingBalance": -19,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 501,
       "ledgerCode": "L0501"
@@ -19174,7 +19174,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -380,
-      "openingBalance": -380,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 507,
       "ledgerCode": "L0507"
@@ -19234,7 +19234,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -47,
-      "openingBalance": -47,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 511,
       "ledgerCode": "L0511"
@@ -19274,7 +19274,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 2585,
-      "openingBalance": 2585,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 513,
       "ledgerCode": "L0513"
@@ -19294,7 +19294,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 3,
-      "openingBalance": 3,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 514,
       "ledgerCode": "L0514"
@@ -19594,7 +19594,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 4,
-      "openingBalance": 4,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 532,
       "ledgerCode": "L0532"
@@ -19674,7 +19674,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 23,
-      "openingBalance": 23,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 536,
       "ledgerCode": "L0536"
@@ -19914,7 +19914,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -370,
-      "openingBalance": -370,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 554,
       "ledgerCode": "L0554"
@@ -20254,7 +20254,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -240,
-      "openingBalance": -240,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 571,
       "ledgerCode": "L0571"
@@ -20374,7 +20374,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -668,
-      "openingBalance": -668,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 577,
       "ledgerCode": "L0577"
@@ -20514,7 +20514,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -275,
-      "openingBalance": -275,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 584,
       "ledgerCode": "L0584"
@@ -20614,7 +20614,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -360,
-      "openingBalance": -360,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 589,
       "ledgerCode": "L0589"
@@ -20714,7 +20714,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -350,
-      "openingBalance": -350,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 594,
       "ledgerCode": "L0594"
@@ -20794,7 +20794,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -49,
-      "openingBalance": -49,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 598,
       "ledgerCode": "L0598"
@@ -20874,7 +20874,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -595,
-      "openingBalance": -595,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 603,
       "ledgerCode": "L0603"
@@ -20914,7 +20914,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -363,
-      "openingBalance": -363,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 605,
       "ledgerCode": "L0605"
@@ -20974,7 +20974,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 156,
-      "openingBalance": 156,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 608,
       "ledgerCode": "L0608"
@@ -20994,7 +20994,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -100,
-      "openingBalance": -100,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 609,
       "ledgerCode": "L0609"
@@ -21034,7 +21034,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -20,
-      "openingBalance": -20,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 613,
       "ledgerCode": "L0613"
@@ -21074,7 +21074,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -20,
-      "openingBalance": -20,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 615,
       "ledgerCode": "L0615"
@@ -21134,7 +21134,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 14,
-      "openingBalance": 14,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 619,
       "ledgerCode": "L0619"
@@ -21234,7 +21234,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -300,
-      "openingBalance": -300,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 624,
       "ledgerCode": "L0624"
@@ -21274,7 +21274,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 19,
-      "openingBalance": 19,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 626,
       "ledgerCode": "L0626"
@@ -21314,7 +21314,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 7,
-      "openingBalance": 7,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 628,
       "ledgerCode": "L0628"
@@ -21334,7 +21334,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -250,
-      "openingBalance": -250,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 629,
       "ledgerCode": "L0629"
@@ -21354,7 +21354,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -460,
-      "openingBalance": -460,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 630,
       "ledgerCode": "L0630"
@@ -21594,7 +21594,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -190,
-      "openingBalance": -190,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 642,
       "ledgerCode": "L0642"
@@ -21634,7 +21634,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -640,
-      "openingBalance": -640,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 644,
       "ledgerCode": "L0644"
@@ -21714,7 +21714,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 11,
-      "openingBalance": 11,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 648,
       "ledgerCode": "L0648"
@@ -21854,7 +21854,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -80,
-      "openingBalance": -80,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 655,
       "ledgerCode": "L0655"
@@ -21894,7 +21894,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -220,
-      "openingBalance": -220,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 657,
       "ledgerCode": "L0657"
@@ -21954,7 +21954,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 126,
-      "openingBalance": 126,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 660,
       "ledgerCode": "L0660"
@@ -22274,7 +22274,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 135,
-      "openingBalance": 135,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 677,
       "ledgerCode": "L0677"
@@ -22374,7 +22374,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -23,
-      "openingBalance": -23,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 682,
       "ledgerCode": "L0682"
@@ -22394,7 +22394,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -30,
-      "openingBalance": -30,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 683,
       "ledgerCode": "L0683"
@@ -22414,7 +22414,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 29,
-      "openingBalance": 29,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 684,
       "ledgerCode": "L0684"
@@ -22554,7 +22554,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -491,
-      "openingBalance": -491,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 691,
       "ledgerCode": "L0691"
@@ -22654,7 +22654,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 60,
-      "openingBalance": 60,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 696,
       "ledgerCode": "L0696"
@@ -22734,7 +22734,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -88,
-      "openingBalance": -88,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 700,
       "ledgerCode": "L0700"
@@ -22854,7 +22854,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -330,
-      "openingBalance": -330,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 706,
       "ledgerCode": "L0706"
@@ -22874,7 +22874,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -670,
-      "openingBalance": -670,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 707,
       "ledgerCode": "L0707"
@@ -22994,7 +22994,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -80,
-      "openingBalance": -80,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 713,
       "ledgerCode": "L0713"
@@ -23154,7 +23154,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 17,
-      "openingBalance": 17,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 721,
       "ledgerCode": "L0721"
@@ -23174,7 +23174,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -440,
-      "openingBalance": -440,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 722,
       "ledgerCode": "L0722"
@@ -23194,7 +23194,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -820,
-      "openingBalance": -820,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 723,
       "ledgerCode": "L0723"
@@ -23234,7 +23234,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -20,
-      "openingBalance": -20,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 725,
       "ledgerCode": "L0725"
@@ -23254,7 +23254,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -363,
-      "openingBalance": -363,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 726,
       "ledgerCode": "L0726"
@@ -23334,7 +23334,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -926,
-      "openingBalance": -926,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 730,
       "ledgerCode": "L0730"
@@ -23394,7 +23394,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -100,
-      "openingBalance": -100,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 733,
       "ledgerCode": "L0733"
@@ -23494,7 +23494,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 47,
-      "openingBalance": 47,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 738,
       "ledgerCode": "L0738"
@@ -23574,7 +23574,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -360,
-      "openingBalance": -360,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 742,
       "ledgerCode": "L0742"
@@ -23654,7 +23654,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -990,
-      "openingBalance": -990,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 746,
       "ledgerCode": "L0746"
@@ -23694,7 +23694,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -710,
-      "openingBalance": -710,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 749,
       "ledgerCode": "L0749"
@@ -23754,7 +23754,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -750,
-      "openingBalance": -750,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 752,
       "ledgerCode": "L0752"
@@ -23874,7 +23874,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -640,
-      "openingBalance": -640,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 758,
       "ledgerCode": "L0758"
@@ -23894,7 +23894,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -510,
-      "openingBalance": -510,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 759,
       "ledgerCode": "L0759"
@@ -24034,7 +24034,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 19,
-      "openingBalance": 19,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 766,
       "ledgerCode": "L0766"
@@ -24134,7 +24134,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -140,
-      "openingBalance": -140,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 771,
       "ledgerCode": "L0771"
@@ -24154,7 +24154,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -101005,
-      "openingBalance": -101005,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 772,
       "ledgerCode": "L0772"
@@ -24194,7 +24194,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 6,
-      "openingBalance": 6,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 774,
       "ledgerCode": "L0774"
@@ -24334,7 +24334,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -217,
-      "openingBalance": -217,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 781,
       "ledgerCode": "L0781"
@@ -24374,7 +24374,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 53659,
-      "openingBalance": 53659,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 783,
       "ledgerCode": "L0783"
@@ -24394,7 +24394,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 50,
-      "openingBalance": 50,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 784,
       "ledgerCode": "L0784"
@@ -24514,7 +24514,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -320,
-      "openingBalance": -320,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 790,
       "ledgerCode": "L0790"
@@ -24614,7 +24614,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 22,
-      "openingBalance": 22,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 797,
       "ledgerCode": "L0797"
@@ -24674,7 +24674,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -900,
-      "openingBalance": -900,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 800,
       "ledgerCode": "L0800"
@@ -24694,7 +24694,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -550,
-      "openingBalance": -550,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 801,
       "ledgerCode": "L0801"
@@ -24714,7 +24714,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -50,
-      "openingBalance": -50,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 802,
       "ledgerCode": "L0802"
@@ -24774,7 +24774,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 11,
-      "openingBalance": 11,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 805,
       "ledgerCode": "L0805"
@@ -24954,7 +24954,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -490,
-      "openingBalance": -490,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 814,
       "ledgerCode": "L0814"
@@ -24994,7 +24994,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -140,
-      "openingBalance": -140,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 817,
       "ledgerCode": "L0817"
@@ -25194,7 +25194,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 3459,
-      "openingBalance": 3459,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 829,
       "ledgerCode": "L0829"
@@ -25214,7 +25214,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 26,
-      "openingBalance": 26,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 830,
       "ledgerCode": "L0830"
@@ -25514,7 +25514,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -958,
-      "openingBalance": -958,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 845,
       "ledgerCode": "L0845"
@@ -25574,7 +25574,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -190,
-      "openingBalance": -190,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 849,
       "ledgerCode": "L0849"
@@ -25634,7 +25634,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -500,
-      "openingBalance": -500,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 853,
       "ledgerCode": "L0853"
@@ -25694,7 +25694,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 12,
-      "openingBalance": 12,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 856,
       "ledgerCode": "L0856"
@@ -25834,7 +25834,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -410,
-      "openingBalance": -410,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 863,
       "ledgerCode": "L0863"
@@ -25934,7 +25934,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 1,
-      "openingBalance": 1,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 868,
       "ledgerCode": "L0868"
@@ -26054,7 +26054,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -220,
-      "openingBalance": -220,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 874,
       "ledgerCode": "L0874"
@@ -26194,7 +26194,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 177,
-      "openingBalance": 177,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 881,
       "ledgerCode": "L0881"
@@ -26234,7 +26234,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -560,
-      "openingBalance": -560,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 883,
       "ledgerCode": "L0883"
@@ -26294,7 +26294,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -830,
-      "openingBalance": -830,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 886,
       "ledgerCode": "L0886"
@@ -26434,7 +26434,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -880,
-      "openingBalance": -880,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 895,
       "ledgerCode": "L0895"
@@ -26514,7 +26514,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 1990,
-      "openingBalance": 1990,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 899,
       "ledgerCode": "L0899"
@@ -26554,7 +26554,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 9,
-      "openingBalance": 9,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 903,
       "ledgerCode": "L0903"
@@ -26594,7 +26594,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 20,
-      "openingBalance": 20,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 905,
       "ledgerCode": "L0905"
@@ -26614,7 +26614,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 9,
-      "openingBalance": 9,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 906,
       "ledgerCode": "L0906"
@@ -26634,7 +26634,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -440,
-      "openingBalance": -440,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 907,
       "ledgerCode": "L0907"
@@ -26674,7 +26674,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 28,
-      "openingBalance": 28,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 909,
       "ledgerCode": "L0909"
@@ -26714,7 +26714,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 21,
-      "openingBalance": 21,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 911,
       "ledgerCode": "L0911"
@@ -26954,7 +26954,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 20,
-      "openingBalance": 20,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 924,
       "ledgerCode": "L0924"
@@ -26974,7 +26974,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 13,
-      "openingBalance": 13,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 925,
       "ledgerCode": "L0925"
@@ -27214,7 +27214,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -170,
-      "openingBalance": -170,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 937,
       "ledgerCode": "L0937"
@@ -27254,7 +27254,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -584,
-      "openingBalance": -584,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 940,
       "ledgerCode": "L0940"
@@ -27274,7 +27274,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -24450,
-      "openingBalance": -24450,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 941,
       "ledgerCode": "L0941"
@@ -27334,7 +27334,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 15,
-      "openingBalance": 15,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 945,
       "ledgerCode": "L0945"
@@ -27374,7 +27374,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -457,
-      "openingBalance": -457,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 947,
       "ledgerCode": "L0947"
@@ -27414,7 +27414,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -100,
-      "openingBalance": -100,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 949,
       "ledgerCode": "L0949"
@@ -27594,7 +27594,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -130,
-      "openingBalance": -130,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 958,
       "ledgerCode": "L0958"
@@ -27754,7 +27754,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -350,
-      "openingBalance": -350,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 966,
       "ledgerCode": "L0966"
@@ -27814,7 +27814,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 50,
-      "openingBalance": 50,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 975,
       "ledgerCode": "L0975"
@@ -27874,7 +27874,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -190,
-      "openingBalance": -190,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 978,
       "ledgerCode": "L0978"
@@ -27994,7 +27994,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -820,
-      "openingBalance": -820,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 988,
       "ledgerCode": "L0988"
@@ -28054,7 +28054,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -180,
-      "openingBalance": -180,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 991,
       "ledgerCode": "L0991"
@@ -28074,7 +28074,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -740,
-      "openingBalance": -740,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 992,
       "ledgerCode": "L0992"
@@ -28154,7 +28154,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 30,
-      "openingBalance": 30,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 996,
       "ledgerCode": "L0996"
@@ -28334,7 +28334,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -25,
-      "openingBalance": -25,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1006,
       "ledgerCode": "L1006"
@@ -28434,7 +28434,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -686,
-      "openingBalance": -686,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1013,
       "ledgerCode": "L1013"
@@ -28534,7 +28534,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -920,
-      "openingBalance": -920,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1020,
       "ledgerCode": "L1020"
@@ -28694,7 +28694,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 18,
-      "openingBalance": 18,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1031,
       "ledgerCode": "L1031"
@@ -28714,7 +28714,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -40,
-      "openingBalance": -40,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1032,
       "ledgerCode": "L1032"
@@ -28734,7 +28734,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -850,
-      "openingBalance": -850,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1033,
       "ledgerCode": "L1033"
@@ -28874,7 +28874,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -40,
-      "openingBalance": -40,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1040,
       "ledgerCode": "L1040"
@@ -29014,7 +29014,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 39,
-      "openingBalance": 39,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1047,
       "ledgerCode": "L1047"
@@ -29054,7 +29054,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 22,
-      "openingBalance": 22,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1049,
       "ledgerCode": "L1049"
@@ -29094,7 +29094,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 13,
-      "openingBalance": 13,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1051,
       "ledgerCode": "L1051"
@@ -29154,7 +29154,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 97,
-      "openingBalance": 97,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1054,
       "ledgerCode": "L1054"
@@ -29214,7 +29214,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 76,
-      "openingBalance": 76,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1057,
       "ledgerCode": "L1057"
@@ -29234,7 +29234,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 36,
-      "openingBalance": 36,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1058,
       "ledgerCode": "L1058"
@@ -29274,7 +29274,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 43,
-      "openingBalance": 43,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1060,
       "ledgerCode": "L1060"
@@ -29414,7 +29414,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 4010,
-      "openingBalance": 4010,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1067,
       "ledgerCode": "L1067"
@@ -29554,7 +29554,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -170,
-      "openingBalance": -170,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1074,
       "ledgerCode": "L1074"
@@ -29574,7 +29574,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -50,
-      "openingBalance": -50,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1075,
       "ledgerCode": "L1075"
@@ -29654,7 +29654,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -20,
-      "openingBalance": -20,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1079,
       "ledgerCode": "L1079"
@@ -29774,7 +29774,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 51,
-      "openingBalance": 51,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1085,
       "ledgerCode": "L1085"
@@ -29874,7 +29874,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -135,
-      "openingBalance": -135,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1090,
       "ledgerCode": "L1090"
@@ -29914,7 +29914,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -230,
-      "openingBalance": -230,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1092,
       "ledgerCode": "L1092"
@@ -30314,7 +30314,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 1,
-      "openingBalance": 1,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1113,
       "ledgerCode": "L1113"
@@ -30354,7 +30354,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 343,
-      "openingBalance": 343,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1115,
       "ledgerCode": "L1115"
@@ -30374,7 +30374,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -350,
-      "openingBalance": -350,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1116,
       "ledgerCode": "L1116"
@@ -30434,7 +30434,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -50,
-      "openingBalance": -50,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1119,
       "ledgerCode": "L1119"
@@ -30454,7 +30454,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 45126,
-      "openingBalance": 45126,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1120,
       "ledgerCode": "L1120"
@@ -30474,7 +30474,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 20,
-      "openingBalance": 20,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1121,
       "ledgerCode": "L1121"
@@ -30494,7 +30494,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -200,
-      "openingBalance": -200,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1123,
       "ledgerCode": "L1123"
@@ -30574,7 +30574,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 37,
-      "openingBalance": 37,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1127,
       "ledgerCode": "L1127"
@@ -30634,7 +30634,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -484,
-      "openingBalance": -484,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1130,
       "ledgerCode": "L1130"
@@ -30694,7 +30694,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -470,
-      "openingBalance": -470,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1133,
       "ledgerCode": "L1133"
@@ -30754,7 +30754,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 13,
-      "openingBalance": 13,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1136,
       "ledgerCode": "L1136"
@@ -30774,7 +30774,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -756,
-      "openingBalance": -756,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1137,
       "ledgerCode": "L1137"
@@ -30874,7 +30874,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 40,
-      "openingBalance": 40,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1142,
       "ledgerCode": "L1142"
@@ -31094,7 +31094,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 40,
-      "openingBalance": 40,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1153,
       "ledgerCode": "L1153"
@@ -31194,7 +31194,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -806,
-      "openingBalance": -806,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1158,
       "ledgerCode": "L1158"
@@ -31214,7 +31214,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -17,
-      "openingBalance": -17,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1159,
       "ledgerCode": "L1159"
@@ -31314,7 +31314,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 102,
-      "openingBalance": 102,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1164,
       "ledgerCode": "L1164"
@@ -31334,7 +31334,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -190,
-      "openingBalance": -190,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1165,
       "ledgerCode": "L1165"
@@ -31454,7 +31454,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 1250,
-      "openingBalance": 1250,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1171,
       "ledgerCode": "L1171"
@@ -31534,7 +31534,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -260,
-      "openingBalance": -260,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1175,
       "ledgerCode": "L1175"
@@ -31674,7 +31674,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -425,
-      "openingBalance": -425,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1183,
       "ledgerCode": "L1183"
@@ -31694,7 +31694,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -950,
-      "openingBalance": -950,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1184,
       "ledgerCode": "L1184"
@@ -31714,7 +31714,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -343,
-      "openingBalance": -343,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1185,
       "ledgerCode": "L1185"
@@ -31734,7 +31734,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 28,
-      "openingBalance": 28,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1186,
       "ledgerCode": "L1186"
@@ -31754,7 +31754,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 925,
-      "openingBalance": 925,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1187,
       "ledgerCode": "L1187"
@@ -31774,7 +31774,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -740,
-      "openingBalance": -740,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1188,
       "ledgerCode": "L1188"
@@ -31794,7 +31794,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -90,
-      "openingBalance": -90,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1189,
       "ledgerCode": "L1189"
@@ -31814,7 +31814,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -30,
-      "openingBalance": -30,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1190,
       "ledgerCode": "L1190"
@@ -31834,7 +31834,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 38,
-      "openingBalance": 38,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1191,
       "ledgerCode": "L1191"
@@ -31874,7 +31874,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -15,
-      "openingBalance": -15,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1193,
       "ledgerCode": "L1193"
@@ -31894,7 +31894,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -110,
-      "openingBalance": -110,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1194,
       "ledgerCode": "L1194"
@@ -31914,7 +31914,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 47,
-      "openingBalance": 47,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1195,
       "ledgerCode": "L1195"
@@ -31934,7 +31934,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -690,
-      "openingBalance": -690,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1196,
       "ledgerCode": "L1196"
@@ -31954,7 +31954,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -50,
-      "openingBalance": -50,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1197,
       "ledgerCode": "L1197"
@@ -31994,7 +31994,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -120,
-      "openingBalance": -120,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1199,
       "ledgerCode": "L1199"
@@ -32014,7 +32014,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 4,
-      "openingBalance": 4,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1200,
       "ledgerCode": "L1200"
@@ -32034,7 +32034,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -190,
-      "openingBalance": -190,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1201,
       "ledgerCode": "L1201"
@@ -32074,7 +32074,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -190,
-      "openingBalance": -190,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1203,
       "ledgerCode": "L1203"
@@ -32114,7 +32114,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 36,
-      "openingBalance": 36,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1205,
       "ledgerCode": "L1205"
@@ -32134,7 +32134,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 57,
-      "openingBalance": 57,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1206,
       "ledgerCode": "L1206"
@@ -32154,7 +32154,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -300,
-      "openingBalance": -300,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1207,
       "ledgerCode": "L1207"
@@ -32174,7 +32174,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 292,
-      "openingBalance": 292,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1208,
       "ledgerCode": "L1208"
@@ -32214,7 +32214,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -700,
-      "openingBalance": -700,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1210,
       "ledgerCode": "L1210"
@@ -32234,7 +32234,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -20,
-      "openingBalance": -20,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1211,
       "ledgerCode": "L1211"
@@ -32254,7 +32254,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -330,
-      "openingBalance": -330,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1212,
       "ledgerCode": "L1212"
@@ -32274,7 +32274,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -350,
-      "openingBalance": -350,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1213,
       "ledgerCode": "L1213"
@@ -32294,7 +32294,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 4,
-      "openingBalance": 4,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1214,
       "ledgerCode": "L1214"
@@ -32314,7 +32314,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 36,
-      "openingBalance": 36,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1215,
       "ledgerCode": "L1215"
@@ -32334,7 +32334,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -900,
-      "openingBalance": -900,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1216,
       "ledgerCode": "L1216"
@@ -32354,7 +32354,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -500,
-      "openingBalance": -500,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1217,
       "ledgerCode": "L1217"
@@ -32374,7 +32374,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -10159,
-      "openingBalance": -10159,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1218,
       "ledgerCode": "L1218"
@@ -32394,7 +32394,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 5,
-      "openingBalance": 5,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1220,
       "ledgerCode": "L1220"
@@ -32414,7 +32414,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -280,
-      "openingBalance": -280,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1221,
       "ledgerCode": "L1221"
@@ -32434,7 +32434,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -175,
-      "openingBalance": -175,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1222,
       "ledgerCode": "L1222"
@@ -32473,7 +32473,7 @@
       "gstin": "",
       "creditLimit": 0,
       "creditPeriod": 0,
-      "balance": 0,
+      "balance": 28,
       "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1224,
@@ -32494,7 +32494,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 188,
-      "openingBalance": 188,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1225,
       "ledgerCode": "L1225"
@@ -32514,7 +32514,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 38,
-      "openingBalance": 38,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1226,
       "ledgerCode": "L1226"
@@ -32534,7 +32534,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -50,
-      "openingBalance": -50,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1227,
       "ledgerCode": "L1227"
@@ -32594,7 +32594,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -330,
-      "openingBalance": -330,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1230,
       "ledgerCode": "L1230"
@@ -32614,7 +32614,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 13,
-      "openingBalance": 13,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1231,
       "ledgerCode": "L1231"
@@ -32634,7 +32634,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -50,
-      "openingBalance": -50,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1232,
       "ledgerCode": "L1232"
@@ -32674,7 +32674,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -440,
-      "openingBalance": -440,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1234,
       "ledgerCode": "L1234"
@@ -32694,7 +32694,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -800,
-      "openingBalance": -800,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1235,
       "ledgerCode": "L1235"
@@ -32714,7 +32714,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 67,
-      "openingBalance": 67,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1236,
       "ledgerCode": "L1236"
@@ -32734,7 +32734,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -290,
-      "openingBalance": -290,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1237,
       "ledgerCode": "L1237"
@@ -32754,7 +32754,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -200,
-      "openingBalance": -200,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1238,
       "ledgerCode": "L1238"
@@ -32774,7 +32774,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 21,
-      "openingBalance": 21,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1239,
       "ledgerCode": "L1239"
@@ -32794,7 +32794,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -200,
-      "openingBalance": -200,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1240,
       "ledgerCode": "L1240"
@@ -32814,7 +32814,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -360,
-      "openingBalance": -360,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1241,
       "ledgerCode": "L1241"
@@ -32834,7 +32834,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -370,
-      "openingBalance": -370,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1242,
       "ledgerCode": "L1242"
@@ -32854,7 +32854,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -100,
-      "openingBalance": -100,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1243,
       "ledgerCode": "L1243"
@@ -32874,7 +32874,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -130,
-      "openingBalance": -130,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1244,
       "ledgerCode": "L1244"
@@ -32914,7 +32914,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -350,
-      "openingBalance": -350,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1246,
       "ledgerCode": "L1246"
@@ -32934,7 +32934,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -80,
-      "openingBalance": -80,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1247,
       "ledgerCode": "L1247"
@@ -32954,7 +32954,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -400,
-      "openingBalance": -400,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1248,
       "ledgerCode": "L1248"
@@ -32974,7 +32974,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -20,
-      "openingBalance": -20,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1249,
       "ledgerCode": "L1249"
@@ -32994,7 +32994,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 67,
-      "openingBalance": 67,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1250,
       "ledgerCode": "L1250"
@@ -33014,7 +33014,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 21,
-      "openingBalance": 21,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1251,
       "ledgerCode": "L1251"
@@ -33034,7 +33034,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -360,
-      "openingBalance": -360,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1252,
       "ledgerCode": "L1252"
@@ -33054,7 +33054,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -30,
-      "openingBalance": -30,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1253,
       "ledgerCode": "L1253"
@@ -33074,7 +33074,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 46,
-      "openingBalance": 46,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1254,
       "ledgerCode": "L1254"
@@ -33094,7 +33094,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 97,
-      "openingBalance": 97,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1255,
       "ledgerCode": "L1255"
@@ -33154,7 +33154,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 139,
-      "openingBalance": 139,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1258,
       "ledgerCode": "L1258"
@@ -33214,7 +33214,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -150,
-      "openingBalance": -150,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1262,
       "ledgerCode": "L1262"
@@ -33234,7 +33234,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -95,
-      "openingBalance": -95,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1263,
       "ledgerCode": "L1263"
@@ -33254,7 +33254,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 76,
-      "openingBalance": 76,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1264,
       "ledgerCode": "L1264"
@@ -33274,7 +33274,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -360,
-      "openingBalance": -360,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1265,
       "ledgerCode": "L1265"
@@ -33294,7 +33294,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -90,
-      "openingBalance": -90,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1266,
       "ledgerCode": "L1266"
@@ -33314,7 +33314,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -65,
-      "openingBalance": -65,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1267,
       "ledgerCode": "L1267"
@@ -33354,7 +33354,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -375,
-      "openingBalance": -375,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1269,
       "ledgerCode": "L1269"
@@ -33394,7 +33394,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -50,
-      "openingBalance": -50,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1271,
       "ledgerCode": "L1271"
@@ -33414,7 +33414,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -604,
-      "openingBalance": -604,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1272,
       "ledgerCode": "L1272"
@@ -33434,7 +33434,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -638,
-      "openingBalance": -638,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1273,
       "ledgerCode": "L1273"
@@ -33454,7 +33454,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -610,
-      "openingBalance": -610,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1274,
       "ledgerCode": "L1274"
@@ -33474,7 +33474,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -40,
-      "openingBalance": -40,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1275,
       "ledgerCode": "L1275"
@@ -33494,7 +33494,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 37,
-      "openingBalance": 37,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1276,
       "ledgerCode": "L1276"
@@ -33514,7 +33514,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 19,
-      "openingBalance": 19,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1277,
       "ledgerCode": "L1277"
@@ -33534,7 +33534,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -60,
-      "openingBalance": -60,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1278,
       "ledgerCode": "L1278"
@@ -33554,7 +33554,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -140,
-      "openingBalance": -140,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1279,
       "ledgerCode": "L1279"
@@ -33574,7 +33574,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 79,
-      "openingBalance": 79,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1280,
       "ledgerCode": "L1280"
@@ -33614,7 +33614,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -50,
-      "openingBalance": -50,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1283,
       "ledgerCode": "L1283"
@@ -33634,7 +33634,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -780,
-      "openingBalance": -780,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1284,
       "ledgerCode": "L1284"
@@ -33654,7 +33654,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -360,
-      "openingBalance": -360,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1285,
       "ledgerCode": "L1285"
@@ -33674,7 +33674,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 170,
-      "openingBalance": 170,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1286,
       "ledgerCode": "L1286"
@@ -33694,7 +33694,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -280,
-      "openingBalance": -280,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1287,
       "ledgerCode": "L1287"
@@ -33714,7 +33714,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 208,
-      "openingBalance": 208,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1288,
       "ledgerCode": "L1288"
@@ -33734,7 +33734,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -300,
-      "openingBalance": -300,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1289,
       "ledgerCode": "L1289"
@@ -33794,7 +33794,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 26,
-      "openingBalance": 26,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1293,
       "ledgerCode": "L1293"
@@ -33814,7 +33814,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 16,
-      "openingBalance": 16,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1294,
       "ledgerCode": "L1294"
@@ -33834,7 +33834,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 22,
-      "openingBalance": 22,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1295,
       "ledgerCode": "L1295"
@@ -33854,7 +33854,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 12,
-      "openingBalance": 12,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1297,
       "ledgerCode": "L1297"
@@ -33874,7 +33874,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 11,
-      "openingBalance": 11,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1298,
       "ledgerCode": "L1298"
@@ -33894,7 +33894,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 45,
-      "openingBalance": 45,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1299,
       "ledgerCode": "L1299"
@@ -33914,7 +33914,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -145,
-      "openingBalance": -145,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1300,
       "ledgerCode": "L1300"
@@ -33934,7 +33934,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -410,
-      "openingBalance": -410,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1301,
       "ledgerCode": "L1301"
@@ -33954,7 +33954,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 5580,
-      "openingBalance": 5580,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1302,
       "ledgerCode": "L1302"
@@ -33994,7 +33994,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 23,
-      "openingBalance": 23,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1305,
       "ledgerCode": "L1305"
@@ -34014,7 +34014,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -100,
-      "openingBalance": -100,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1306,
       "ledgerCode": "L1306"
@@ -34034,7 +34034,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -360,
-      "openingBalance": -360,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1307,
       "ledgerCode": "L1307"
@@ -34074,7 +34074,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -50,
-      "openingBalance": -50,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1309,
       "ledgerCode": "L1309"
@@ -34114,7 +34114,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 8,
-      "openingBalance": 8,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1311,
       "ledgerCode": "L1311"
@@ -34174,7 +34174,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -18565,
-      "openingBalance": -18565,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1314,
       "ledgerCode": "L1314"
@@ -34194,7 +34194,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -530,
-      "openingBalance": -530,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1315,
       "ledgerCode": "L1315"
@@ -34214,7 +34214,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -2500,
-      "openingBalance": -2500,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1316,
       "ledgerCode": "L1316"
@@ -34234,7 +34234,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -350,
-      "openingBalance": -350,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1317,
       "ledgerCode": "L1317"
@@ -34254,7 +34254,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -200,
-      "openingBalance": -200,
+      "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1318,
       "ledgerCode": "L1318"
@@ -34295,7 +34295,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -130589.41000000003,
-      "openingBalance": -130589.41000000003,
+      "openingBalance": 85591,
       "balanceType": "Credit",
       "bankName": "",
       "acNo": "",
@@ -34889,7 +34889,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -99950,
-      "openingBalance": -99950,
+      "openingBalance": 99950,
       "balanceType": "Credit",
       "bankName": "",
       "acNo": "",
@@ -35043,7 +35043,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 416936.98,
-      "openingBalance": 416936.98,
+      "openingBalance": 304813.02,
       "balanceType": "Credit",
       "bankName": "",
       "acNo": "",
@@ -35109,7 +35109,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -4836,
-      "openingBalance": -4836,
+      "openingBalance": 4836,
       "balanceType": "Credit",
       "bankName": "",
       "acNo": "",
@@ -35219,7 +35219,7 @@
       "creditLimit": 0,
       "creditPeriod": "",
       "balance": 10,
-      "openingBalance": 10,
+      "openingBalance": 0,
       "balanceType": "Credit",
       "bankName": "",
       "acNo": "",
@@ -35262,7 +35262,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -5960,
-      "openingBalance": -5960,
+      "openingBalance": 5960,
       "balanceType": "Credit",
       "bankName": "",
       "acNo": "",
@@ -35284,7 +35284,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -7079.5,
-      "openingBalance": -7079.5,
+      "openingBalance": 7079.5,
       "balanceType": "Credit",
       "bankName": "",
       "acNo": "",
@@ -35306,7 +35306,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": -13148,
-      "openingBalance": -13148,
+      "openingBalance": 23648,
       "balanceType": "Credit",
       "bankName": "",
       "acNo": "",
@@ -35415,7 +35415,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 2,
-      "openingBalance": 2,
+      "openingBalance": 0,
       "balanceType": "Credit",
       "bankName": "",
       "acNo": "",
@@ -35459,7 +35459,7 @@
       "creditLimit": 0,
       "creditPeriod": 0,
       "balance": 16352,
-      "openingBalance": 16352,
+      "openingBalance": 0,
       "balanceType": "Credit",
       "bankName": "",
       "acNo": "",
@@ -109037,7 +109037,7 @@
       "tradeasyId": 1,
       "name": "CASH",
       "groupName": "CASH-IN-HAND",
-      "openingBalance": 1475221.2200000002,
+      "openingBalance": 2265649.23,
       "balanceType": "Debit"
     },
     {
@@ -109064,7 +109064,7 @@
       "name": "LOCAL SALES",
       "groupName": "SALES ACCOUNT",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0005",
@@ -109088,7 +109088,7 @@
       "name": "LOCAL SALES RETURN",
       "groupName": "SALES ACCOUNT",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0008",
@@ -109112,7 +109112,7 @@
       "name": "DISCOUNT RECEIVED",
       "groupName": "INDIRECT INCOME",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0011",
@@ -109120,7 +109120,7 @@
       "name": "ADDITIONAL TAX",
       "groupName": "DUTIES & TAXES",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0012",
@@ -109154,7 +109154,7 @@
       "name": "FOREX GAIN",
       "groupName": "INDIRECT INCOME",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0016",
@@ -109162,7 +109162,7 @@
       "name": "SERVICE CHARGE",
       "groupName": "DIRECT INCOME",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0017",
@@ -109170,7 +109170,7 @@
       "name": "SERVICE TAX COLLECTED",
       "groupName": "DUTIES & TAXES",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0018",
@@ -109178,7 +109178,7 @@
       "name": "SERVICE CESS",
       "groupName": "DUTIES & TAXES",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0020",
@@ -109186,7 +109186,7 @@
       "name": "SALES CESS",
       "groupName": "DUTIES & TAXES",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0021",
@@ -109194,7 +109194,7 @@
       "name": "PURCHASE CESS",
       "groupName": "DUTIES & TAXES",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0022",
@@ -109202,7 +109202,7 @@
       "name": "SERVICE TAX PAID",
       "groupName": "DUTIES & TAXES",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0023",
@@ -109210,7 +109210,7 @@
       "name": "SERVICE CESS PAID",
       "groupName": "DUTIES & TAXES",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0028",
@@ -109249,7 +109249,7 @@
       "tradeasyId": 32,
       "name": "INPUT SGST 6%",
       "groupName": "INPUT SGST",
-      "openingBalance": 10053.36,
+      "openingBalance": 0,
       "balanceType": "Debit"
     },
     {
@@ -109257,7 +109257,7 @@
       "tradeasyId": 33,
       "name": "INPUT SGST 9%",
       "groupName": "INPUT SGST",
-      "openingBalance": 654647.6499999999,
+      "openingBalance": 356462.69,
       "balanceType": "Debit"
     },
     {
@@ -109289,7 +109289,7 @@
       "tradeasyId": 37,
       "name": "INPUT CGST 6%",
       "groupName": "INPUT CGST",
-      "openingBalance": 10053.36,
+      "openingBalance": 0,
       "balanceType": "Debit"
     },
     {
@@ -109297,7 +109297,7 @@
       "tradeasyId": 38,
       "name": "INPUT CGST 9%",
       "groupName": "INPUT CGST",
-      "openingBalance": 654647.6399999999,
+      "openingBalance": 356462.69,
       "balanceType": "Debit"
     },
     {
@@ -109329,7 +109329,7 @@
       "tradeasyId": 42,
       "name": "INPUT IGST 12%",
       "groupName": "INPUT IGST",
-      "openingBalance": 94443.73999999999,
+      "openingBalance": 75228.23,
       "balanceType": "Debit"
     },
     {
@@ -109337,7 +109337,7 @@
       "tradeasyId": 43,
       "name": "INPUT IGST 18%",
       "groupName": "INPUT IGST",
-      "openingBalance": 124590.87000000001,
+      "openingBalance": 124560.99,
       "balanceType": "Debit"
     },
     {
@@ -109369,7 +109369,7 @@
       "tradeasyId": 47,
       "name": "OUTPUT SGST 6%",
       "groupName": "OUTPUT SGST",
-      "openingBalance": 62337.60999999996,
+      "openingBalance": 41623.64,
       "balanceType": "Credit"
     },
     {
@@ -109377,7 +109377,7 @@
       "tradeasyId": 48,
       "name": "OUTPUT SGST 9%",
       "groupName": "OUTPUT SGST",
-      "openingBalance": 821666.5099999993,
+      "openingBalance": 491875.03,
       "balanceType": "Credit"
     },
     {
@@ -109409,7 +109409,7 @@
       "tradeasyId": 52,
       "name": "OUTPUT CGST 6%",
       "groupName": "OUTPUT CGST",
-      "openingBalance": 62337.65999999998,
+      "openingBalance": 41623.64,
       "balanceType": "Credit"
     },
     {
@@ -109417,7 +109417,7 @@
       "tradeasyId": 53,
       "name": "OUTPUT CGST 9%",
       "groupName": "OUTPUT CGST",
-      "openingBalance": 821666.7499999995,
+      "openingBalance": 491875.03,
       "balanceType": "Credit"
     },
     {
@@ -109474,7 +109474,7 @@
       "name": "IGST SALES",
       "groupName": "SALES ACCOUNT",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0061",
@@ -109482,7 +109482,7 @@
       "name": "NON TAXABLE SALES",
       "groupName": "SALES ACCOUNT",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0062",
@@ -109506,7 +109506,7 @@
       "name": "IGST SALES RETURN",
       "groupName": "SALES ACCOUNT",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0065",
@@ -109514,7 +109514,7 @@
       "name": "NON TAXABLE SALES RETURN",
       "groupName": "SALES ACCOUNT",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0066",
@@ -109561,7 +109561,7 @@
       "tradeasyId": 100,
       "name": "FEDERARAL BANK",
       "groupName": "BANK ACCOUNTS",
-      "openingBalance": 299422.47,
+      "openingBalance": 20725.9,
       "balanceType": "Debit"
     },
     {
@@ -109577,7 +109577,7 @@
       "tradeasyId": 102,
       "name": "DISTRICT BANK",
       "groupName": "BANK ACCOUNTS",
-      "openingBalance": 3469.2399999999907,
+      "openingBalance": 3469.24,
       "balanceType": "Debit"
     },
     {
@@ -109594,7 +109594,7 @@
       "name": "GOLD SCHEME RECEIVED",
       "groupName": "INDIRECT INCOME",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0116",
@@ -109602,14 +109602,14 @@
       "name": "RENT COLLECTED",
       "groupName": "DIRECT INCOME",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0118",
       "tradeasyId": 118,
       "name": "GST PAID",
       "groupName": "DUTIES & TAXES",
-      "openingBalance": 206187,
+      "openingBalance": 157099,
       "balanceType": "Debit"
     },
     {
@@ -109626,7 +109626,7 @@
       "name": "DISCOUNT RECEIVED INDIRECT",
       "groupName": "INDIRECT INCOME",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0125",
@@ -109642,7 +109642,7 @@
       "name": "DISCOUNT RECEIVED DIRECT",
       "groupName": "DIRECT INCOME",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0135",
@@ -109650,7 +109650,7 @@
       "name": "INTEREST ON SD",
       "groupName": "INDIRECT INCOME",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0139",
@@ -109658,7 +109658,7 @@
       "name": "AMAZON GIFT CARD",
       "groupName": "INDIRECT INCOME",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0146",
@@ -109674,7 +109674,7 @@
       "name": "GOLD SCHEME PRIYA",
       "groupName": "INDIRECT INCOME",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0149",
@@ -109724,7 +109724,7 @@
       "name": "KERALA FLOOD CESS",
       "groupName": "DUTIES & TAXES",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0166",
@@ -109732,7 +109732,7 @@
       "name": "KERALA FLOOD CESS PAYABLE",
       "groupName": "OUTSTANDING LIABILITIES & PROVISIONS",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0171",
@@ -109748,7 +109748,7 @@
       "name": "GOLD RECEIVED CHETTINAD",
       "groupName": "INDIRECT INCOME",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0181",
@@ -109852,7 +109852,7 @@
       "name": "SHAHUL SREEKANDAPURAM",
       "groupName": "CURRENT LIABILITIES",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0196",
@@ -109860,7 +109860,7 @@
       "name": "SCHEME RECEIVED- JSW CEMENT LTD",
       "groupName": "INDIRECT INCOME",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0197",
@@ -109876,7 +109876,7 @@
       "name": "PROFESSIONAL CHARGES PAYABLE",
       "groupName": "OUTSTANDING LIABILITIES & PROVISIONS",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0237",
@@ -109908,7 +109908,7 @@
       "name": "GIFT CARD ACC",
       "groupName": "INDIRECT INCOME",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0278",
@@ -109948,7 +109948,7 @@
       "name": "REVERSE CHARGE PAYABLE",
       "groupName": "CURRENT LIABILITIES",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0336",
@@ -109956,7 +109956,7 @@
       "name": "SCHEME RECEIVED FROM ACC",
       "groupName": "INDIRECT INCOME",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0349",
@@ -109972,7 +109972,7 @@
       "name": "SHEME RECEIVED FROM CHETTINAD",
       "groupName": "INDIRECT INCOME",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0396",
@@ -109980,7 +109980,7 @@
       "name": "ASHTECH",
       "groupName": "CURRENT LIABILITIES",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0406",
@@ -109996,7 +109996,7 @@
       "name": "RTGS COMMISSION",
       "groupName": "INDIRECT INCOME",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0466",
@@ -110012,7 +110012,7 @@
       "name": "SCHEME RECEIVED FROM CHETTINAD",
       "groupName": "INDIRECT INCOME",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0510",
@@ -110020,7 +110020,7 @@
       "name": "INCOME TAX 2020-21",
       "groupName": "CURRENT LIABILITIES",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0519",
@@ -110036,7 +110036,7 @@
       "name": "INTEREST ON KFC PAYABLE",
       "groupName": "OUTSTANDING LIABILITIES & PROVISIONS",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0548",
@@ -110084,7 +110084,7 @@
       "name": "SCHEME RECEIVED FROM DALMIA",
       "groupName": "INDIRECT INCOME",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0611",
@@ -110092,7 +110092,7 @@
       "name": "SCHEME RECEIVED FROM ULTRA TECH",
       "groupName": "INDIRECT INCOME",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0747",
@@ -110108,7 +110108,7 @@
       "name": "PROVISION FOR INCOME TAX",
       "groupName": "OUTSTANDING LIABILITIES & PROVISIONS",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0794",
@@ -110132,7 +110132,7 @@
       "name": "ELITE ENGINEERING COMPANY",
       "groupName": "CURRENT LIABILITIES",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0846",
@@ -110148,7 +110148,7 @@
       "name": "ORHER REWARD&INCOME",
       "groupName": "INDIRECT INCOME",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0888",
@@ -110156,7 +110156,7 @@
       "name": "TRADEASY",
       "groupName": "CURRENT LIABILITIES",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0889",
@@ -110164,7 +110164,7 @@
       "name": "DEEPA ASSOCIATES",
       "groupName": "CURRENT LIABILITIES",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0939",
@@ -110188,7 +110188,7 @@
       "name": "INCOME TAX REFUNDF",
       "groupName": "CURRENT LIABILITIES",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0970",
@@ -110204,7 +110204,7 @@
       "name": "SWEDINOX MANUFACTURERS PRIVATE LIMITED",
       "groupName": "CURRENT LIABILITIES",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0972",
@@ -110220,7 +110220,7 @@
       "name": "INDO ELECTRICAL MART",
       "groupName": "CURRENT LIABILITIES",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L0984",
@@ -110236,7 +110236,7 @@
       "name": "BUSINESS PERQUSITES",
       "groupName": "INDIRECT INCOME",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L1015",
@@ -110252,7 +110252,7 @@
       "name": "SCHEME RECEIVED FROM RAMCO CEMENT",
       "groupName": "INDIRECT INCOME",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L1025",
@@ -110283,7 +110283,7 @@
       "tradeasyId": 1096,
       "name": "PHONEPAY BUSINESS",
       "groupName": "BANK ACCOUNTS",
-      "openingBalance": 49,
+      "openingBalance": 0,
       "balanceType": "Debit"
     },
     {
@@ -110300,7 +110300,7 @@
       "name": "LOADING CHARGE",
       "groupName": "INDIRECT INCOME",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L1303",
@@ -110315,14 +110315,14 @@
       "name": "SALES A/C",
       "groupName": "SALES ACCOUNT",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L023",
       "name": "INTERSTATE SALES",
       "groupName": "SALES ACCOUNT",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L030",
@@ -110350,7 +110350,7 @@
       "name": "BUSINESS PERQUISITES",
       "groupName": "INDIRECT INCOME",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
       "code": "L019",
@@ -110358,13 +110358,6 @@
       "groupName": "PURCHASE ACCOUNT",
       "openingBalance": 0,
       "balanceType": "Debit"
-    },
-    {
-      "code": "L1304",
-      "name": "PROFIT/LOSS OF THE F.Y. 01/04/2026 TO 20/09/2026",
-      "groupName": "CAPITAL ACCOUNT",
-      "openingBalance": 133549.21126847947,
-      "balanceType": "Credit"
     }
   ],
   "salesAdjustments": [
