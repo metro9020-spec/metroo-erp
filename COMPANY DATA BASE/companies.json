@@ -13,8 +13,8 @@
     "pincode": "670142",
     "website": "http://",
     "currencyName": "Rupees",
-    "financialYearStarts": "2026-04-01",
-    "financialYearEnds": "2027-03-31",
+    "financialYearStarts": "2026-09-21",
+    "financialYearEnds": "2027-09-20",
     "maintain": "Inventory with Accounts",
     "taxApplicable": "GST(Goods and Service TAX)",
     "gstin": "32AFUPH3623R1ZX",
@@ -34,9 +34,9 @@
     "financialYears": [
       {
         "id": "default",
-        "name": "Current F.Y",
+        "name": "01/04/2026 to 20/09/2026",
         "startDate": "2026-04-01",
-        "endDate": "2027-03-31"
+        "endDate": "2026-09-20"
       }
     ],
     "district": "Kannur",
