@@ -1,5 +1,5 @@
 {
-  "_lastSaved": 1789925974578,
+  "_lastSaved": 1789929114768,
   "materials": [
     {
       "id": "MAT-0001",
@@ -28,7 +28,7 @@
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
       "openingStock": 7182.3,
-      "stock": 5701.2,
+      "stock": 5702.03,
       "landingCost": 70,
       "costPrice": 70,
       "sellingPrice": 60.8,
@@ -627,7 +627,7 @@
           "batchNo": "54.237",
           "landingCost": 54.237,
           "openingStock": 0,
-          "stock": 2000,
+          "stock": 2000.83,
           "marginPercent": 2.347106,
           "marginAmount": 1.273,
           "gstExclRate": 54.237,
@@ -34458,7 +34458,7 @@
       "gstin": "32AADCP5210D1Z5",
       "creditLimit": 0,
       "creditPeriod": 0,
-      "balance": 8409.535456000001,
+      "balance": 8356.4128,
       "openingBalance": 0,
       "balanceType": "Credit",
       "bankName": "STATE BANK OF INDIA",
@@ -57980,7 +57980,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 9055.2
         }
@@ -58778,7 +58778,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2900
         }
@@ -58796,7 +58796,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1959.52
         }
@@ -61831,44 +61831,6 @@
           "accountId": "L0012",
           "debit": 0.44,
           "credit": 0
-        }
-      ]
-    },
-    {
-      "id": "13",
-      "voucherId": "13",
-      "voucherNo": "LPR-0010",
-      "voucherType": "PUR",
-      "date": "2026-05-29",
-      "reference": "LPR-0010",
-      "description": "As per Inv.No:GB0086 Dt.29-05-2026",
-      "contactId": "CUST-1210",
-      "siteName": "",
-      "entries": [
-        {
-          "accountId": "L0005",
-          "debit": 55084,
-          "credit": 0
-        },
-        {
-          "accountId": "VEND-0069",
-          "debit": 0,
-          "credit": 64999
-        },
-        {
-          "accountId": "L0038",
-          "debit": 4957.56,
-          "credit": 0
-        },
-        {
-          "accountId": "L0033",
-          "debit": 4957.56,
-          "credit": 0
-        },
-        {
-          "accountId": "L0012",
-          "debit": 0,
-          "credit": 0.12
         }
       ]
     },
@@ -72568,31 +72530,6 @@
       ]
     },
     {
-      "id": "TX-REC-177",
-      "voucherId": "177",
-      "voucherNo": "13",
-      "voucherType": "Receipt",
-      "date": "2026-04-01",
-      "reference": "RC-9",
-      "description": "Receipt from Customer: RAMSHI (RC-13)",
-      "contactId": "CUST-1210",
-      "siteName": "",
-      "entries": [
-        {
-          "accountId": "CUST-1210",
-          "debit": 0,
-          "credit": 36000,
-          "narration": ""
-        },
-        {
-          "accountId": "L0100",
-          "debit": 36000,
-          "credit": 0,
-          "narration": ""
-        }
-      ]
-    },
-    {
       "id": "TX-REC-6",
       "voucherId": "6",
       "voucherNo": "1",
@@ -75310,31 +75247,6 @@
       ]
     },
     {
-      "id": "TX-CON-88",
-      "voucherId": "88",
-      "voucherNo": "13",
-      "voucherType": "Contra",
-      "date": "2026-04-18",
-      "reference": "CNTR-13",
-      "description": "Contra Voucher 13",
-      "contactId": "",
-      "siteName": "",
-      "entries": [
-        {
-          "accountId": "L1096",
-          "debit": 0,
-          "credit": 5195,
-          "narration": ""
-        },
-        {
-          "accountId": "L0100",
-          "debit": 5195,
-          "credit": 0,
-          "narration": ""
-        }
-      ]
-    },
-    {
       "id": "TX-PAY-226",
       "voucherId": "226",
       "voucherNo": "8",
@@ -77111,31 +77023,6 @@
           "accountId": "L0100",
           "debit": 26346,
           "credit": 0,
-          "narration": ""
-        }
-      ]
-    },
-    {
-      "id": "TX-PAY-230",
-      "voucherId": "230",
-      "voucherNo": "13",
-      "voucherType": "Payment",
-      "date": "2026-04-27",
-      "reference": "PM-13",
-      "description": "Payment to Supplier: SAINTS DISTRIBUTORS -KANNUR (PAY-13)",
-      "contactId": "VEND-1182",
-      "siteName": "",
-      "entries": [
-        {
-          "accountId": "VEND-1182",
-          "debit": 19200,
-          "credit": 0,
-          "narration": ""
-        },
-        {
-          "accountId": "L0100",
-          "debit": 0,
-          "credit": 19200,
           "narration": ""
         }
       ]
@@ -99990,88 +99877,6 @@
       ]
     },
     {
-      "id": "TX-1373",
-      "date": "2026-09-20",
-      "reference": "Purchase Return PR-001",
-      "description": "",
-      "siteName": "",
-      "entries": [
-        {
-          "accountId": "VEND-0068",
-          "debit": 8409.535456000001,
-          "credit": 0
-        },
-        {
-          "accountId": "L0005",
-          "debit": 0,
-          "credit": 7041.979200000001
-        },
-        {
-          "accountId": "L0038",
-          "debit": 0,
-          "credit": 633.778128
-        },
-        {
-          "accountId": "L0033",
-          "debit": 0,
-          "credit": 633.778128
-        },
-        {
-          "accountId": "L031",
-          "debit": 0,
-          "credit": 100
-        }
-      ]
-    },
-    {
-      "id": "TX-1374",
-      "date": "2026-09-20",
-      "reference": "Sales Return SR-001",
-      "description": "",
-      "siteName": "",
-      "entries": [
-        {
-          "accountId": "L0004",
-          "debit": 2847.5,
-          "credit": 0
-        },
-        {
-          "accountId": "CUST-0427",
-          "debit": 0,
-          "credit": 3360.05
-        },
-        {
-          "accountId": "L0053",
-          "debit": 256.275,
-          "credit": 0
-        },
-        {
-          "accountId": "L0048",
-          "debit": 256.275,
-          "credit": 0
-        }
-      ]
-    },
-    {
-      "id": "TX-1375",
-      "date": "2026-09-20",
-      "reference": "SR-001 COGS",
-      "description": "",
-      "siteName": "",
-      "entries": [
-        {
-          "accountId": "1200",
-          "debit": 2942.4,
-          "credit": 0
-        },
-        {
-          "accountId": "5100",
-          "debit": 0,
-          "credit": 2942.4
-        }
-      ]
-    },
-    {
       "id": "LSL-0336",
       "voucherId": "LSL-0336",
       "voucherType": "SALE",
@@ -100167,7 +99972,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2059.6800000000003
         }
@@ -100185,7 +99990,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1624.78
         }
@@ -100287,7 +100092,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 882.72
         }
@@ -100305,7 +100110,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 5017.6
         }
@@ -100323,7 +100128,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 8232
         }
@@ -100341,7 +100146,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 9508.5
         }
@@ -100359,7 +100164,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 7923.75
         }
@@ -100377,7 +100182,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 5017.6
         }
@@ -100395,7 +100200,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 5958.66
         }
@@ -100413,7 +100218,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 6090
         }
@@ -100431,7 +100236,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 3236.6400000000003
         }
@@ -100449,7 +100254,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 4390.400000000001
         }
@@ -100467,7 +100272,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 5590.56
         }
@@ -100485,7 +100290,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 4459.76
         }
@@ -100503,7 +100308,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2007.04
         }
@@ -100521,7 +100326,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2429.76
         }
@@ -100539,7 +100344,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 7024.639999999999
         }
@@ -100557,7 +100362,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 9570
         }
@@ -100575,7 +100380,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 3841.6000000000004
         }
@@ -100593,7 +100398,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 3989.7599999999998
         }
@@ -100611,7 +100416,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 3296.28
         }
@@ -100629,7 +100434,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1832.9499999999998
         }
@@ -100647,7 +100452,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 11640.400000000001
         }
@@ -100665,7 +100470,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 10150
         }
@@ -100683,7 +100488,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 10057.52
         }
@@ -100701,7 +100506,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 8191.6
         }
@@ -100719,7 +100524,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 5762.400000000001
         }
@@ -100737,7 +100542,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 16512.725
         }
@@ -100755,7 +100560,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 4413.6
         }
@@ -100773,7 +100578,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 10628.48
         }
@@ -100791,7 +100596,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 15659
         }
@@ -100809,7 +100614,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 26514.780000000002
         }
@@ -100827,7 +100632,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 18351.76
         }
@@ -100845,7 +100650,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 4413.6
         }
@@ -100863,7 +100668,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 28357.64
         }
@@ -100881,7 +100686,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 12427.116
         }
@@ -100899,7 +100704,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 19783.54
         }
@@ -100917,7 +100722,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 12810
         }
@@ -100935,7 +100740,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 6402.39
         }
@@ -100953,7 +100758,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 7540
         }
@@ -100971,7 +100776,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 32770
         }
@@ -100989,7 +100794,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 3190
         }
@@ -101007,7 +100812,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 4350
         }
@@ -101025,7 +100830,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 8700
         }
@@ -101043,7 +100848,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 4350
         }
@@ -101061,7 +100866,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2942.4
         }
@@ -101079,7 +100884,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 7944.4800000000005
         }
@@ -101097,7 +100902,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 5674.64
         }
@@ -101115,7 +100920,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 24556
         }
@@ -101133,7 +100938,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 6475.84
         }
@@ -101151,7 +100956,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 25774
         }
@@ -101169,7 +100974,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 882.72
         }
@@ -101187,7 +100992,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1683.32
         }
@@ -101205,7 +101010,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 813.558
         }
@@ -101223,7 +101028,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 3010
         }
@@ -101241,7 +101046,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 294.24
         }
@@ -101259,7 +101064,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 14712
         }
@@ -101277,7 +101082,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 60130
         }
@@ -101295,7 +101100,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 14712
         }
@@ -101313,7 +101118,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 493.92
         }
@@ -101331,7 +101136,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 384.16
         }
@@ -101349,7 +101154,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 29424
         }
@@ -101367,7 +101172,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 693.28
         }
@@ -101385,7 +101190,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 641.336
         }
@@ -101403,7 +101208,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 5433.12
         }
@@ -101421,7 +101226,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 3073.28
         }
@@ -101439,7 +101244,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 6522.88
         }
@@ -101457,7 +101262,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 3073.28
         }
@@ -101475,7 +101280,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 9341.869999999999
         }
@@ -101493,7 +101298,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 12065.76
         }
@@ -101511,7 +101316,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 8761.66
         }
@@ -101529,7 +101334,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 48860
         }
@@ -101547,7 +101352,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 57540
         }
@@ -101565,7 +101370,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 21072
         }
@@ -101583,7 +101388,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 39630
         }
@@ -101601,7 +101406,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 28816.72
         }
@@ -101619,7 +101424,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 4399.360000000001
         }
@@ -101637,7 +101442,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 13171.2
         }
@@ -101655,7 +101460,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 30950
         }
@@ -101673,7 +101478,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 7796.97
         }
@@ -101691,7 +101496,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 41230
         }
@@ -101709,7 +101514,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 8136.16
         }
@@ -101727,7 +101532,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 10710
         }
@@ -101745,7 +101550,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 5589.92
         }
@@ -101763,7 +101568,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 5872.16
         }
@@ -101781,7 +101586,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 12073.6
         }
@@ -101799,7 +101604,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 7463.68
         }
@@ -101817,7 +101622,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 8945.44
         }
@@ -101835,7 +101640,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 9559.32
         }
@@ -101853,7 +101658,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 9709.92
         }
@@ -101871,7 +101676,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 9479.49
         }
@@ -101889,7 +101694,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 13842.279999999999
         }
@@ -101907,7 +101712,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 6793.43
         }
@@ -101925,7 +101730,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 4107.360000000001
         }
@@ -101943,7 +101748,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 5927.04
         }
@@ -101961,7 +101766,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 16957.920000000002
         }
@@ -101979,7 +101784,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 31234
         }
@@ -101997,7 +101802,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 8442.67
         }
@@ -102015,7 +101820,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 4392.656
         }
@@ -102033,7 +101838,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 4340
         }
@@ -102051,7 +101856,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 45920
         }
@@ -102069,7 +101874,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2341.08
         }
@@ -102087,7 +101892,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 5229.324
         }
@@ -102105,7 +101910,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 44486
         }
@@ -102123,7 +101928,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2996.96
         }
@@ -102141,7 +101946,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 46060
         }
@@ -102159,7 +101964,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 10440
         }
@@ -102177,7 +101982,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 41170
         }
@@ -102195,7 +102000,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1160
         }
@@ -102213,7 +102018,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 21750
         }
@@ -102231,7 +102036,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2926.96
         }
@@ -102249,7 +102054,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2900
         }
@@ -102267,7 +102072,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2926.96
         }
@@ -102285,7 +102090,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2856.96
         }
@@ -102303,7 +102108,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 4579.68
         }
@@ -102321,7 +102126,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2900
         }
@@ -102339,7 +102144,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 18690
         }
@@ -102357,7 +102162,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 35109.36
         }
@@ -102375,7 +102180,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 10730
         }
@@ -102393,7 +102198,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 3423.06
         }
@@ -102411,7 +102216,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 3029.6600000000003
         }
@@ -102429,7 +102234,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2994.8100000000004
         }
@@ -102447,7 +102252,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1195.704
         }
@@ -102465,7 +102270,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 5974.367
         }
@@ -102483,7 +102288,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 16130.490000000002
         }
@@ -102501,7 +102306,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 14342.856
         }
@@ -102519,7 +102324,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 44784.11
         }
@@ -102537,7 +102342,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1014.08
         }
@@ -102555,7 +102360,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 3951.9
         }
@@ -102573,7 +102378,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 3321.36
         }
@@ -102591,7 +102396,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1725.44
         }
@@ -102609,7 +102414,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1765.44
         }
@@ -102627,7 +102432,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 5296.32
         }
@@ -102645,7 +102450,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 4413.6
         }
@@ -102663,7 +102468,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 7359.6
         }
@@ -102681,7 +102486,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2900
         }
@@ -102699,7 +102504,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2063.56
         }
@@ -102717,7 +102522,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1478.811
         }
@@ -102735,7 +102540,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 3256.428
         }
@@ -102753,7 +102558,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1449.15
         }
@@ -102771,7 +102576,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 5510
         }
@@ -102789,7 +102594,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 21670
         }
@@ -102807,7 +102612,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 3652.9000000000005
         }
@@ -102825,7 +102630,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 3190
         }
@@ -102843,7 +102648,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1262.132
         }
@@ -102861,7 +102666,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 16470.37
         }
@@ -102879,7 +102684,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 7944.4800000000005
         }
@@ -102897,7 +102702,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 5061.36
         }
@@ -102915,7 +102720,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 12490.936
         }
@@ -102933,7 +102738,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2059.6800000000003
         }
@@ -102951,7 +102756,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 4999.96
         }
@@ -102969,7 +102774,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2226.9100000000003
         }
@@ -102987,7 +102792,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1873.9299999999998
         }
@@ -103005,7 +102810,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 5796.89
         }
@@ -103023,7 +102828,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 39281.36
         }
@@ -103041,7 +102846,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 28710
         }
@@ -103059,7 +102864,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1740
         }
@@ -103077,7 +102882,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2610
         }
@@ -103095,7 +102900,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 976.125
         }
@@ -103113,7 +102918,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2161.36
         }
@@ -103131,7 +102936,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2610
         }
@@ -103149,7 +102954,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 3923.58
         }
@@ -103167,7 +102972,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 6153.39
         }
@@ -103185,7 +102990,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 31131.323
         }
@@ -103203,7 +103008,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1160
         }
@@ -103221,7 +103026,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 3770
         }
@@ -103239,7 +103044,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1002.856
         }
@@ -103257,7 +103062,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 22040
         }
@@ -103275,7 +103080,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 12760
         }
@@ -103293,7 +103098,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 21851.323
         }
@@ -103311,7 +103116,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 34931.36
         }
@@ -103329,7 +103134,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 3990
         }
@@ -103347,7 +103152,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 40020
         }
@@ -103365,7 +103170,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 4640
         }
@@ -103383,7 +103188,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 25088
         }
@@ -103401,7 +103206,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1160
         }
@@ -103419,7 +103224,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 44490
         }
@@ -103437,7 +103242,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1262.24
         }
@@ -103455,7 +103260,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 932.2
         }
@@ -103473,7 +103278,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 17400
         }
@@ -103491,7 +103296,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 14790
         }
@@ -103509,7 +103314,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 29000
         }
@@ -103527,7 +103332,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 4888.16
         }
@@ -103545,7 +103350,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 7574.5
         }
@@ -103563,7 +103368,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 4114.88
         }
@@ -103581,7 +103386,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2320
         }
@@ -103599,7 +103404,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 10730
         }
@@ -103617,7 +103422,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 18817.38
         }
@@ -103635,7 +103440,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 3825.12
         }
@@ -103653,7 +103458,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2942.4
         }
@@ -103671,7 +103476,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 11949.44
         }
@@ -103689,7 +103494,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 8032.646
         }
@@ -103707,7 +103512,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 11317.97
         }
@@ -103725,7 +103530,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 11310
         }
@@ -103743,7 +103548,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 12470
         }
@@ -103761,7 +103566,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2030
         }
@@ -103779,7 +103584,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2030
         }
@@ -103797,7 +103602,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2900
         }
@@ -103815,7 +103620,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 4640
         }
@@ -103833,7 +103638,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 15510
         }
@@ -103851,7 +103656,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 3150
         }
@@ -103869,7 +103674,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 6650
         }
@@ -103887,7 +103692,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2450
         }
@@ -103905,7 +103710,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 7350
         }
@@ -103923,7 +103728,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 5915
         }
@@ -103941,7 +103746,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 14000
         }
@@ -103959,7 +103764,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2764.44
         }
@@ -103977,7 +103782,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2800
         }
@@ -103995,7 +103800,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 887.46
         }
@@ -104013,7 +103818,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 870
         }
@@ -104031,7 +103836,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 3080
         }
@@ -104049,7 +103854,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1471.2
         }
@@ -104067,7 +103872,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2415
         }
@@ -104085,7 +103890,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2800
         }
@@ -104103,7 +103908,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2940
         }
@@ -104121,7 +103926,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1897
         }
@@ -104139,7 +103944,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1960
         }
@@ -104157,7 +103962,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1540
         }
@@ -104175,7 +103980,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1960
         }
@@ -104193,7 +103998,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2863
         }
@@ -104211,7 +104016,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 14350
         }
@@ -104229,7 +104034,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1750
         }
@@ -104247,7 +104052,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 52360
         }
@@ -104265,7 +104070,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 50330
         }
@@ -104283,7 +104088,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 50050
         }
@@ -104301,7 +104106,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 51030
         }
@@ -104319,7 +104124,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 51450
         }
@@ -104337,7 +104142,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 42664.8
         }
@@ -104355,7 +104160,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 49280
         }
@@ -104373,7 +104178,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2900
         }
@@ -104391,7 +104196,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 49420
         }
@@ -104409,7 +104214,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 48860
         }
@@ -104427,7 +104232,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 3237.92
         }
@@ -104445,7 +104250,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 51520
         }
@@ -104463,7 +104268,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2535.6
         }
@@ -104481,7 +104286,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 10298.4
         }
@@ -104499,7 +104304,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 21000
         }
@@ -104517,7 +104322,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 10976
         }
@@ -104535,7 +104340,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2900
         }
@@ -104553,7 +104358,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1450
         }
@@ -104571,7 +104376,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 48860
         }
@@ -104589,7 +104394,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 288260
         }
@@ -104607,7 +104412,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 3530.88
         }
@@ -104625,7 +104430,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 34321.95
         }
@@ -104643,7 +104448,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 34321.95
         }
@@ -104661,7 +104466,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 40320
         }
@@ -104679,7 +104484,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 41020
         }
@@ -104697,7 +104502,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 16530
         }
@@ -104715,7 +104520,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 28210
         }
@@ -104733,7 +104538,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 35216
         }
@@ -104751,7 +104556,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 4413.6
         }
@@ -104769,7 +104574,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 29424
         }
@@ -104787,7 +104592,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 20300
         }
@@ -104805,7 +104610,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 46060
         }
@@ -104823,7 +104628,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 49070
         }
@@ -104841,7 +104646,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 48230
         }
@@ -104859,7 +104664,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 22239
         }
@@ -104877,7 +104682,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 4413.6
         }
@@ -104895,7 +104700,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 33350
         }
@@ -104913,7 +104718,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 5002.08
         }
@@ -104931,7 +104736,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 29036.04
         }
@@ -104949,7 +104754,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 3325.96
         }
@@ -104967,7 +104772,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 17640
         }
@@ -104985,7 +104790,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1160
         }
@@ -105003,7 +104808,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1765.44
         }
@@ -105021,7 +104826,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1471.2
         }
@@ -105039,7 +104844,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 3311.96
         }
@@ -105057,7 +104862,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 625.41
         }
@@ -105075,7 +104880,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 822.8799999999999
         }
@@ -105093,7 +104898,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2028.16
         }
@@ -105111,7 +104916,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1740
         }
@@ -105129,7 +104934,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 294.24
         }
@@ -105147,7 +104952,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 11760
         }
@@ -105165,7 +104970,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 17394.43
         }
@@ -105183,7 +104988,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 48375
         }
@@ -105201,7 +105006,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 19211.6
         }
@@ -105219,7 +105024,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 315.26000000000005
         }
@@ -105237,7 +105042,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 3360
         }
@@ -105255,7 +105060,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2030
         }
@@ -105273,7 +105078,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 52360
         }
@@ -105291,7 +105096,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 35308.8
         }
@@ -105309,7 +105114,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1849.76
         }
@@ -105327,7 +105132,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2380.4900000000002
         }
@@ -105345,7 +105150,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 3480
         }
@@ -105363,7 +105168,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 3480
         }
@@ -105381,7 +105186,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 47852
         }
@@ -105399,7 +105204,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 3009.76
         }
@@ -105417,7 +105222,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1160
         }
@@ -105435,7 +105240,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 14500
         }
@@ -105453,7 +105258,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 12399.52
         }
@@ -105471,7 +105276,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 4707.84
         }
@@ -105489,7 +105294,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2900
         }
@@ -105507,7 +105312,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1450
         }
@@ -105525,7 +105330,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 11764.64
         }
@@ -105543,7 +105348,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 6091.68
         }
@@ -105561,7 +105366,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 42000
         }
@@ -105579,7 +105384,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 18614.88
         }
@@ -105597,7 +105402,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 43806
         }
@@ -105615,7 +105420,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 8218.880000000001
         }
@@ -105633,7 +105438,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 9219
         }
@@ -105651,7 +105456,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 18270
         }
@@ -105669,7 +105474,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 9860
         }
@@ -105687,7 +105492,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 35256.9
         }
@@ -105705,7 +105510,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 4716.388
         }
@@ -105723,7 +105528,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 26131
         }
@@ -105741,7 +105546,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 409.44399999999996
         }
@@ -105759,7 +105564,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 7469.52
         }
@@ -105777,7 +105582,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1160
         }
@@ -105795,7 +105600,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 8742.09
         }
@@ -105813,7 +105618,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1152.48
         }
@@ -105831,7 +105636,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1262.24
         }
@@ -105849,7 +105654,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 987.84
         }
@@ -105867,7 +105672,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2484.64
         }
@@ -105885,7 +105690,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1042.72
         }
@@ -105903,7 +105708,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2303.7000000000003
         }
@@ -105921,7 +105726,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 316.95
         }
@@ -105939,7 +105744,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 5614
         }
@@ -105957,7 +105762,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2495.84
         }
@@ -105975,7 +105780,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1388.912
         }
@@ -105993,7 +105798,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 4251.392
         }
@@ -106011,7 +105816,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 3321.3999999999996
         }
@@ -106029,7 +105834,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 12715
         }
@@ -106047,7 +105852,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1849.76
         }
@@ -106065,7 +105870,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 10710
         }
@@ -106083,7 +105888,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1765.44
         }
@@ -106101,7 +105906,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1189.88
         }
@@ -106119,7 +105924,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 959.51
         }
@@ -106137,7 +105942,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1624.78
         }
@@ -106155,7 +105960,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1036.3
         }
@@ -106173,7 +105978,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2213.26
         }
@@ -106191,7 +105996,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 3095.98
         }
@@ -106209,7 +106014,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 52920
         }
@@ -106227,7 +106032,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1858.66
         }
@@ -106245,7 +106050,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1253.75
         }
@@ -106263,7 +106068,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2229.69
         }
@@ -106281,7 +106086,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1624.78
         }
@@ -106299,7 +106104,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1641.21
         }
@@ -106317,7 +106122,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 975.94
         }
@@ -106335,7 +106140,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2353.92
         }
@@ -106353,7 +106158,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2648.16
         }
@@ -106371,7 +106176,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 895.6400000000001
         }
@@ -106389,7 +106194,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1995.81
         }
@@ -106407,7 +106212,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 13440
         }
@@ -106425,7 +106230,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 3313.4300000000003
         }
@@ -106443,7 +106248,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 5002.08
         }
@@ -106461,7 +106266,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1471.2
         }
@@ -106479,7 +106284,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1765.44
         }
@@ -106497,7 +106302,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2136.4700000000003
         }
@@ -106515,7 +106320,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1270.18
         }
@@ -106533,7 +106338,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 7880.61
         }
@@ -106551,7 +106356,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1330.54
         }
@@ -106569,7 +106374,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 52500
         }
@@ -106587,7 +106392,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 24152.5
         }
@@ -106605,7 +106410,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 5123.040000000001
         }
@@ -106623,7 +106428,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 27952.8
         }
@@ -106641,7 +106446,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 20692.760000000002
         }
@@ -106659,7 +106464,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 14417.76
         }
@@ -106677,7 +106482,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2083.9
         }
@@ -106695,7 +106500,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 4350
         }
@@ -106713,7 +106518,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 26062.4
         }
@@ -106731,7 +106536,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 13162.560000000001
         }
@@ -106749,7 +106554,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1267.8
         }
@@ -106767,7 +106572,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 47516
         }
@@ -106785,7 +106590,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1740
         }
@@ -106803,7 +106608,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 3443.56
         }
@@ -106821,7 +106626,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 2900
         }
@@ -106839,7 +106644,7 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 4272.9400000000005
         }
@@ -106857,9 +106662,128 @@
           "credit": 0
         },
         {
-          "accountId": "L017",
+          "accountId": "1200",
           "debit": 0,
           "credit": 1151.8500000000001
+        }
+      ]
+    },
+    {
+      "id": "TX-1744",
+      "date": "2026-09-20",
+      "reference": "Sales Return SR-001",
+      "description": "",
+      "siteName": "",
+      "entries": [
+        {
+          "accountId": "L0004",
+          "debit": 2847.5,
+          "credit": 0
+        },
+        {
+          "accountId": "CUST-0427",
+          "debit": 0,
+          "credit": 3360.05
+        },
+        {
+          "accountId": "L0053",
+          "debit": 256.275,
+          "credit": 0
+        },
+        {
+          "accountId": "L0048",
+          "debit": 256.275,
+          "credit": 0
+        }
+      ]
+    },
+    {
+      "id": "TX-1745",
+      "date": "2026-09-20",
+      "reference": "SR-001 COGS",
+      "description": "",
+      "siteName": "",
+      "entries": [
+        {
+          "accountId": "1200",
+          "debit": 2942.4,
+          "credit": 0
+        },
+        {
+          "accountId": "5100",
+          "debit": 0,
+          "credit": 2942.4
+        }
+      ]
+    },
+    {
+      "id": "TX-1746",
+      "date": "2026-09-20",
+      "reference": "Purchase Return PR-001",
+      "description": "",
+      "siteName": "",
+      "entries": [
+        {
+          "accountId": "VEND-0068",
+          "debit": 8356.4128,
+          "credit": 0
+        },
+        {
+          "accountId": "L0005",
+          "debit": 0,
+          "credit": 6996.96
+        },
+        {
+          "accountId": "L0038",
+          "debit": 0,
+          "credit": 629.7264
+        },
+        {
+          "accountId": "L0033",
+          "debit": 0,
+          "credit": 629.7264
+        },
+        {
+          "accountId": "L031",
+          "debit": 0,
+          "credit": 100
+        }
+      ]
+    },
+    {
+      "id": "13",
+      "voucherId": "13",
+      "voucherType": "PUR",
+      "voucherNo": "LPR-0010",
+      "date": "2026-05-29",
+      "reference": "LPR-0010",
+      "description": "As per Inv.No:GB0086 Dt.29-05-2026",
+      "siteName": "",
+      "entries": [
+        {
+          "accountId": "L0005",
+          "debit": 55084,
+          "credit": 0
+        },
+        {
+          "accountId": "VEND-0069",
+          "debit": 0,
+          "credit": 64999
+        },
+        {
+          "accountId": "L0038",
+          "debit": 4957.56,
+          "credit": 0
+        },
+        {
+          "accountId": "L0033",
+          "debit": 4957.56,
+          "credit": 0
+        },
+        {
+          "accountId": "L0012",
+          "debit": 0,
+          "credit": 0.12
         }
       ]
     }
@@ -107567,60 +107491,6 @@
       "payMode": "Credit",
       "paymode": "Credit",
       "narration": "As per Inv.No:GB0087 Dt.29-05-2026"
-    },
-    {
-      "id": "13",
-      "purchaseNo": 13,
-      "voucherNo": "LPR-0010",
-      "seriesId": "SER-LOCAL-PURCHASE",
-      "refNo": "GB0082",
-      "invoiceNo": "GB0082",
-      "invoiceDate": "2026-05-29",
-      "date": "2026-05-29",
-      "supplierId": "VEND-0069",
-      "contactId": "VEND-0069",
-      "supplierName": "K.P.C ALI & CO.",
-      "contactName": "K.P.C ALI & CO.",
-      "ledgerId": 69,
-      "items": [
-        {
-          "materialId": "MAT-0003",
-          "name": "CEMENT",
-          "code": "ACC",
-          "model": "ACC",
-          "batchNo": "275.42",
-          "quantity": 200,
-          "unit": "Nos",
-          "price": 275.42,
-          "landingCost": 275.42,
-          "amount": 55084,
-          "netValue": 55084,
-          "taxRate": 18,
-          "gstPercent": 18,
-          "gstAmount": 9915.12,
-          "cessPercent": 0,
-          "netAmount": 64999.12,
-          "cgst": 4957.56,
-          "sgst": 4957.56,
-          "igst": 0
-        }
-      ],
-      "subtotal": 55084,
-      "taxRate": 18,
-      "taxAmount": 9915.12,
-      "cgst": 4957.56,
-      "sgst": 4957.56,
-      "igst": 0,
-      "shipping": 0,
-      "discount": 0,
-      "roundOff": -0.12,
-      "total": 64999,
-      "paidAmount": 0,
-      "status": "unpaid",
-      "cancelFlag": false,
-      "payMode": "Credit",
-      "paymode": "Credit",
-      "narration": "As per Inv.No:GB0086 Dt.29-05-2026"
     },
     {
       "id": "12",
@@ -108964,6 +108834,49 @@
       "additionalCess": 0,
       "roundOff": -4.8,
       "total": 69900
+    },
+    {
+      "id": "13",
+      "seriesId": "SER-LOCAL-PURCHASE",
+      "voucherNo": "LPR-0010",
+      "refNo": "LPR-0010",
+      "invoiceNo": "GB0082",
+      "date": "2026-05-29",
+      "contactId": "VEND-0069",
+      "contactName": "K.P.C ALI & CO.",
+      "siteName": "",
+      "state": "KERALA",
+      "payMode": "Credit",
+      "creditPeriod": "0",
+      "narration": "As per Inv.No:GB0086 Dt.29-05-2026",
+      "headloaderType": "std",
+      "items": [
+        {
+          "materialId": "MAT-0003",
+          "name": "CEMENT",
+          "code": "ACC",
+          "batchNo": "275.42",
+          "quantity": 200,
+          "unit": "Nos",
+          "price": 275.42,
+          "mrp": 344.27500000000003,
+          "discountPercent": 0,
+          "discountAmount": 0,
+          "netValue": 55084,
+          "gstPercent": 18,
+          "gstAmount": 9915.119999999999,
+          "netAmount": 64999.119999999995
+        }
+      ],
+      "subtotal": 55084,
+      "totalDiscount": 0,
+      "totalGst": 9915.119999999999,
+      "totalCess": 0,
+      "adjustments": 0,
+      "adjustmentsList": [],
+      "additionalCess": 0,
+      "roundOff": -0.12,
+      "total": 64998.99999999999
     }
   ],
   "salesReturns": [
@@ -109007,17 +108920,17 @@
         {
           "materialId": "MAT-0001",
           "name": "TMT STEELS",
-          "quantity": 129.83,
+          "quantity": 129,
           "unit": "Kg",
           "price": 54.24,
-          "amount": 7041.979200000001,
+          "amount": 6996.96,
           "gstPercent": 18,
-          "gstAmount": 1267.556256
+          "gstAmount": 1259.4528
         }
       ],
-      "subtotal": 7041.979200000001,
+      "subtotal": 6996.96,
       "taxRate": 18,
-      "taxAmount": 1267.556256,
+      "taxAmount": 1259.4528,
       "adjustmentsList": [
         {
           "type": "Add",
@@ -109027,7 +108940,7 @@
         }
       ],
       "roundOff": 0,
-      "total": 8409.535456000001
+      "total": 8356.4128
     }
   ],
   "conversions": [],
