@@ -1,5 +1,5 @@
 {
-  "_lastSaved": 1790001839486,
+  "_lastSaved": 1790001630430,
   "materials": [
     {
       "id": "MAT-0001",
@@ -28681,7 +28681,7 @@
       "tradeasyId": 2,
       "name": "PREVIOUS YEAR PROFIT",
       "groupName": "CAPITAL ACCOUNT",
-      "openingBalance": 402453.11226847925,
+      "openingBalance": 338646.34,
       "balanceType": "Credit",
       "parentCustomerId": null,
       "isCustomerSubLedger": false

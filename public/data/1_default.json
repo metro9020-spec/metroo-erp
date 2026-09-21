@@ -1,5 +1,5 @@
 {
-  "_lastSaved": 1789987449088,
+  "_lastSaved": 1789998837148,
   "materials": [
     {
       "id": "MAT-0001",
@@ -1612,7 +1612,7 @@
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
       "openingStock": 358,
-      "stock": 97,
+      "stock": 87,
       "landingCost": 294.24,
       "costPrice": 294.24,
       "sellingPrice": 330,
@@ -2250,7 +2250,7 @@
           "batchNo": "266.95",
           "landingCost": 266.95,
           "openingStock": 0,
-          "stock": 53,
+          "stock": 43,
           "marginPercent": 3.491291,
           "marginAmount": 9.31999999999999,
           "gstExclRate": 266.95,
@@ -8234,7 +8234,7 @@
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
       "openingStock": 220,
-      "stock": 235,
+      "stock": 220,
       "landingCost": 76.79,
       "costPrice": 76.79,
       "sellingPrice": 89,
@@ -8586,7 +8586,7 @@
           "batchNo": "76.79",
           "landingCost": 76.79,
           "openingStock": 0,
-          "stock": 235,
+          "stock": 220,
           "marginPercent": 3.477015,
           "marginAmount": 2.66999999999999,
           "gstExclRate": 76.79,
@@ -14973,7 +14973,7 @@
       "gstin": "",
       "creditLimit": 0,
       "creditPeriod": 0,
-      "balance": 0,
+      "balance": 3847,
       "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 273,
@@ -17633,7 +17633,7 @@
       "gstin": "32CCWPM6567L1ZP",
       "creditLimit": 0,
       "creditPeriod": 0,
-      "balance": 318248,
+      "balance": 314887.95,
       "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 427,
@@ -32473,7 +32473,7 @@
       "gstin": "",
       "creditLimit": 0,
       "creditPeriod": 0,
-      "balance": 28,
+      "balance": 0,
       "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1224,
@@ -34272,7 +34272,7 @@
       "gstin": "32AADCP5210D1Z5",
       "creditLimit": 0,
       "creditPeriod": 0,
-      "balance": 0,
+      "balance": 8356.4128,
       "openingBalance": 0,
       "balanceType": "Credit",
       "bankName": "STATE BANK OF INDIA",
@@ -57577,6 +57577,108 @@
       "total": 3299.9959999999996,
       "paidAmount": 0,
       "status": "unpaid"
+    },
+    {
+      "id": "LSL-0339",
+      "seriesId": "SER-LOCAL-SALES",
+      "voucherNo": "LSL-0339",
+      "refNo": "LSL-0339",
+      "employee": "",
+      "influencer": "",
+      "date": "2026-09-20",
+      "dueDate": "2026-09-20",
+      "contactId": "__CASH__",
+      "contactName": "CASH SALES",
+      "siteName": "",
+      "state": "KERALA",
+      "payMode": "Cash",
+      "creditPeriod": "0",
+      "narration": "",
+      "headloaderType": "std",
+      "discountPercent": "0",
+      "discountAmount": "0.00",
+      "shippingAddress": "",
+      "vehicleNo": "",
+      "items": [
+        {
+          "materialId": "MAT-0298",
+          "name": "BLOCK",
+          "code": "AAC",
+          "batchNo": "76.79",
+          "quantity": 15,
+          "unit": "Nos",
+          "price": 89,
+          "mrp": 79.46,
+          "discountPercent": 0,
+          "discountAmount": 0,
+          "netValue": 1335,
+          "gstPercent": 12,
+          "gstAmount": 160.2,
+          "netAmount": 1495.2
+        }
+      ],
+      "subtotal": 1335,
+      "totalDiscount": 0,
+      "totalGst": 160.2,
+      "totalCess": 0,
+      "adjustments": 0,
+      "adjustmentsList": [],
+      "additionalCess": 0,
+      "roundOff": -0.2,
+      "total": 1495,
+      "paidAmount": 1495,
+      "status": "paid"
+    },
+    {
+      "id": "372",
+      "seriesId": "SER-LOCAL-SALES",
+      "voucherNo": "LSL-0340",
+      "refNo": "LSL-0340",
+      "employee": "",
+      "influencer": "",
+      "date": "2026-09-21",
+      "dueDate": "2026-09-21",
+      "contactId": "CUST-0273",
+      "contactName": "AALI KUNHI CP",
+      "siteName": "",
+      "state": "KERALA",
+      "payMode": "Credit",
+      "creditPeriod": "0",
+      "narration": "",
+      "headloaderType": "std",
+      "discountPercent": "0",
+      "discountAmount": "0.00",
+      "shippingAddress": "",
+      "vehicleNo": "",
+      "items": [
+        {
+          "materialId": "MAT-0003",
+          "name": "CEMENT",
+          "code": "ACC",
+          "batchNo": "266.95",
+          "quantity": 10,
+          "unit": "Nos",
+          "price": 326,
+          "mrp": 276.27,
+          "discountPercent": 0,
+          "discountAmount": 0,
+          "netValue": 3260,
+          "gstPercent": 18,
+          "gstAmount": 586.8,
+          "netAmount": 3846.8
+        }
+      ],
+      "subtotal": 3260,
+      "totalDiscount": 0,
+      "totalGst": 586.8,
+      "totalCess": 0,
+      "adjustments": 0,
+      "adjustmentsList": [],
+      "additionalCess": 0,
+      "roundOff": 0.2,
+      "total": 3847,
+      "paidAmount": 0,
+      "status": "unpaid"
     }
   ],
   "salesOrders": [],
@@ -80333,31 +80435,6 @@
       ]
     },
     {
-      "id": "TX-REC-372",
-      "voucherId": "372",
-      "voucherNo": "270",
-      "voucherType": "Receipt",
-      "date": "2026-05-13",
-      "reference": "RC-270",
-      "description": "Receipt from Customer: MADHUSOODHANAN (RC-270)",
-      "contactId": "CUST-1205",
-      "siteName": "",
-      "entries": [
-        {
-          "accountId": "CUST-1205",
-          "debit": 0,
-          "credit": 20,
-          "narration": ""
-        },
-        {
-          "accountId": "L1096",
-          "debit": 20,
-          "credit": 0,
-          "narration": ""
-        }
-      ]
-    },
-    {
       "id": "TX-REC-373",
       "voucherId": "373",
       "voucherNo": "271",
@@ -83378,31 +83455,6 @@
           "accountId": "CUST-0441",
           "debit": 0,
           "credit": 4380,
-          "narration": ""
-        }
-      ]
-    },
-    {
-      "id": "TX-REC-552",
-      "voucherId": "552",
-      "voucherNo": "372",
-      "voucherType": "Receipt",
-      "date": "2026-05-25",
-      "reference": "RC-372",
-      "description": "Receipt from Customer: YOUNUS (RC-372)",
-      "contactId": "CUST-0628",
-      "siteName": "",
-      "entries": [
-        {
-          "accountId": "CUST-0628",
-          "debit": 0,
-          "credit": 4835,
-          "narration": ""
-        },
-        {
-          "accountId": "L0100",
-          "debit": 4835,
-          "credit": 0,
           "narration": ""
         }
       ]
@@ -106555,6 +106607,453 @@
           "credit": 0
         }
       ]
+    },
+    {
+      "id": "LSL-0339",
+      "voucherId": "LSL-0339",
+      "voucherType": "SALE",
+      "voucherNo": "LSL-0339",
+      "date": "2026-09-20",
+      "reference": "LSL-0339",
+      "description": "",
+      "siteName": "",
+      "entries": [
+        {
+          "accountId": "L0001",
+          "debit": 1495,
+          "credit": 0
+        },
+        {
+          "accountId": "L0004",
+          "debit": 0,
+          "credit": 1335
+        },
+        {
+          "accountId": "L0052",
+          "debit": 0,
+          "credit": 80.1
+        },
+        {
+          "accountId": "L0047",
+          "debit": 0,
+          "credit": 80.1
+        },
+        {
+          "accountId": "L0012",
+          "debit": 0.2,
+          "credit": 0
+        }
+      ]
+    },
+    {
+      "id": "TX-1729",
+      "date": "2026-04-01",
+      "reference": "LSL-0003 COGS",
+      "description": "Cost of Goods Sold for invoice LSL-0003",
+      "entries": [
+        {
+          "accountId": "5100",
+          "debit": 5123.040000000001,
+          "credit": 0
+        },
+        {
+          "accountId": "1200",
+          "debit": 0,
+          "credit": 5123.040000000001
+        }
+      ]
+    },
+    {
+      "id": "TX-1730",
+      "date": "2026-04-01",
+      "reference": "LSL-0004 COGS",
+      "description": "Cost of Goods Sold for invoice LSL-0004",
+      "entries": [
+        {
+          "accountId": "5100",
+          "debit": 27952.8,
+          "credit": 0
+        },
+        {
+          "accountId": "1200",
+          "debit": 0,
+          "credit": 27952.8
+        }
+      ]
+    },
+    {
+      "id": "TX-1731",
+      "date": "2026-04-16",
+      "reference": "LSL-0035 COGS",
+      "description": "Cost of Goods Sold for invoice LSL-0035",
+      "entries": [
+        {
+          "accountId": "5100",
+          "debit": 20692.760000000002,
+          "credit": 0
+        },
+        {
+          "accountId": "1200",
+          "debit": 0,
+          "credit": 20692.760000000002
+        }
+      ]
+    },
+    {
+      "id": "TX-1732",
+      "date": "2026-04-06",
+      "reference": "LSL-0015 COGS",
+      "description": "Cost of Goods Sold for invoice LSL-0015",
+      "entries": [
+        {
+          "accountId": "5100",
+          "debit": 14417.76,
+          "credit": 0
+        },
+        {
+          "accountId": "1200",
+          "debit": 0,
+          "credit": 14417.76
+        }
+      ]
+    },
+    {
+      "id": "TX-1733",
+      "date": "2026-04-29",
+      "reference": "LSL-0049 COGS",
+      "description": "Cost of Goods Sold for invoice LSL-0049",
+      "entries": [
+        {
+          "accountId": "5100",
+          "debit": 2083.9,
+          "credit": 0
+        },
+        {
+          "accountId": "1200",
+          "debit": 0,
+          "credit": 2083.9
+        }
+      ]
+    },
+    {
+      "id": "TX-1734",
+      "date": "2026-04-27",
+      "reference": "LSL-0045 COGS",
+      "description": "Cost of Goods Sold for invoice LSL-0045",
+      "entries": [
+        {
+          "accountId": "5100",
+          "debit": 4350,
+          "credit": 0
+        },
+        {
+          "accountId": "1200",
+          "debit": 0,
+          "credit": 4350
+        }
+      ]
+    },
+    {
+      "id": "TX-1735",
+      "date": "2026-05-03",
+      "reference": "LSL-0054 COGS",
+      "description": "Cost of Goods Sold for invoice LSL-0054",
+      "entries": [
+        {
+          "accountId": "5100",
+          "debit": 26062.4,
+          "credit": 0
+        },
+        {
+          "accountId": "1200",
+          "debit": 0,
+          "credit": 26062.4
+        }
+      ]
+    },
+    {
+      "id": "TX-1736",
+      "date": "2026-05-07",
+      "reference": "LSL-0071 COGS",
+      "description": "Cost of Goods Sold for invoice LSL-0071",
+      "entries": [
+        {
+          "accountId": "5100",
+          "debit": 13162.560000000001,
+          "credit": 0
+        },
+        {
+          "accountId": "1200",
+          "debit": 0,
+          "credit": 13162.560000000001
+        }
+      ]
+    },
+    {
+      "id": "TX-1737",
+      "date": "2026-05-05",
+      "reference": "LSL-0064 COGS",
+      "description": "Cost of Goods Sold for invoice LSL-0064",
+      "entries": [
+        {
+          "accountId": "5100",
+          "debit": 1267.8,
+          "credit": 0
+        },
+        {
+          "accountId": "1200",
+          "debit": 0,
+          "credit": 1267.8
+        }
+      ]
+    },
+    {
+      "id": "TX-1738",
+      "date": "2026-05-02",
+      "reference": "LSL-0053 COGS",
+      "description": "Cost of Goods Sold for invoice LSL-0053",
+      "entries": [
+        {
+          "accountId": "5100",
+          "debit": 47516,
+          "credit": 0
+        },
+        {
+          "accountId": "1200",
+          "debit": 0,
+          "credit": 47516
+        }
+      ]
+    },
+    {
+      "id": "TX-1739",
+      "date": "2026-06-18",
+      "reference": "LSL-0157 COGS",
+      "description": "Cost of Goods Sold for invoice LSL-0157",
+      "entries": [
+        {
+          "accountId": "5100",
+          "debit": 1740,
+          "credit": 0
+        },
+        {
+          "accountId": "1200",
+          "debit": 0,
+          "credit": 1740
+        }
+      ]
+    },
+    {
+      "id": "TX-1740",
+      "date": "2026-06-03",
+      "reference": "LSL-0117 COGS",
+      "description": "Cost of Goods Sold for invoice LSL-0117",
+      "entries": [
+        {
+          "accountId": "5100",
+          "debit": 3443.56,
+          "credit": 0
+        },
+        {
+          "accountId": "1200",
+          "debit": 0,
+          "credit": 3443.56
+        }
+      ]
+    },
+    {
+      "id": "TX-1741",
+      "date": "2026-06-06",
+      "reference": "LSL-0132 COGS",
+      "description": "Cost of Goods Sold for invoice LSL-0132",
+      "entries": [
+        {
+          "accountId": "5100",
+          "debit": 2900,
+          "credit": 0
+        },
+        {
+          "accountId": "1200",
+          "debit": 0,
+          "credit": 2900
+        }
+      ]
+    },
+    {
+      "id": "TX-1742",
+      "date": "2026-08-20",
+      "reference": "LSL-0338 COGS",
+      "description": "Cost of Goods Sold for invoice LSL-0338",
+      "entries": [
+        {
+          "accountId": "5100",
+          "debit": 4272.9400000000005,
+          "credit": 0
+        },
+        {
+          "accountId": "1200",
+          "debit": 0,
+          "credit": 4272.9400000000005
+        }
+      ]
+    },
+    {
+      "id": "TX-1743",
+      "date": "2026-09-20",
+      "reference": "LSL-0339 COGS",
+      "description": "Cost of Goods Sold for invoice LSL-0339",
+      "entries": [
+        {
+          "accountId": "5100",
+          "debit": 1151.8500000000001,
+          "credit": 0
+        },
+        {
+          "accountId": "1200",
+          "debit": 0,
+          "credit": 1151.8500000000001
+        }
+      ]
+    },
+    {
+      "id": "TX-1746",
+      "date": "2026-09-20",
+      "reference": "Purchase Return PR-001",
+      "description": "",
+      "siteName": "",
+      "entries": [
+        {
+          "accountId": "VEND-0068",
+          "debit": 8356.4128,
+          "credit": 0
+        },
+        {
+          "accountId": "L0005",
+          "debit": 0,
+          "credit": 6996.96
+        },
+        {
+          "accountId": "L0038",
+          "debit": 0,
+          "credit": 629.7264
+        },
+        {
+          "accountId": "L0033",
+          "debit": 0,
+          "credit": 629.7264
+        },
+        {
+          "accountId": "L031",
+          "debit": 0,
+          "credit": 100
+        }
+      ]
+    },
+    {
+      "id": "TX-1747",
+      "date": "2026-09-20",
+      "reference": "Sales Return SR-001",
+      "description": "",
+      "siteName": "",
+      "entries": [
+        {
+          "accountId": "L0004",
+          "debit": 2847.5,
+          "credit": 0
+        },
+        {
+          "accountId": "CUST-0427",
+          "debit": 0,
+          "credit": 3360.05
+        },
+        {
+          "accountId": "L0053",
+          "debit": 256.275,
+          "credit": 0
+        },
+        {
+          "accountId": "L0048",
+          "debit": 256.275,
+          "credit": 0
+        }
+      ]
+    },
+    {
+      "id": "TX-1748",
+      "date": "2026-09-20",
+      "reference": "SR-001 COGS",
+      "description": "",
+      "siteName": "",
+      "entries": [
+        {
+          "accountId": "1200",
+          "debit": 2942.4,
+          "credit": 0
+        },
+        {
+          "accountId": "5100",
+          "debit": 0,
+          "credit": 2942.4
+        }
+      ]
+    },
+    {
+      "id": "372",
+      "voucherId": "372",
+      "voucherType": "SALE",
+      "voucherNo": "LSL-0340",
+      "date": "2026-09-21",
+      "reference": "LSL-0340",
+      "description": "",
+      "siteName": "",
+      "entries": [
+        {
+          "accountId": "CUST-0273",
+          "debit": 3847,
+          "credit": 0
+        },
+        {
+          "accountId": "L0004",
+          "debit": 0,
+          "credit": 3260
+        },
+        {
+          "accountId": "L0053",
+          "debit": 0,
+          "credit": 293.4
+        },
+        {
+          "accountId": "L0048",
+          "debit": 0,
+          "credit": 293.4
+        },
+        {
+          "accountId": "L0012",
+          "debit": 0,
+          "credit": 0.2
+        }
+      ]
+    },
+    {
+      "id": "TX-1750",
+      "voucherId": "372",
+      "voucherType": "SALE",
+      "voucherNo": "LSL-0340",
+      "date": "2026-09-21",
+      "reference": "LSL-0340 COGS",
+      "description": "",
+      "entries": [
+        {
+          "accountId": "5100",
+          "debit": 2942.4,
+          "credit": 0
+        },
+        {
+          "accountId": "1200",
+          "debit": 0,
+          "credit": 2942.4
+        }
+      ]
     }
   ],
   "purchases": [
@@ -107260,60 +107759,6 @@
       "payMode": "Credit",
       "paymode": "Credit",
       "narration": "As per Inv.No:GB0087 Dt.29-05-2026"
-    },
-    {
-      "id": "13",
-      "purchaseNo": 13,
-      "voucherNo": "LPR-0010",
-      "seriesId": "SER-LOCAL-PURCHASE",
-      "refNo": "GB0082",
-      "invoiceNo": "GB0082",
-      "invoiceDate": "2026-05-29",
-      "date": "2026-05-29",
-      "supplierId": "VEND-0069",
-      "contactId": "VEND-0069",
-      "supplierName": "K.P.C ALI & CO.",
-      "contactName": "K.P.C ALI & CO.",
-      "ledgerId": 69,
-      "items": [
-        {
-          "materialId": "MAT-0003",
-          "name": "CEMENT",
-          "code": "ACC",
-          "model": "ACC",
-          "batchNo": "275.42",
-          "quantity": 200,
-          "unit": "Nos",
-          "price": 275.42,
-          "landingCost": 275.42,
-          "amount": 55084,
-          "netValue": 55084,
-          "taxRate": 18,
-          "gstPercent": 18,
-          "gstAmount": 9915.12,
-          "cessPercent": 0,
-          "netAmount": 64999.12,
-          "cgst": 4957.56,
-          "sgst": 4957.56,
-          "igst": 0
-        }
-      ],
-      "subtotal": 55084,
-      "taxRate": 18,
-      "taxAmount": 9915.12,
-      "cgst": 4957.56,
-      "sgst": 4957.56,
-      "igst": 0,
-      "shipping": 0,
-      "discount": 0,
-      "roundOff": -0.12,
-      "total": 64999,
-      "paidAmount": 0,
-      "status": "unpaid",
-      "cancelFlag": false,
-      "payMode": "Credit",
-      "paymode": "Credit",
-      "narration": "As per Inv.No:GB0086 Dt.29-05-2026"
     },
     {
       "id": "12",
@@ -108657,6 +109102,49 @@
       "additionalCess": 0,
       "roundOff": -4.8,
       "total": 69900
+    },
+    {
+      "id": "13",
+      "seriesId": "SER-LOCAL-PURCHASE",
+      "voucherNo": "LPR-0010",
+      "refNo": "LPR-0010",
+      "invoiceNo": "GB0082",
+      "date": "2026-05-29",
+      "contactId": "VEND-0069",
+      "contactName": "K.P.C ALI & CO.",
+      "siteName": "",
+      "state": "KERALA",
+      "payMode": "Credit",
+      "creditPeriod": "0",
+      "narration": "As per Inv.No:GB0086 Dt.29-05-2026",
+      "headloaderType": "std",
+      "items": [
+        {
+          "materialId": "MAT-0003",
+          "name": "CEMENT",
+          "code": "ACC",
+          "batchNo": "275.42",
+          "quantity": 200,
+          "unit": "Nos",
+          "price": 275.42,
+          "mrp": 344.27500000000003,
+          "discountPercent": 0,
+          "discountAmount": 0,
+          "netValue": 55084,
+          "gstPercent": 18,
+          "gstAmount": 9915.119999999999,
+          "netAmount": 64999.119999999995
+        }
+      ],
+      "subtotal": 55084,
+      "totalDiscount": 0,
+      "totalGst": 9915.119999999999,
+      "totalCess": 0,
+      "adjustments": 0,
+      "adjustmentsList": [],
+      "additionalCess": 0,
+      "roundOff": -0.12,
+      "total": 64998.99999999999
     }
   ],
   "salesReturns": [],
@@ -111258,7 +111746,7 @@
       "prefix": "LSL-",
       "digits": 4,
       "startingNumber": 1,
-      "currentNumber": 339,
+      "currentNumber": 341,
       "ledgerCode": "L0004",
       "isActive": true
     },
