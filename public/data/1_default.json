@@ -1,5 +1,5 @@
 {
-  "_lastSaved": 1789929024799,
+  "_lastSaved": 1789967694941,
   "materials": [
     {
       "id": "MAT-0001",
@@ -32399,7 +32399,7 @@
       "gstin": "",
       "creditLimit": 0,
       "creditPeriod": 0,
-      "balance": -700,
+      "balance": 35300,
       "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1210,
@@ -35535,7 +35535,7 @@
       "gstin": "32FDCPS06221D1Z",
       "creditLimit": 0,
       "creditPeriod": 0,
-      "balance": 0,
+      "balance": -19200,
       "openingBalance": 0,
       "balanceType": "Credit",
       "bankName": "",
@@ -106669,54 +106669,6 @@
       ]
     },
     {
-      "id": "TX-1744",
-      "date": "2026-09-20",
-      "reference": "Sales Return SR-001",
-      "description": "",
-      "siteName": "",
-      "entries": [
-        {
-          "accountId": "L0004",
-          "debit": 2847.5,
-          "credit": 0
-        },
-        {
-          "accountId": "CUST-0427",
-          "debit": 0,
-          "credit": 3360.05
-        },
-        {
-          "accountId": "L0053",
-          "debit": 256.275,
-          "credit": 0
-        },
-        {
-          "accountId": "L0048",
-          "debit": 256.275,
-          "credit": 0
-        }
-      ]
-    },
-    {
-      "id": "TX-1745",
-      "date": "2026-09-20",
-      "reference": "SR-001 COGS",
-      "description": "",
-      "siteName": "",
-      "entries": [
-        {
-          "accountId": "1200",
-          "debit": 2942.4,
-          "credit": 0
-        },
-        {
-          "accountId": "5100",
-          "debit": 0,
-          "credit": 2942.4
-        }
-      ]
-    },
-    {
       "id": "TX-1746",
       "date": "2026-09-20",
       "reference": "Purchase Return PR-001",
@@ -106784,6 +106736,54 @@
           "accountId": "L0012",
           "debit": 0,
           "credit": 0.12
+        }
+      ]
+    },
+    {
+      "id": "TX-1747",
+      "date": "2026-09-20",
+      "reference": "Sales Return SR-001",
+      "description": "",
+      "siteName": "",
+      "entries": [
+        {
+          "accountId": "L0004",
+          "debit": 2847.5,
+          "credit": 0
+        },
+        {
+          "accountId": "CUST-0427",
+          "debit": 0,
+          "credit": 3360.05
+        },
+        {
+          "accountId": "L0053",
+          "debit": 256.275,
+          "credit": 0
+        },
+        {
+          "accountId": "L0048",
+          "debit": 256.275,
+          "credit": 0
+        }
+      ]
+    },
+    {
+      "id": "TX-1748",
+      "date": "2026-09-20",
+      "reference": "SR-001 COGS",
+      "description": "",
+      "siteName": "",
+      "entries": [
+        {
+          "accountId": "1200",
+          "debit": 2942.4,
+          "credit": 0
+        },
+        {
+          "accountId": "5100",
+          "debit": 0,
+          "credit": 2942.4
         }
       ]
     }
@@ -111510,7 +111510,8 @@
     "enableCessInSalesBill": false,
     "influencerLoyaltyRate": 1,
     "enablePartyClosingBalanceBottom": false,
-    "enableHeadloader": true
+    "enableHeadloader": true,
+    "googleDriveBackupPath": "H:\\Other computers"
   },
   "influencers": [],
   "influencerRedemptions": [],
