@@ -1,5 +1,5 @@
 {
-  "_lastSaved": 1789967694941,
+  "_lastSaved": 1789969826944,
   "materials": [
     {
       "id": "MAT-0001",
@@ -32659,7 +32659,7 @@
       "gstin": "",
       "creditLimit": 0,
       "creditPeriod": 0,
-      "balance": 28,
+      "balance": 0,
       "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1224,
@@ -106784,6 +106784,25 @@
           "accountId": "5100",
           "debit": 0,
           "credit": 2942.4
+        }
+      ]
+    },
+    {
+      "id": "TX-1749",
+      "date": "2026-09-22",
+      "reference": "RC-0876",
+      "description": "",
+      "siteName": "",
+      "entries": [
+        {
+          "accountId": "CUST-1224",
+          "debit": 0,
+          "credit": 28
+        },
+        {
+          "accountId": "L0001",
+          "debit": 28,
+          "credit": 0
         }
       ]
     }
