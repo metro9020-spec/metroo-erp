@@ -1,5 +1,5 @@
 {
-  "_lastSaved": 1789969826944,
+  "_lastSaved": 1789986706291,
   "materials": [
     {
       "id": "MAT-0001",
@@ -28,7 +28,7 @@
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
       "openingStock": 7182.3,
-      "stock": 5702.03,
+      "stock": 5831.03,
       "landingCost": 70,
       "costPrice": 70,
       "sellingPrice": 60.8,
@@ -536,7 +536,7 @@
           "batchNo": "50",
           "landingCost": 50,
           "openingStock": 566.9000000000001,
-          "stock": 0,
+          "stock": 5.684341886080802e-14,
           "marginPercent": 2,
           "marginAmount": 1,
           "gstExclRate": 50,
@@ -627,7 +627,7 @@
           "batchNo": "54.237",
           "landingCost": 54.237,
           "openingStock": 0,
-          "stock": 2000.83,
+          "stock": 2129.83,
           "marginPercent": 2.347106,
           "marginAmount": 1.273,
           "gstExclRate": 54.237,
@@ -1240,14 +1240,8 @@
       ],
       "unloadingCharge": 0,
       "unloadingChargeEnabled": false,
-      "loadingChargesByType": {
-        "std": 0,
-        "type_1789889054254_coik": 0
-      },
-      "unloadingChargesByType": {
-        "std": 0,
-        "type_1789889054254_coik": 0
-      }
+      "loadingChargesByType": {},
+      "unloadingChargesByType": {}
     },
     {
       "id": "MAT-0002",
@@ -1588,14 +1582,8 @@
       ],
       "unloadingCharge": 0,
       "unloadingChargeEnabled": false,
-      "loadingChargesByType": {
-        "std": 0,
-        "type_1789889054254_coik": 0
-      },
-      "unloadingChargesByType": {
-        "std": 0,
-        "type_1789889054254_coik": 0
-      }
+      "loadingChargesByType": {},
+      "unloadingChargesByType": {}
     },
     {
       "id": "MAT-0003",
@@ -1624,7 +1612,7 @@
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
       "openingStock": 358,
-      "stock": 107,
+      "stock": 97,
       "landingCost": 294.24,
       "costPrice": 294.24,
       "sellingPrice": 330,
@@ -1638,7 +1626,7 @@
           "batchNo": "304.69",
           "landingCost": 304.69,
           "openingStock": 0,
-          "stock": 10,
+          "stock": 0,
           "marginPercent": 4.686666,
           "marginAmount": 14.06,
           "gstExclRate": 304.69,
@@ -2293,16 +2281,10 @@
           "stock": 350
         }
       ],
-      "unloadingCharge": 12,
-      "unloadingChargeEnabled": true,
-      "loadingChargesByType": {
-        "std": 0,
-        "type_1789889054254_coik": 0
-      },
-      "unloadingChargesByType": {
-        "std": 12,
-        "type_1789889054254_coik": 12
-      }
+      "unloadingCharge": 0,
+      "unloadingChargeEnabled": false,
+      "loadingChargesByType": {},
+      "unloadingChargesByType": {}
     },
     {
       "id": "MAT-0004",
@@ -2363,16 +2345,10 @@
           "stock": 0
         }
       ],
-      "unloadingCharge": 12,
-      "unloadingChargeEnabled": true,
-      "loadingChargesByType": {
-        "std": 0,
-        "type_1789889054254_coik": 0
-      },
-      "unloadingChargesByType": {
-        "std": 12,
-        "type_1789889054254_coik": 12
-      }
+      "unloadingCharge": 0,
+      "unloadingChargeEnabled": false,
+      "loadingChargesByType": {},
+      "unloadingChargesByType": {}
     },
     {
       "id": "MAT-0005",
@@ -2451,16 +2427,10 @@
           "costPrice": 234.38
         }
       ],
-      "unloadingCharge": 12,
-      "unloadingChargeEnabled": true,
-      "loadingChargesByType": {
-        "std": 0,
-        "type_1789889054254_coik": 0
-      },
-      "unloadingChargesByType": {
-        "std": 12,
-        "type_1789889054254_coik": 12
-      }
+      "unloadingCharge": 0,
+      "unloadingChargeEnabled": false,
+      "loadingChargesByType": {},
+      "unloadingChargesByType": {}
     },
     {
       "id": "MAT-0006",
@@ -3448,16 +3418,10 @@
           "costPrice": 241.525
         }
       ],
-      "unloadingCharge": 12,
-      "unloadingChargeEnabled": true,
-      "loadingChargesByType": {
-        "std": 0,
-        "type_1789889054254_coik": 0
-      },
-      "unloadingChargesByType": {
-        "std": 12,
-        "type_1789889054254_coik": 12
-      }
+      "unloadingCharge": 0,
+      "unloadingChargeEnabled": false,
+      "loadingChargesByType": {},
+      "unloadingChargesByType": {}
     },
     {
       "id": "MAT-0010",
@@ -3536,16 +3500,10 @@
           "costPrice": 210.938
         }
       ],
-      "unloadingCharge": 12,
-      "unloadingChargeEnabled": true,
-      "loadingChargesByType": {
-        "std": 0,
-        "type_1789889054254_coik": 0
-      },
-      "unloadingChargesByType": {
-        "std": 12,
-        "type_1789889054254_coik": 12
-      }
+      "unloadingCharge": 0,
+      "unloadingChargeEnabled": false,
+      "loadingChargesByType": {},
+      "unloadingChargesByType": {}
     },
     {
       "id": "MAT-0011",
@@ -3814,16 +3772,10 @@
           "stock": 0
         }
       ],
-      "unloadingCharge": 12,
-      "unloadingChargeEnabled": true,
-      "loadingChargesByType": {
-        "std": 0,
-        "type_1789889054254_coik": 0
-      },
-      "unloadingChargesByType": {
-        "std": 12,
-        "type_1789889054254_coik": 12
-      }
+      "unloadingCharge": 0,
+      "unloadingChargeEnabled": false,
+      "loadingChargesByType": {},
+      "unloadingChargesByType": {}
     },
     {
       "id": "MAT-0012",
@@ -3928,16 +3880,10 @@
           "costPrice": 312.5
         }
       ],
-      "unloadingCharge": 12,
-      "unloadingChargeEnabled": true,
-      "loadingChargesByType": {
-        "std": 0,
-        "type_1789889054254_coik": 0
-      },
-      "unloadingChargesByType": {
-        "std": 12,
-        "type_1789889054254_coik": 12
-      }
+      "unloadingCharge": 0,
+      "unloadingChargeEnabled": false,
+      "loadingChargesByType": {},
+      "unloadingChargesByType": {}
     },
     {
       "id": "MAT-0013",
@@ -4583,16 +4529,10 @@
           "stock": 100
         }
       ],
-      "unloadingCharge": 12,
-      "unloadingChargeEnabled": true,
-      "loadingChargesByType": {
-        "std": 0,
-        "type_1789889054254_coik": 0
-      },
-      "unloadingChargesByType": {
-        "std": 12,
-        "type_1789889054254_coik": 12
-      }
+      "unloadingCharge": 0,
+      "unloadingChargeEnabled": false,
+      "loadingChargesByType": {},
+      "unloadingChargesByType": {}
     },
     {
       "id": "MAT-0018",
@@ -4658,16 +4598,10 @@
           "costPrice": 253.91
         }
       ],
-      "unloadingCharge": 12,
-      "unloadingChargeEnabled": true,
-      "loadingChargesByType": {
-        "std": 0,
-        "type_1789889054254_coik": 0
-      },
-      "unloadingChargesByType": {
-        "std": 12,
-        "type_1789889054254_coik": 12
-      }
+      "unloadingCharge": 0,
+      "unloadingChargeEnabled": false,
+      "loadingChargesByType": {},
+      "unloadingChargesByType": {}
     },
     {
       "id": "MAT-0027",
@@ -4736,16 +4670,10 @@
           "stock": 0
         }
       ],
-      "unloadingCharge": 12,
-      "unloadingChargeEnabled": true,
-      "loadingChargesByType": {
-        "std": 0,
-        "type_1789889054254_coik": 0
-      },
-      "unloadingChargesByType": {
-        "std": 12,
-        "type_1789889054254_coik": 12
-      }
+      "unloadingCharge": 0,
+      "unloadingChargeEnabled": false,
+      "loadingChargesByType": {},
+      "unloadingChargesByType": {}
     },
     {
       "id": "MAT-0032",
@@ -5114,16 +5042,10 @@
           "costPrice": 218.75
         }
       ],
-      "unloadingCharge": 12,
-      "unloadingChargeEnabled": true,
-      "loadingChargesByType": {
-        "std": 0,
-        "type_1789889054254_coik": 0
-      },
-      "unloadingChargesByType": {
-        "std": 12,
-        "type_1789889054254_coik": 12
-      }
+      "unloadingCharge": 0,
+      "unloadingChargeEnabled": false,
+      "loadingChargesByType": {},
+      "unloadingChargesByType": {}
     },
     {
       "id": "MAT-0052",
@@ -5906,16 +5828,10 @@
           "costPrice": 242.187
         }
       ],
-      "unloadingCharge": 12,
-      "unloadingChargeEnabled": true,
-      "loadingChargesByType": {
-        "std": 0,
-        "type_1789889054254_coik": 0
-      },
-      "unloadingChargesByType": {
-        "std": 12,
-        "type_1789889054254_coik": 12
-      }
+      "unloadingCharge": 0,
+      "unloadingChargeEnabled": false,
+      "loadingChargesByType": {},
+      "unloadingChargesByType": {}
     },
     {
       "id": "MAT-0094",
@@ -6059,16 +5975,10 @@
           "costPrice": 226.563
         }
       ],
-      "unloadingCharge": 12,
-      "unloadingChargeEnabled": true,
-      "loadingChargesByType": {
-        "std": 0,
-        "type_1789889054254_coik": 0
-      },
-      "unloadingChargesByType": {
-        "std": 12,
-        "type_1789889054254_coik": 12
-      }
+      "unloadingCharge": 0,
+      "unloadingChargeEnabled": false,
+      "loadingChargesByType": {},
+      "unloadingChargesByType": {}
     },
     {
       "id": "MAT-0099",
@@ -6597,16 +6507,10 @@
           "stock": 221
         }
       ],
-      "unloadingCharge": 12,
-      "unloadingChargeEnabled": true,
-      "loadingChargesByType": {
-        "std": 0,
-        "type_1789889054254_coik": 0
-      },
-      "unloadingChargesByType": {
-        "std": 12,
-        "type_1789889054254_coik": 12
-      }
+      "unloadingCharge": 0,
+      "unloadingChargeEnabled": false,
+      "loadingChargesByType": {},
+      "unloadingChargesByType": {}
     },
     {
       "id": "MAT-0108",
@@ -7621,16 +7525,10 @@
           "costPrice": 271.18571428
         }
       ],
-      "unloadingCharge": 12,
-      "unloadingChargeEnabled": true,
-      "loadingChargesByType": {
-        "std": 0,
-        "type_1789889054254_coik": 0
-      },
-      "unloadingChargesByType": {
-        "std": 12,
-        "type_1789889054254_coik": 12
-      }
+      "unloadingCharge": 0,
+      "unloadingChargeEnabled": false,
+      "loadingChargesByType": {},
+      "unloadingChargesByType": {}
     },
     {
       "id": "MAT-0119",
@@ -7925,16 +7823,10 @@
           "costPrice": 236.72
         }
       ],
-      "unloadingCharge": 12,
-      "unloadingChargeEnabled": true,
-      "loadingChargesByType": {
-        "std": 0,
-        "type_1789889054254_coik": 0
-      },
-      "unloadingChargesByType": {
-        "std": 12,
-        "type_1789889054254_coik": 12
-      }
+      "unloadingCharge": 0,
+      "unloadingChargeEnabled": false,
+      "loadingChargesByType": {},
+      "unloadingChargesByType": {}
     },
     {
       "id": "MAT-0247",
@@ -8047,16 +7939,10 @@
           "stock": 185
         }
       ],
-      "unloadingCharge": 12,
-      "unloadingChargeEnabled": true,
-      "loadingChargesByType": {
-        "std": 0,
-        "type_1789889054254_coik": 0
-      },
-      "unloadingChargesByType": {
-        "std": 12,
-        "type_1789889054254_coik": 12
-      }
+      "unloadingCharge": 0,
+      "unloadingChargeEnabled": false,
+      "loadingChargesByType": {},
+      "unloadingChargesByType": {}
     },
     {
       "id": "MAT-0248",
@@ -8316,16 +8202,10 @@
           "costPrice": 203.125
         }
       ],
-      "unloadingCharge": 12,
-      "unloadingChargeEnabled": true,
-      "loadingChargesByType": {
-        "std": 0,
-        "type_1789889054254_coik": 0
-      },
-      "unloadingChargesByType": {
-        "std": 12,
-        "type_1789889054254_coik": 12
-      }
+      "unloadingCharge": 0,
+      "unloadingChargeEnabled": false,
+      "loadingChargesByType": {},
+      "unloadingChargesByType": {}
     },
     {
       "id": "MAT-0298",
@@ -8354,7 +8234,7 @@
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
       "openingStock": 220,
-      "stock": 220,
+      "stock": 235,
       "landingCost": 76.79,
       "costPrice": 76.79,
       "sellingPrice": 89,
@@ -8706,7 +8586,7 @@
           "batchNo": "76.79",
           "landingCost": 76.79,
           "openingStock": 0,
-          "stock": 220,
+          "stock": 235,
           "marginPercent": 3.477015,
           "marginAmount": 2.66999999999999,
           "gstExclRate": 76.79,
@@ -8880,16 +8760,10 @@
           "costPrice": 257.81
         }
       ],
-      "unloadingCharge": 12,
-      "unloadingChargeEnabled": true,
-      "loadingChargesByType": {
-        "std": 0,
-        "type_1789889054254_coik": 0
-      },
-      "unloadingChargesByType": {
-        "std": 12,
-        "type_1789889054254_coik": 12
-      }
+      "unloadingCharge": 0,
+      "unloadingChargeEnabled": false,
+      "loadingChargesByType": {},
+      "unloadingChargesByType": {}
     },
     {
       "id": "MAT-0323",
@@ -9171,16 +9045,10 @@
           "costPrice": 264.844
         }
       ],
-      "unloadingCharge": 12,
-      "unloadingChargeEnabled": true,
-      "loadingChargesByType": {
-        "std": 0,
-        "type_1789889054254_coik": 0
-      },
-      "unloadingChargesByType": {
-        "std": 12,
-        "type_1789889054254_coik": 12
-      }
+      "unloadingCharge": 0,
+      "unloadingChargeEnabled": false,
+      "loadingChargesByType": {},
+      "unloadingChargesByType": {}
     },
     {
       "id": "MAT-0428",
@@ -9913,16 +9781,10 @@
           "costPrice": 199.22
         }
       ],
-      "unloadingCharge": 12,
-      "unloadingChargeEnabled": true,
-      "loadingChargesByType": {
-        "std": 0,
-        "type_1789889054254_coik": 0
-      },
-      "unloadingChargesByType": {
-        "std": 12,
-        "type_1789889054254_coik": 12
-      }
+      "unloadingCharge": 0,
+      "unloadingChargeEnabled": false,
+      "loadingChargesByType": {},
+      "unloadingChargesByType": {}
     },
     {
       "id": "MAT-0516",
@@ -10350,16 +10212,10 @@
           "costPrice": 0
         }
       ],
-      "unloadingCharge": 12,
-      "unloadingChargeEnabled": true,
-      "loadingChargesByType": {
-        "std": 0,
-        "type_1789889054254_coik": 0
-      },
-      "unloadingChargesByType": {
-        "std": 12,
-        "type_1789889054254_coik": 12
-      }
+      "unloadingCharge": 0,
+      "unloadingChargeEnabled": false,
+      "loadingChargesByType": {},
+      "unloadingChargesByType": {}
     },
     {
       "id": "MAT-0572",
@@ -10494,16 +10350,10 @@
           "costPrice": 265.63
         }
       ],
-      "unloadingCharge": 12,
-      "unloadingChargeEnabled": true,
-      "loadingChargesByType": {
-        "std": 0,
-        "type_1789889054254_coik": 0
-      },
-      "unloadingChargesByType": {
-        "std": 12,
-        "type_1789889054254_coik": 12
-      }
+      "unloadingCharge": 0,
+      "unloadingChargeEnabled": false,
+      "loadingChargesByType": {},
+      "unloadingChargesByType": {}
     },
     {
       "id": "MAT-0575",
@@ -11016,14 +10866,8 @@
       ],
       "unloadingCharge": 0,
       "unloadingChargeEnabled": false,
-      "loadingChargesByType": {
-        "std": 0,
-        "type_1789889054254_coik": 0
-      },
-      "unloadingChargesByType": {
-        "std": 0,
-        "type_1789889054254_coik": 0
-      }
+      "loadingChargesByType": {},
+      "unloadingChargesByType": {}
     },
     {
       "id": "MAT-0646",
@@ -11446,16 +11290,10 @@
           "costPrice": 148.31
         }
       ],
-      "unloadingCharge": 12,
-      "unloadingChargeEnabled": true,
-      "loadingChargesByType": {
-        "std": 0,
-        "type_1789889054254_coik": 0
-      },
-      "unloadingChargesByType": {
-        "std": 12,
-        "type_1789889054254_coik": 12
-      }
+      "unloadingCharge": 0,
+      "unloadingChargeEnabled": false,
+      "loadingChargesByType": {},
+      "unloadingChargesByType": {}
     },
     {
       "id": "MAT-0718",
@@ -11508,16 +11346,10 @@
           "costPrice": 203.905
         }
       ],
-      "unloadingCharge": 12,
-      "unloadingChargeEnabled": true,
-      "loadingChargesByType": {
-        "std": 0,
-        "type_1789889054254_coik": 0
-      },
-      "unloadingChargesByType": {
-        "std": 12,
-        "type_1789889054254_coik": 12
-      }
+      "unloadingCharge": 0,
+      "unloadingChargeEnabled": false,
+      "loadingChargesByType": {},
+      "unloadingChargesByType": {}
     },
     {
       "id": "MAT-0723",
@@ -11676,14 +11508,8 @@
       ],
       "unloadingCharge": 0,
       "unloadingChargeEnabled": false,
-      "loadingChargesByType": {
-        "std": 0,
-        "type_1789889054254_coik": 0
-      },
-      "unloadingChargesByType": {
-        "std": 0,
-        "type_1789889054254_coik": 0
-      }
+      "loadingChargesByType": {},
+      "unloadingChargesByType": {}
     },
     {
       "id": "MAT-0730",
@@ -11749,16 +11575,10 @@
           "costPrice": 228.813
         }
       ],
-      "unloadingCharge": 12,
-      "unloadingChargeEnabled": true,
-      "loadingChargesByType": {
-        "std": 0,
-        "type_1789889054254_coik": 0
-      },
-      "unloadingChargesByType": {
-        "std": 12,
-        "type_1789889054254_coik": 12
-      }
+      "unloadingCharge": 0,
+      "unloadingChargeEnabled": false,
+      "loadingChargesByType": {},
+      "unloadingChargesByType": {}
     },
     {
       "id": "MAT-0770",
@@ -12147,16 +11967,10 @@
           "costPrice": 288.136
         }
       ],
-      "unloadingCharge": 12,
-      "unloadingChargeEnabled": true,
-      "loadingChargesByType": {
-        "std": 0,
-        "type_1789889054254_coik": 0
-      },
-      "unloadingChargesByType": {
-        "std": 12,
-        "type_1789889054254_coik": 12
-      }
+      "unloadingCharge": 0,
+      "unloadingChargeEnabled": false,
+      "loadingChargesByType": {},
+      "unloadingChargesByType": {}
     },
     {
       "id": "MAT-0867",
@@ -17819,7 +17633,7 @@
       "gstin": "32CCWPM6567L1ZP",
       "creditLimit": 0,
       "creditPeriod": 0,
-      "balance": 314887.95,
+      "balance": 318248,
       "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 427,
@@ -18099,7 +17913,7 @@
       "gstin": "",
       "creditLimit": 0,
       "creditPeriod": 0,
-      "balance": 4380,
+      "balance": 0,
       "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 441,
@@ -32399,7 +32213,7 @@
       "gstin": "",
       "creditLimit": 0,
       "creditPeriod": 0,
-      "balance": 35300,
+      "balance": -700,
       "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1210,
@@ -32659,7 +32473,7 @@
       "gstin": "",
       "creditLimit": 0,
       "creditPeriod": 0,
-      "balance": 0,
+      "balance": 28,
       "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1224,
@@ -32879,7 +32693,7 @@
       "gstin": "",
       "creditLimit": 0,
       "creditPeriod": 0,
-      "balance": 0,
+      "balance": -800,
       "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1235,
@@ -34458,7 +34272,7 @@
       "gstin": "32AADCP5210D1Z5",
       "creditLimit": 0,
       "creditPeriod": 0,
-      "balance": 8356.4128,
+      "balance": 0,
       "openingBalance": 0,
       "balanceType": "Credit",
       "bankName": "STATE BANK OF INDIA",
@@ -35535,7 +35349,7 @@
       "gstin": "32FDCPS06221D1Z",
       "creditLimit": 0,
       "creditPeriod": 0,
-      "balance": -19200,
+      "balance": 0,
       "openingBalance": 0,
       "balanceType": "Credit",
       "bankName": "",
@@ -56693,8 +56507,7 @@
       "status": "unpaid",
       "cancelFlag": false,
       "payMode": "Credit",
-      "paymode": "Credit",
-      "isCancelled": false
+      "paymode": "Credit"
     },
     {
       "id": "LSL-0337",
@@ -56767,8 +56580,7 @@
       "status": "unpaid",
       "cancelFlag": false,
       "payMode": "Credit",
-      "paymode": "Credit",
-      "isCancelled": false
+      "paymode": "Credit"
     },
     {
       "id": "LSL-0316",
@@ -56870,6 +56682,73 @@
       "additionalCess": 0,
       "roundOff": -0.32,
       "total": 30000,
+      "paidAmount": 0,
+      "status": "unpaid"
+    },
+    {
+      "id": "LSL-0338",
+      "seriesId": "SER-LOCAL-SALES",
+      "voucherNo": "LSL-0338",
+      "refNo": "LSL-0338",
+      "employee": "",
+      "influencer": "",
+      "date": "2026-08-20",
+      "dueDate": "2026-08-20",
+      "contactId": "CUST-1311",
+      "contactName": "ATHIRA AGUSTIN",
+      "siteName": "",
+      "state": "KERALA",
+      "payMode": "Credit",
+      "creditPeriod": "0",
+      "narration": "",
+      "headloaderType": "std",
+      "discountPercent": "0",
+      "discountAmount": "0.00",
+      "shippingAddress": "",
+      "vehicleNo": "",
+      "items": [
+        {
+          "materialId": "MAT-0003",
+          "name": "CEMENT",
+          "code": "ACC",
+          "batchNo": "266.95",
+          "quantity": 14,
+          "unit": "Nos",
+          "price": 276.27,
+          "mrp": 345.3375,
+          "discountPercent": 0,
+          "discountAmount": 0,
+          "netValue": 3867.7799999999997,
+          "gstPercent": 18,
+          "gstAmount": 696.2004,
+          "netAmount": 4563.9803999999995
+        },
+        {
+          "materialId": "MAT-0298",
+          "name": "BLOCK",
+          "code": "AAC",
+          "batchNo": "76.79",
+          "quantity": 2,
+          "unit": "Nos",
+          "price": 79.46,
+          "mrp": 99.32499999999999,
+          "discountPercent": 0,
+          "discountAmount": 0,
+          "netValue": 158.92,
+          "gstPercent": 12,
+          "gstAmount": 19.0704,
+          "netAmount": 177.9904
+        }
+      ],
+      "subtotal": 4026.7,
+      "totalDiscount": 0,
+      "totalGst": 715.2707999999999,
+      "totalCess": 0,
+      "adjustments": 0,
+      "adjustmentsList": [],
+      "additionalCess": 0,
+      "roundOff": 0.03,
+      "total": 4742.0008,
       "paidAmount": 0,
       "status": "unpaid"
     },
@@ -57698,124 +57577,6 @@
       "total": 3299.9959999999996,
       "paidAmount": 0,
       "status": "unpaid"
-    },
-    {
-      "id": "LSL-0338",
-      "seriesId": "SER-LOCAL-SALES",
-      "voucherNo": "LSL-0338",
-      "refNo": "LSL-0338",
-      "employee": "",
-      "influencer": "",
-      "date": "2026-08-20",
-      "dueDate": "2026-08-20",
-      "contactId": "CUST-1311",
-      "contactName": "ATHIRA AGUSTIN",
-      "siteName": "",
-      "state": "KERALA",
-      "payMode": "Credit",
-      "creditPeriod": "0",
-      "narration": "",
-      "headloaderType": "std",
-      "discountPercent": "0",
-      "discountAmount": "0.00",
-      "shippingAddress": "",
-      "vehicleNo": "KL59V1757",
-      "items": [
-        {
-          "materialId": "MAT-0003",
-          "name": "CEMENT",
-          "code": "ACC",
-          "batchNo": "266.95",
-          "quantity": 14,
-          "unit": "Nos",
-          "price": 276.27,
-          "mrp": 345.3375,
-          "discountPercent": 0,
-          "discountAmount": 0,
-          "netValue": 3867.7799999999997,
-          "gstPercent": 18,
-          "gstAmount": 696.2004,
-          "netAmount": 4563.9803999999995
-        },
-        {
-          "materialId": "MAT-0298",
-          "name": "BLOCK",
-          "code": "AAC",
-          "batchNo": "76.79",
-          "quantity": 2,
-          "unit": "Nos",
-          "price": 79.46,
-          "mrp": 99.32499999999999,
-          "discountPercent": 0,
-          "discountAmount": 0,
-          "netValue": 158.92,
-          "gstPercent": 12,
-          "gstAmount": 19.0704,
-          "netAmount": 177.9904
-        }
-      ],
-      "subtotal": 4026.7,
-      "totalDiscount": 0,
-      "totalGst": 715.2707999999999,
-      "totalCess": 0,
-      "adjustments": 0,
-      "adjustmentsList": [],
-      "additionalCess": 0,
-      "roundOff": 0.03,
-      "total": 4742.0008,
-      "paidAmount": 0,
-      "status": "unpaid"
-    },
-    {
-      "id": "LSL-0339",
-      "seriesId": "SER-LOCAL-SALES",
-      "voucherNo": "LSL-0339",
-      "refNo": "LSL-0339",
-      "employee": "",
-      "influencer": "",
-      "date": "2026-09-20",
-      "dueDate": "2026-09-20",
-      "contactId": "__CASH__",
-      "contactName": "CASH SALES",
-      "siteName": "",
-      "state": "KERALA",
-      "payMode": "Cash",
-      "creditPeriod": "0",
-      "narration": "",
-      "headloaderType": "std",
-      "discountPercent": "0",
-      "discountAmount": "0.00",
-      "shippingAddress": "",
-      "vehicleNo": "",
-      "items": [
-        {
-          "materialId": "MAT-0298",
-          "name": "BLOCK",
-          "code": "AAC",
-          "batchNo": "76.79",
-          "quantity": 15,
-          "unit": "Nos",
-          "price": 89,
-          "mrp": 79.46,
-          "discountPercent": 0,
-          "discountAmount": 0,
-          "netValue": 1335,
-          "gstPercent": 12,
-          "gstAmount": 160.2,
-          "netAmount": 1495.2
-        }
-      ],
-      "subtotal": 1335,
-      "totalDiscount": 0,
-      "totalGst": 160.2,
-      "totalCess": 0,
-      "adjustments": 0,
-      "adjustmentsList": [],
-      "additionalCess": 0,
-      "roundOff": -0.2,
-      "total": 1495,
-      "paidAmount": 1495,
-      "status": "paid"
     }
   ],
   "salesOrders": [],
@@ -61831,6 +61592,44 @@
           "accountId": "L0012",
           "debit": 0.44,
           "credit": 0
+        }
+      ]
+    },
+    {
+      "id": "13",
+      "voucherId": "13",
+      "voucherNo": "LPR-0010",
+      "voucherType": "PUR",
+      "date": "2026-05-29",
+      "reference": "LPR-0010",
+      "description": "As per Inv.No:GB0086 Dt.29-05-2026",
+      "contactId": "CUST-1210",
+      "siteName": "",
+      "entries": [
+        {
+          "accountId": "L0005",
+          "debit": 55084,
+          "credit": 0
+        },
+        {
+          "accountId": "VEND-0069",
+          "debit": 0,
+          "credit": 64999
+        },
+        {
+          "accountId": "L0038",
+          "debit": 4957.56,
+          "credit": 0
+        },
+        {
+          "accountId": "L0033",
+          "debit": 4957.56,
+          "credit": 0
+        },
+        {
+          "accountId": "L0012",
+          "debit": 0,
+          "credit": 0.12
         }
       ]
     },
@@ -72002,6 +71801,137 @@
       ]
     },
     {
+      "id": "LSL-0336",
+      "voucherId": "LSL-0336",
+      "voucherType": "SALE",
+      "voucherNo": "LSL-0336",
+      "date": "2026-08-20",
+      "reference": "LSL-0336",
+      "description": "",
+      "siteName": "",
+      "entries": [
+        {
+          "accountId": "CUST-1049",
+          "debit": 2282,
+          "credit": 0
+        },
+        {
+          "accountId": "L0004",
+          "debit": 0,
+          "credit": 1933.89
+        },
+        {
+          "accountId": "L0053",
+          "debit": 0,
+          "credit": 174.05
+        },
+        {
+          "accountId": "L0048",
+          "debit": 0,
+          "credit": 174.05
+        },
+        {
+          "accountId": "L0012",
+          "debit": 0,
+          "credit": 0.01
+        }
+      ]
+    },
+    {
+      "id": "LSL-0337",
+      "voucherId": "LSL-0337",
+      "voucherType": "SALE",
+      "voucherNo": "LSL-0337",
+      "date": "2026-08-20",
+      "reference": "LSL-0337",
+      "description": "",
+      "siteName": "",
+      "entries": [
+        {
+          "accountId": "CUST-1305",
+          "debit": 1838,
+          "credit": 0
+        },
+        {
+          "accountId": "L0004",
+          "debit": 0,
+          "credit": 1565.72
+        },
+        {
+          "accountId": "L0052",
+          "debit": 0,
+          "credit": 9.54
+        },
+        {
+          "accountId": "L0047",
+          "debit": 0,
+          "credit": 9.53
+        },
+        {
+          "accountId": "L0053",
+          "debit": 0,
+          "credit": 126.61
+        },
+        {
+          "accountId": "L0048",
+          "debit": 0,
+          "credit": 126.61
+        },
+        {
+          "accountId": "L0012",
+          "debit": 0.01,
+          "credit": 0
+        }
+      ]
+    },
+    {
+      "id": "LSL-0338",
+      "voucherId": "LSL-0338",
+      "voucherType": "SALE",
+      "voucherNo": "LSL-0338",
+      "date": "2026-08-20",
+      "reference": "LSL-0338",
+      "description": "",
+      "siteName": "",
+      "entries": [
+        {
+          "accountId": "CUST-1311",
+          "debit": 4742,
+          "credit": 0
+        },
+        {
+          "accountId": "L0004",
+          "debit": 0,
+          "credit": 4026.7
+        },
+        {
+          "accountId": "L0052",
+          "debit": 0,
+          "credit": 9.54
+        },
+        {
+          "accountId": "L0047",
+          "debit": 0,
+          "credit": 9.53
+        },
+        {
+          "accountId": "L0053",
+          "debit": 0,
+          "credit": 348.1
+        },
+        {
+          "accountId": "L0048",
+          "debit": 0,
+          "credit": 348.1
+        },
+        {
+          "accountId": "L0012",
+          "debit": 0,
+          "credit": 0.03
+        }
+      ]
+    },
+    {
       "id": "B2B0026",
       "voucherId": "B2B0026",
       "voucherType": "SALE",
@@ -72525,6 +72455,31 @@
           "accountId": "CUST-1210",
           "debit": 0,
           "credit": 2000,
+          "narration": ""
+        }
+      ]
+    },
+    {
+      "id": "TX-REC-177",
+      "voucherId": "177",
+      "voucherNo": "13",
+      "voucherType": "Receipt",
+      "date": "2026-04-01",
+      "reference": "RC-9",
+      "description": "Receipt from Customer: RAMSHI (RC-13)",
+      "contactId": "CUST-1210",
+      "siteName": "",
+      "entries": [
+        {
+          "accountId": "CUST-1210",
+          "debit": 0,
+          "credit": 36000,
+          "narration": ""
+        },
+        {
+          "accountId": "L0100",
+          "debit": 36000,
+          "credit": 0,
           "narration": ""
         }
       ]
@@ -75247,6 +75202,31 @@
       ]
     },
     {
+      "id": "TX-CON-88",
+      "voucherId": "88",
+      "voucherNo": "13",
+      "voucherType": "Contra",
+      "date": "2026-04-18",
+      "reference": "CNTR-13",
+      "description": "Contra Voucher 13",
+      "contactId": "",
+      "siteName": "",
+      "entries": [
+        {
+          "accountId": "L1096",
+          "debit": 0,
+          "credit": 5195,
+          "narration": ""
+        },
+        {
+          "accountId": "L0100",
+          "debit": 5195,
+          "credit": 0,
+          "narration": ""
+        }
+      ]
+    },
+    {
       "id": "TX-PAY-226",
       "voucherId": "226",
       "voucherNo": "8",
@@ -77023,6 +77003,31 @@
           "accountId": "L0100",
           "debit": 26346,
           "credit": 0,
+          "narration": ""
+        }
+      ]
+    },
+    {
+      "id": "TX-PAY-230",
+      "voucherId": "230",
+      "voucherNo": "13",
+      "voucherType": "Payment",
+      "date": "2026-04-27",
+      "reference": "PM-13",
+      "description": "Payment to Supplier: SAINTS DISTRIBUTORS -KANNUR (PAY-13)",
+      "contactId": "VEND-1182",
+      "siteName": "",
+      "entries": [
+        {
+          "accountId": "VEND-1182",
+          "debit": 19200,
+          "credit": 0,
+          "narration": ""
+        },
+        {
+          "accountId": "L0100",
+          "debit": 0,
+          "credit": 19200,
           "narration": ""
         }
       ]
@@ -80303,6 +80308,31 @@
       ]
     },
     {
+      "id": "TX-REC-371",
+      "voucherId": "371",
+      "voucherNo": "269",
+      "voucherType": "Receipt",
+      "date": "2026-05-13",
+      "reference": "RC-269",
+      "description": "Receipt from Customer: THASLEENA (RC-269)",
+      "contactId": "CUST-1235",
+      "siteName": "",
+      "entries": [
+        {
+          "accountId": "L1096",
+          "debit": 800,
+          "credit": 0,
+          "narration": ""
+        },
+        {
+          "accountId": "CUST-1235",
+          "debit": 0,
+          "credit": 800,
+          "narration": ""
+        }
+      ]
+    },
+    {
       "id": "TX-REC-372",
       "voucherId": "372",
       "voucherNo": "270",
@@ -83323,6 +83353,31 @@
           "accountId": "CUST-1254",
           "debit": 0,
           "credit": 2410,
+          "narration": ""
+        }
+      ]
+    },
+    {
+      "id": "TX-REC-551",
+      "voucherId": "551",
+      "voucherNo": "371",
+      "voucherType": "Receipt",
+      "date": "2026-05-25",
+      "reference": "RC-371",
+      "description": "Receipt from Customer: JITHIN K (RC-371)",
+      "contactId": "CUST-0441",
+      "siteName": "",
+      "entries": [
+        {
+          "accountId": "L0100",
+          "debit": 4380,
+          "credit": 0,
+          "narration": ""
+        },
+        {
+          "accountId": "CUST-0441",
+          "debit": 0,
+          "credit": 4380,
           "narration": ""
         }
       ]
@@ -99877,211 +99932,7 @@
       ]
     },
     {
-      "id": "LSL-0336",
-      "voucherId": "LSL-0336",
-      "voucherType": "SALE",
-      "voucherNo": "LSL-0336",
-      "date": "2026-08-20",
-      "reference": "LSL-0336",
-      "description": "",
-      "siteName": "",
-      "entries": [
-        {
-          "accountId": "CUST-1049",
-          "debit": 2282,
-          "credit": 0
-        },
-        {
-          "accountId": "L0004",
-          "debit": 0,
-          "credit": 1933.89
-        },
-        {
-          "accountId": "L0053",
-          "debit": 0,
-          "credit": 174.05
-        },
-        {
-          "accountId": "L0048",
-          "debit": 0,
-          "credit": 174.05
-        },
-        {
-          "accountId": "L0012",
-          "debit": 0,
-          "credit": 0.01
-        }
-      ]
-    },
-    {
-      "id": "LSL-0337",
-      "voucherId": "LSL-0337",
-      "voucherType": "SALE",
-      "voucherNo": "LSL-0337",
-      "date": "2026-08-20",
-      "reference": "LSL-0337",
-      "description": "",
-      "siteName": "",
-      "entries": [
-        {
-          "accountId": "CUST-1305",
-          "debit": 1838,
-          "credit": 0
-        },
-        {
-          "accountId": "L0004",
-          "debit": 0,
-          "credit": 1565.72
-        },
-        {
-          "accountId": "L0052",
-          "debit": 0,
-          "credit": 9.54
-        },
-        {
-          "accountId": "L0047",
-          "debit": 0,
-          "credit": 9.53
-        },
-        {
-          "accountId": "L0053",
-          "debit": 0,
-          "credit": 126.61
-        },
-        {
-          "accountId": "L0048",
-          "debit": 0,
-          "credit": 126.61
-        },
-        {
-          "accountId": "L0012",
-          "debit": 0.01,
-          "credit": 0
-        }
-      ]
-    },
-    {
-      "id": "TX-1376",
-      "date": "2026-08-20",
-      "reference": "LSL-0336 COGS",
-      "description": "Cost of Goods Sold for invoice LSL-0336",
-      "entries": [
-        {
-          "accountId": "5100",
-          "debit": 2059.6800000000003,
-          "credit": 0
-        },
-        {
-          "accountId": "1200",
-          "debit": 0,
-          "credit": 2059.6800000000003
-        }
-      ]
-    },
-    {
-      "id": "TX-1377",
-      "date": "2026-08-20",
-      "reference": "LSL-0337 COGS",
-      "description": "Cost of Goods Sold for invoice LSL-0337",
-      "entries": [
-        {
-          "accountId": "5100",
-          "debit": 1624.78,
-          "credit": 0
-        },
-        {
-          "accountId": "1200",
-          "debit": 0,
-          "credit": 1624.78
-        }
-      ]
-    },
-    {
-      "id": "LSL-0338",
-      "voucherId": "LSL-0338",
-      "voucherType": "SALE",
-      "voucherNo": "LSL-0338",
-      "date": "2026-08-20",
-      "reference": "LSL-0338",
-      "description": "",
-      "siteName": "",
-      "entries": [
-        {
-          "accountId": "CUST-1311",
-          "debit": 4742,
-          "credit": 0
-        },
-        {
-          "accountId": "L0004",
-          "debit": 0,
-          "credit": 4026.7
-        },
-        {
-          "accountId": "L0052",
-          "debit": 0,
-          "credit": 9.54
-        },
-        {
-          "accountId": "L0047",
-          "debit": 0,
-          "credit": 9.53
-        },
-        {
-          "accountId": "L0053",
-          "debit": 0,
-          "credit": 348.1
-        },
-        {
-          "accountId": "L0048",
-          "debit": 0,
-          "credit": 348.1
-        },
-        {
-          "accountId": "L0012",
-          "debit": 0,
-          "credit": 0.03
-        }
-      ]
-    },
-    {
-      "id": "LSL-0339",
-      "voucherId": "LSL-0339",
-      "voucherType": "SALE",
-      "voucherNo": "LSL-0339",
-      "date": "2026-09-20",
-      "reference": "LSL-0339",
-      "description": "",
-      "siteName": "",
-      "entries": [
-        {
-          "accountId": "L0001",
-          "debit": 1495,
-          "credit": 0
-        },
-        {
-          "accountId": "L0004",
-          "debit": 0,
-          "credit": 1335
-        },
-        {
-          "accountId": "L0052",
-          "debit": 0,
-          "credit": 80.1
-        },
-        {
-          "accountId": "L0047",
-          "debit": 0,
-          "credit": 80.1
-        },
-        {
-          "accountId": "L0012",
-          "debit": 0.2,
-          "credit": 0
-        }
-      ]
-    },
-    {
-      "id": "TX-1378",
+      "id": "TX-1361",
       "date": "2026-04-05",
       "reference": "B2B001 COGS",
       "description": "Cost of Goods Sold for invoice B2B001",
@@ -100099,7 +99950,7 @@
       ]
     },
     {
-      "id": "TX-1379",
+      "id": "TX-1362",
       "date": "2026-04-01",
       "reference": "LSL-0002 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0002",
@@ -100117,7 +99968,7 @@
       ]
     },
     {
-      "id": "TX-1380",
+      "id": "TX-1363",
       "date": "2026-04-02",
       "reference": "LSL-0006 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0006",
@@ -100135,7 +99986,7 @@
       ]
     },
     {
-      "id": "TX-1381",
+      "id": "TX-1364",
       "date": "2026-04-02",
       "reference": "LSL-0007 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0007",
@@ -100153,7 +100004,7 @@
       ]
     },
     {
-      "id": "TX-1382",
+      "id": "TX-1365",
       "date": "2026-04-02",
       "reference": "LSL-0008 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0008",
@@ -100171,7 +100022,7 @@
       ]
     },
     {
-      "id": "TX-1383",
+      "id": "TX-1366",
       "date": "2026-04-02",
       "reference": "LSL-0009 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0009",
@@ -100189,7 +100040,7 @@
       ]
     },
     {
-      "id": "TX-1384",
+      "id": "TX-1367",
       "date": "2026-04-03",
       "reference": "LSL-0010 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0010",
@@ -100207,7 +100058,7 @@
       ]
     },
     {
-      "id": "TX-1385",
+      "id": "TX-1368",
       "date": "2026-04-04",
       "reference": "LSL-0011 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0011",
@@ -100225,7 +100076,7 @@
       ]
     },
     {
-      "id": "TX-1386",
+      "id": "TX-1369",
       "date": "2026-04-04",
       "reference": "LSL-0012 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0012",
@@ -100243,7 +100094,7 @@
       ]
     },
     {
-      "id": "TX-1387",
+      "id": "TX-1370",
       "date": "2026-04-04",
       "reference": "LSL-0013 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0013",
@@ -100261,7 +100112,7 @@
       ]
     },
     {
-      "id": "TX-1388",
+      "id": "TX-1371",
       "date": "2026-04-06",
       "reference": "LSL-0014 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0014",
@@ -100279,7 +100130,7 @@
       ]
     },
     {
-      "id": "TX-1389",
+      "id": "TX-1372",
       "date": "2026-04-06",
       "reference": "LSL-0016 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0016",
@@ -100297,7 +100148,7 @@
       ]
     },
     {
-      "id": "TX-1390",
+      "id": "TX-1373",
       "date": "2026-04-07",
       "reference": "LSL-0017 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0017",
@@ -100315,7 +100166,7 @@
       ]
     },
     {
-      "id": "TX-1391",
+      "id": "TX-1374",
       "date": "2026-04-07",
       "reference": "LSL-0018 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0018",
@@ -100333,7 +100184,7 @@
       ]
     },
     {
-      "id": "TX-1392",
+      "id": "TX-1375",
       "date": "2026-04-08",
       "reference": "LSL-0019 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0019",
@@ -100351,7 +100202,7 @@
       ]
     },
     {
-      "id": "TX-1393",
+      "id": "TX-1376",
       "date": "2026-04-08",
       "reference": "LSL-0020 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0020",
@@ -100369,7 +100220,7 @@
       ]
     },
     {
-      "id": "TX-1394",
+      "id": "TX-1377",
       "date": "2026-04-10",
       "reference": "LSL-0021 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0021",
@@ -100387,7 +100238,7 @@
       ]
     },
     {
-      "id": "TX-1395",
+      "id": "TX-1378",
       "date": "2026-04-10",
       "reference": "LSL-0022 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0022",
@@ -100405,7 +100256,7 @@
       ]
     },
     {
-      "id": "TX-1396",
+      "id": "TX-1379",
       "date": "2026-04-10",
       "reference": "LSL-0023 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0023",
@@ -100423,7 +100274,7 @@
       ]
     },
     {
-      "id": "TX-1397",
+      "id": "TX-1380",
       "date": "2026-04-11",
       "reference": "LSL-0024 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0024",
@@ -100441,7 +100292,7 @@
       ]
     },
     {
-      "id": "TX-1398",
+      "id": "TX-1381",
       "date": "2026-04-11",
       "reference": "LSL-0025 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0025",
@@ -100459,7 +100310,7 @@
       ]
     },
     {
-      "id": "TX-1399",
+      "id": "TX-1382",
       "date": "2026-04-13",
       "reference": "LSL-0028 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0028",
@@ -100477,7 +100328,7 @@
       ]
     },
     {
-      "id": "TX-1400",
+      "id": "TX-1383",
       "date": "2026-04-15",
       "reference": "LSL-0029 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0029",
@@ -100495,7 +100346,7 @@
       ]
     },
     {
-      "id": "TX-1401",
+      "id": "TX-1384",
       "date": "2026-04-15",
       "reference": "LSL-0030 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0030",
@@ -100513,7 +100364,7 @@
       ]
     },
     {
-      "id": "TX-1402",
+      "id": "TX-1385",
       "date": "2026-04-15",
       "reference": "LSL-0031 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0031",
@@ -100531,7 +100382,7 @@
       ]
     },
     {
-      "id": "TX-1403",
+      "id": "TX-1386",
       "date": "2026-04-16",
       "reference": "LSL-0032 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0032",
@@ -100549,7 +100400,7 @@
       ]
     },
     {
-      "id": "TX-1404",
+      "id": "TX-1387",
       "date": "2026-04-16",
       "reference": "LSL-0033 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0033",
@@ -100567,7 +100418,7 @@
       ]
     },
     {
-      "id": "TX-1405",
+      "id": "TX-1388",
       "date": "2026-04-16",
       "reference": "LSL-0034 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0034",
@@ -100585,7 +100436,7 @@
       ]
     },
     {
-      "id": "TX-1406",
+      "id": "TX-1389",
       "date": "2026-04-17",
       "reference": "B2B002 COGS",
       "description": "Cost of Goods Sold for invoice B2B002",
@@ -100603,7 +100454,7 @@
       ]
     },
     {
-      "id": "TX-1407",
+      "id": "TX-1390",
       "date": "2026-04-18",
       "reference": "LSL-0036 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0036",
@@ -100621,7 +100472,7 @@
       ]
     },
     {
-      "id": "TX-1408",
+      "id": "TX-1391",
       "date": "2026-04-20",
       "reference": "LSL-0037 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0037",
@@ -100639,7 +100490,7 @@
       ]
     },
     {
-      "id": "TX-1409",
+      "id": "TX-1392",
       "date": "2026-04-20",
       "reference": "LSL-0038 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0038",
@@ -100657,7 +100508,7 @@
       ]
     },
     {
-      "id": "TX-1410",
+      "id": "TX-1393",
       "date": "2026-04-21",
       "reference": "LSL-0039 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0039",
@@ -100675,7 +100526,7 @@
       ]
     },
     {
-      "id": "TX-1411",
+      "id": "TX-1394",
       "date": "2026-04-22",
       "reference": "LSL-0040 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0040",
@@ -100693,7 +100544,7 @@
       ]
     },
     {
-      "id": "TX-1412",
+      "id": "TX-1395",
       "date": "2026-04-23",
       "reference": "LSL-0041 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0041",
@@ -100711,7 +100562,7 @@
       ]
     },
     {
-      "id": "TX-1413",
+      "id": "TX-1396",
       "date": "2026-04-24",
       "reference": "LSL-0042 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0042",
@@ -100729,7 +100580,7 @@
       ]
     },
     {
-      "id": "TX-1414",
+      "id": "TX-1397",
       "date": "2026-04-25",
       "reference": "LSL-0043 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0043",
@@ -100747,7 +100598,7 @@
       ]
     },
     {
-      "id": "TX-1415",
+      "id": "TX-1398",
       "date": "2026-04-27",
       "reference": "LSL-0044 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0044",
@@ -100765,7 +100616,7 @@
       ]
     },
     {
-      "id": "TX-1416",
+      "id": "TX-1399",
       "date": "2026-04-27",
       "reference": "B2B003 COGS",
       "description": "Cost of Goods Sold for invoice B2B003",
@@ -100783,7 +100634,7 @@
       ]
     },
     {
-      "id": "TX-1417",
+      "id": "TX-1400",
       "date": "2026-04-27",
       "reference": "LSL-0046 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0046",
@@ -100801,7 +100652,7 @@
       ]
     },
     {
-      "id": "TX-1418",
+      "id": "TX-1401",
       "date": "2026-04-27",
       "reference": "LSL-0047 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0047",
@@ -100819,7 +100670,7 @@
       ]
     },
     {
-      "id": "TX-1419",
+      "id": "TX-1402",
       "date": "2026-04-28",
       "reference": "LSL-0048 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0048",
@@ -100837,7 +100688,7 @@
       ]
     },
     {
-      "id": "TX-1420",
+      "id": "TX-1403",
       "date": "2026-04-29",
       "reference": "LSL-0050 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0050",
@@ -100855,7 +100706,7 @@
       ]
     },
     {
-      "id": "TX-1421",
+      "id": "TX-1404",
       "date": "2026-05-01",
       "reference": "B2B004 COGS",
       "description": "Cost of Goods Sold for invoice B2B004",
@@ -100873,7 +100724,7 @@
       ]
     },
     {
-      "id": "TX-1422",
+      "id": "TX-1405",
       "date": "2026-05-01",
       "reference": "LSL-0051 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0051",
@@ -100891,7 +100742,7 @@
       ]
     },
     {
-      "id": "TX-1423",
+      "id": "TX-1406",
       "date": "2026-05-02",
       "reference": "LSL-0052 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0052",
@@ -100909,7 +100760,7 @@
       ]
     },
     {
-      "id": "TX-1424",
+      "id": "TX-1407",
       "date": "2026-05-23",
       "reference": "B2B005 COGS",
       "description": "Cost of Goods Sold for invoice B2B005",
@@ -100927,7 +100778,7 @@
       ]
     },
     {
-      "id": "TX-1425",
+      "id": "TX-1408",
       "date": "2026-05-04",
       "reference": "LSL-0055 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0055",
@@ -100945,7 +100796,7 @@
       ]
     },
     {
-      "id": "TX-1426",
+      "id": "TX-1409",
       "date": "2026-05-25",
       "reference": "B2B006 COGS",
       "description": "Cost of Goods Sold for invoice B2B006",
@@ -100963,7 +100814,7 @@
       ]
     },
     {
-      "id": "TX-1427",
+      "id": "TX-1410",
       "date": "2026-05-27",
       "reference": "B2B007 COGS",
       "description": "Cost of Goods Sold for invoice B2B007",
@@ -100981,7 +100832,7 @@
       ]
     },
     {
-      "id": "TX-1428",
+      "id": "TX-1411",
       "date": "2026-05-04",
       "reference": "LSL-0056 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0056",
@@ -100999,7 +100850,7 @@
       ]
     },
     {
-      "id": "TX-1429",
+      "id": "TX-1412",
       "date": "2026-05-29",
       "reference": "B2B008 COGS",
       "description": "Cost of Goods Sold for invoice B2B008",
@@ -101017,7 +100868,7 @@
       ]
     },
     {
-      "id": "TX-1430",
+      "id": "TX-1413",
       "date": "2026-05-04",
       "reference": "LSL-0057 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0057",
@@ -101035,7 +100886,7 @@
       ]
     },
     {
-      "id": "TX-1431",
+      "id": "TX-1414",
       "date": "2026-05-04",
       "reference": "LSL-0058 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0058",
@@ -101053,7 +100904,7 @@
       ]
     },
     {
-      "id": "TX-1432",
+      "id": "TX-1415",
       "date": "2026-06-01",
       "reference": "B2B009 COGS",
       "description": "Cost of Goods Sold for invoice B2B009",
@@ -101071,7 +100922,7 @@
       ]
     },
     {
-      "id": "TX-1433",
+      "id": "TX-1416",
       "date": "2026-05-04",
       "reference": "LSL-0059 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0059",
@@ -101089,7 +100940,7 @@
       ]
     },
     {
-      "id": "TX-1434",
+      "id": "TX-1417",
       "date": "2026-06-03",
       "reference": "B2B0010 COGS",
       "description": "Cost of Goods Sold for invoice B2B0010",
@@ -101107,7 +100958,7 @@
       ]
     },
     {
-      "id": "TX-1435",
+      "id": "TX-1418",
       "date": "2026-05-04",
       "reference": "LSL-0060 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0060",
@@ -101125,7 +100976,7 @@
       ]
     },
     {
-      "id": "TX-1436",
+      "id": "TX-1419",
       "date": "2026-05-04",
       "reference": "LSL-0061 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0061",
@@ -101143,7 +100994,7 @@
       ]
     },
     {
-      "id": "TX-1437",
+      "id": "TX-1420",
       "date": "2026-06-03",
       "reference": "B2B0011 COGS",
       "description": "Cost of Goods Sold for invoice B2B0011",
@@ -101161,7 +101012,7 @@
       ]
     },
     {
-      "id": "TX-1438",
+      "id": "TX-1421",
       "date": "2026-05-05",
       "reference": "LSL-0062 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0062",
@@ -101179,7 +101030,7 @@
       ]
     },
     {
-      "id": "TX-1439",
+      "id": "TX-1422",
       "date": "2026-05-05",
       "reference": "LSL-0063 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0063",
@@ -101197,7 +101048,7 @@
       ]
     },
     {
-      "id": "TX-1440",
+      "id": "TX-1423",
       "date": "2026-05-05",
       "reference": "LSL-0065 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0065",
@@ -101215,7 +101066,7 @@
       ]
     },
     {
-      "id": "TX-1441",
+      "id": "TX-1424",
       "date": "2026-05-05",
       "reference": "LSL-0066 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0066",
@@ -101233,7 +101084,7 @@
       ]
     },
     {
-      "id": "TX-1442",
+      "id": "TX-1425",
       "date": "2026-05-05",
       "reference": "LSL-0067 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0067",
@@ -101251,7 +101102,7 @@
       ]
     },
     {
-      "id": "TX-1443",
+      "id": "TX-1426",
       "date": "2026-05-06",
       "reference": "LSL-0068 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0068",
@@ -101269,7 +101120,7 @@
       ]
     },
     {
-      "id": "TX-1444",
+      "id": "TX-1427",
       "date": "2026-05-06",
       "reference": "LSL-0069 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0069",
@@ -101287,7 +101138,7 @@
       ]
     },
     {
-      "id": "TX-1445",
+      "id": "TX-1428",
       "date": "2026-05-07",
       "reference": "LSL-0070 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0070",
@@ -101305,7 +101156,7 @@
       ]
     },
     {
-      "id": "TX-1446",
+      "id": "TX-1429",
       "date": "2026-05-08",
       "reference": "LSL-0072 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0072",
@@ -101323,7 +101174,7 @@
       ]
     },
     {
-      "id": "TX-1447",
+      "id": "TX-1430",
       "date": "2026-05-08",
       "reference": "LSL-0073 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0073",
@@ -101341,7 +101192,7 @@
       ]
     },
     {
-      "id": "TX-1448",
+      "id": "TX-1431",
       "date": "2026-05-08",
       "reference": "LSL-0074 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0074",
@@ -101359,7 +101210,7 @@
       ]
     },
     {
-      "id": "TX-1449",
+      "id": "TX-1432",
       "date": "2026-05-09",
       "reference": "LSL-0075 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0075",
@@ -101377,7 +101228,7 @@
       ]
     },
     {
-      "id": "TX-1450",
+      "id": "TX-1433",
       "date": "2026-05-09",
       "reference": "LSL-0076 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0076",
@@ -101395,7 +101246,7 @@
       ]
     },
     {
-      "id": "TX-1451",
+      "id": "TX-1434",
       "date": "2026-05-09",
       "reference": "LSL-0077 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0077",
@@ -101413,7 +101264,7 @@
       ]
     },
     {
-      "id": "TX-1452",
+      "id": "TX-1435",
       "date": "2026-05-11",
       "reference": "LSL-0078 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0078",
@@ -101431,7 +101282,7 @@
       ]
     },
     {
-      "id": "TX-1453",
+      "id": "TX-1436",
       "date": "2026-05-11",
       "reference": "LSL-0079 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0079",
@@ -101449,7 +101300,7 @@
       ]
     },
     {
-      "id": "TX-1454",
+      "id": "TX-1437",
       "date": "2026-05-12",
       "reference": "LSL-0080 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0080",
@@ -101467,7 +101318,7 @@
       ]
     },
     {
-      "id": "TX-1455",
+      "id": "TX-1438",
       "date": "2026-05-13",
       "reference": "LSL-0081 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0081",
@@ -101485,7 +101336,7 @@
       ]
     },
     {
-      "id": "TX-1456",
+      "id": "TX-1439",
       "date": "2026-05-14",
       "reference": "LSL-0082 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0082",
@@ -101503,7 +101354,7 @@
       ]
     },
     {
-      "id": "TX-1457",
+      "id": "TX-1440",
       "date": "2026-05-15",
       "reference": "LSL-0083 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0083",
@@ -101521,7 +101372,7 @@
       ]
     },
     {
-      "id": "TX-1458",
+      "id": "TX-1441",
       "date": "2026-05-15",
       "reference": "LSL-0084 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0084",
@@ -101539,7 +101390,7 @@
       ]
     },
     {
-      "id": "TX-1459",
+      "id": "TX-1442",
       "date": "2026-05-16",
       "reference": "LSL-0085 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0085",
@@ -101557,7 +101408,7 @@
       ]
     },
     {
-      "id": "TX-1460",
+      "id": "TX-1443",
       "date": "2026-05-18",
       "reference": "LSL-0086 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0086",
@@ -101575,7 +101426,7 @@
       ]
     },
     {
-      "id": "TX-1461",
+      "id": "TX-1444",
       "date": "2026-05-18",
       "reference": "LSL-0087 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0087",
@@ -101593,7 +101444,7 @@
       ]
     },
     {
-      "id": "TX-1462",
+      "id": "TX-1445",
       "date": "2026-05-18",
       "reference": "LSL-0088 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0088",
@@ -101611,7 +101462,7 @@
       ]
     },
     {
-      "id": "TX-1463",
+      "id": "TX-1446",
       "date": "2026-05-19",
       "reference": "LSL-0089 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0089",
@@ -101629,7 +101480,7 @@
       ]
     },
     {
-      "id": "TX-1464",
+      "id": "TX-1447",
       "date": "2026-05-20",
       "reference": "LSL-0090 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0090",
@@ -101647,7 +101498,7 @@
       ]
     },
     {
-      "id": "TX-1465",
+      "id": "TX-1448",
       "date": "2026-05-21",
       "reference": "LSL-0091 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0091",
@@ -101665,7 +101516,7 @@
       ]
     },
     {
-      "id": "TX-1466",
+      "id": "TX-1449",
       "date": "2026-05-21",
       "reference": "LSL-0092 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0092",
@@ -101683,7 +101534,7 @@
       ]
     },
     {
-      "id": "TX-1467",
+      "id": "TX-1450",
       "date": "2026-05-21",
       "reference": "LSL-0093 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0093",
@@ -101701,7 +101552,7 @@
       ]
     },
     {
-      "id": "TX-1468",
+      "id": "TX-1451",
       "date": "2026-05-22",
       "reference": "LSL-0094 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0094",
@@ -101719,7 +101570,7 @@
       ]
     },
     {
-      "id": "TX-1469",
+      "id": "TX-1452",
       "date": "2026-05-22",
       "reference": "LSL-0095 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0095",
@@ -101737,7 +101588,7 @@
       ]
     },
     {
-      "id": "TX-1470",
+      "id": "TX-1453",
       "date": "2026-05-23",
       "reference": "LSL-0096 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0096",
@@ -101755,7 +101606,7 @@
       ]
     },
     {
-      "id": "TX-1471",
+      "id": "TX-1454",
       "date": "2026-05-25",
       "reference": "LSL-0097 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0097",
@@ -101773,7 +101624,7 @@
       ]
     },
     {
-      "id": "TX-1472",
+      "id": "TX-1455",
       "date": "2026-05-25",
       "reference": "LSL-0098 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0098",
@@ -101791,7 +101642,7 @@
       ]
     },
     {
-      "id": "TX-1473",
+      "id": "TX-1456",
       "date": "2026-05-27",
       "reference": "LSL-0099 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0099",
@@ -101809,7 +101660,7 @@
       ]
     },
     {
-      "id": "TX-1474",
+      "id": "TX-1457",
       "date": "2026-05-27",
       "reference": "LSL-0100 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0100",
@@ -101827,7 +101678,7 @@
       ]
     },
     {
-      "id": "TX-1475",
+      "id": "TX-1458",
       "date": "2026-05-27",
       "reference": "LSL-0101 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0101",
@@ -101845,7 +101696,7 @@
       ]
     },
     {
-      "id": "TX-1476",
+      "id": "TX-1459",
       "date": "2026-05-28",
       "reference": "LSL-0102 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0102",
@@ -101863,7 +101714,7 @@
       ]
     },
     {
-      "id": "TX-1477",
+      "id": "TX-1460",
       "date": "2026-05-30",
       "reference": "LSL-0104 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0104",
@@ -101881,7 +101732,7 @@
       ]
     },
     {
-      "id": "TX-1478",
+      "id": "TX-1461",
       "date": "2026-05-30",
       "reference": "LSL-0105 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0105",
@@ -101899,7 +101750,7 @@
       ]
     },
     {
-      "id": "TX-1479",
+      "id": "TX-1462",
       "date": "2026-05-29",
       "reference": "LSL-0103 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0103",
@@ -101917,7 +101768,7 @@
       ]
     },
     {
-      "id": "TX-1480",
+      "id": "TX-1463",
       "date": "2026-06-01",
       "reference": "LSL-0107 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0107",
@@ -101935,7 +101786,7 @@
       ]
     },
     {
-      "id": "TX-1481",
+      "id": "TX-1464",
       "date": "2026-05-30",
       "reference": "LSL-0106 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0106",
@@ -101953,7 +101804,7 @@
       ]
     },
     {
-      "id": "TX-1482",
+      "id": "TX-1465",
       "date": "2026-06-03",
       "reference": "B2B0012 COGS",
       "description": "Cost of Goods Sold for invoice B2B0012",
@@ -101971,7 +101822,7 @@
       ]
     },
     {
-      "id": "TX-1483",
+      "id": "TX-1466",
       "date": "2026-06-03",
       "reference": "B2B0013 COGS",
       "description": "Cost of Goods Sold for invoice B2B0013",
@@ -101989,7 +101840,7 @@
       ]
     },
     {
-      "id": "TX-1484",
+      "id": "TX-1467",
       "date": "2026-06-01",
       "reference": "LSL-0108 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0108",
@@ -102007,7 +101858,7 @@
       ]
     },
     {
-      "id": "TX-1485",
+      "id": "TX-1468",
       "date": "2026-06-04",
       "reference": "B2B0014 COGS",
       "description": "Cost of Goods Sold for invoice B2B0014",
@@ -102025,7 +101876,7 @@
       ]
     },
     {
-      "id": "TX-1486",
+      "id": "TX-1469",
       "date": "2026-06-12",
       "reference": "B2B0015 COGS",
       "description": "Cost of Goods Sold for invoice B2B0015",
@@ -102043,7 +101894,7 @@
       ]
     },
     {
-      "id": "TX-1487",
+      "id": "TX-1470",
       "date": "2026-06-01",
       "reference": "LSL-0109 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0109",
@@ -102061,7 +101912,7 @@
       ]
     },
     {
-      "id": "TX-1488",
+      "id": "TX-1471",
       "date": "2026-06-01",
       "reference": "LSL-0110 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0110",
@@ -102079,7 +101930,7 @@
       ]
     },
     {
-      "id": "TX-1489",
+      "id": "TX-1472",
       "date": "2026-06-01",
       "reference": "LSL-0111 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0111",
@@ -102097,7 +101948,7 @@
       ]
     },
     {
-      "id": "TX-1490",
+      "id": "TX-1473",
       "date": "2026-06-01",
       "reference": "LSL-0112 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0112",
@@ -102115,7 +101966,7 @@
       ]
     },
     {
-      "id": "TX-1491",
+      "id": "TX-1474",
       "date": "2026-06-02",
       "reference": "LSL-0113 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0113",
@@ -102133,7 +101984,7 @@
       ]
     },
     {
-      "id": "TX-1492",
+      "id": "TX-1475",
       "date": "2026-06-02",
       "reference": "LSL-0114 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0114",
@@ -102151,7 +102002,7 @@
       ]
     },
     {
-      "id": "TX-1493",
+      "id": "TX-1476",
       "date": "2026-06-15",
       "reference": "B2B0016 COGS",
       "description": "Cost of Goods Sold for invoice B2B0016",
@@ -102169,7 +102020,7 @@
       ]
     },
     {
-      "id": "TX-1494",
+      "id": "TX-1477",
       "date": "2026-06-28",
       "reference": "B2B0017 COGS",
       "description": "Cost of Goods Sold for invoice B2B0017",
@@ -102187,7 +102038,7 @@
       ]
     },
     {
-      "id": "TX-1495",
+      "id": "TX-1478",
       "date": "2026-06-03",
       "reference": "LSL-0115 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0115",
@@ -102205,7 +102056,7 @@
       ]
     },
     {
-      "id": "TX-1496",
+      "id": "TX-1479",
       "date": "2026-06-03",
       "reference": "LSL-0116 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0116",
@@ -102223,7 +102074,7 @@
       ]
     },
     {
-      "id": "TX-1497",
+      "id": "TX-1480",
       "date": "2026-06-03",
       "reference": "LSL-0118 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0118",
@@ -102241,7 +102092,7 @@
       ]
     },
     {
-      "id": "TX-1498",
+      "id": "TX-1481",
       "date": "2026-06-03",
       "reference": "LSL-0119 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0119",
@@ -102259,7 +102110,7 @@
       ]
     },
     {
-      "id": "TX-1499",
+      "id": "TX-1482",
       "date": "2026-06-03",
       "reference": "LSL-0120 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0120",
@@ -102277,7 +102128,7 @@
       ]
     },
     {
-      "id": "TX-1500",
+      "id": "TX-1483",
       "date": "2026-06-03",
       "reference": "LSL-0121 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0121",
@@ -102295,7 +102146,7 @@
       ]
     },
     {
-      "id": "TX-1501",
+      "id": "TX-1484",
       "date": "2026-06-03",
       "reference": "LSL-0122 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0122",
@@ -102313,7 +102164,7 @@
       ]
     },
     {
-      "id": "TX-1502",
+      "id": "TX-1485",
       "date": "2026-06-04",
       "reference": "LSL-0123 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0123",
@@ -102331,7 +102182,7 @@
       ]
     },
     {
-      "id": "TX-1503",
+      "id": "TX-1486",
       "date": "2026-06-04",
       "reference": "LSL-0124 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0124",
@@ -102349,7 +102200,7 @@
       ]
     },
     {
-      "id": "TX-1504",
+      "id": "TX-1487",
       "date": "2026-06-04",
       "reference": "LSL-0125 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0125",
@@ -102367,7 +102218,7 @@
       ]
     },
     {
-      "id": "TX-1505",
+      "id": "TX-1488",
       "date": "2026-06-04",
       "reference": "LSL-0126 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0126",
@@ -102385,7 +102236,7 @@
       ]
     },
     {
-      "id": "TX-1506",
+      "id": "TX-1489",
       "date": "2026-06-04",
       "reference": "LSL-0127 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0127",
@@ -102403,7 +102254,7 @@
       ]
     },
     {
-      "id": "TX-1507",
+      "id": "TX-1490",
       "date": "2026-06-04",
       "reference": "LSL-0128 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0128",
@@ -102421,7 +102272,7 @@
       ]
     },
     {
-      "id": "TX-1508",
+      "id": "TX-1491",
       "date": "2026-06-05",
       "reference": "LSL-0129 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0129",
@@ -102439,7 +102290,7 @@
       ]
     },
     {
-      "id": "TX-1509",
+      "id": "TX-1492",
       "date": "2026-06-05",
       "reference": "LSL-0130 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0130",
@@ -102457,7 +102308,7 @@
       ]
     },
     {
-      "id": "TX-1510",
+      "id": "TX-1493",
       "date": "2026-06-06",
       "reference": "LSL-0131 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0131",
@@ -102475,7 +102326,7 @@
       ]
     },
     {
-      "id": "TX-1511",
+      "id": "TX-1494",
       "date": "2026-06-06",
       "reference": "LSL-0133 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0133",
@@ -102493,7 +102344,7 @@
       ]
     },
     {
-      "id": "TX-1512",
+      "id": "TX-1495",
       "date": "2026-06-06",
       "reference": "LSL-0134 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0134",
@@ -102511,7 +102362,7 @@
       ]
     },
     {
-      "id": "TX-1513",
+      "id": "TX-1496",
       "date": "2026-06-06",
       "reference": "LSL-0135 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0135",
@@ -102529,7 +102380,7 @@
       ]
     },
     {
-      "id": "TX-1514",
+      "id": "TX-1497",
       "date": "2026-06-06",
       "reference": "LSL-0136 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0136",
@@ -102547,7 +102398,7 @@
       ]
     },
     {
-      "id": "TX-1515",
+      "id": "TX-1498",
       "date": "2026-06-08",
       "reference": "LSL-0137 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0137",
@@ -102565,7 +102416,7 @@
       ]
     },
     {
-      "id": "TX-1516",
+      "id": "TX-1499",
       "date": "2026-06-08",
       "reference": "LSL-0138 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0138",
@@ -102583,7 +102434,7 @@
       ]
     },
     {
-      "id": "TX-1517",
+      "id": "TX-1500",
       "date": "2026-06-08",
       "reference": "LSL-0139 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0139",
@@ -102601,7 +102452,7 @@
       ]
     },
     {
-      "id": "TX-1518",
+      "id": "TX-1501",
       "date": "2026-06-08",
       "reference": "LSL-0140 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0140",
@@ -102619,7 +102470,7 @@
       ]
     },
     {
-      "id": "TX-1519",
+      "id": "TX-1502",
       "date": "2026-06-08",
       "reference": "LSL-0141 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0141",
@@ -102637,7 +102488,7 @@
       ]
     },
     {
-      "id": "TX-1520",
+      "id": "TX-1503",
       "date": "2026-06-08",
       "reference": "LSL-0142 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0142",
@@ -102655,7 +102506,7 @@
       ]
     },
     {
-      "id": "TX-1521",
+      "id": "TX-1504",
       "date": "2026-06-09",
       "reference": "LSL-0143 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0143",
@@ -102673,7 +102524,7 @@
       ]
     },
     {
-      "id": "TX-1522",
+      "id": "TX-1505",
       "date": "2026-06-10",
       "reference": "LSL-0144 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0144",
@@ -102691,7 +102542,7 @@
       ]
     },
     {
-      "id": "TX-1523",
+      "id": "TX-1506",
       "date": "2026-06-11",
       "reference": "LSL-0145 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0145",
@@ -102709,7 +102560,7 @@
       ]
     },
     {
-      "id": "TX-1524",
+      "id": "TX-1507",
       "date": "2026-06-12",
       "reference": "LSL-0146 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0146",
@@ -102727,7 +102578,7 @@
       ]
     },
     {
-      "id": "TX-1525",
+      "id": "TX-1508",
       "date": "2026-06-12",
       "reference": "LSL-0147 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0147",
@@ -102745,7 +102596,7 @@
       ]
     },
     {
-      "id": "TX-1526",
+      "id": "TX-1509",
       "date": "2026-06-12",
       "reference": "LSL-0148 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0148",
@@ -102763,7 +102614,7 @@
       ]
     },
     {
-      "id": "TX-1527",
+      "id": "TX-1510",
       "date": "2026-06-13",
       "reference": "LSL-0149 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0149",
@@ -102781,7 +102632,7 @@
       ]
     },
     {
-      "id": "TX-1528",
+      "id": "TX-1511",
       "date": "2026-06-15",
       "reference": "LSL-0150 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0150",
@@ -102799,7 +102650,7 @@
       ]
     },
     {
-      "id": "TX-1529",
+      "id": "TX-1512",
       "date": "2026-06-15",
       "reference": "LSL-0151 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0151",
@@ -102817,7 +102668,7 @@
       ]
     },
     {
-      "id": "TX-1530",
+      "id": "TX-1513",
       "date": "2026-06-16",
       "reference": "LSL-0152 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0152",
@@ -102835,7 +102686,7 @@
       ]
     },
     {
-      "id": "TX-1531",
+      "id": "TX-1514",
       "date": "2026-06-17",
       "reference": "LSL-0153 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0153",
@@ -102853,7 +102704,7 @@
       ]
     },
     {
-      "id": "TX-1532",
+      "id": "TX-1515",
       "date": "2026-06-17",
       "reference": "LSL-0154 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0154",
@@ -102871,7 +102722,7 @@
       ]
     },
     {
-      "id": "TX-1533",
+      "id": "TX-1516",
       "date": "2026-06-17",
       "reference": "LSL-0155 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0155",
@@ -102889,7 +102740,7 @@
       ]
     },
     {
-      "id": "TX-1534",
+      "id": "TX-1517",
       "date": "2026-06-18",
       "reference": "LSL-0156 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0156",
@@ -102907,7 +102758,7 @@
       ]
     },
     {
-      "id": "TX-1535",
+      "id": "TX-1518",
       "date": "2026-06-18",
       "reference": "LSL-0158 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0158",
@@ -102925,7 +102776,7 @@
       ]
     },
     {
-      "id": "TX-1536",
+      "id": "TX-1519",
       "date": "2026-06-19",
       "reference": "LSL-0159 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0159",
@@ -102943,7 +102794,7 @@
       ]
     },
     {
-      "id": "TX-1537",
+      "id": "TX-1520",
       "date": "2026-06-19",
       "reference": "LSL-0160 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0160",
@@ -102961,7 +102812,7 @@
       ]
     },
     {
-      "id": "TX-1538",
+      "id": "TX-1521",
       "date": "2026-06-19",
       "reference": "LSL-0161 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0161",
@@ -102979,7 +102830,7 @@
       ]
     },
     {
-      "id": "TX-1539",
+      "id": "TX-1522",
       "date": "2026-06-19",
       "reference": "LSL-0162 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0162",
@@ -102997,7 +102848,7 @@
       ]
     },
     {
-      "id": "TX-1540",
+      "id": "TX-1523",
       "date": "2026-06-19",
       "reference": "LSL-0163 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0163",
@@ -103015,7 +102866,7 @@
       ]
     },
     {
-      "id": "TX-1541",
+      "id": "TX-1524",
       "date": "2026-06-20",
       "reference": "LSL-0164 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0164",
@@ -103033,7 +102884,7 @@
       ]
     },
     {
-      "id": "TX-1542",
+      "id": "TX-1525",
       "date": "2026-06-20",
       "reference": "LSL-0165 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0165",
@@ -103051,7 +102902,7 @@
       ]
     },
     {
-      "id": "TX-1543",
+      "id": "TX-1526",
       "date": "2026-06-22",
       "reference": "LSL-0166 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0166",
@@ -103069,7 +102920,7 @@
       ]
     },
     {
-      "id": "TX-1544",
+      "id": "TX-1527",
       "date": "2026-06-23",
       "reference": "LSL-0167 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0167",
@@ -103087,7 +102938,7 @@
       ]
     },
     {
-      "id": "TX-1545",
+      "id": "TX-1528",
       "date": "2026-06-24",
       "reference": "LSL-0168 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0168",
@@ -103105,7 +102956,7 @@
       ]
     },
     {
-      "id": "TX-1546",
+      "id": "TX-1529",
       "date": "2026-06-25",
       "reference": "LSL-0169 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0169",
@@ -103123,7 +102974,7 @@
       ]
     },
     {
-      "id": "TX-1547",
+      "id": "TX-1530",
       "date": "2026-07-07",
       "reference": "B2B0018 COGS",
       "description": "Cost of Goods Sold for invoice B2B0018",
@@ -103141,7 +102992,7 @@
       ]
     },
     {
-      "id": "TX-1548",
+      "id": "TX-1531",
       "date": "2026-07-08",
       "reference": "B2B0019 COGS",
       "description": "Cost of Goods Sold for invoice B2B0019",
@@ -103159,7 +103010,7 @@
       ]
     },
     {
-      "id": "TX-1549",
+      "id": "TX-1532",
       "date": "2026-07-01",
       "reference": "LSL-0170 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0170",
@@ -103177,7 +103028,7 @@
       ]
     },
     {
-      "id": "TX-1550",
+      "id": "TX-1533",
       "date": "2026-07-11",
       "reference": "B2B0020 COGS",
       "description": "Cost of Goods Sold for invoice B2B0020",
@@ -103195,7 +103046,7 @@
       ]
     },
     {
-      "id": "TX-1551",
+      "id": "TX-1534",
       "date": "2026-07-01",
       "reference": "LSL-0171 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0171",
@@ -103213,7 +103064,7 @@
       ]
     },
     {
-      "id": "TX-1552",
+      "id": "TX-1535",
       "date": "2026-07-02",
       "reference": "LSL-0172 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0172",
@@ -103231,7 +103082,7 @@
       ]
     },
     {
-      "id": "TX-1553",
+      "id": "TX-1536",
       "date": "2026-07-02",
       "reference": "LSL-0173 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0173",
@@ -103249,7 +103100,7 @@
       ]
     },
     {
-      "id": "TX-1554",
+      "id": "TX-1537",
       "date": "2026-07-02",
       "reference": "LSL-0174 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0174",
@@ -103267,7 +103118,7 @@
       ]
     },
     {
-      "id": "TX-1555",
+      "id": "TX-1538",
       "date": "2026-07-02",
       "reference": "LSL-0175 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0175",
@@ -103285,7 +103136,7 @@
       ]
     },
     {
-      "id": "TX-1556",
+      "id": "TX-1539",
       "date": "2026-07-03",
       "reference": "LSL-0176 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0176",
@@ -103303,7 +103154,7 @@
       ]
     },
     {
-      "id": "TX-1557",
+      "id": "TX-1540",
       "date": "2026-07-03",
       "reference": "LSL-0177 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0177",
@@ -103321,7 +103172,7 @@
       ]
     },
     {
-      "id": "TX-1558",
+      "id": "TX-1541",
       "date": "2026-07-03",
       "reference": "LSL-0178 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0178",
@@ -103339,7 +103190,7 @@
       ]
     },
     {
-      "id": "TX-1559",
+      "id": "TX-1542",
       "date": "2026-07-03",
       "reference": "LSL-0179 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0179",
@@ -103357,7 +103208,7 @@
       ]
     },
     {
-      "id": "TX-1560",
+      "id": "TX-1543",
       "date": "2026-07-03",
       "reference": "LSL-0180 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0180",
@@ -103375,7 +103226,7 @@
       ]
     },
     {
-      "id": "TX-1561",
+      "id": "TX-1544",
       "date": "2026-07-03",
       "reference": "LSL-0181 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0181",
@@ -103393,7 +103244,7 @@
       ]
     },
     {
-      "id": "TX-1562",
+      "id": "TX-1545",
       "date": "2026-07-04",
       "reference": "LSL-0182 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0182",
@@ -103411,7 +103262,7 @@
       ]
     },
     {
-      "id": "TX-1563",
+      "id": "TX-1546",
       "date": "2026-07-04",
       "reference": "LSL-0183 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0183",
@@ -103429,7 +103280,7 @@
       ]
     },
     {
-      "id": "TX-1564",
+      "id": "TX-1547",
       "date": "2026-07-04",
       "reference": "LSL-0184 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0184",
@@ -103447,7 +103298,7 @@
       ]
     },
     {
-      "id": "TX-1565",
+      "id": "TX-1548",
       "date": "2026-07-04",
       "reference": "LSL-0185 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0185",
@@ -103465,7 +103316,7 @@
       ]
     },
     {
-      "id": "TX-1566",
+      "id": "TX-1549",
       "date": "2026-07-06",
       "reference": "LSL-0186 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0186",
@@ -103483,7 +103334,7 @@
       ]
     },
     {
-      "id": "TX-1567",
+      "id": "TX-1550",
       "date": "2026-07-06",
       "reference": "LSL-0187 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0187",
@@ -103501,7 +103352,7 @@
       ]
     },
     {
-      "id": "TX-1568",
+      "id": "TX-1551",
       "date": "2026-07-06",
       "reference": "LSL-0188 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0188",
@@ -103519,7 +103370,7 @@
       ]
     },
     {
-      "id": "TX-1569",
+      "id": "TX-1552",
       "date": "2026-07-06",
       "reference": "LSL-0189 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0189",
@@ -103537,7 +103388,7 @@
       ]
     },
     {
-      "id": "TX-1570",
+      "id": "TX-1553",
       "date": "2026-07-06",
       "reference": "LSL-0190 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0190",
@@ -103555,7 +103406,7 @@
       ]
     },
     {
-      "id": "TX-1571",
+      "id": "TX-1554",
       "date": "2026-07-07",
       "reference": "LSL-0191 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0191",
@@ -103573,7 +103424,7 @@
       ]
     },
     {
-      "id": "TX-1572",
+      "id": "TX-1555",
       "date": "2026-07-07",
       "reference": "LSL-0192 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0192",
@@ -103591,7 +103442,7 @@
       ]
     },
     {
-      "id": "TX-1573",
+      "id": "TX-1556",
       "date": "2026-07-07",
       "reference": "LSL-0193 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0193",
@@ -103609,7 +103460,7 @@
       ]
     },
     {
-      "id": "TX-1574",
+      "id": "TX-1557",
       "date": "2026-07-08",
       "reference": "LSL-0194 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0194",
@@ -103627,7 +103478,7 @@
       ]
     },
     {
-      "id": "TX-1575",
+      "id": "TX-1558",
       "date": "2026-07-08",
       "reference": "LSL-0195 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0195",
@@ -103645,7 +103496,7 @@
       ]
     },
     {
-      "id": "TX-1576",
+      "id": "TX-1559",
       "date": "2026-07-08",
       "reference": "LSL-0196 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0196",
@@ -103663,7 +103514,7 @@
       ]
     },
     {
-      "id": "TX-1577",
+      "id": "TX-1560",
       "date": "2026-07-08",
       "reference": "LSL-0197 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0197",
@@ -103681,7 +103532,7 @@
       ]
     },
     {
-      "id": "TX-1578",
+      "id": "TX-1561",
       "date": "2026-07-08",
       "reference": "LSL-0198 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0198",
@@ -103699,7 +103550,7 @@
       ]
     },
     {
-      "id": "TX-1579",
+      "id": "TX-1562",
       "date": "2026-07-08",
       "reference": "LSL-0199 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0199",
@@ -103717,7 +103568,7 @@
       ]
     },
     {
-      "id": "TX-1580",
+      "id": "TX-1563",
       "date": "2026-07-10",
       "reference": "LSL-0200 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0200",
@@ -103735,7 +103586,7 @@
       ]
     },
     {
-      "id": "TX-1581",
+      "id": "TX-1564",
       "date": "2026-07-11",
       "reference": "LSL-0201 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0201",
@@ -103753,7 +103604,7 @@
       ]
     },
     {
-      "id": "TX-1582",
+      "id": "TX-1565",
       "date": "2026-07-13",
       "reference": "LSL-0202 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0202",
@@ -103771,7 +103622,7 @@
       ]
     },
     {
-      "id": "TX-1583",
+      "id": "TX-1566",
       "date": "2026-07-13",
       "reference": "LSL-0203 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0203",
@@ -103789,7 +103640,7 @@
       ]
     },
     {
-      "id": "TX-1584",
+      "id": "TX-1567",
       "date": "2026-07-13",
       "reference": "LSL-0204 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0204",
@@ -103807,7 +103658,7 @@
       ]
     },
     {
-      "id": "TX-1585",
+      "id": "TX-1568",
       "date": "2026-07-13",
       "reference": "LSL-0205 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0205",
@@ -103825,7 +103676,7 @@
       ]
     },
     {
-      "id": "TX-1586",
+      "id": "TX-1569",
       "date": "2026-07-13",
       "reference": "LSL-0206 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0206",
@@ -103843,7 +103694,7 @@
       ]
     },
     {
-      "id": "TX-1587",
+      "id": "TX-1570",
       "date": "2026-07-15",
       "reference": "LSL-0207 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0207",
@@ -103861,7 +103712,7 @@
       ]
     },
     {
-      "id": "TX-1588",
+      "id": "TX-1571",
       "date": "2026-07-15",
       "reference": "LSL-0208 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0208",
@@ -103879,7 +103730,7 @@
       ]
     },
     {
-      "id": "TX-1589",
+      "id": "TX-1572",
       "date": "2026-07-15",
       "reference": "LSL-0209 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0209",
@@ -103897,7 +103748,7 @@
       ]
     },
     {
-      "id": "TX-1590",
+      "id": "TX-1573",
       "date": "2026-07-16",
       "reference": "LSL-0210 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0210",
@@ -103915,7 +103766,7 @@
       ]
     },
     {
-      "id": "TX-1591",
+      "id": "TX-1574",
       "date": "2026-07-16",
       "reference": "LSL-0211 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0211",
@@ -103933,7 +103784,7 @@
       ]
     },
     {
-      "id": "TX-1592",
+      "id": "TX-1575",
       "date": "2026-07-17",
       "reference": "LSL-0212 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0212",
@@ -103951,7 +103802,7 @@
       ]
     },
     {
-      "id": "TX-1593",
+      "id": "TX-1576",
       "date": "2026-07-17",
       "reference": "LSL-0213 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0213",
@@ -103969,7 +103820,7 @@
       ]
     },
     {
-      "id": "TX-1594",
+      "id": "TX-1577",
       "date": "2026-07-17",
       "reference": "LSL-0214 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0214",
@@ -103987,7 +103838,7 @@
       ]
     },
     {
-      "id": "TX-1595",
+      "id": "TX-1578",
       "date": "2026-07-17",
       "reference": "LSL-0215 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0215",
@@ -104005,7 +103856,7 @@
       ]
     },
     {
-      "id": "TX-1596",
+      "id": "TX-1579",
       "date": "2026-07-17",
       "reference": "LSL-0216 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0216",
@@ -104023,7 +103874,7 @@
       ]
     },
     {
-      "id": "TX-1597",
+      "id": "TX-1580",
       "date": "2026-07-17",
       "reference": "LSL-0217 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0217",
@@ -104041,7 +103892,7 @@
       ]
     },
     {
-      "id": "TX-1598",
+      "id": "TX-1581",
       "date": "2026-07-18",
       "reference": "LSL-0218 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0218",
@@ -104059,7 +103910,7 @@
       ]
     },
     {
-      "id": "TX-1599",
+      "id": "TX-1582",
       "date": "2026-07-18",
       "reference": "LSL-0219 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0219",
@@ -104077,7 +103928,7 @@
       ]
     },
     {
-      "id": "TX-1600",
+      "id": "TX-1583",
       "date": "2026-07-20",
       "reference": "LSL-0220 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0220",
@@ -104095,7 +103946,7 @@
       ]
     },
     {
-      "id": "TX-1601",
+      "id": "TX-1584",
       "date": "2026-07-20",
       "reference": "LSL-0221 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0221",
@@ -104113,7 +103964,7 @@
       ]
     },
     {
-      "id": "TX-1602",
+      "id": "TX-1585",
       "date": "2026-07-21",
       "reference": "LSL-0222 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0222",
@@ -104131,7 +103982,7 @@
       ]
     },
     {
-      "id": "TX-1603",
+      "id": "TX-1586",
       "date": "2026-07-21",
       "reference": "LSL-0223 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0223",
@@ -104149,7 +104000,7 @@
       ]
     },
     {
-      "id": "TX-1604",
+      "id": "TX-1587",
       "date": "2026-07-22",
       "reference": "LSL-0224 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0224",
@@ -104167,7 +104018,7 @@
       ]
     },
     {
-      "id": "TX-1605",
+      "id": "TX-1588",
       "date": "2026-07-23",
       "reference": "LSL-0225 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0225",
@@ -104185,7 +104036,7 @@
       ]
     },
     {
-      "id": "TX-1606",
+      "id": "TX-1589",
       "date": "2026-07-24",
       "reference": "LSL-0226 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0226",
@@ -104203,7 +104054,7 @@
       ]
     },
     {
-      "id": "TX-1607",
+      "id": "TX-1590",
       "date": "2026-07-25",
       "reference": "LSL-0227 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0227",
@@ -104221,7 +104072,7 @@
       ]
     },
     {
-      "id": "TX-1608",
+      "id": "TX-1591",
       "date": "2026-07-27",
       "reference": "LSL-0228 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0228",
@@ -104239,7 +104090,7 @@
       ]
     },
     {
-      "id": "TX-1609",
+      "id": "TX-1592",
       "date": "2026-07-28",
       "reference": "LSL-0229 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0229",
@@ -104257,7 +104108,7 @@
       ]
     },
     {
-      "id": "TX-1610",
+      "id": "TX-1593",
       "date": "2026-07-28",
       "reference": "LSL-0230 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0230",
@@ -104275,7 +104126,7 @@
       ]
     },
     {
-      "id": "TX-1611",
+      "id": "TX-1594",
       "date": "2026-07-30",
       "reference": "LSL-0231 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0231",
@@ -104293,7 +104144,7 @@
       ]
     },
     {
-      "id": "TX-1612",
+      "id": "TX-1595",
       "date": "2026-08-01",
       "reference": "LSL-0233 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0233",
@@ -104311,7 +104162,7 @@
       ]
     },
     {
-      "id": "TX-1613",
+      "id": "TX-1596",
       "date": "2026-08-01",
       "reference": "LSL-0234 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0234",
@@ -104329,7 +104180,7 @@
       ]
     },
     {
-      "id": "TX-1614",
+      "id": "TX-1597",
       "date": "2026-08-02",
       "reference": "LSL-0235 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0235",
@@ -104347,7 +104198,7 @@
       ]
     },
     {
-      "id": "TX-1615",
+      "id": "TX-1598",
       "date": "2026-08-02",
       "reference": "LSL-0236 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0236",
@@ -104365,7 +104216,7 @@
       ]
     },
     {
-      "id": "TX-1616",
+      "id": "TX-1599",
       "date": "2026-07-31",
       "reference": "LSL-0232 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0232",
@@ -104383,7 +104234,7 @@
       ]
     },
     {
-      "id": "TX-1617",
+      "id": "TX-1600",
       "date": "2026-08-03",
       "reference": "LSL-0237 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0237",
@@ -104401,7 +104252,7 @@
       ]
     },
     {
-      "id": "TX-1618",
+      "id": "TX-1601",
       "date": "2026-07-11",
       "reference": "B2B0021 COGS",
       "description": "Cost of Goods Sold for invoice B2B0021",
@@ -104419,7 +104270,7 @@
       ]
     },
     {
-      "id": "TX-1619",
+      "id": "TX-1602",
       "date": "2026-07-24",
       "reference": "B2B0022 COGS",
       "description": "Cost of Goods Sold for invoice B2B0022",
@@ -104437,7 +104288,7 @@
       ]
     },
     {
-      "id": "TX-1620",
+      "id": "TX-1603",
       "date": "2026-07-24",
       "reference": "B2B0023 COGS",
       "description": "Cost of Goods Sold for invoice B2B0023",
@@ -104455,7 +104306,7 @@
       ]
     },
     {
-      "id": "TX-1621",
+      "id": "TX-1604",
       "date": "2026-08-03",
       "reference": "LSL-0238 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0238",
@@ -104473,7 +104324,7 @@
       ]
     },
     {
-      "id": "TX-1622",
+      "id": "TX-1605",
       "date": "2026-07-28",
       "reference": "B2B0024 COGS",
       "description": "Cost of Goods Sold for invoice B2B0024",
@@ -104491,7 +104342,7 @@
       ]
     },
     {
-      "id": "TX-1623",
+      "id": "TX-1606",
       "date": "2026-08-03",
       "reference": "LSL-0239 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0239",
@@ -104509,7 +104360,7 @@
       ]
     },
     {
-      "id": "TX-1624",
+      "id": "TX-1607",
       "date": "2026-08-03",
       "reference": "LSL-0240 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0240",
@@ -104527,7 +104378,7 @@
       ]
     },
     {
-      "id": "TX-1625",
+      "id": "TX-1608",
       "date": "2026-08-03",
       "reference": "LSL-0241 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0241",
@@ -104545,7 +104396,7 @@
       ]
     },
     {
-      "id": "TX-1626",
+      "id": "TX-1609",
       "date": "2026-08-03",
       "reference": "LSL-0242 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0242",
@@ -104563,7 +104414,7 @@
       ]
     },
     {
-      "id": "TX-1627",
+      "id": "TX-1610",
       "date": "2026-08-03",
       "reference": "LSL-0243 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0243",
@@ -104581,7 +104432,7 @@
       ]
     },
     {
-      "id": "TX-1628",
+      "id": "TX-1611",
       "date": "2026-08-05",
       "reference": "LSL-0244 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0244",
@@ -104599,7 +104450,7 @@
       ]
     },
     {
-      "id": "TX-1629",
+      "id": "TX-1612",
       "date": "2026-08-05",
       "reference": "LSL-0245 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0245",
@@ -104617,7 +104468,7 @@
       ]
     },
     {
-      "id": "TX-1630",
+      "id": "TX-1613",
       "date": "2026-08-05",
       "reference": "LSL-0246 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0246",
@@ -104635,7 +104486,7 @@
       ]
     },
     {
-      "id": "TX-1631",
+      "id": "TX-1614",
       "date": "2026-08-01",
       "reference": "B2B0025 COGS",
       "description": "Cost of Goods Sold for invoice B2B0025",
@@ -104653,7 +104504,7 @@
       ]
     },
     {
-      "id": "TX-1632",
+      "id": "TX-1615",
       "date": "2026-08-21",
       "reference": "B2B0026 COGS",
       "description": "Cost of Goods Sold for invoice B2B0026",
@@ -104671,7 +104522,7 @@
       ]
     },
     {
-      "id": "TX-1633",
+      "id": "TX-1616",
       "date": "2026-08-05",
       "reference": "LSL-0247 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0247",
@@ -104689,7 +104540,7 @@
       ]
     },
     {
-      "id": "TX-1634",
+      "id": "TX-1617",
       "date": "2026-08-27",
       "reference": "B2B0027 COGS",
       "description": "Cost of Goods Sold for invoice B2B0027",
@@ -104707,7 +104558,7 @@
       ]
     },
     {
-      "id": "TX-1635",
+      "id": "TX-1618",
       "date": "2026-08-27",
       "reference": "B2B0028 COGS",
       "description": "Cost of Goods Sold for invoice B2B0028",
@@ -104725,7 +104576,7 @@
       ]
     },
     {
-      "id": "TX-1636",
+      "id": "TX-1619",
       "date": "2026-08-28",
       "reference": "B2B0030 COGS",
       "description": "Cost of Goods Sold for invoice B2B0030",
@@ -104743,7 +104594,7 @@
       ]
     },
     {
-      "id": "TX-1637",
+      "id": "TX-1620",
       "date": "2026-08-05",
       "reference": "LSL-0248 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0248",
@@ -104761,7 +104612,7 @@
       ]
     },
     {
-      "id": "TX-1638",
+      "id": "TX-1621",
       "date": "2026-08-05",
       "reference": "LSL-0249 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0249",
@@ -104779,7 +104630,7 @@
       ]
     },
     {
-      "id": "TX-1639",
+      "id": "TX-1622",
       "date": "2026-08-27",
       "reference": "B2B0029 COGS",
       "description": "Cost of Goods Sold for invoice B2B0029",
@@ -104797,7 +104648,7 @@
       ]
     },
     {
-      "id": "TX-1640",
+      "id": "TX-1623",
       "date": "2026-08-28",
       "reference": "B2B0031 COGS",
       "description": "Cost of Goods Sold for invoice B2B0031",
@@ -104815,7 +104666,7 @@
       ]
     },
     {
-      "id": "TX-1641",
+      "id": "TX-1624",
       "date": "2026-08-05",
       "reference": "LSL-0250 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0250",
@@ -104833,7 +104684,7 @@
       ]
     },
     {
-      "id": "TX-1642",
+      "id": "TX-1625",
       "date": "2026-08-29",
       "reference": "B2B0032 COGS",
       "description": "Cost of Goods Sold for invoice B2B0032",
@@ -104851,7 +104702,7 @@
       ]
     },
     {
-      "id": "TX-1643",
+      "id": "TX-1626",
       "date": "2026-08-05",
       "reference": "LSL-0251 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0251",
@@ -104869,7 +104720,7 @@
       ]
     },
     {
-      "id": "TX-1644",
+      "id": "TX-1627",
       "date": "2026-08-05",
       "reference": "LSL-0252 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0252",
@@ -104887,7 +104738,7 @@
       ]
     },
     {
-      "id": "TX-1645",
+      "id": "TX-1628",
       "date": "2026-08-05",
       "reference": "LSL-0253 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0253",
@@ -104905,7 +104756,7 @@
       ]
     },
     {
-      "id": "TX-1646",
+      "id": "TX-1629",
       "date": "2026-08-05",
       "reference": "LSL-0254 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0254",
@@ -104923,7 +104774,7 @@
       ]
     },
     {
-      "id": "TX-1647",
+      "id": "TX-1630",
       "date": "2026-08-05",
       "reference": "LSL-0255 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0255",
@@ -104941,7 +104792,7 @@
       ]
     },
     {
-      "id": "TX-1648",
+      "id": "TX-1631",
       "date": "2026-08-05",
       "reference": "LSL-0256 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0256",
@@ -104959,7 +104810,7 @@
       ]
     },
     {
-      "id": "TX-1649",
+      "id": "TX-1632",
       "date": "2026-08-06",
       "reference": "LSL-0257 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0257",
@@ -104977,7 +104828,7 @@
       ]
     },
     {
-      "id": "TX-1650",
+      "id": "TX-1633",
       "date": "2026-08-06",
       "reference": "LSL-0258 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0258",
@@ -104995,7 +104846,7 @@
       ]
     },
     {
-      "id": "TX-1651",
+      "id": "TX-1634",
       "date": "2026-08-06",
       "reference": "LSL-0259 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0259",
@@ -105013,7 +104864,7 @@
       ]
     },
     {
-      "id": "TX-1652",
+      "id": "TX-1635",
       "date": "2026-08-07",
       "reference": "LSL-0260 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0260",
@@ -105031,7 +104882,7 @@
       ]
     },
     {
-      "id": "TX-1653",
+      "id": "TX-1636",
       "date": "2026-08-07",
       "reference": "LSL-0261 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0261",
@@ -105049,7 +104900,7 @@
       ]
     },
     {
-      "id": "TX-1654",
+      "id": "TX-1637",
       "date": "2026-08-07",
       "reference": "LSL-0262 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0262",
@@ -105067,7 +104918,7 @@
       ]
     },
     {
-      "id": "TX-1655",
+      "id": "TX-1638",
       "date": "2026-08-07",
       "reference": "LSL-0263 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0263",
@@ -105085,7 +104936,7 @@
       ]
     },
     {
-      "id": "TX-1656",
+      "id": "TX-1639",
       "date": "2026-08-07",
       "reference": "LSL-0264 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0264",
@@ -105103,7 +104954,7 @@
       ]
     },
     {
-      "id": "TX-1657",
+      "id": "TX-1640",
       "date": "2026-08-07",
       "reference": "LSL-0265 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0265",
@@ -105121,7 +104972,7 @@
       ]
     },
     {
-      "id": "TX-1658",
+      "id": "TX-1641",
       "date": "2026-08-07",
       "reference": "LSL-0266 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0266",
@@ -105139,7 +104990,7 @@
       ]
     },
     {
-      "id": "TX-1659",
+      "id": "TX-1642",
       "date": "2026-08-07",
       "reference": "LSL-0267 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0267",
@@ -105157,7 +105008,7 @@
       ]
     },
     {
-      "id": "TX-1660",
+      "id": "TX-1643",
       "date": "2026-08-07",
       "reference": "LSL-0268 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0268",
@@ -105175,7 +105026,7 @@
       ]
     },
     {
-      "id": "TX-1661",
+      "id": "TX-1644",
       "date": "2026-08-07",
       "reference": "LSL-0269 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0269",
@@ -105193,7 +105044,7 @@
       ]
     },
     {
-      "id": "TX-1662",
+      "id": "TX-1645",
       "date": "2026-08-07",
       "reference": "LSL-0270 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0270",
@@ -105211,7 +105062,7 @@
       ]
     },
     {
-      "id": "TX-1663",
+      "id": "TX-1646",
       "date": "2026-08-07",
       "reference": "LSL-0271 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0271",
@@ -105229,7 +105080,7 @@
       ]
     },
     {
-      "id": "TX-1664",
+      "id": "TX-1647",
       "date": "2026-08-08",
       "reference": "LSL-0272 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0272",
@@ -105247,7 +105098,7 @@
       ]
     },
     {
-      "id": "TX-1665",
+      "id": "TX-1648",
       "date": "2026-08-08",
       "reference": "LSL-0273 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0273",
@@ -105265,7 +105116,7 @@
       ]
     },
     {
-      "id": "TX-1666",
+      "id": "TX-1649",
       "date": "2026-08-08",
       "reference": "LSL-0274 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0274",
@@ -105283,7 +105134,7 @@
       ]
     },
     {
-      "id": "TX-1667",
+      "id": "TX-1650",
       "date": "2026-08-08",
       "reference": "LSL-0275 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0275",
@@ -105301,7 +105152,7 @@
       ]
     },
     {
-      "id": "TX-1668",
+      "id": "TX-1651",
       "date": "2026-08-08",
       "reference": "LSL-0276 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0276",
@@ -105319,7 +105170,7 @@
       ]
     },
     {
-      "id": "TX-1669",
+      "id": "TX-1652",
       "date": "2026-08-08",
       "reference": "LSL-0277 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0277",
@@ -105337,7 +105188,7 @@
       ]
     },
     {
-      "id": "TX-1670",
+      "id": "TX-1653",
       "date": "2026-08-08",
       "reference": "LSL-0278 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0278",
@@ -105355,7 +105206,7 @@
       ]
     },
     {
-      "id": "TX-1671",
+      "id": "TX-1654",
       "date": "2026-08-09",
       "reference": "LSL-0279 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0279",
@@ -105373,7 +105224,7 @@
       ]
     },
     {
-      "id": "TX-1672",
+      "id": "TX-1655",
       "date": "2026-08-09",
       "reference": "LSL-0280 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0280",
@@ -105391,7 +105242,7 @@
       ]
     },
     {
-      "id": "TX-1673",
+      "id": "TX-1656",
       "date": "2026-08-09",
       "reference": "LSL-0281 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0281",
@@ -105409,7 +105260,7 @@
       ]
     },
     {
-      "id": "TX-1674",
+      "id": "TX-1657",
       "date": "2026-08-09",
       "reference": "LSL-0282 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0282",
@@ -105427,7 +105278,7 @@
       ]
     },
     {
-      "id": "TX-1675",
+      "id": "TX-1658",
       "date": "2026-08-10",
       "reference": "LSL-0283 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0283",
@@ -105445,7 +105296,7 @@
       ]
     },
     {
-      "id": "TX-1676",
+      "id": "TX-1659",
       "date": "2026-08-10",
       "reference": "LSL-0284 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0284",
@@ -105463,7 +105314,7 @@
       ]
     },
     {
-      "id": "TX-1677",
+      "id": "TX-1660",
       "date": "2026-08-10",
       "reference": "LSL-0285 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0285",
@@ -105481,7 +105332,7 @@
       ]
     },
     {
-      "id": "TX-1678",
+      "id": "TX-1661",
       "date": "2026-08-11",
       "reference": "LSL-0286 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0286",
@@ -105499,7 +105350,7 @@
       ]
     },
     {
-      "id": "TX-1679",
+      "id": "TX-1662",
       "date": "2026-08-11",
       "reference": "LSL-0287 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0287",
@@ -105517,7 +105368,7 @@
       ]
     },
     {
-      "id": "TX-1680",
+      "id": "TX-1663",
       "date": "2026-08-11",
       "reference": "LSL-0288 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0288",
@@ -105535,7 +105386,7 @@
       ]
     },
     {
-      "id": "TX-1681",
+      "id": "TX-1664",
       "date": "2026-08-11",
       "reference": "LSL-0289 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0289",
@@ -105553,7 +105404,7 @@
       ]
     },
     {
-      "id": "TX-1682",
+      "id": "TX-1665",
       "date": "2026-08-12",
       "reference": "LSL-0290 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0290",
@@ -105571,7 +105422,7 @@
       ]
     },
     {
-      "id": "TX-1683",
+      "id": "TX-1666",
       "date": "2026-08-12",
       "reference": "LSL-0291 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0291",
@@ -105589,7 +105440,7 @@
       ]
     },
     {
-      "id": "TX-1684",
+      "id": "TX-1667",
       "date": "2026-08-12",
       "reference": "LSL-0292 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0292",
@@ -105607,7 +105458,7 @@
       ]
     },
     {
-      "id": "TX-1685",
+      "id": "TX-1668",
       "date": "2026-08-14",
       "reference": "LSL-0293 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0293",
@@ -105625,7 +105476,7 @@
       ]
     },
     {
-      "id": "TX-1686",
+      "id": "TX-1669",
       "date": "2026-08-14",
       "reference": "LSL-0294 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0294",
@@ -105643,7 +105494,7 @@
       ]
     },
     {
-      "id": "TX-1687",
+      "id": "TX-1670",
       "date": "2026-08-14",
       "reference": "LSL-0295 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0295",
@@ -105661,7 +105512,7 @@
       ]
     },
     {
-      "id": "TX-1688",
+      "id": "TX-1671",
       "date": "2026-08-14",
       "reference": "LSL-0296 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0296",
@@ -105679,7 +105530,7 @@
       ]
     },
     {
-      "id": "TX-1689",
+      "id": "TX-1672",
       "date": "2026-08-14",
       "reference": "LSL-0297 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0297",
@@ -105697,7 +105548,7 @@
       ]
     },
     {
-      "id": "TX-1690",
+      "id": "TX-1673",
       "date": "2026-08-14",
       "reference": "LSL-0298 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0298",
@@ -105715,7 +105566,7 @@
       ]
     },
     {
-      "id": "TX-1691",
+      "id": "TX-1674",
       "date": "2026-08-14",
       "reference": "LSL-0299 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0299",
@@ -105733,7 +105584,7 @@
       ]
     },
     {
-      "id": "TX-1692",
+      "id": "TX-1675",
       "date": "2026-08-14",
       "reference": "LSL-0300 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0300",
@@ -105751,7 +105602,7 @@
       ]
     },
     {
-      "id": "TX-1693",
+      "id": "TX-1676",
       "date": "2026-08-14",
       "reference": "LSL-0301 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0301",
@@ -105769,7 +105620,7 @@
       ]
     },
     {
-      "id": "TX-1694",
+      "id": "TX-1677",
       "date": "2026-08-15",
       "reference": "LSL-0302 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0302",
@@ -105787,7 +105638,7 @@
       ]
     },
     {
-      "id": "TX-1695",
+      "id": "TX-1678",
       "date": "2026-08-15",
       "reference": "LSL-0303 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0303",
@@ -105805,7 +105656,7 @@
       ]
     },
     {
-      "id": "TX-1696",
+      "id": "TX-1679",
       "date": "2026-08-16",
       "reference": "LSL-0304 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0304",
@@ -105823,7 +105674,7 @@
       ]
     },
     {
-      "id": "TX-1697",
+      "id": "TX-1680",
       "date": "2026-08-16",
       "reference": "LSL-0305 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0305",
@@ -105841,7 +105692,7 @@
       ]
     },
     {
-      "id": "TX-1698",
+      "id": "TX-1681",
       "date": "2026-08-16",
       "reference": "LSL-0306 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0306",
@@ -105859,7 +105710,7 @@
       ]
     },
     {
-      "id": "TX-1699",
+      "id": "TX-1682",
       "date": "2026-08-17",
       "reference": "LSL-0307 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0307",
@@ -105877,7 +105728,7 @@
       ]
     },
     {
-      "id": "TX-1700",
+      "id": "TX-1683",
       "date": "2026-08-17",
       "reference": "LSL-0308 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0308",
@@ -105895,7 +105746,7 @@
       ]
     },
     {
-      "id": "TX-1701",
+      "id": "TX-1684",
       "date": "2026-08-17",
       "reference": "LSL-0309 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0309",
@@ -105913,7 +105764,7 @@
       ]
     },
     {
-      "id": "TX-1702",
+      "id": "TX-1685",
       "date": "2026-08-17",
       "reference": "LSL-0310 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0310",
@@ -105931,7 +105782,7 @@
       ]
     },
     {
-      "id": "TX-1703",
+      "id": "TX-1686",
       "date": "2026-08-17",
       "reference": "LSL-0311 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0311",
@@ -105949,7 +105800,7 @@
       ]
     },
     {
-      "id": "TX-1704",
+      "id": "TX-1687",
       "date": "2026-08-17",
       "reference": "LSL-0312 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0312",
@@ -105967,7 +105818,7 @@
       ]
     },
     {
-      "id": "TX-1705",
+      "id": "TX-1688",
       "date": "2026-08-17",
       "reference": "LSL-0313 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0313",
@@ -105985,7 +105836,7 @@
       ]
     },
     {
-      "id": "TX-1706",
+      "id": "TX-1689",
       "date": "2026-08-17",
       "reference": "LSL-0314 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0314",
@@ -106003,7 +105854,7 @@
       ]
     },
     {
-      "id": "TX-1707",
+      "id": "TX-1690",
       "date": "2026-08-17",
       "reference": "LSL-0315 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0315",
@@ -106021,7 +105872,7 @@
       ]
     },
     {
-      "id": "TX-1708",
+      "id": "TX-1691",
       "date": "2026-08-18",
       "reference": "LSL-0317 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0317",
@@ -106039,7 +105890,7 @@
       ]
     },
     {
-      "id": "TX-1709",
+      "id": "TX-1692",
       "date": "2026-08-18",
       "reference": "LSL-0318 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0318",
@@ -106057,7 +105908,7 @@
       ]
     },
     {
-      "id": "TX-1710",
+      "id": "TX-1693",
       "date": "2026-08-18",
       "reference": "LSL-0319 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0319",
@@ -106075,7 +105926,7 @@
       ]
     },
     {
-      "id": "TX-1711",
+      "id": "TX-1694",
       "date": "2026-08-18",
       "reference": "LSL-0320 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0320",
@@ -106093,7 +105944,7 @@
       ]
     },
     {
-      "id": "TX-1712",
+      "id": "TX-1695",
       "date": "2026-08-18",
       "reference": "LSL-0321 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0321",
@@ -106111,7 +105962,7 @@
       ]
     },
     {
-      "id": "TX-1713",
+      "id": "TX-1696",
       "date": "2026-08-18",
       "reference": "LSL-0322 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0322",
@@ -106129,7 +105980,7 @@
       ]
     },
     {
-      "id": "TX-1714",
+      "id": "TX-1697",
       "date": "2026-08-18",
       "reference": "LSL-0323 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0323",
@@ -106147,7 +105998,7 @@
       ]
     },
     {
-      "id": "TX-1715",
+      "id": "TX-1698",
       "date": "2026-08-18",
       "reference": "LSL-0324 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0324",
@@ -106165,7 +106016,7 @@
       ]
     },
     {
-      "id": "TX-1716",
+      "id": "TX-1699",
       "date": "2026-08-18",
       "reference": "LSL-0325 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0325",
@@ -106183,7 +106034,7 @@
       ]
     },
     {
-      "id": "TX-1717",
+      "id": "TX-1700",
       "date": "2026-08-18",
       "reference": "LSL-0326 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0326",
@@ -106201,7 +106052,7 @@
       ]
     },
     {
-      "id": "TX-1718",
+      "id": "TX-1701",
       "date": "2026-08-18",
       "reference": "LSL-0327 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0327",
@@ -106219,7 +106070,7 @@
       ]
     },
     {
-      "id": "TX-1719",
+      "id": "TX-1702",
       "date": "2026-08-18",
       "reference": "LSL-0328 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0328",
@@ -106237,7 +106088,7 @@
       ]
     },
     {
-      "id": "TX-1720",
+      "id": "TX-1703",
       "date": "2026-08-18",
       "reference": "LSL-0329 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0329",
@@ -106255,7 +106106,7 @@
       ]
     },
     {
-      "id": "TX-1721",
+      "id": "TX-1704",
       "date": "2026-08-19",
       "reference": "LSL-0330 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0330",
@@ -106273,7 +106124,7 @@
       ]
     },
     {
-      "id": "TX-1722",
+      "id": "TX-1705",
       "date": "2026-08-19",
       "reference": "LSL-0331 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0331",
@@ -106291,7 +106142,7 @@
       ]
     },
     {
-      "id": "TX-1723",
+      "id": "TX-1706",
       "date": "2026-08-19",
       "reference": "LSL-0332 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0332",
@@ -106309,7 +106160,7 @@
       ]
     },
     {
-      "id": "TX-1724",
+      "id": "TX-1707",
       "date": "2026-08-19",
       "reference": "LSL-0333 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0333",
@@ -106327,7 +106178,7 @@
       ]
     },
     {
-      "id": "TX-1725",
+      "id": "TX-1708",
       "date": "2026-08-19",
       "reference": "LSL-0334 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0334",
@@ -106345,7 +106196,7 @@
       ]
     },
     {
-      "id": "TX-1726",
+      "id": "TX-1709",
       "date": "2026-08-20",
       "reference": "LSL-0335 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0335",
@@ -106363,7 +106214,43 @@
       ]
     },
     {
-      "id": "TX-1727",
+      "id": "TX-1710",
+      "date": "2026-08-20",
+      "reference": "LSL-0336 COGS",
+      "description": "Cost of Goods Sold for invoice LSL-0336",
+      "entries": [
+        {
+          "accountId": "5100",
+          "debit": 2059.6800000000003,
+          "credit": 0
+        },
+        {
+          "accountId": "1200",
+          "debit": 0,
+          "credit": 2059.6800000000003
+        }
+      ]
+    },
+    {
+      "id": "TX-1711",
+      "date": "2026-08-20",
+      "reference": "LSL-0337 COGS",
+      "description": "Cost of Goods Sold for invoice LSL-0337",
+      "entries": [
+        {
+          "accountId": "5100",
+          "debit": 1624.78,
+          "credit": 0
+        },
+        {
+          "accountId": "1200",
+          "debit": 0,
+          "credit": 1624.78
+        }
+      ]
+    },
+    {
+      "id": "TX-1712",
       "date": "2026-08-17",
       "reference": "LSL-0316 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0316",
@@ -106381,7 +106268,7 @@
       ]
     },
     {
-      "id": "TX-1728",
+      "id": "TX-1713",
       "date": "2026-04-01",
       "reference": "LSL-0005 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0005",
@@ -106399,241 +106286,7 @@
       ]
     },
     {
-      "id": "TX-1729",
-      "date": "2026-04-01",
-      "reference": "LSL-0003 COGS",
-      "description": "Cost of Goods Sold for invoice LSL-0003",
-      "entries": [
-        {
-          "accountId": "5100",
-          "debit": 5123.040000000001,
-          "credit": 0
-        },
-        {
-          "accountId": "1200",
-          "debit": 0,
-          "credit": 5123.040000000001
-        }
-      ]
-    },
-    {
-      "id": "TX-1730",
-      "date": "2026-04-01",
-      "reference": "LSL-0004 COGS",
-      "description": "Cost of Goods Sold for invoice LSL-0004",
-      "entries": [
-        {
-          "accountId": "5100",
-          "debit": 27952.8,
-          "credit": 0
-        },
-        {
-          "accountId": "1200",
-          "debit": 0,
-          "credit": 27952.8
-        }
-      ]
-    },
-    {
-      "id": "TX-1731",
-      "date": "2026-04-16",
-      "reference": "LSL-0035 COGS",
-      "description": "Cost of Goods Sold for invoice LSL-0035",
-      "entries": [
-        {
-          "accountId": "5100",
-          "debit": 20692.760000000002,
-          "credit": 0
-        },
-        {
-          "accountId": "1200",
-          "debit": 0,
-          "credit": 20692.760000000002
-        }
-      ]
-    },
-    {
-      "id": "TX-1732",
-      "date": "2026-04-06",
-      "reference": "LSL-0015 COGS",
-      "description": "Cost of Goods Sold for invoice LSL-0015",
-      "entries": [
-        {
-          "accountId": "5100",
-          "debit": 14417.76,
-          "credit": 0
-        },
-        {
-          "accountId": "1200",
-          "debit": 0,
-          "credit": 14417.76
-        }
-      ]
-    },
-    {
-      "id": "TX-1733",
-      "date": "2026-04-29",
-      "reference": "LSL-0049 COGS",
-      "description": "Cost of Goods Sold for invoice LSL-0049",
-      "entries": [
-        {
-          "accountId": "5100",
-          "debit": 2083.9,
-          "credit": 0
-        },
-        {
-          "accountId": "1200",
-          "debit": 0,
-          "credit": 2083.9
-        }
-      ]
-    },
-    {
-      "id": "TX-1734",
-      "date": "2026-04-27",
-      "reference": "LSL-0045 COGS",
-      "description": "Cost of Goods Sold for invoice LSL-0045",
-      "entries": [
-        {
-          "accountId": "5100",
-          "debit": 4350,
-          "credit": 0
-        },
-        {
-          "accountId": "1200",
-          "debit": 0,
-          "credit": 4350
-        }
-      ]
-    },
-    {
-      "id": "TX-1735",
-      "date": "2026-05-03",
-      "reference": "LSL-0054 COGS",
-      "description": "Cost of Goods Sold for invoice LSL-0054",
-      "entries": [
-        {
-          "accountId": "5100",
-          "debit": 26062.4,
-          "credit": 0
-        },
-        {
-          "accountId": "1200",
-          "debit": 0,
-          "credit": 26062.4
-        }
-      ]
-    },
-    {
-      "id": "TX-1736",
-      "date": "2026-05-07",
-      "reference": "LSL-0071 COGS",
-      "description": "Cost of Goods Sold for invoice LSL-0071",
-      "entries": [
-        {
-          "accountId": "5100",
-          "debit": 13162.560000000001,
-          "credit": 0
-        },
-        {
-          "accountId": "1200",
-          "debit": 0,
-          "credit": 13162.560000000001
-        }
-      ]
-    },
-    {
-      "id": "TX-1737",
-      "date": "2026-05-05",
-      "reference": "LSL-0064 COGS",
-      "description": "Cost of Goods Sold for invoice LSL-0064",
-      "entries": [
-        {
-          "accountId": "5100",
-          "debit": 1267.8,
-          "credit": 0
-        },
-        {
-          "accountId": "1200",
-          "debit": 0,
-          "credit": 1267.8
-        }
-      ]
-    },
-    {
-      "id": "TX-1738",
-      "date": "2026-05-02",
-      "reference": "LSL-0053 COGS",
-      "description": "Cost of Goods Sold for invoice LSL-0053",
-      "entries": [
-        {
-          "accountId": "5100",
-          "debit": 47516,
-          "credit": 0
-        },
-        {
-          "accountId": "1200",
-          "debit": 0,
-          "credit": 47516
-        }
-      ]
-    },
-    {
-      "id": "TX-1739",
-      "date": "2026-06-18",
-      "reference": "LSL-0157 COGS",
-      "description": "Cost of Goods Sold for invoice LSL-0157",
-      "entries": [
-        {
-          "accountId": "5100",
-          "debit": 1740,
-          "credit": 0
-        },
-        {
-          "accountId": "1200",
-          "debit": 0,
-          "credit": 1740
-        }
-      ]
-    },
-    {
-      "id": "TX-1740",
-      "date": "2026-06-03",
-      "reference": "LSL-0117 COGS",
-      "description": "Cost of Goods Sold for invoice LSL-0117",
-      "entries": [
-        {
-          "accountId": "5100",
-          "debit": 3443.56,
-          "credit": 0
-        },
-        {
-          "accountId": "1200",
-          "debit": 0,
-          "credit": 3443.56
-        }
-      ]
-    },
-    {
-      "id": "TX-1741",
-      "date": "2026-06-06",
-      "reference": "LSL-0132 COGS",
-      "description": "Cost of Goods Sold for invoice LSL-0132",
-      "entries": [
-        {
-          "accountId": "5100",
-          "debit": 2900,
-          "credit": 0
-        },
-        {
-          "accountId": "1200",
-          "debit": 0,
-          "credit": 2900
-        }
-      ]
-    },
-    {
-      "id": "TX-1742",
+      "id": "TX-1714",
       "date": "2026-08-20",
       "reference": "LSL-0338 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0338",
@@ -106651,145 +106304,242 @@
       ]
     },
     {
-      "id": "TX-1743",
-      "date": "2026-09-20",
-      "reference": "LSL-0339 COGS",
-      "description": "Cost of Goods Sold for invoice LSL-0339",
+      "id": "TX-1715",
+      "date": "2026-04-01",
+      "reference": "LSL-0003 COGS",
+      "description": "Cost of Goods Sold for invoice LSL-0003",
       "entries": [
         {
           "accountId": "5100",
-          "debit": 1151.8500000000001,
+          "debit": 5123.040000000001,
           "credit": 0
         },
         {
           "accountId": "1200",
           "debit": 0,
-          "credit": 1151.8500000000001
+          "credit": 5123.040000000001
         }
       ]
     },
     {
-      "id": "TX-1746",
-      "date": "2026-09-20",
-      "reference": "Purchase Return PR-001",
-      "description": "",
-      "siteName": "",
+      "id": "TX-1716",
+      "date": "2026-04-01",
+      "reference": "LSL-0004 COGS",
+      "description": "Cost of Goods Sold for invoice LSL-0004",
       "entries": [
-        {
-          "accountId": "VEND-0068",
-          "debit": 8356.4128,
-          "credit": 0
-        },
-        {
-          "accountId": "L0005",
-          "debit": 0,
-          "credit": 6996.96
-        },
-        {
-          "accountId": "L0038",
-          "debit": 0,
-          "credit": 629.7264
-        },
-        {
-          "accountId": "L0033",
-          "debit": 0,
-          "credit": 629.7264
-        },
-        {
-          "accountId": "L031",
-          "debit": 0,
-          "credit": 100
-        }
-      ]
-    },
-    {
-      "id": "13",
-      "voucherId": "13",
-      "voucherType": "PUR",
-      "voucherNo": "LPR-0010",
-      "date": "2026-05-29",
-      "reference": "LPR-0010",
-      "description": "As per Inv.No:GB0086 Dt.29-05-2026",
-      "siteName": "",
-      "entries": [
-        {
-          "accountId": "L0005",
-          "debit": 55084,
-          "credit": 0
-        },
-        {
-          "accountId": "VEND-0069",
-          "debit": 0,
-          "credit": 64999
-        },
-        {
-          "accountId": "L0038",
-          "debit": 4957.56,
-          "credit": 0
-        },
-        {
-          "accountId": "L0033",
-          "debit": 4957.56,
-          "credit": 0
-        },
-        {
-          "accountId": "L0012",
-          "debit": 0,
-          "credit": 0.12
-        }
-      ]
-    },
-    {
-      "id": "TX-1747",
-      "date": "2026-09-20",
-      "reference": "Sales Return SR-001",
-      "description": "",
-      "siteName": "",
-      "entries": [
-        {
-          "accountId": "L0004",
-          "debit": 2847.5,
-          "credit": 0
-        },
-        {
-          "accountId": "CUST-0427",
-          "debit": 0,
-          "credit": 3360.05
-        },
-        {
-          "accountId": "L0053",
-          "debit": 256.275,
-          "credit": 0
-        },
-        {
-          "accountId": "L0048",
-          "debit": 256.275,
-          "credit": 0
-        }
-      ]
-    },
-    {
-      "id": "TX-1748",
-      "date": "2026-09-20",
-      "reference": "SR-001 COGS",
-      "description": "",
-      "siteName": "",
-      "entries": [
-        {
-          "accountId": "1200",
-          "debit": 2942.4,
-          "credit": 0
-        },
         {
           "accountId": "5100",
+          "debit": 27952.8,
+          "credit": 0
+        },
+        {
+          "accountId": "1200",
           "debit": 0,
-          "credit": 2942.4
+          "credit": 27952.8
         }
       ]
     },
     {
-      "id": "TX-1749",
-      "date": "2026-09-22",
+      "id": "TX-1717",
+      "date": "2026-04-16",
+      "reference": "LSL-0035 COGS",
+      "description": "Cost of Goods Sold for invoice LSL-0035",
+      "entries": [
+        {
+          "accountId": "5100",
+          "debit": 20692.760000000002,
+          "credit": 0
+        },
+        {
+          "accountId": "1200",
+          "debit": 0,
+          "credit": 20692.760000000002
+        }
+      ]
+    },
+    {
+      "id": "TX-1718",
+      "date": "2026-04-06",
+      "reference": "LSL-0015 COGS",
+      "description": "Cost of Goods Sold for invoice LSL-0015",
+      "entries": [
+        {
+          "accountId": "5100",
+          "debit": 14417.76,
+          "credit": 0
+        },
+        {
+          "accountId": "1200",
+          "debit": 0,
+          "credit": 14417.76
+        }
+      ]
+    },
+    {
+      "id": "TX-1719",
+      "date": "2026-04-29",
+      "reference": "LSL-0049 COGS",
+      "description": "Cost of Goods Sold for invoice LSL-0049",
+      "entries": [
+        {
+          "accountId": "5100",
+          "debit": 2083.9,
+          "credit": 0
+        },
+        {
+          "accountId": "1200",
+          "debit": 0,
+          "credit": 2083.9
+        }
+      ]
+    },
+    {
+      "id": "TX-1720",
+      "date": "2026-04-27",
+      "reference": "LSL-0045 COGS",
+      "description": "Cost of Goods Sold for invoice LSL-0045",
+      "entries": [
+        {
+          "accountId": "5100",
+          "debit": 4350,
+          "credit": 0
+        },
+        {
+          "accountId": "1200",
+          "debit": 0,
+          "credit": 4350
+        }
+      ]
+    },
+    {
+      "id": "TX-1721",
+      "date": "2026-05-03",
+      "reference": "LSL-0054 COGS",
+      "description": "Cost of Goods Sold for invoice LSL-0054",
+      "entries": [
+        {
+          "accountId": "5100",
+          "debit": 26062.4,
+          "credit": 0
+        },
+        {
+          "accountId": "1200",
+          "debit": 0,
+          "credit": 26062.4
+        }
+      ]
+    },
+    {
+      "id": "TX-1722",
+      "date": "2026-05-07",
+      "reference": "LSL-0071 COGS",
+      "description": "Cost of Goods Sold for invoice LSL-0071",
+      "entries": [
+        {
+          "accountId": "5100",
+          "debit": 13162.560000000001,
+          "credit": 0
+        },
+        {
+          "accountId": "1200",
+          "debit": 0,
+          "credit": 13162.560000000001
+        }
+      ]
+    },
+    {
+      "id": "TX-1723",
+      "date": "2026-05-05",
+      "reference": "LSL-0064 COGS",
+      "description": "Cost of Goods Sold for invoice LSL-0064",
+      "entries": [
+        {
+          "accountId": "5100",
+          "debit": 1267.8,
+          "credit": 0
+        },
+        {
+          "accountId": "1200",
+          "debit": 0,
+          "credit": 1267.8
+        }
+      ]
+    },
+    {
+      "id": "TX-1724",
+      "date": "2026-05-02",
+      "reference": "LSL-0053 COGS",
+      "description": "Cost of Goods Sold for invoice LSL-0053",
+      "entries": [
+        {
+          "accountId": "5100",
+          "debit": 47516,
+          "credit": 0
+        },
+        {
+          "accountId": "1200",
+          "debit": 0,
+          "credit": 47516
+        }
+      ]
+    },
+    {
+      "id": "TX-1725",
+      "date": "2026-06-18",
+      "reference": "LSL-0157 COGS",
+      "description": "Cost of Goods Sold for invoice LSL-0157",
+      "entries": [
+        {
+          "accountId": "5100",
+          "debit": 1740,
+          "credit": 0
+        },
+        {
+          "accountId": "1200",
+          "debit": 0,
+          "credit": 1740
+        }
+      ]
+    },
+    {
+      "id": "TX-1726",
+      "date": "2026-06-03",
+      "reference": "LSL-0117 COGS",
+      "description": "Cost of Goods Sold for invoice LSL-0117",
+      "entries": [
+        {
+          "accountId": "5100",
+          "debit": 3443.56,
+          "credit": 0
+        },
+        {
+          "accountId": "1200",
+          "debit": 0,
+          "credit": 3443.56
+        }
+      ]
+    },
+    {
+      "id": "TX-1727",
+      "date": "2026-06-06",
+      "reference": "LSL-0132 COGS",
+      "description": "Cost of Goods Sold for invoice LSL-0132",
+      "entries": [
+        {
+          "accountId": "5100",
+          "debit": 2900,
+          "credit": 0
+        },
+        {
+          "accountId": "1200",
+          "debit": 0,
+          "credit": 2900
+        }
+      ]
+    },
+    {
+      "id": "TX-1728",
+      "date": "2026-09-20",
       "reference": "RC-0876",
       "description": "",
       "siteName": "",
@@ -107510,6 +107260,60 @@
       "payMode": "Credit",
       "paymode": "Credit",
       "narration": "As per Inv.No:GB0087 Dt.29-05-2026"
+    },
+    {
+      "id": "13",
+      "purchaseNo": 13,
+      "voucherNo": "LPR-0010",
+      "seriesId": "SER-LOCAL-PURCHASE",
+      "refNo": "GB0082",
+      "invoiceNo": "GB0082",
+      "invoiceDate": "2026-05-29",
+      "date": "2026-05-29",
+      "supplierId": "VEND-0069",
+      "contactId": "VEND-0069",
+      "supplierName": "K.P.C ALI & CO.",
+      "contactName": "K.P.C ALI & CO.",
+      "ledgerId": 69,
+      "items": [
+        {
+          "materialId": "MAT-0003",
+          "name": "CEMENT",
+          "code": "ACC",
+          "model": "ACC",
+          "batchNo": "275.42",
+          "quantity": 200,
+          "unit": "Nos",
+          "price": 275.42,
+          "landingCost": 275.42,
+          "amount": 55084,
+          "netValue": 55084,
+          "taxRate": 18,
+          "gstPercent": 18,
+          "gstAmount": 9915.12,
+          "cessPercent": 0,
+          "netAmount": 64999.12,
+          "cgst": 4957.56,
+          "sgst": 4957.56,
+          "igst": 0
+        }
+      ],
+      "subtotal": 55084,
+      "taxRate": 18,
+      "taxAmount": 9915.12,
+      "cgst": 4957.56,
+      "sgst": 4957.56,
+      "igst": 0,
+      "shipping": 0,
+      "discount": 0,
+      "roundOff": -0.12,
+      "total": 64999,
+      "paidAmount": 0,
+      "status": "unpaid",
+      "cancelFlag": false,
+      "payMode": "Credit",
+      "paymode": "Credit",
+      "narration": "As per Inv.No:GB0086 Dt.29-05-2026"
     },
     {
       "id": "12",
@@ -108853,115 +108657,10 @@
       "additionalCess": 0,
       "roundOff": -4.8,
       "total": 69900
-    },
-    {
-      "id": "13",
-      "seriesId": "SER-LOCAL-PURCHASE",
-      "voucherNo": "LPR-0010",
-      "refNo": "LPR-0010",
-      "invoiceNo": "GB0082",
-      "date": "2026-05-29",
-      "contactId": "VEND-0069",
-      "contactName": "K.P.C ALI & CO.",
-      "siteName": "",
-      "state": "KERALA",
-      "payMode": "Credit",
-      "creditPeriod": "0",
-      "narration": "As per Inv.No:GB0086 Dt.29-05-2026",
-      "headloaderType": "std",
-      "items": [
-        {
-          "materialId": "MAT-0003",
-          "name": "CEMENT",
-          "code": "ACC",
-          "batchNo": "275.42",
-          "quantity": 200,
-          "unit": "Nos",
-          "price": 275.42,
-          "mrp": 344.27500000000003,
-          "discountPercent": 0,
-          "discountAmount": 0,
-          "netValue": 55084,
-          "gstPercent": 18,
-          "gstAmount": 9915.119999999999,
-          "netAmount": 64999.119999999995
-        }
-      ],
-      "subtotal": 55084,
-      "totalDiscount": 0,
-      "totalGst": 9915.119999999999,
-      "totalCess": 0,
-      "adjustments": 0,
-      "adjustmentsList": [],
-      "additionalCess": 0,
-      "roundOff": -0.12,
-      "total": 64998.99999999999
     }
   ],
-  "salesReturns": [
-    {
-      "id": "SR-001",
-      "billNo": "B2B009",
-      "date": "2026-09-20",
-      "contactId": "CUST-0427",
-      "contactName": "MANEESH PV",
-      "siteName": "",
-      "state": "KERALA",
-      "items": [
-        {
-          "materialId": "MAT-0003",
-          "name": "CEMENT",
-          "quantity": 10,
-          "unit": "Nos",
-          "price": 284.75,
-          "amount": 2847.5,
-          "gstPercent": 18,
-          "gstAmount": 512.55
-        }
-      ],
-      "subtotal": 2847.5,
-      "taxRate": 18,
-      "taxAmount": 512.55,
-      "adjustmentsList": [],
-      "roundOff": 0,
-      "total": 3360.05
-    }
-  ],
-  "purchaseReturns": [
-    {
-      "id": "PR-001",
-      "billNo": "1075/26-27",
-      "date": "2026-09-20",
-      "contactId": "VEND-0068",
-      "contactName": "PRINCE TMT STEELS (P) LTD",
-      "state": "KERALA",
-      "items": [
-        {
-          "materialId": "MAT-0001",
-          "name": "TMT STEELS",
-          "quantity": 129,
-          "unit": "Kg",
-          "price": 54.24,
-          "amount": 6996.96,
-          "gstPercent": 18,
-          "gstAmount": 1259.4528
-        }
-      ],
-      "subtotal": 6996.96,
-      "taxRate": 18,
-      "taxAmount": 1259.4528,
-      "adjustmentsList": [
-        {
-          "type": "Add",
-          "name": "FREIGHT",
-          "amount": 100,
-          "ledgerCode": "L031"
-        }
-      ],
-      "roundOff": 0,
-      "total": 8356.4128
-    }
-  ],
+  "salesReturns": [],
+  "purchaseReturns": [],
   "conversions": [],
   "stockAdjustments": [],
   "productGroups": [
@@ -111522,15 +111221,14 @@
     }
   ],
   "options": {
-    "enableEmployeeSales": false,
-    "enableInfluencerSales": false,
-    "enableCess": false,
+    "enableEmployeeSales": true,
+    "enableInfluencerSales": true,
+    "enableCess": true,
     "enable4DigitHsn": true,
     "enableCessInSalesBill": false,
     "influencerLoyaltyRate": 1,
-    "enablePartyClosingBalanceBottom": false,
-    "enableHeadloader": true,
-    "googleDriveBackupPath": "H:\\Other computers"
+    "enablePartyClosingBalanceBottom": true,
+    "enableHeadloader": true
   },
   "influencers": [],
   "influencerRedemptions": [],
@@ -111560,7 +111258,7 @@
       "prefix": "LSL-",
       "digits": 4,
       "startingNumber": 1,
-      "currentNumber": 340,
+      "currentNumber": 339,
       "ledgerCode": "L0004",
       "isActive": true
     },
@@ -111637,47 +111335,13 @@
       "isActive": false
     }
   ],
-  "headloaderProductIds": [
-    "MAT-0004",
-    "MAT-0005",
-    "MAT-0009",
-    "MAT-0010",
-    "MAT-0011",
-    "MAT-0012",
-    "MAT-0013",
-    "MAT-0018",
-    "MAT-0027",
-    "MAT-0033",
-    "MAT-0093",
-    "MAT-0094",
-    "MAT-0099",
-    "MAT-0108",
-    "MAT-0233",
-    "MAT-0247",
-    "MAT-0269",
-    "MAT-0317",
-    "MAT-0369",
-    "MAT-0506",
-    "MAT-0565",
-    "MAT-0574",
-    "MAT-0689",
-    "MAT-0718",
-    "MAT-0730",
-    "MAT-0860",
-    "MAT-0003"
-  ],
+  "headloaderProductIds": [],
   "headloaderTypes": [
     {
       "id": "std",
       "name": "Standard",
       "isDefault": true,
       "category": "both"
-    },
-    {
-      "id": "type_1789889054254_coik",
-      "name": "TORRUS",
-      "category": "both",
-      "isDefault": false
     }
   ],
   "gstMaster": [
