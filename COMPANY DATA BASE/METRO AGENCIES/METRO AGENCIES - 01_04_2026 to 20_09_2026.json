@@ -1,5 +1,5 @@
 {
-  "_lastSaved": 1790071733787,
+  "_lastSaved": 1790076435904,
   "materials": [
     {
       "id": "MAT-0001",
@@ -34458,7 +34458,7 @@
       "gstin": "32AADCP5210D1Z5",
       "creditLimit": 0,
       "creditPeriod": 0,
-      "balance": 16665.948256000003,
+      "balance": 8309.535456000001,
       "openingBalance": 0,
       "balanceType": "Credit",
       "bankName": "STATE BANK OF INDIA",
@@ -100044,43 +100044,6 @@
       ]
     },
     {
-      "id": "LSL-0339",
-      "voucherId": "LSL-0339",
-      "voucherType": "SALE",
-      "voucherNo": "LSL-0339",
-      "date": "2026-09-20",
-      "reference": "LSL-0339",
-      "description": "",
-      "siteName": "",
-      "entries": [
-        {
-          "accountId": "L0001",
-          "debit": 1495,
-          "credit": 0
-        },
-        {
-          "accountId": "L0004",
-          "debit": 0,
-          "credit": 1335
-        },
-        {
-          "accountId": "L0052",
-          "debit": 0,
-          "credit": 80.1
-        },
-        {
-          "accountId": "L0047",
-          "debit": 0,
-          "credit": 80.1
-        },
-        {
-          "accountId": "L0012",
-          "debit": 0.2,
-          "credit": 0
-        }
-      ]
-    },
-    {
       "id": "TX-1378",
       "date": "2026-04-05",
       "reference": "B2B001 COGS",
@@ -106651,24 +106614,6 @@
       ]
     },
     {
-      "id": "TX-1743",
-      "date": "2026-09-20",
-      "reference": "LSL-0339 COGS",
-      "description": "Cost of Goods Sold for invoice LSL-0339",
-      "entries": [
-        {
-          "accountId": "5100",
-          "debit": 1151.8500000000001,
-          "credit": 0
-        },
-        {
-          "accountId": "1200",
-          "debit": 0,
-          "credit": 1151.8500000000001
-        }
-      ]
-    },
-    {
       "id": "13",
       "voucherId": "13",
       "voucherType": "PUR",
@@ -106779,6 +106724,64 @@
           "accountId": "L0033",
           "debit": 0,
           "credit": 633.778128
+        }
+      ]
+    },
+    {
+      "id": "LSL-0339",
+      "voucherId": "LSL-0339",
+      "voucherType": "SALE",
+      "voucherNo": "LSL-0339",
+      "date": "2026-09-20",
+      "reference": "LSL-0339",
+      "description": "",
+      "siteName": "",
+      "entries": [
+        {
+          "accountId": "L0001",
+          "debit": 1495,
+          "credit": 0
+        },
+        {
+          "accountId": "L0004",
+          "debit": 0,
+          "credit": 1335
+        },
+        {
+          "accountId": "L0052",
+          "debit": 0,
+          "credit": 80.1
+        },
+        {
+          "accountId": "L0047",
+          "debit": 0,
+          "credit": 80.1
+        },
+        {
+          "accountId": "L0012",
+          "debit": 0.2,
+          "credit": 0
+        }
+      ]
+    },
+    {
+      "id": "TX-1753",
+      "voucherId": "LSL-0339",
+      "voucherType": "SALE",
+      "voucherNo": "LSL-0339",
+      "date": "2026-09-20",
+      "reference": "LSL-0339 COGS",
+      "description": "",
+      "entries": [
+        {
+          "accountId": "5100",
+          "debit": 1151.8500000000001,
+          "credit": 0
+        },
+        {
+          "accountId": "1200",
+          "debit": 0,
+          "credit": 1151.8500000000001
         }
       ]
     }
@@ -111498,7 +111501,8 @@
     "enableCessInSalesBill": false,
     "enablePartyClosingBalanceBottom": true,
     "enableHeadloader": true,
-    "influencerLoyaltyRate": 1
+    "influencerLoyaltyRate": 1,
+    "allowPreviousYearEditing": false
   },
   "influencers": [
     {
@@ -111615,7 +111619,8 @@
     {
       "id": "std",
       "name": "Standard",
-      "isDefault": true
+      "isDefault": true,
+      "category": "both"
     }
   ],
   "gstMaster": [
