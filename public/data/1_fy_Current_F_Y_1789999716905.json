@@ -1,5 +1,5 @@
 {
-  "_lastSaved": 1790077235490,
+  "_lastSaved": 1790080415452,
   "materials": [
     {
       "id": "MAT-0001",
@@ -9315,6 +9315,116 @@
       ],
       "unloadingCharge": 0,
       "unloadingChargeEnabled": false,
+      "loadingChargesByType": {},
+      "unloadingChargesByType": {}
+    },
+    {
+      "id": "MAT-090",
+      "name": "CEMENT",
+      "code": "ULTRA SUPER",
+      "category": "CEMENT",
+      "unit": "Nos",
+      "reorderLevel": 50,
+      "barcode": "",
+      "eanCode": "",
+      "productGroup": "CEMENT",
+      "company": "ULTRATECH",
+      "subCategory": "UNAVAILABLE",
+      "hsnCode": "2523",
+      "description": "PORTLAND CEMENT, ALUMINOUS CEMENT, SLAG CEMENT",
+      "productType": "Goods",
+      "rackNo": "",
+      "defaultDiscount": 0,
+      "igst": 18,
+      "cgst": 9,
+      "sgst": 9,
+      "cess": 0,
+      "addlCess": 0,
+      "cessOn": "NetValue",
+      "alternateUnits": [],
+      "loadingChargeEnabled": false,
+      "loadingCharge": 0,
+      "unloadingChargeEnabled": false,
+      "unloadingCharge": 0,
+      "openingStock": 0,
+      "stock": 0,
+      "landingCost": 290,
+      "marginPercent": 5.2,
+      "marginAmount": 15.08,
+      "gstExclRate": 305.08,
+      "gstInclRate": 360,
+      "mrp": 381.36,
+      "costPrice": 290,
+      "sellingPrice": 305.08,
+      "batches": [
+        {
+          "batchNo": "290",
+          "landingCost": 290,
+          "openingStock": 0,
+          "stock": 0,
+          "marginPercent": 5.2,
+          "marginAmount": 15.08,
+          "gstExclRate": 305.08,
+          "gstInclRate": 360,
+          "mrp": 381.36,
+          "sellingPrice": 305.08
+        }
+      ],
+      "loadingChargesByType": {},
+      "unloadingChargesByType": {}
+    },
+    {
+      "id": "MAT-091",
+      "name": "TMT STEELS",
+      "code": "RING",
+      "category": "STEEL",
+      "unit": "Kg",
+      "reorderLevel": 50,
+      "barcode": "",
+      "eanCode": "",
+      "productGroup": "STEEL",
+      "company": "PRINCE",
+      "subCategory": "UNAVAILABLE",
+      "hsnCode": "7214",
+      "description": "BARS AND RODS OF IRON OR NON-ALLOY STEEL (TMT REBARS)",
+      "productType": "Goods",
+      "rackNo": "",
+      "defaultDiscount": 0,
+      "igst": 18,
+      "cgst": 9,
+      "sgst": 9,
+      "cess": 0,
+      "addlCess": 0,
+      "cessOn": "NetValue",
+      "alternateUnits": [],
+      "loadingChargeEnabled": false,
+      "loadingCharge": 0,
+      "unloadingChargeEnabled": false,
+      "unloadingCharge": 0,
+      "openingStock": 0,
+      "stock": 0,
+      "landingCost": 65,
+      "marginPercent": 3,
+      "marginAmount": 1.95,
+      "gstExclRate": 66.95,
+      "gstInclRate": 79,
+      "mrp": 83.69,
+      "costPrice": 65,
+      "sellingPrice": 66.95,
+      "batches": [
+        {
+          "batchNo": "65",
+          "landingCost": 65,
+          "openingStock": 0,
+          "stock": 0,
+          "marginPercent": 3,
+          "marginAmount": 1.95,
+          "gstExclRate": 66.95,
+          "gstInclRate": 79,
+          "mrp": 83.69,
+          "sellingPrice": 66.95
+        }
+      ],
       "loadingChargesByType": {},
       "unloadingChargesByType": {}
     }
@@ -34981,7 +35091,8 @@
     "enableCessInSalesBill": false,
     "enablePartyClosingBalanceBottom": true,
     "enableHeadloader": true,
-    "influencerLoyaltyRate": 1
+    "influencerLoyaltyRate": 1,
+    "allowPreviousYearEditing": false
   },
   "influencers": [
     {
@@ -35006,7 +35117,10 @@
     "6901",
     "2517"
   ],
-  "hsnDescriptions": {},
+  "hsnDescriptions": {
+    "2523": "PORTLAND CEMENT, ALUMINOUS CEMENT, SLAG CEMENT",
+    "7214": "BARS AND RODS OF IRON OR NON-ALLOY STEEL (TMT REBARS)"
+  },
   "seriesMaster": [
     {
       "id": "SER-LOCAL-SALES",
@@ -35098,7 +35212,8 @@
     {
       "id": "std",
       "name": "Standard",
-      "isDefault": true
+      "isDefault": true,
+      "category": "both"
     }
   ],
   "gstMaster": [
