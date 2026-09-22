@@ -47,44 +47,5 @@
     ],
     "district": "Kannur",
     "serverUrl": "http://100.66.24.43:3001"
-  },
-  {
-    "id": "1789996578862",
-    "name": "company 2",
-    "financialYearStarts": "2026-04-01",
-    "financialYears": [
-      {
-        "id": "default",
-        "name": "Current F.Y",
-        "startDate": "2026-04-01",
-        "endDate": "2027-03-31"
-      }
-    ]
-  },
-  {
-    "id": "1789996578873",
-    "name": "company METRO AGENCIES",
-    "financialYearStarts": "2026-04-01",
-    "financialYears": [
-      {
-        "id": "default",
-        "name": "Current F.Y",
-        "startDate": "2026-04-01",
-        "endDate": "2027-03-31"
-      }
-    ]
-  },
-  {
-    "id": "1789996579095",
-    "name": "METRO STEELS",
-    "financialYearStarts": "2026-04-01",
-    "financialYears": [
-      {
-        "id": "default",
-        "name": "Current F.Y",
-        "startDate": "2026-04-01",
-        "endDate": "2027-03-31"
-      }
-    ]
   }
 ]
