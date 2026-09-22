@@ -1,5 +1,5 @@
 {
-  "_lastSaved": 1790001869287,
+  "_lastSaved": 1790055819155,
   "materials": [
     {
       "id": "MAT-0001",
@@ -28,7 +28,7 @@
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
       "openingStock": 7182.3,
-      "stock": 5702.03,
+      "stock": 5831.03,
       "landingCost": 70,
       "costPrice": 70,
       "sellingPrice": 60.8,
@@ -536,7 +536,7 @@
           "batchNo": "50",
           "landingCost": 50,
           "openingStock": 566.9000000000001,
-          "stock": 0,
+          "stock": 5.684341886080802e-14,
           "marginPercent": 2,
           "marginAmount": 1,
           "gstExclRate": 50,
@@ -627,7 +627,7 @@
           "batchNo": "54.237",
           "landingCost": 54.237,
           "openingStock": 0,
-          "stock": 2000.83,
+          "stock": 2129.83,
           "marginPercent": 2.347106,
           "marginAmount": 1.273,
           "gstExclRate": 54.237,
@@ -34458,7 +34458,7 @@
       "gstin": "32AADCP5210D1Z5",
       "creditLimit": 0,
       "creditPeriod": 0,
-      "balance": 8356.4128,
+      "balance": 0,
       "openingBalance": 0,
       "balanceType": "Credit",
       "bankName": "STATE BANK OF INDIA",
@@ -106669,40 +106669,6 @@
       ]
     },
     {
-      "id": "TX-1746",
-      "date": "2026-09-20",
-      "reference": "Purchase Return PR-001",
-      "description": "",
-      "siteName": "",
-      "entries": [
-        {
-          "accountId": "VEND-0068",
-          "debit": 8356.4128,
-          "credit": 0
-        },
-        {
-          "accountId": "L0005",
-          "debit": 0,
-          "credit": 6996.96
-        },
-        {
-          "accountId": "L0038",
-          "debit": 0,
-          "credit": 629.7264
-        },
-        {
-          "accountId": "L0033",
-          "debit": 0,
-          "credit": 629.7264
-        },
-        {
-          "accountId": "L031",
-          "debit": 0,
-          "credit": 100
-        }
-      ]
-    },
-    {
       "id": "13",
       "voucherId": "13",
       "voucherType": "PUR",
@@ -106784,6 +106750,40 @@
           "accountId": "5100",
           "debit": 0,
           "credit": 2942.4
+        }
+      ]
+    },
+    {
+      "id": "TX-1749",
+      "date": "2026-09-20",
+      "reference": "Purchase Return PR-001",
+      "description": "",
+      "siteName": "",
+      "entries": [
+        {
+          "accountId": "VEND-0068",
+          "debit": 8356.4128,
+          "credit": 0
+        },
+        {
+          "accountId": "L0005",
+          "debit": 0,
+          "credit": 6996.96
+        },
+        {
+          "accountId": "L0038",
+          "debit": 0,
+          "credit": 629.7264
+        },
+        {
+          "accountId": "L0033",
+          "debit": 0,
+          "credit": 629.7264
+        },
+        {
+          "accountId": "L031",
+          "debit": 0,
+          "credit": 100
         }
       ]
     }
@@ -108908,41 +108908,7 @@
       "total": 3360.05
     }
   ],
-  "purchaseReturns": [
-    {
-      "id": "PR-001",
-      "billNo": "1075/26-27",
-      "date": "2026-09-20",
-      "contactId": "VEND-0068",
-      "contactName": "PRINCE TMT STEELS (P) LTD",
-      "state": "KERALA",
-      "items": [
-        {
-          "materialId": "MAT-0001",
-          "name": "TMT STEELS",
-          "quantity": 129,
-          "unit": "Kg",
-          "price": 54.24,
-          "amount": 6996.96,
-          "gstPercent": 18,
-          "gstAmount": 1259.4528
-        }
-      ],
-      "subtotal": 6996.96,
-      "taxRate": 18,
-      "taxAmount": 1259.4528,
-      "adjustmentsList": [
-        {
-          "type": "Add",
-          "name": "FREIGHT",
-          "amount": 100,
-          "ledgerCode": "L031"
-        }
-      ],
-      "roundOff": 0,
-      "total": 8356.4128
-    }
-  ],
+  "purchaseReturns": [],
   "conversions": [],
   "stockAdjustments": [],
   "productGroups": [

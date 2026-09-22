@@ -1,5 +1,5 @@
 {
-  "_lastSaved": 1790005231047,
+  "_lastSaved": 1790054896690,
   "materials": [
     {
       "id": "MAT-0001",
@@ -39,51 +39,748 @@
       "marginAmount": -15.351,
       "batches": [
         {
+          "batchNo": "58.051",
+          "landingCost": 58.051,
+          "sellingPrice": 50.39,
+          "mrp": 42.7,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "36.86",
+          "landingCost": 36.86,
+          "sellingPrice": 44.65,
+          "mrp": 37.84,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "37.71",
+          "landingCost": 37.71,
+          "sellingPrice": 45.2,
+          "mrp": 38.31,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "37.712",
+          "landingCost": 37.712,
+          "sellingPrice": 45.3,
+          "mrp": 38.39,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "36.864",
+          "landingCost": 36.864,
+          "sellingPrice": 44.65,
+          "mrp": 37.84,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "38.56",
+          "landingCost": 38.56,
+          "sellingPrice": 46.44,
+          "mrp": 39.36,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "43.22",
+          "landingCost": 43.22,
+          "sellingPrice": 52,
+          "mrp": 44.07,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "44.92",
+          "landingCost": 44.92,
+          "sellingPrice": 53.35,
+          "mrp": 45.21,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "44.915",
+          "landingCost": 44.915,
+          "sellingPrice": 53.95,
+          "mrp": 45.72,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "44.914",
+          "landingCost": 44.914,
+          "sellingPrice": 53.9,
+          "mrp": 45.68,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "52.966",
+          "landingCost": 52.966,
+          "sellingPrice": 53.9,
+          "mrp": 45.68,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "45.76",
+          "landingCost": 45.76,
+          "sellingPrice": 54.94,
+          "mrp": 46.56,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "45.763",
+          "landingCost": 45.763,
+          "sellingPrice": 54.95,
+          "mrp": 46.57,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "44.068",
+          "landingCost": 44.068,
+          "sellingPrice": 52.39,
+          "mrp": 44.4,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "44.0680473372781",
+          "landingCost": 44.0680473372781,
+          "sellingPrice": 52.83,
+          "mrp": 44.77,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "43.64",
+          "landingCost": 43.64,
+          "sellingPrice": 52,
+          "mrp": 44.07,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "41.949",
+          "landingCost": 41.949,
+          "sellingPrice": 50.5,
+          "mrp": 42.8,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "38.305",
+          "landingCost": 38.305,
+          "sellingPrice": 46,
+          "mrp": 38.98,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "37.455",
+          "landingCost": 37.455,
+          "sellingPrice": 44.8,
+          "mrp": 37.97,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "41.271",
+          "landingCost": 41.271,
+          "sellingPrice": 49.7,
+          "mrp": 42.12,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "39.237",
+          "landingCost": 39.237,
+          "sellingPrice": 47.25,
+          "mrp": 40.04,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "45.339",
+          "landingCost": 45.339,
+          "sellingPrice": 54.3,
+          "mrp": 46.02,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "53.813",
+          "landingCost": 53.813,
+          "sellingPrice": 51,
+          "mrp": 43.22,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "41.525",
+          "landingCost": 41.525,
+          "sellingPrice": 49.7,
+          "mrp": 42.12,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "39.619",
+          "landingCost": 39.619,
+          "sellingPrice": 47.7,
+          "mrp": 40.42,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "41.102",
+          "landingCost": 41.102,
+          "sellingPrice": 49.45,
+          "mrp": 41.91,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "40.254",
+          "landingCost": 40.254,
+          "sellingPrice": 48.45,
+          "mrp": 41.06,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "40.042",
+          "landingCost": 40.042,
+          "sellingPrice": 47.85,
+          "mrp": 40.55,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "36.229",
+          "landingCost": 36.229,
+          "sellingPrice": 43.6,
+          "mrp": 36.95,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "42.5",
+          "landingCost": 42.5,
+          "sellingPrice": 43.35,
+          "mrp": 36.74,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "38.136",
+          "landingCost": 38.136,
+          "sellingPrice": 46,
+          "mrp": 38.98,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "39.576",
+          "landingCost": 39.576,
+          "sellingPrice": 47.75,
+          "mrp": 40.47,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "40.424",
+          "landingCost": 40.424,
+          "sellingPrice": 48.65,
+          "mrp": 41.23,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "44.067",
+          "landingCost": 44.067,
+          "sellingPrice": 53,
+          "mrp": 44.92,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "49.152",
+          "landingCost": 49.152,
+          "sellingPrice": 59,
+          "mrp": 50,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
           "batchNo": "48.305",
           "landingCost": 48.305,
-          "openingStock": -24.999999999999986,
-          "stock": -24.999999999999986,
-          "marginPercent": 1.749301,
-          "marginAmount": 0.844999999999999,
-          "gstExclRate": 48.305,
-          "gstInclRate": 58,
-          "mrp": 49.15,
           "sellingPrice": 58,
-          "costPrice": 48.305
+          "mrp": 49.15,
+          "openingStock": -24.999999999999986,
+          "stock": -24.999999999999986
+        },
+        {
+          "batchNo": "47.458",
+          "landingCost": 47.458,
+          "sellingPrice": 56.75,
+          "mrp": 48.09,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "53.39",
+          "landingCost": 53.39,
+          "sellingPrice": 63.8,
+          "mrp": 54.07,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "50",
+          "landingCost": 50,
+          "sellingPrice": 60.18,
+          "mrp": 51,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "55.085",
+          "landingCost": 55.085,
+          "sellingPrice": 66,
+          "mrp": 55.93,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "57.627",
+          "landingCost": 57.627,
+          "sellingPrice": 69,
+          "mrp": 58.47,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "59.322",
+          "landingCost": 59.322,
+          "sellingPrice": 71.4,
+          "mrp": 60.51,
+          "openingStock": 0,
+          "stock": 0
         },
         {
           "batchNo": "55.932",
           "landingCost": 55.932,
-          "openingStock": -1.1368683772161603e-13,
-          "stock": -1.1368683772161603e-13,
-          "marginPercent": 1.998856,
-          "marginAmount": 1.118,
-          "gstExclRate": 55.932,
-          "gstInclRate": 67.32,
-          "mrp": 57.05,
           "sellingPrice": 67.32,
-          "costPrice": 55.932
+          "mrp": 57.05,
+          "openingStock": -1.1368683772161603e-13,
+          "stock": -1.1368683772161603e-13
+        },
+        {
+          "batchNo": "51.695",
+          "landingCost": 51.695,
+          "sellingPrice": 61.95,
+          "mrp": 52.5,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "56.78",
+          "landingCost": 56.78,
+          "sellingPrice": 68.18,
+          "mrp": 57.78,
+          "openingStock": 0,
+          "stock": 0
         },
         {
           "batchNo": "54.237",
           "landingCost": 54.237,
-          "openingStock": 2000.83,
-          "stock": 2000.83,
-          "marginPercent": 2.347106,
-          "marginAmount": 1.273,
-          "gstExclRate": 54.237,
-          "gstInclRate": 65.5,
-          "mrp": 55.51,
           "sellingPrice": 65.5,
-          "costPrice": 54.237
+          "mrp": 55.51,
+          "openingStock": 2000.83,
+          "stock": 2000.83
+        },
+        {
+          "batchNo": "51.39",
+          "landingCost": 51.39,
+          "sellingPrice": 62,
+          "mrp": 52.54,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "50.297",
+          "landingCost": 50.297,
+          "sellingPrice": 60.55,
+          "mrp": 51.31,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "51.415",
+          "landingCost": 51.415,
+          "sellingPrice": 61.86,
+          "mrp": 52.42,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "51.907",
+          "landingCost": 51.907,
+          "sellingPrice": 62.47,
+          "mrp": 52.94,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "64",
+          "landingCost": 64,
+          "sellingPrice": 65.5,
+          "mrp": 55.51,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "55.635",
+          "landingCost": 55.635,
+          "sellingPrice": 67,
+          "mrp": 56.78,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "56.483",
+          "landingCost": 56.483,
+          "sellingPrice": 68,
+          "mrp": 57.63,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "60.17",
+          "landingCost": 60.17,
+          "sellingPrice": 72.5,
+          "mrp": 61.44,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "61.864",
+          "landingCost": 61.864,
+          "sellingPrice": 74.5,
+          "mrp": 63.14,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "64.407",
+          "landingCost": 64.407,
+          "sellingPrice": 77.63,
+          "mrp": 65.79,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "65.254",
+          "landingCost": 65.254,
+          "sellingPrice": 78.65,
+          "mrp": 66.65,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "55.2",
+          "landingCost": 55.2,
+          "sellingPrice": 66.65,
+          "mrp": 56.48,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "69.491",
+          "landingCost": 69.491,
+          "sellingPrice": 83.64,
+          "mrp": 70.88,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "70.339",
+          "landingCost": 70.339,
+          "sellingPrice": 84.67,
+          "mrp": 71.75,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "71.186",
+          "landingCost": 71.186,
+          "sellingPrice": 85.68,
+          "mrp": 72.61,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "72.034",
+          "landingCost": 72.034,
+          "sellingPrice": 86.69,
+          "mrp": 73.47,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "72.881",
+          "landingCost": 72.881,
+          "sellingPrice": 87.72,
+          "mrp": 74.34,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "63.559",
+          "landingCost": 63.559,
+          "sellingPrice": 76.5,
+          "mrp": 64.83,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "62.712",
+          "landingCost": 62.712,
+          "sellingPrice": 75.5,
+          "mrp": 63.98,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "61.016",
+          "landingCost": 61.016,
+          "sellingPrice": 73.45,
+          "mrp": 62.25,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "62.288",
+          "landingCost": 62.288,
+          "sellingPrice": 75,
+          "mrp": 63.56,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "63.135",
+          "landingCost": 63.135,
+          "sellingPrice": 76,
+          "mrp": 64.41,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "61.441",
+          "landingCost": 61.441,
+          "sellingPrice": 73.95,
+          "mrp": 62.67,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "60.593",
+          "landingCost": 60.593,
+          "sellingPrice": 72.92,
+          "mrp": 61.8,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "58.474",
+          "landingCost": 58.474,
+          "sellingPrice": 70.41,
+          "mrp": 59.67,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "58.898",
+          "landingCost": 58.898,
+          "sellingPrice": 70.91,
+          "mrp": 60.09,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "59.746",
+          "landingCost": 59.746,
+          "sellingPrice": 71.92,
+          "mrp": 60.95,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "57.5",
+          "landingCost": 57.5,
+          "sellingPrice": 69.25,
+          "mrp": 58.69,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "58.347",
+          "landingCost": 58.347,
+          "sellingPrice": 70.27,
+          "mrp": 59.55,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "56.36",
+          "landingCost": 56.36,
+          "sellingPrice": 67.83,
+          "mrp": 57.48,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "57.203",
+          "landingCost": 57.203,
+          "sellingPrice": 68.81,
+          "mrp": 58.31,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "56.7798054627485",
+          "landingCost": 56.7798054627485,
+          "sellingPrice": 68.65,
+          "mrp": 58.18,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "54.661",
+          "landingCost": 54.661,
+          "sellingPrice": 65.94,
+          "mrp": 55.88,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "55.508",
+          "landingCost": 55.508,
+          "sellingPrice": 66.92,
+          "mrp": 56.71,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "54.03",
+          "landingCost": 54.03,
+          "sellingPrice": 65.15,
+          "mrp": 55.21,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "54.87",
+          "landingCost": 54.87,
+          "sellingPrice": 66.15,
+          "mrp": 56.06,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "53.178",
+          "landingCost": 53.178,
+          "sellingPrice": 64.2,
+          "mrp": 54.41,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "54.025",
+          "landingCost": 54.025,
+          "sellingPrice": 65.2,
+          "mrp": 55.25,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "52.119",
+          "landingCost": 52.119,
+          "sellingPrice": 62.8,
+          "mrp": 53.22,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "52.27",
+          "landingCost": 52.27,
+          "sellingPrice": 62.94,
+          "mrp": 53.34,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "51.059",
+          "landingCost": 51.059,
+          "sellingPrice": 61.5,
+          "mrp": 52.12,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "52.753",
+          "landingCost": 52.753,
+          "sellingPrice": 63.5,
+          "mrp": 53.81,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "51.271",
+          "landingCost": 51.271,
+          "sellingPrice": 61.8,
+          "mrp": 52.37,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "51.694",
+          "landingCost": 51.694,
+          "sellingPrice": 63,
+          "mrp": 53.39,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "49.576",
+          "landingCost": 49.576,
+          "sellingPrice": 59.68,
+          "mrp": 50.58,
+          "openingStock": 0,
+          "stock": 0
         },
         {
           "batchNo": "70",
-          "openingStock": 3726.2,
           "landingCost": 70,
           "sellingPrice": 60.8,
           "mrp": 51.53,
+          "openingStock": 3726.2,
           "stock": 3726.2
+        },
+        {
+          "batchNo": "69.72",
+          "landingCost": 69.72,
+          "sellingPrice": 63.18,
+          "mrp": 53.54,
+          "openingStock": 0,
+          "stock": 0
         }
       ],
       "unloadingCharge": 0,
@@ -134,6 +831,182 @@
       "marginPercent": 1.68,
       "marginAmount": 0.77,
       "batches": [
+        {
+          "batchNo": "45.76",
+          "landingCost": 45.76,
+          "sellingPrice": 54.9,
+          "mrp": 46.53,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "35.59",
+          "landingCost": 35.59,
+          "sellingPrice": 42.8,
+          "mrp": 36.27,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "37.034",
+          "landingCost": 37.034,
+          "sellingPrice": 44.5,
+          "mrp": 37.71,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "36.78",
+          "landingCost": 36.78,
+          "sellingPrice": 44.34,
+          "mrp": 37.58,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "41.53",
+          "landingCost": 41.53,
+          "sellingPrice": 49.8,
+          "mrp": 42.2,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "41.525",
+          "landingCost": 41.525,
+          "sellingPrice": 49.8,
+          "mrp": 42.2,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "43.22",
+          "landingCost": 43.22,
+          "sellingPrice": 52,
+          "mrp": 44.07,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "44.237",
+          "landingCost": 44.237,
+          "sellingPrice": 52.55,
+          "mrp": 44.53,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "45.77",
+          "landingCost": 45.77,
+          "sellingPrice": 54.9,
+          "mrp": 46.53,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "44.49",
+          "landingCost": 44.49,
+          "sellingPrice": 53.45,
+          "mrp": 45.3,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "44.066",
+          "landingCost": 44.066,
+          "sellingPrice": 52.95,
+          "mrp": 44.87,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "45.339",
+          "landingCost": 45.339,
+          "sellingPrice": 54.87,
+          "mrp": 46.5,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "44.068",
+          "landingCost": 44.068,
+          "sellingPrice": 52.8,
+          "mrp": 44.75,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "34.4949494949495",
+          "landingCost": 34.4949494949495,
+          "sellingPrice": 41,
+          "mrp": 34.75,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "39.83",
+          "landingCost": 39.83,
+          "sellingPrice": 48,
+          "mrp": 40.68,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "38.136",
+          "landingCost": 38.136,
+          "sellingPrice": 45.6,
+          "mrp": 38.64,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "37.288",
+          "landingCost": 37.288,
+          "sellingPrice": 44.56,
+          "mrp": 37.76,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "36.441",
+          "landingCost": 36.441,
+          "sellingPrice": 43.95,
+          "mrp": 37.25,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "46",
+          "landingCost": 46,
+          "sellingPrice": 46.92,
+          "mrp": 39.76,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "41.104",
+          "landingCost": 41.104,
+          "sellingPrice": 49.5,
+          "mrp": 41.95,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "46.61",
+          "landingCost": 46.61,
+          "sellingPrice": 55.6,
+          "mrp": 47.12,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "47.458",
+          "landingCost": 47.458,
+          "sellingPrice": 56.62,
+          "mrp": 47.98,
+          "openingStock": 0,
+          "stock": 0
+        },
         {
           "batchNo": "50",
           "landingCost": 50,
@@ -194,100 +1067,409 @@
         {
           "batchNo": "304.69",
           "landingCost": 304.69,
-          "openingStock": 10,
-          "stock": 10,
-          "marginPercent": 4.686666,
-          "marginAmount": 14.06,
-          "gstExclRate": 304.69,
-          "gstInclRate": 402,
-          "mrp": 314.06,
           "sellingPrice": 402,
-          "costPrice": 304.69
+          "mrp": 314.06,
+          "openingStock": 10,
+          "stock": 10
+        },
+        {
+          "batchNo": "302.34",
+          "landingCost": 302.34,
+          "sellingPrice": 397,
+          "mrp": 310.16,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "300.78",
+          "landingCost": 300.78,
+          "sellingPrice": 395,
+          "mrp": 308.59,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "299.22",
+          "landingCost": 299.22,
+          "sellingPrice": 393,
+          "mrp": 307.03,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "296.88",
+          "landingCost": 296.88,
+          "sellingPrice": 390,
+          "mrp": 304.69,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "300",
+          "landingCost": 300,
+          "sellingPrice": 394,
+          "mrp": 307.81,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "296.875",
+          "landingCost": 296.875,
+          "sellingPrice": 390,
+          "mrp": 304.69,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "298.438",
+          "landingCost": 298.438,
+          "sellingPrice": 392,
+          "mrp": 306.25,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "292.97",
+          "landingCost": 292.97,
+          "sellingPrice": 385,
+          "mrp": 300.78,
+          "openingStock": 0,
+          "stock": 0
         },
         {
           "batchNo": "285.16",
           "landingCost": 285.16,
-          "openingStock": 1,
-          "stock": 1,
-          "marginPercent": 2.738813,
-          "marginAmount": 7.81,
-          "gstExclRate": 285.16,
-          "gstInclRate": 375,
-          "mrp": 292.97,
           "sellingPrice": 375,
-          "costPrice": 285.16
+          "mrp": 292.97,
+          "openingStock": 1,
+          "stock": 1
+        },
+        {
+          "batchNo": "289.06",
+          "landingCost": 289.06,
+          "sellingPrice": 380,
+          "mrp": 296.88,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "304.688",
+          "landingCost": 304.688,
+          "sellingPrice": 400,
+          "mrp": 312.5,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "292.969",
+          "landingCost": 292.969,
+          "sellingPrice": 385,
+          "mrp": 300.78,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "285.156",
+          "landingCost": 285.156,
+          "sellingPrice": 375,
+          "mrp": 292.97,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "308.592",
+          "landingCost": 308.592,
+          "sellingPrice": 405,
+          "mrp": 316.41,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "308.594",
+          "landingCost": 308.594,
+          "sellingPrice": 405,
+          "mrp": 316.41,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "312.5",
+          "landingCost": 312.5,
+          "sellingPrice": 409,
+          "mrp": 319.53,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "320.314",
+          "landingCost": 320.314,
+          "sellingPrice": 420,
+          "mrp": 328.13,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "289.062",
+          "landingCost": 289.062,
+          "sellingPrice": 376,
+          "mrp": 293.75,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "277.343",
+          "landingCost": 277.343,
+          "sellingPrice": 368,
+          "mrp": 287.5,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "281.25",
+          "landingCost": 281.25,
+          "sellingPrice": 375,
+          "mrp": 292.97,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "324.22",
+          "landingCost": 324.22,
+          "sellingPrice": 425,
+          "mrp": 332.03,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "328.125",
+          "landingCost": 328.125,
+          "sellingPrice": 429,
+          "mrp": 335.16,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "335.937",
+          "landingCost": 335.937,
+          "sellingPrice": 440,
+          "mrp": 343.75,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "308.59",
+          "landingCost": 308.59,
+          "sellingPrice": 403,
+          "mrp": 314.84,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "269.53",
+          "landingCost": 269.53,
+          "sellingPrice": 352,
+          "mrp": 275,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "316.405",
+          "landingCost": 316.405,
+          "sellingPrice": 414,
+          "mrp": 323.44,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "339.843",
+          "landingCost": 339.843,
+          "sellingPrice": 445,
+          "mrp": 347.66,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "359.375",
+          "landingCost": 359.375,
+          "sellingPrice": 470,
+          "mrp": 367.19,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "355.47",
+          "landingCost": 355.47,
+          "sellingPrice": 465,
+          "mrp": 363.28,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "332.03",
+          "landingCost": 332.03,
+          "sellingPrice": 433.5,
+          "mrp": 338.67,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "351.563",
+          "landingCost": 351.563,
+          "sellingPrice": 459,
+          "mrp": 358.59,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "306.48",
+          "landingCost": 306.48,
+          "sellingPrice": 401,
+          "mrp": 313.28,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "273.44",
+          "landingCost": 273.44,
+          "sellingPrice": 360,
+          "mrp": 281.25,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "261.72",
+          "landingCost": 261.72,
+          "sellingPrice": 345,
+          "mrp": 269.53,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "300.781",
+          "landingCost": 300.781,
+          "sellingPrice": 397,
+          "mrp": 310.16,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "359.38",
+          "landingCost": 359.38,
+          "sellingPrice": 470,
+          "mrp": 367.19,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "275.781",
+          "landingCost": 275.781,
+          "sellingPrice": 365,
+          "mrp": 285.16,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "265.625",
+          "landingCost": 265.625,
+          "sellingPrice": 350,
+          "mrp": 273.44,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "257.813",
+          "landingCost": 257.813,
+          "sellingPrice": 340,
+          "mrp": 265.63,
+          "openingStock": 0,
+          "stock": 0
         },
         {
           "batchNo": "253.91",
           "landingCost": 253.91,
-          "openingStock": 2,
-          "stock": 2,
-          "marginPercent": 3.075893,
-          "marginAmount": 7.81000000000003,
-          "gstExclRate": 253.91,
-          "gstInclRate": 335,
-          "mrp": 261.72,
           "sellingPrice": 335,
-          "costPrice": 253.91
+          "mrp": 261.72,
+          "openingStock": 2,
+          "stock": 2
+        },
+        {
+          "batchNo": "264.06",
+          "landingCost": 264.06,
+          "sellingPrice": 350,
+          "mrp": 273.44,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "250",
+          "landingCost": 250,
+          "sellingPrice": 331,
+          "mrp": 258.59,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "242.188",
+          "landingCost": 242.188,
+          "sellingPrice": 322,
+          "mrp": 251.56,
+          "openingStock": 0,
+          "stock": 0
         },
         {
           "batchNo": "254.24",
           "landingCost": 254.24,
-          "openingStock": -400,
-          "stock": -400,
-          "marginPercent": 6.666929,
-          "marginAmount": 16.95,
-          "gstExclRate": 254.24,
-          "gstInclRate": 320,
-          "mrp": 271.19,
           "sellingPrice": 320,
-          "costPrice": 254.24
+          "mrp": 271.19,
+          "openingStock": -400,
+          "stock": -400
+        },
+        {
+          "batchNo": "245.763",
+          "landingCost": 245.763,
+          "sellingPrice": 304,
+          "mrp": 257.63,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "258.475",
+          "landingCost": 258.475,
+          "sellingPrice": 317,
+          "mrp": 268.64,
+          "openingStock": 0,
+          "stock": 0
         },
         {
           "batchNo": "275.42",
           "landingCost": 275.42,
-          "openingStock": 7,
-          "stock": 7,
-          "marginPercent": 3.387553,
-          "marginAmount": 9.32999999999998,
-          "gstExclRate": 275.42,
-          "gstInclRate": 336,
-          "mrp": 284.75,
           "sellingPrice": 336,
-          "costPrice": 275.42
+          "mrp": 284.75,
+          "openingStock": 7,
+          "stock": 7
         },
         {
           "batchNo": "266.95",
           "landingCost": 266.95,
-          "openingStock": 53,
-          "stock": 53,
-          "marginPercent": 3.491291,
-          "marginAmount": 9.31999999999999,
-          "gstExclRate": 266.95,
-          "gstInclRate": 326,
-          "mrp": 276.27,
           "sellingPrice": 326,
-          "costPrice": 266.95
+          "mrp": 276.27,
+          "openingStock": 53,
+          "stock": 53
         },
         {
           "batchNo": "271.187",
           "landingCost": 271.187,
-          "openingStock": 84,
-          "stock": 84,
-          "marginPercent": 3.751286,
-          "marginAmount": 10.173,
-          "gstExclRate": 271.187,
-          "gstInclRate": 332,
-          "mrp": 281.36,
           "sellingPrice": 332,
-          "costPrice": 271.187
+          "mrp": 281.36,
+          "openingStock": 84,
+          "stock": 84
         },
         {
           "batchNo": "294.24",
-          "openingStock": 350,
           "landingCost": 294.24,
           "sellingPrice": 330,
           "mrp": 271.19,
+          "openingStock": 350,
           "stock": 350
         }
       ],
@@ -339,6 +1521,14 @@
       "marginPercent": 2.71,
       "marginAmount": 7.82,
       "batches": [
+        {
+          "batchNo": "289.06",
+          "landingCost": 289.06,
+          "sellingPrice": 380,
+          "mrp": 296.88,
+          "openingStock": 0,
+          "stock": 0
+        },
         {
           "batchNo": "56.04",
           "landingCost": 56.04,
@@ -397,6 +1587,22 @@
       "marginAmount": 7.815,
       "batches": [
         {
+          "batchNo": "265.625",
+          "landingCost": 265.625,
+          "sellingPrice": 350,
+          "mrp": 273.44,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "250",
+          "landingCost": 250,
+          "sellingPrice": 330,
+          "mrp": 257.81,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
           "batchNo": "234.38",
           "landingCost": 234.38,
           "sellingPrice": 310,
@@ -454,17 +1660,52 @@
       "marginAmount": 70.054,
       "batches": [
         {
+          "batchNo": "684.186",
+          "landingCost": 684.186,
+          "sellingPrice": 890,
+          "mrp": 754.24,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "684.185",
+          "landingCost": 684.185,
+          "sellingPrice": 890,
+          "mrp": 754.24,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "684.19",
+          "landingCost": 684.19,
+          "sellingPrice": 850,
+          "mrp": 720.34,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "703.49",
+          "landingCost": 703.49,
+          "sellingPrice": 870,
+          "mrp": 737.29,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
           "batchNo": "723.75",
           "landingCost": 723.75,
-          "openingStock": 8,
-          "stock": 8,
-          "marginPercent": 3.041105,
-          "marginAmount": 22.01,
-          "gstExclRate": 723.75,
-          "gstInclRate": 880,
-          "mrp": 745.76,
           "sellingPrice": 880,
-          "costPrice": 723.75
+          "mrp": 745.76,
+          "openingStock": 8,
+          "stock": 8
+        },
+        {
+          "batchNo": "750",
+          "landingCost": 750,
+          "sellingPrice": 910,
+          "mrp": 771.19,
+          "openingStock": 0,
+          "stock": 0
         }
       ],
       "unloadingCharge": 0,
@@ -509,6 +1750,38 @@
       "marginPercent": 8.213213,
       "marginAmount": 100.34,
       "batches": [
+        {
+          "batchNo": "1221.69",
+          "landingCost": 1221.69,
+          "sellingPrice": 1560,
+          "mrp": 1322.03,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "1266",
+          "landingCost": 1266,
+          "sellingPrice": 1580,
+          "mrp": 1338.98,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "1260.29",
+          "landingCost": 1260.29,
+          "sellingPrice": 1530,
+          "mrp": 1296.61,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "1283.45",
+          "landingCost": 1283.45,
+          "sellingPrice": 1550,
+          "mrp": 1313.56,
+          "openingStock": 0,
+          "stock": 0
+        },
         {
           "batchNo": "1330",
           "landingCost": 1330,
@@ -561,17 +1834,52 @@
       "marginAmount": 44.485,
       "batches": [
         {
+          "batchNo": "379.245",
+          "landingCost": 379.245,
+          "sellingPrice": 500,
+          "mrp": 423.73,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "393",
+          "landingCost": 393,
+          "sellingPrice": 500,
+          "mrp": 423.73,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "379.25",
+          "landingCost": 379.25,
+          "sellingPrice": 470,
+          "mrp": 398.31,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "393.72",
+          "landingCost": 393.72,
+          "sellingPrice": 483,
+          "mrp": 409.32,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
           "batchNo": "400.48",
           "landingCost": 400.48,
-          "openingStock": 9,
-          "stock": 9,
-          "marginPercent": 4.746804,
-          "marginAmount": 19.01,
-          "gstExclRate": 400.48,
-          "gstInclRate": 495,
-          "mrp": 419.49,
           "sellingPrice": 495,
-          "costPrice": 400.48
+          "mrp": 419.49,
+          "openingStock": 9,
+          "stock": 9
+        },
+        {
+          "batchNo": "415",
+          "landingCost": 415,
+          "sellingPrice": 500,
+          "mrp": 423.73,
+          "openingStock": 0,
+          "stock": 0
         }
       ],
       "unloadingCharge": 0,
@@ -616,6 +1924,366 @@
       "marginPercent": 4.619131,
       "marginAmount": 13.28,
       "batches": [
+        {
+          "batchNo": "279.6875",
+          "landingCost": 279.6875,
+          "sellingPrice": 385,
+          "mrp": 300.78,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "285.16",
+          "landingCost": 285.16,
+          "sellingPrice": 375,
+          "mrp": 292.97,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "282.81",
+          "landingCost": 282.81,
+          "sellingPrice": 372,
+          "mrp": 290.63,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "281.25",
+          "landingCost": 281.25,
+          "sellingPrice": 370,
+          "mrp": 289.06,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "277.34",
+          "landingCost": 277.34,
+          "sellingPrice": 365,
+          "mrp": 285.16,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "273.44",
+          "landingCost": 273.44,
+          "sellingPrice": 360,
+          "mrp": 281.25,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "265.625",
+          "landingCost": 265.625,
+          "sellingPrice": 350,
+          "mrp": 273.44,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "273.438",
+          "landingCost": 273.438,
+          "sellingPrice": 360,
+          "mrp": 281.25,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "265.63",
+          "landingCost": 265.63,
+          "sellingPrice": 350,
+          "mrp": 273.44,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "269.53",
+          "landingCost": 269.53,
+          "sellingPrice": 355,
+          "mrp": 277.34,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "258.63",
+          "landingCost": 258.63,
+          "sellingPrice": 340,
+          "mrp": 265.63,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "271.094",
+          "landingCost": 271.094,
+          "sellingPrice": 357,
+          "mrp": 278.91,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "277.344",
+          "landingCost": 277.344,
+          "sellingPrice": 365,
+          "mrp": 285.16,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "289.06",
+          "landingCost": 289.06,
+          "sellingPrice": 380,
+          "mrp": 296.88,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "279.7",
+          "landingCost": 279.7,
+          "sellingPrice": 368,
+          "mrp": 287.5,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "289.063",
+          "landingCost": 289.063,
+          "sellingPrice": 380,
+          "mrp": 296.88,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "285.946",
+          "landingCost": 285.946,
+          "sellingPrice": 378,
+          "mrp": 295.31,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "287.5",
+          "landingCost": 287.5,
+          "sellingPrice": 378,
+          "mrp": 295.31,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "285.156",
+          "landingCost": 285.156,
+          "sellingPrice": 374,
+          "mrp": 292.19,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "253.906",
+          "landingCost": 253.906,
+          "sellingPrice": 334,
+          "mrp": 260.94,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "292.97",
+          "landingCost": 292.97,
+          "sellingPrice": 384,
+          "mrp": 300,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "275",
+          "landingCost": 275,
+          "sellingPrice": 362,
+          "mrp": 282.81,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "263.28",
+          "landingCost": 263.28,
+          "sellingPrice": 347,
+          "mrp": 271.09,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "225.47",
+          "landingCost": 225.47,
+          "sellingPrice": 298,
+          "mrp": 232.81,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "255.468",
+          "landingCost": 255.468,
+          "sellingPrice": 337,
+          "mrp": 263.28,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "253.91",
+          "landingCost": 253.91,
+          "sellingPrice": 335,
+          "mrp": 261.72,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "250",
+          "landingCost": 250,
+          "sellingPrice": 330,
+          "mrp": 257.81,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "296.875",
+          "landingCost": 296.875,
+          "sellingPrice": 390,
+          "mrp": 304.69,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "286.952",
+          "landingCost": 286.952,
+          "sellingPrice": 375,
+          "mrp": 292.97,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "283.046",
+          "landingCost": 283.046,
+          "sellingPrice": 370,
+          "mrp": 289.06,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "295.31",
+          "landingCost": 295.31,
+          "sellingPrice": 386,
+          "mrp": 301.56,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "301.95",
+          "landingCost": 301.95,
+          "sellingPrice": 397,
+          "mrp": 310.16,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "307.03",
+          "landingCost": 307.03,
+          "sellingPrice": 401,
+          "mrp": 313.28,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "279.1",
+          "landingCost": 279.1,
+          "sellingPrice": 365,
+          "mrp": 285.16,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "273.436",
+          "landingCost": 273.436,
+          "sellingPrice": 358,
+          "mrp": 279.69,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "269.531",
+          "landingCost": 269.531,
+          "sellingPrice": 352,
+          "mrp": 275,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "298.7",
+          "landingCost": 298.7,
+          "sellingPrice": 395,
+          "mrp": 308.59,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "306.48",
+          "landingCost": 306.48,
+          "sellingPrice": 401,
+          "mrp": 313.28,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "284.77",
+          "landingCost": 284.77,
+          "sellingPrice": 373,
+          "mrp": 291.41,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "261.72",
+          "landingCost": 261.72,
+          "sellingPrice": 345,
+          "mrp": 269.53,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "242.19",
+          "landingCost": 242.19,
+          "sellingPrice": 320,
+          "mrp": 250,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "265.627",
+          "landingCost": 265.627,
+          "sellingPrice": 349,
+          "mrp": 272.66,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "246.09",
+          "landingCost": 246.09,
+          "sellingPrice": 326,
+          "mrp": 254.69,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "234.38",
+          "landingCost": 234.38,
+          "sellingPrice": 311,
+          "mrp": 242.97,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "230.47",
+          "landingCost": 230.47,
+          "sellingPrice": 307,
+          "mrp": 239.84,
+          "openingStock": 0,
+          "stock": 0
+        },
         {
           "batchNo": "241.525",
           "landingCost": 241.525,
@@ -674,6 +2342,22 @@
       "marginAmount": 3.91000000000003,
       "batches": [
         {
+          "batchNo": "269.53",
+          "landingCost": 269.53,
+          "sellingPrice": 350,
+          "mrp": 273.44,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "263.28",
+          "landingCost": 263.28,
+          "sellingPrice": 345,
+          "mrp": 269.53,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
           "batchNo": "210.938",
           "landingCost": 210.938,
           "sellingPrice": 280,
@@ -730,6 +2414,142 @@
       "marginPercent": 9.791857,
       "marginAmount": 25.78,
       "batches": [
+        {
+          "batchNo": "275.391",
+          "landingCost": 275.391,
+          "sellingPrice": 370,
+          "mrp": 289.06,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "271.577",
+          "landingCost": 271.577,
+          "sellingPrice": 357,
+          "mrp": 278.91,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "267.19",
+          "landingCost": 267.19,
+          "sellingPrice": 352,
+          "mrp": 275,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "263.28",
+          "landingCost": 263.28,
+          "sellingPrice": 346,
+          "mrp": 270.31,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "257.81",
+          "landingCost": 257.81,
+          "sellingPrice": 340,
+          "mrp": 265.63,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "260.16",
+          "landingCost": 260.16,
+          "sellingPrice": 343,
+          "mrp": 267.97,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "269.53",
+          "landingCost": 269.53,
+          "sellingPrice": 355,
+          "mrp": 277.34,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "273.92",
+          "landingCost": 273.92,
+          "sellingPrice": 360,
+          "mrp": 281.25,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "267.67",
+          "landingCost": 267.67,
+          "sellingPrice": 353,
+          "mrp": 275.78,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "245.538",
+          "landingCost": 245.538,
+          "sellingPrice": 324,
+          "mrp": 253.13,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "256.25",
+          "landingCost": 256.25,
+          "sellingPrice": 338,
+          "mrp": 264.06,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "252.34",
+          "landingCost": 252.34,
+          "sellingPrice": 333,
+          "mrp": 260.16,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "250",
+          "landingCost": 250,
+          "sellingPrice": 330,
+          "mrp": 257.81,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "271.09",
+          "landingCost": 271.09,
+          "sellingPrice": 357,
+          "mrp": 278.91,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "271.875",
+          "landingCost": 271.875,
+          "sellingPrice": 357,
+          "mrp": 278.91,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "269.64",
+          "landingCost": 269.64,
+          "sellingPrice": 355,
+          "mrp": 277.34,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "268.75",
+          "landingCost": 268.75,
+          "sellingPrice": 352,
+          "mrp": 275,
+          "openingStock": 0,
+          "stock": 0
+        },
         {
           "batchNo": "310",
           "landingCost": 310,
@@ -788,6 +2608,38 @@
       "marginAmount": 7.8099999999,
       "batches": [
         {
+          "batchNo": "286.72",
+          "landingCost": 286.72,
+          "sellingPrice": 377,
+          "mrp": 294.53,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "291.77",
+          "landingCost": 291.77,
+          "sellingPrice": 382.02,
+          "mrp": 298.45,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "380.006",
+          "landingCost": 380.006,
+          "sellingPrice": 385,
+          "mrp": 300.78,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "343.75",
+          "landingCost": 343.75,
+          "sellingPrice": 450,
+          "mrp": 351.56,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
           "batchNo": "312.5",
           "landingCost": 312.5,
           "sellingPrice": 410,
@@ -845,37 +2697,379 @@
       "marginAmount": 11.73,
       "batches": [
         {
+          "batchNo": "285.15",
+          "landingCost": 285.15,
+          "sellingPrice": 380,
+          "mrp": 296.88,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "295.31",
+          "landingCost": 295.31,
+          "sellingPrice": 388,
+          "mrp": 303.13,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "289.06",
+          "landingCost": 289.06,
+          "sellingPrice": 380,
+          "mrp": 296.88,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "281.25",
+          "landingCost": 281.25,
+          "sellingPrice": 370,
+          "mrp": 289.06,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "277.34",
+          "landingCost": 277.34,
+          "sellingPrice": 365,
+          "mrp": 285.16,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "273.44",
+          "landingCost": 273.44,
+          "sellingPrice": 360,
+          "mrp": 281.25,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "269.53",
+          "landingCost": 269.53,
+          "sellingPrice": 355,
+          "mrp": 277.34,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "265.63",
+          "landingCost": 265.63,
+          "sellingPrice": 350,
+          "mrp": 273.44,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "273.438",
+          "landingCost": 273.438,
+          "sellingPrice": 360,
+          "mrp": 281.25,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "268.59",
+          "landingCost": 268.59,
+          "sellingPrice": 354,
+          "mrp": 276.56,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "254.03",
+          "landingCost": 254.03,
+          "sellingPrice": 335,
+          "mrp": 261.72,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "296.88",
+          "landingCost": 296.88,
+          "sellingPrice": 390,
+          "mrp": 304.69,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "292.97",
+          "landingCost": 292.97,
+          "sellingPrice": 385,
+          "mrp": 300.78,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "292.96",
+          "landingCost": 292.96,
+          "sellingPrice": 383,
+          "mrp": 299.22,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "292.969",
+          "landingCost": 292.969,
+          "sellingPrice": 383,
+          "mrp": 299.22,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "320.312",
+          "landingCost": 320.312,
+          "sellingPrice": 418,
+          "mrp": 326.56,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "296.875",
+          "landingCost": 296.875,
+          "sellingPrice": 388,
+          "mrp": 303.13,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "326.563",
+          "landingCost": 326.563,
+          "sellingPrice": 427,
+          "mrp": 333.59,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "289.063",
+          "landingCost": 289.063,
+          "sellingPrice": 378,
+          "mrp": 295.31,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "312.5",
+          "landingCost": 312.5,
+          "sellingPrice": 410,
+          "mrp": 320.31,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "257.81",
+          "landingCost": 257.81,
+          "sellingPrice": 340,
+          "mrp": 265.63,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "285.155",
+          "landingCost": 285.155,
+          "sellingPrice": 377,
+          "mrp": 294.53,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "300.78",
+          "landingCost": 300.78,
+          "sellingPrice": 395,
+          "mrp": 308.59,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "277.344",
+          "landingCost": 277.344,
+          "sellingPrice": 367,
+          "mrp": 286.72,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "277.345",
+          "landingCost": 277.345,
+          "sellingPrice": 367,
+          "mrp": 286.72,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "275.781",
+          "landingCost": 275.781,
+          "sellingPrice": 364,
+          "mrp": 284.38,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "265.625",
+          "landingCost": 265.625,
+          "sellingPrice": 350,
+          "mrp": 273.44,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "250",
+          "landingCost": 250,
+          "sellingPrice": 331,
+          "mrp": 258.59,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "246.094",
+          "landingCost": 246.094,
+          "sellingPrice": 327,
+          "mrp": 255.47,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "242.188",
+          "landingCost": 242.188,
+          "sellingPrice": 322,
+          "mrp": 251.56,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "211.864",
+          "landingCost": 211.864,
+          "sellingPrice": 282,
+          "mrp": 220.31,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "195.313",
+          "landingCost": 195.313,
+          "sellingPrice": 260,
+          "mrp": 203.13,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "191.41",
+          "landingCost": 191.41,
+          "sellingPrice": 255,
+          "mrp": 199.22,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
           "batchNo": "187.5",
           "landingCost": 187.5,
-          "openingStock": -8,
-          "stock": -8,
-          "marginPercent": 5.002666,
-          "marginAmount": 9.38,
-          "gstExclRate": 187.5,
-          "gstInclRate": 252,
-          "mrp": 196.88,
           "sellingPrice": 252,
-          "costPrice": 187.5
+          "mrp": 196.88,
+          "openingStock": -8,
+          "stock": -8
+        },
+        {
+          "batchNo": "218.75",
+          "landingCost": 218.75,
+          "sellingPrice": 291,
+          "mrp": 227.34,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "222.66",
+          "landingCost": 222.66,
+          "sellingPrice": 297,
+          "mrp": 232.03,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "253.906",
+          "landingCost": 253.906,
+          "sellingPrice": 338,
+          "mrp": 264.06,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "226.56",
+          "landingCost": 226.56,
+          "sellingPrice": 302,
+          "mrp": 235.94,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "207.03",
+          "landingCost": 207.03,
+          "sellingPrice": 279,
+          "mrp": 217.97,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "210.93",
+          "landingCost": 210.93,
+          "sellingPrice": 282,
+          "mrp": 220.31,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "200.85",
+          "landingCost": 200.85,
+          "sellingPrice": 275,
+          "mrp": 233.05,
+          "openingStock": 0,
+          "stock": 0
         },
         {
           "batchNo": "203.39",
           "landingCost": 203.39,
-          "openingStock": -100,
-          "stock": -100,
-          "marginPercent": 4.58233,
-          "marginAmount": 9.32000000000002,
-          "gstExclRate": 203.39,
-          "gstInclRate": 251,
-          "mrp": 212.71,
           "sellingPrice": 251,
-          "costPrice": 203.39
+          "mrp": 212.71,
+          "openingStock": -100,
+          "stock": -100
+        },
+        {
+          "batchNo": "194.91",
+          "landingCost": 194.91,
+          "sellingPrice": 245,
+          "mrp": 207.63,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "190.68",
+          "landingCost": 190.68,
+          "sellingPrice": 240,
+          "mrp": 203.39,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "199.15",
+          "landingCost": 199.15,
+          "sellingPrice": 250,
+          "mrp": 211.86,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "228.81",
+          "landingCost": 228.81,
+          "sellingPrice": 282,
+          "mrp": 238.98,
+          "openingStock": 0,
+          "stock": 0
         },
         {
           "batchNo": "250.88",
-          "openingStock": 100,
           "landingCost": 250.88,
           "sellingPrice": 261,
           "mrp": 212.71,
+          "openingStock": 100,
           "stock": 100
         }
       ],
@@ -927,6 +3121,14 @@
       "marginPercent": 5.88036,
       "marginAmount": 15.62,
       "batches": [
+        {
+          "batchNo": "273.436",
+          "landingCost": 273.436,
+          "sellingPrice": 360,
+          "mrp": 281.25,
+          "openingStock": 0,
+          "stock": 0
+        },
         {
           "batchNo": "253.91",
           "landingCost": 253.91,
@@ -985,6 +3187,22 @@
       "marginAmount": 7.81,
       "batches": [
         {
+          "batchNo": "269.53",
+          "landingCost": 269.53,
+          "sellingPrice": 355,
+          "mrp": 277.34,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "273.44",
+          "landingCost": 273.44,
+          "sellingPrice": 355,
+          "mrp": 281.25,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
           "batchNo": "281.25",
           "landingCost": 281.25,
           "sellingPrice": 355,
@@ -1042,6 +3260,14 @@
       "marginAmount": 14.21,
       "batches": [
         {
+          "batchNo": "112.91",
+          "landingCost": 112.91,
+          "sellingPrice": 150,
+          "mrp": 127.12,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
           "batchNo": "117",
           "landingCost": 117,
           "sellingPrice": 150,
@@ -1092,6 +3318,158 @@
       "marginPercent": 3.124,
       "marginAmount": 7.81,
       "batches": [
+        {
+          "batchNo": "250",
+          "landingCost": 250,
+          "sellingPrice": 330,
+          "mrp": 257.81,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "253.91",
+          "landingCost": 253.91,
+          "sellingPrice": 335,
+          "mrp": 261.72,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "257.812",
+          "landingCost": 257.812,
+          "sellingPrice": 335,
+          "mrp": 261.72,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "253.906",
+          "landingCost": 253.906,
+          "sellingPrice": 326,
+          "mrp": 254.69,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "285.157",
+          "landingCost": 285.157,
+          "sellingPrice": 345,
+          "mrp": 269.53,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "273.438",
+          "landingCost": 273.438,
+          "sellingPrice": 350,
+          "mrp": 273.44,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "289.063",
+          "landingCost": 289.063,
+          "sellingPrice": 370,
+          "mrp": 289.06,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "289.062",
+          "landingCost": 289.062,
+          "sellingPrice": 355,
+          "mrp": 277.34,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "289.06",
+          "landingCost": 289.06,
+          "sellingPrice": 365,
+          "mrp": 285.16,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "289.061",
+          "landingCost": 289.061,
+          "sellingPrice": 350,
+          "mrp": 273.44,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "304.688",
+          "landingCost": 304.688,
+          "sellingPrice": 372,
+          "mrp": 290.63,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "280.469",
+          "landingCost": 280.469,
+          "sellingPrice": 342,
+          "mrp": 267.19,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "298.67",
+          "landingCost": 298.67,
+          "sellingPrice": 390,
+          "mrp": 304.69,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "316.405",
+          "landingCost": 316.405,
+          "sellingPrice": 362,
+          "mrp": 282.81,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "390.625",
+          "landingCost": 390.625,
+          "sellingPrice": 366,
+          "mrp": 285.94,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "331.25",
+          "landingCost": 331.25,
+          "sellingPrice": 302,
+          "mrp": 235.94,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "335.938",
+          "landingCost": 335.938,
+          "sellingPrice": 350,
+          "mrp": 273.44,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "300",
+          "landingCost": 300,
+          "sellingPrice": 283,
+          "mrp": 221.09,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "343.75",
+          "landingCost": 343.75,
+          "sellingPrice": 335,
+          "mrp": 261.72,
+          "openingStock": 0,
+          "stock": 0
+        },
         {
           "batchNo": "218.75",
           "landingCost": 218.75,
@@ -1150,6 +3528,62 @@
       "marginAmount": 17.88,
       "batches": [
         {
+          "batchNo": "376.19",
+          "landingCost": 376.19,
+          "sellingPrice": 465,
+          "mrp": 394.07,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "396.61",
+          "landingCost": 396.61,
+          "sellingPrice": 485,
+          "mrp": 411.02,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "401.69",
+          "landingCost": 401.69,
+          "sellingPrice": 485,
+          "mrp": 411.02,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "432.2",
+          "landingCost": 432.2,
+          "sellingPrice": 520,
+          "mrp": 440.68,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "384.889",
+          "landingCost": 384.889,
+          "sellingPrice": 465,
+          "mrp": 394.07,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "386.441",
+          "landingCost": 386.441,
+          "sellingPrice": 467,
+          "mrp": 395.76,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "409.373",
+          "landingCost": 409.373,
+          "sellingPrice": 495,
+          "mrp": 419.49,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
           "batchNo": "477.966",
           "landingCost": 477.966,
           "sellingPrice": 576,
@@ -1200,6 +3634,70 @@
       "marginPercent": 5.425838,
       "marginAmount": 17.01,
       "batches": [
+        {
+          "batchNo": "313.5",
+          "landingCost": 313.5,
+          "sellingPrice": 390,
+          "mrp": 330.51,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "330.51",
+          "landingCost": 330.51,
+          "sellingPrice": 410,
+          "mrp": 347.46,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "334.75",
+          "landingCost": 334.75,
+          "sellingPrice": 410,
+          "mrp": 347.46,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "351.69",
+          "landingCost": 351.69,
+          "sellingPrice": 425,
+          "mrp": 360.17,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "360.17",
+          "landingCost": 360.17,
+          "sellingPrice": 435,
+          "mrp": 368.64,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "320.742",
+          "landingCost": 320.742,
+          "sellingPrice": 388,
+          "mrp": 328.81,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "322.034",
+          "landingCost": 322.034,
+          "sellingPrice": 390,
+          "mrp": 330.51,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "341.144",
+          "landingCost": 341.144,
+          "sellingPrice": 415,
+          "mrp": 351.69,
+          "openingStock": 0,
+          "stock": 0
+        },
         {
           "batchNo": "398.305",
           "landingCost": 398.305,
@@ -1252,6 +3750,62 @@
       "marginAmount": 12.71,
       "batches": [
         {
+          "batchNo": "250",
+          "landingCost": 250,
+          "sellingPrice": 310,
+          "mrp": 262.71,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "264.41",
+          "landingCost": 264.41,
+          "sellingPrice": 320,
+          "mrp": 271.19,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "267.79",
+          "landingCost": 267.79,
+          "sellingPrice": 330,
+          "mrp": 279.66,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "288.14",
+          "landingCost": 288.14,
+          "sellingPrice": 347,
+          "mrp": 294.07,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "256.59",
+          "landingCost": 256.59,
+          "sellingPrice": 311,
+          "mrp": 263.56,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "257.627",
+          "landingCost": 257.627,
+          "sellingPrice": 313,
+          "mrp": 265.25,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "272.915",
+          "landingCost": 272.915,
+          "sellingPrice": 331,
+          "mrp": 280.51,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
           "batchNo": "318.644",
           "landingCost": 318.644,
           "sellingPrice": 388,
@@ -1302,6 +3856,14 @@
       "marginPercent": 12.59023,
       "marginAmount": 14.215,
       "batches": [
+        {
+          "batchNo": "112.91",
+          "landingCost": 112.91,
+          "sellingPrice": 150,
+          "mrp": 127.12,
+          "openingStock": 0,
+          "stock": 0
+        },
         {
           "batchNo": "107.12",
           "landingCost": 107.12,
@@ -1354,17 +3916,20 @@
       "marginAmount": 28.635,
       "batches": [
         {
+          "batchNo": "217.125",
+          "landingCost": 217.125,
+          "sellingPrice": 290,
+          "mrp": 245.76,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
           "batchNo": "212.3",
           "landingCost": 212.3,
-          "openingStock": 21,
-          "stock": 21,
-          "marginPercent": 7.776731,
-          "marginAmount": 16.51,
-          "gstExclRate": 212.3,
-          "gstInclRate": 270,
-          "mrp": 228.81,
           "sellingPrice": 270,
-          "costPrice": 212.3
+          "mrp": 228.81,
+          "openingStock": 21,
+          "stock": 21
         }
       ],
       "unloadingCharge": 0,
@@ -1409,6 +3974,14 @@
       "marginPercent": 46.37306,
       "marginAmount": 10.74,
       "batches": [
+        {
+          "batchNo": "23.16",
+          "landingCost": 23.16,
+          "sellingPrice": 40,
+          "mrp": 33.9,
+          "openingStock": 0,
+          "stock": 0
+        },
         {
           "batchNo": "23.64",
           "landingCost": 23.64,
@@ -1460,6 +4033,14 @@
       "marginPercent": 18.03443,
       "marginAmount": 16.185,
       "batches": [
+        {
+          "batchNo": "89.745",
+          "landingCost": 89.745,
+          "sellingPrice": 125,
+          "mrp": 105.93,
+          "openingStock": 0,
+          "stock": 0
+        },
         {
           "batchNo": "92.64",
           "landingCost": 92.64,
@@ -1569,6 +4150,62 @@
       "marginAmount": 15.5,
       "batches": [
         {
+          "batchNo": "297",
+          "landingCost": 297,
+          "sellingPrice": 400,
+          "mrp": 312.5,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "295",
+          "landingCost": 295,
+          "sellingPrice": 397,
+          "mrp": 310.16,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "299.1",
+          "landingCost": 299.1,
+          "sellingPrice": 395,
+          "mrp": 308.59,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "299.842",
+          "landingCost": 299.842,
+          "sellingPrice": 395,
+          "mrp": 308.59,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "299.84",
+          "landingCost": 299.84,
+          "sellingPrice": 378,
+          "mrp": 295.31,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "277.344",
+          "landingCost": 277.344,
+          "sellingPrice": 358,
+          "mrp": 279.69,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "246.09",
+          "landingCost": 246.09,
+          "sellingPrice": 326,
+          "mrp": 254.69,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
           "batchNo": "226.563",
           "landingCost": 226.563,
           "sellingPrice": 302,
@@ -1626,37 +4263,307 @@
       "marginAmount": 7.81700000000001,
       "batches": [
         {
+          "batchNo": "265.623",
+          "landingCost": 265.623,
+          "sellingPrice": 350,
+          "mrp": 273.44,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "273.44",
+          "landingCost": 273.44,
+          "sellingPrice": 360,
+          "mrp": 281.25,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "281.25",
+          "landingCost": 281.25,
+          "sellingPrice": 370,
+          "mrp": 289.06,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "277.34",
+          "landingCost": 277.34,
+          "sellingPrice": 365,
+          "mrp": 285.16,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "287.5",
+          "landingCost": 287.5,
+          "sellingPrice": 372,
+          "mrp": 290.63,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "289.063",
+          "landingCost": 289.063,
+          "sellingPrice": 379,
+          "mrp": 296.09,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "296.875",
+          "landingCost": 296.875,
+          "sellingPrice": 388,
+          "mrp": 303.13,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "269.53",
+          "landingCost": 269.53,
+          "sellingPrice": 354,
+          "mrp": 276.56,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "257.81",
+          "landingCost": 257.81,
+          "sellingPrice": 340,
+          "mrp": 265.63,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "250",
+          "landingCost": 250,
+          "sellingPrice": 330,
+          "mrp": 257.81,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "304.69",
+          "landingCost": 304.69,
+          "sellingPrice": 395,
+          "mrp": 308.59,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "289.06",
+          "landingCost": 289.06,
+          "sellingPrice": 381.52,
+          "mrp": 298.06,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "285.16",
+          "landingCost": 285.16,
+          "sellingPrice": 377,
+          "mrp": 294.53,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "365",
+          "landingCost": 365,
+          "sellingPrice": 477.5,
+          "mrp": 373.05,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "304.689",
+          "landingCost": 304.689,
+          "sellingPrice": 400,
+          "mrp": 312.5,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "332.03",
+          "landingCost": 332.03,
+          "sellingPrice": 435,
+          "mrp": 339.84,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "328.125",
+          "landingCost": 328.125,
+          "sellingPrice": 430,
+          "mrp": 335.94,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "343.75",
+          "landingCost": 343.75,
+          "sellingPrice": 451,
+          "mrp": 352.34,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "320.312",
+          "landingCost": 320.312,
+          "sellingPrice": 420,
+          "mrp": 328.13,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "316.405",
+          "landingCost": 316.405,
+          "sellingPrice": 417,
+          "mrp": 325.78,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "273.438",
+          "landingCost": 273.438,
+          "sellingPrice": 360,
+          "mrp": 281.25,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "269.531",
+          "landingCost": 269.531,
+          "sellingPrice": 356,
+          "mrp": 278.13,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "242.875",
+          "landingCost": 242.875,
+          "sellingPrice": 323,
+          "mrp": 252.34,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "242.188",
+          "landingCost": 242.188,
+          "sellingPrice": 322,
+          "mrp": 251.56,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "238.813",
+          "landingCost": 238.813,
+          "sellingPrice": 316,
+          "mrp": 246.88,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "238.281",
+          "landingCost": 238.281,
+          "sellingPrice": 316,
+          "mrp": 246.88,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "234.375",
+          "landingCost": 234.375,
+          "sellingPrice": 312,
+          "mrp": 243.75,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "253.906",
+          "landingCost": 253.906,
+          "sellingPrice": 337,
+          "mrp": 263.28,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "261.719",
+          "landingCost": 261.719,
+          "sellingPrice": 348,
+          "mrp": 271.88,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "265.625",
+          "landingCost": 265.625,
+          "sellingPrice": 352,
+          "mrp": 275,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "257.813",
+          "landingCost": 257.813,
+          "sellingPrice": 345,
+          "mrp": 269.53,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "254.237",
+          "landingCost": 254.237,
+          "sellingPrice": 312,
+          "mrp": 264.41,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "237.288",
+          "landingCost": 237.288,
+          "sellingPrice": 292,
+          "mrp": 247.46,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
           "batchNo": "245.763",
           "landingCost": 245.763,
-          "openingStock": -226,
-          "stock": -226,
-          "marginPercent": 4.136912,
-          "marginAmount": 10.167,
-          "gstExclRate": 245.763,
-          "gstInclRate": 302,
-          "mrp": 255.93,
           "sellingPrice": 302,
-          "costPrice": 245.763
+          "mrp": 255.93,
+          "openingStock": -226,
+          "stock": -226
+        },
+        {
+          "batchNo": "245.76",
+          "landingCost": 245.76,
+          "sellingPrice": 310,
+          "mrp": 262.71,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "266.949",
+          "landingCost": 266.949,
+          "sellingPrice": 327,
+          "mrp": 277.12,
+          "openingStock": 0,
+          "stock": 0
         },
         {
           "batchNo": "262.712",
           "landingCost": 262.712,
-          "openingStock": 85,
-          "stock": 85,
-          "marginPercent": 3.54685,
-          "marginAmount": 9.31799999999998,
-          "gstExclRate": 262.712,
-          "gstInclRate": 321,
-          "mrp": 272.03,
           "sellingPrice": 321,
-          "costPrice": 262.712
+          "mrp": 272.03,
+          "openingStock": 85,
+          "stock": 85
         },
         {
           "batchNo": "290",
-          "openingStock": 221,
           "landingCost": 290,
           "sellingPrice": 302,
           "mrp": 255.93,
+          "openingStock": 221,
           "stock": 221
         }
       ],
@@ -1709,17 +4616,604 @@
       "marginAmount": -76.563,
       "batches": [
         {
+          "batchNo": "320.31",
+          "landingCost": 320.31,
+          "sellingPrice": 312,
+          "mrp": 243.75,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "270",
+          "landingCost": 270,
+          "sellingPrice": 310,
+          "mrp": 242.19,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "275",
+          "landingCost": 275,
+          "sellingPrice": 318,
+          "mrp": 248.44,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "280",
+          "landingCost": 280,
+          "sellingPrice": 325,
+          "mrp": 253.91,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "285",
+          "landingCost": 285,
+          "sellingPrice": 333,
+          "mrp": 260.16,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "250.62",
+          "landingCost": 250.62,
+          "sellingPrice": 280,
+          "mrp": 218.75,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "266.25",
+          "landingCost": 266.25,
+          "sellingPrice": 309,
+          "mrp": 241.41,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "262.34",
+          "landingCost": 262.34,
+          "sellingPrice": 318,
+          "mrp": 248.44,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "258.44",
+          "landingCost": 258.44,
+          "sellingPrice": 314,
+          "mrp": 245.31,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "268.44",
+          "landingCost": 268.44,
+          "sellingPrice": 314,
+          "mrp": 245.31,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "278.44",
+          "landingCost": 278.44,
+          "sellingPrice": 335,
+          "mrp": 261.72,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "261.09",
+          "landingCost": 261.09,
+          "sellingPrice": 315,
+          "mrp": 246.09,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "276.72",
+          "landingCost": 276.72,
+          "sellingPrice": 325,
+          "mrp": 253.91,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "280.63",
+          "landingCost": 280.63,
+          "sellingPrice": 340,
+          "mrp": 265.63,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "284.53",
+          "landingCost": 284.53,
+          "sellingPrice": 330,
+          "mrp": 257.81,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "280.62",
+          "landingCost": 280.62,
+          "sellingPrice": 330,
+          "mrp": 257.81,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "282.81",
+          "landingCost": 282.81,
+          "sellingPrice": 327,
+          "mrp": 255.47,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "271.25",
+          "landingCost": 271.25,
+          "sellingPrice": 320,
+          "mrp": 250,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "275.16",
+          "landingCost": 275.16,
+          "sellingPrice": 333,
+          "mrp": 260.16,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "262.5",
+          "landingCost": 262.5,
+          "sellingPrice": 325,
+          "mrp": 253.91,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "258.59",
+          "landingCost": 258.59,
+          "sellingPrice": 323,
+          "mrp": 252.34,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "285.94",
+          "landingCost": 285.94,
+          "sellingPrice": 332,
+          "mrp": 259.38,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "301.56",
+          "landingCost": 301.56,
+          "sellingPrice": 360.96,
+          "mrp": 282,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "305.47",
+          "landingCost": 305.47,
+          "sellingPrice": 359,
+          "mrp": 280.47,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "298.44",
+          "landingCost": 298.44,
+          "sellingPrice": 355,
+          "mrp": 277.34,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "290.63",
+          "landingCost": 290.63,
+          "sellingPrice": 341,
+          "mrp": 266.41,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "271.09",
+          "landingCost": 271.09,
+          "sellingPrice": 325,
+          "mrp": 253.91,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "286.72",
+          "landingCost": 286.72,
+          "sellingPrice": 333,
+          "mrp": 260.16,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "247.656",
+          "landingCost": 247.656,
+          "sellingPrice": 304,
+          "mrp": 237.5,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "271.094",
+          "landingCost": 271.094,
+          "sellingPrice": 300,
+          "mrp": 234.38,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "259.375",
+          "landingCost": 259.375,
+          "sellingPrice": 320,
+          "mrp": 250,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "294.531",
+          "landingCost": 294.531,
+          "sellingPrice": 352,
+          "mrp": 275,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "302.343",
+          "landingCost": 302.343,
+          "sellingPrice": 362,
+          "mrp": 282.81,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "302.344",
+          "landingCost": 302.344,
+          "sellingPrice": 350,
+          "mrp": 273.44,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "298.438",
+          "landingCost": 298.438,
+          "sellingPrice": 345,
+          "mrp": 269.53,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "303.124",
+          "landingCost": 303.124,
+          "sellingPrice": 355,
+          "mrp": 277.34,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "303.125",
+          "landingCost": 303.125,
+          "sellingPrice": 360,
+          "mrp": 281.25,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "308.594",
+          "landingCost": 308.594,
+          "sellingPrice": 371,
+          "mrp": 289.84,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "308.593",
+          "landingCost": 308.593,
+          "sellingPrice": 348,
+          "mrp": 271.88,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "285.156",
+          "landingCost": 285.156,
+          "sellingPrice": 342.5,
+          "mrp": 267.58,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "285.155",
+          "landingCost": 285.155,
+          "sellingPrice": 322,
+          "mrp": 251.56,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "289.062",
+          "landingCost": 289.062,
+          "sellingPrice": 325,
+          "mrp": 253.91,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "292.969",
+          "landingCost": 292.969,
+          "sellingPrice": 325,
+          "mrp": 253.91,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "296.875",
+          "landingCost": 296.875,
+          "sellingPrice": 335,
+          "mrp": 261.72,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "285.16",
+          "landingCost": 285.16,
+          "sellingPrice": 352,
+          "mrp": 275,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "300.781",
+          "landingCost": 300.781,
+          "sellingPrice": 350,
+          "mrp": 273.44,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "304.687",
+          "landingCost": 304.687,
+          "sellingPrice": 362,
+          "mrp": 282.81,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "312.5",
+          "landingCost": 312.5,
+          "sellingPrice": 357.5,
+          "mrp": 279.3,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "316.407",
+          "landingCost": 316.407,
+          "sellingPrice": 370,
+          "mrp": 289.06,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "304.688",
+          "landingCost": 304.688,
+          "sellingPrice": 368,
+          "mrp": 287.5,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "304.686",
+          "landingCost": 304.686,
+          "sellingPrice": 355,
+          "mrp": 277.34,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "304.69",
+          "landingCost": 304.69,
+          "sellingPrice": 355,
+          "mrp": 277.34,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "335.938",
+          "landingCost": 335.938,
+          "sellingPrice": 374,
+          "mrp": 292.19,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "343.75",
+          "landingCost": 343.75,
+          "sellingPrice": 378,
+          "mrp": 295.31,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "328.125",
+          "landingCost": 328.125,
+          "sellingPrice": 371,
+          "mrp": 289.84,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "289.063",
+          "landingCost": 289.063,
+          "sellingPrice": 350,
+          "mrp": 273.44,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "320.313",
+          "landingCost": 320.313,
+          "sellingPrice": 384,
+          "mrp": 300,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "289.844",
+          "landingCost": 289.844,
+          "sellingPrice": 272,
+          "mrp": 212.5,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "305.469",
+          "landingCost": 305.469,
+          "sellingPrice": 340,
+          "mrp": 265.63,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "305.468",
+          "landingCost": 305.468,
+          "sellingPrice": 352,
+          "mrp": 275,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "297.656",
+          "landingCost": 297.656,
+          "sellingPrice": 335,
+          "mrp": 261.72,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "313.281",
+          "landingCost": 313.281,
+          "sellingPrice": 360,
+          "mrp": 281.25,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "317.188",
+          "landingCost": 317.188,
+          "sellingPrice": 362,
+          "mrp": 282.81,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "328.906",
+          "landingCost": 328.906,
+          "sellingPrice": 377,
+          "mrp": 294.53,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "286.719",
+          "landingCost": 286.719,
+          "sellingPrice": 342,
+          "mrp": 267.19,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "281.25",
+          "landingCost": 281.25,
+          "sellingPrice": 344,
+          "mrp": 268.75,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "282.813",
+          "landingCost": 282.813,
+          "sellingPrice": 342,
+          "mrp": 267.19,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "278.91",
+          "landingCost": 278.91,
+          "sellingPrice": 315,
+          "mrp": 246.09,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "278.906",
+          "landingCost": 278.906,
+          "sellingPrice": 311,
+          "mrp": 242.97,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "263.281",
+          "landingCost": 263.281,
+          "sellingPrice": 305,
+          "mrp": 238.28,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "255.469",
+          "landingCost": 255.469,
+          "sellingPrice": 308,
+          "mrp": 240.63,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "306.25",
+          "landingCost": 306.25,
+          "sellingPrice": 340,
+          "mrp": 265.63,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
           "batchNo": "271.186",
           "landingCost": 271.186,
-          "openingStock": 8,
-          "stock": 8,
-          "marginPercent": -8.435538,
-          "marginAmount": -22.876,
-          "gstExclRate": 271.186,
-          "gstInclRate": 293.01,
-          "mrp": 248.31,
           "sellingPrice": 293.01,
-          "costPrice": 271.186
+          "mrp": 248.31,
+          "openingStock": 8,
+          "stock": 8
+        },
+        {
+          "batchNo": "271.187",
+          "landingCost": 271.187,
+          "sellingPrice": 288,
+          "mrp": 244.07,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "271.18571428",
+          "landingCost": 271.18571428,
+          "sellingPrice": 288,
+          "mrp": 244.07,
+          "openingStock": 0,
+          "stock": 0
         }
       ],
       "unloadingCharge": 12,
@@ -1770,6 +5264,14 @@
       "marginPercent": 3.267694,
       "marginAmount": 33.52,
       "batches": [
+        {
+          "batchNo": "1025.8",
+          "landingCost": 1025.8,
+          "sellingPrice": 1250,
+          "mrp": 1059.32,
+          "openingStock": 0,
+          "stock": 0
+        },
         {
           "batchNo": "1013.25",
           "landingCost": 1013.25,
@@ -1822,6 +5324,46 @@
       "marginAmount": 16.4399999999999,
       "batches": [
         {
+          "batchNo": "521.7",
+          "landingCost": 521.7,
+          "sellingPrice": 635,
+          "mrp": 538.14,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "527.8",
+          "landingCost": 527.8,
+          "sellingPrice": 640,
+          "mrp": 542.37,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "564.41",
+          "landingCost": 564.41,
+          "sellingPrice": 680,
+          "mrp": 576.27,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "651.6720864",
+          "landingCost": 651.6720864,
+          "sellingPrice": 785,
+          "mrp": 665.25,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "552.264",
+          "landingCost": 552.264,
+          "sellingPrice": 670,
+          "mrp": 567.8,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
           "batchNo": "634.576",
           "landingCost": 634.576,
           "sellingPrice": 764,
@@ -1872,6 +5414,38 @@
       "marginPercent": 3.260507,
       "marginAmount": 7.8199999999,
       "batches": [
+        {
+          "batchNo": "239.84",
+          "landingCost": 239.84,
+          "sellingPrice": 317,
+          "mrp": 247.66,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "242.19",
+          "landingCost": 242.19,
+          "sellingPrice": 320,
+          "mrp": 250,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "238.28",
+          "landingCost": 238.28,
+          "sellingPrice": 314,
+          "mrp": 245.31,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "234.38",
+          "landingCost": 234.38,
+          "sellingPrice": 308,
+          "mrp": 240.63,
+          "openingStock": 0,
+          "stock": 0
+        },
         {
           "batchNo": "236.72",
           "landingCost": 236.72,
@@ -1930,24 +5504,51 @@
       "marginAmount": 7.81,
       "batches": [
         {
+          "batchNo": "199.22",
+          "landingCost": 199.22,
+          "sellingPrice": 265,
+          "mrp": 207.03,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "203.13",
+          "landingCost": 203.13,
+          "sellingPrice": 270,
+          "mrp": 210.94,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "234.38",
+          "landingCost": 234.38,
+          "sellingPrice": 307,
+          "mrp": 239.84,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "222.66",
+          "landingCost": 222.66,
+          "sellingPrice": 294,
+          "mrp": 229.69,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
           "batchNo": "204.688",
           "landingCost": 204.688,
-          "openingStock": -54,
-          "stock": -54,
-          "marginPercent": 4.197608,
-          "marginAmount": 8.59200000000001,
-          "gstExclRate": 204.688,
-          "gstInclRate": 273,
-          "mrp": 213.28,
           "sellingPrice": 273,
-          "costPrice": 204.688
+          "mrp": 213.28,
+          "openingStock": -54,
+          "stock": -54
         },
         {
           "batchNo": "280",
-          "openingStock": 185,
           "landingCost": 280,
           "sellingPrice": 290,
           "mrp": 213.28,
+          "openingStock": 185,
           "stock": 185
         }
       ],
@@ -2002,15 +5603,10 @@
         {
           "batchNo": "152.54",
           "landingCost": 152.54,
-          "openingStock": 3,
-          "stock": 3,
-          "marginPercent": 5.559197,
-          "marginAmount": 8.48000000000002,
-          "gstExclRate": 152.54,
-          "gstInclRate": 190,
-          "mrp": 161.02,
           "sellingPrice": 190,
-          "costPrice": 152.54
+          "mrp": 161.02,
+          "openingStock": 3,
+          "stock": 3
         }
       ],
       "unloadingCharge": 0,
@@ -2158,6 +5754,30 @@
       "marginAmount": 7.62,
       "batches": [
         {
+          "batchNo": "146.29",
+          "landingCost": 146.29,
+          "sellingPrice": 197,
+          "mrp": 153.91,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "153.31",
+          "landingCost": 153.31,
+          "sellingPrice": 206,
+          "mrp": 160.94,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "154.38",
+          "landingCost": 154.38,
+          "sellingPrice": 207,
+          "mrp": 161.72,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
           "batchNo": "203.125",
           "landingCost": 203.125,
           "sellingPrice": 270,
@@ -2215,17 +5835,228 @@
       "marginAmount": 2,
       "batches": [
         {
+          "batchNo": "58",
+          "landingCost": 58,
+          "sellingPrice": 63,
+          "mrp": 60,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "55.24",
+          "landingCost": 55.24,
+          "sellingPrice": 59.2,
+          "mrp": 56.38,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "52.7",
+          "landingCost": 52.7,
+          "sellingPrice": 57,
+          "mrp": 54.29,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "46.52",
+          "landingCost": 46.52,
+          "sellingPrice": 49.82,
+          "mrp": 47.45,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "75.1",
+          "landingCost": 75.1,
+          "sellingPrice": 80.45,
+          "mrp": 76.62,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "46.85",
+          "landingCost": 46.85,
+          "sellingPrice": 50.3,
+          "mrp": 47.9,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "52",
+          "landingCost": 52,
+          "sellingPrice": 56,
+          "mrp": 53.33,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "45",
+          "landingCost": 45,
+          "sellingPrice": 48.5,
+          "mrp": 46.19,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "62",
+          "landingCost": 62,
+          "sellingPrice": 66.4,
+          "mrp": 63.24,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "41",
+          "landingCost": 41,
+          "sellingPrice": 44.5,
+          "mrp": 42.38,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "39",
+          "landingCost": 39,
+          "sellingPrice": 42,
+          "mrp": 40,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "40",
+          "landingCost": 40,
+          "sellingPrice": 43.5,
+          "mrp": 41.43,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "36.48",
+          "landingCost": 36.48,
+          "sellingPrice": 43.2,
+          "mrp": 38.57,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "54.7",
+          "landingCost": 54.7,
+          "sellingPrice": 64.53,
+          "mrp": 57.62,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "53.574",
+          "landingCost": 53.574,
+          "sellingPrice": 63,
+          "mrp": 56.25,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "52.232",
+          "landingCost": 52.232,
+          "sellingPrice": 60,
+          "mrp": 53.57,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "51.3",
+          "landingCost": 51.3,
+          "sellingPrice": 60,
+          "mrp": 53.57,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "50.561",
+          "landingCost": 50.561,
+          "sellingPrice": 58.4,
+          "mrp": 52.14,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "56.625",
+          "landingCost": 56.625,
+          "sellingPrice": 65.61,
+          "mrp": 58.58,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "53.11",
+          "landingCost": 53.11,
+          "sellingPrice": 61.5,
+          "mrp": 54.91,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "51.429",
+          "landingCost": 51.429,
+          "sellingPrice": 59.5,
+          "mrp": 53.13,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "49.554",
+          "landingCost": 49.554,
+          "sellingPrice": 57.5,
+          "mrp": 51.34,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "48.881",
+          "landingCost": 48.881,
+          "sellingPrice": 57,
+          "mrp": 50.89,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "47.723",
+          "landingCost": 47.723,
+          "sellingPrice": 57,
+          "mrp": 50.89,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "48.214",
+          "landingCost": 48.214,
+          "sellingPrice": 56,
+          "mrp": 50,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "51.334",
+          "landingCost": 51.334,
+          "sellingPrice": 60,
+          "mrp": 53.57,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
           "batchNo": "76.79",
           "landingCost": 76.79,
-          "openingStock": 220,
-          "stock": 220,
-          "marginPercent": 3.477015,
-          "marginAmount": 2.66999999999999,
-          "gstExclRate": 76.79,
-          "gstInclRate": 89,
-          "mrp": 79.46,
           "sellingPrice": 89,
-          "costPrice": 76.79
+          "mrp": 79.46,
+          "openingStock": 220,
+          "stock": 220
+        },
+        {
+          "batchNo": "81.76",
+          "landingCost": 81.76,
+          "sellingPrice": 85,
+          "mrp": 75.89,
+          "openingStock": 0,
+          "stock": 0
         }
       ],
       "unloadingCharge": 0,
@@ -2321,6 +6152,30 @@
       "marginPercent": 3.314133,
       "marginAmount": 8.596,
       "batches": [
+        {
+          "batchNo": "259.374",
+          "landingCost": 259.374,
+          "sellingPrice": 343,
+          "mrp": 267.97,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "247.396",
+          "landingCost": 247.396,
+          "sellingPrice": 325,
+          "mrp": 253.91,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "265.63",
+          "landingCost": 265.63,
+          "sellingPrice": 352,
+          "mrp": 275,
+          "openingStock": 0,
+          "stock": 0
+        },
         {
           "batchNo": "257.81",
           "landingCost": 257.81,
@@ -2480,6 +6335,78 @@
       "marginPercent": 3.033242,
       "marginAmount": 7.81999999999999,
       "batches": [
+        {
+          "batchNo": "257.81",
+          "landingCost": 257.81,
+          "sellingPrice": 340,
+          "mrp": 265.63,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "304.688",
+          "landingCost": 304.688,
+          "sellingPrice": 400,
+          "mrp": 312.5,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "296.875",
+          "landingCost": 296.875,
+          "sellingPrice": 385,
+          "mrp": 300.78,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "298.438",
+          "landingCost": 298.438,
+          "sellingPrice": 391,
+          "mrp": 305.47,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "254",
+          "landingCost": 254,
+          "sellingPrice": 333,
+          "mrp": 260.16,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "264.84",
+          "landingCost": 264.84,
+          "sellingPrice": 347,
+          "mrp": 271.09,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "295.31",
+          "landingCost": 295.31,
+          "sellingPrice": 388,
+          "mrp": 303.13,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "300.78",
+          "landingCost": 300.78,
+          "sellingPrice": 395,
+          "mrp": 308.59,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "292.97",
+          "landingCost": 292.97,
+          "sellingPrice": 385,
+          "mrp": 300.78,
+          "openingStock": 0,
+          "stock": 0
+        },
         {
           "batchNo": "264.844",
           "landingCost": 264.844,
@@ -2795,15 +6722,26 @@
         {
           "batchNo": "705.72",
           "landingCost": 705.72,
-          "openingStock": 6,
-          "stock": 6,
-          "marginPercent": 2.071643,
-          "marginAmount": 14.62,
-          "gstExclRate": 705.72,
-          "gstInclRate": 850,
-          "mrp": 720.34,
           "sellingPrice": 850,
-          "costPrice": 705.72
+          "mrp": 720.34,
+          "openingStock": 6,
+          "stock": 6
+        },
+        {
+          "batchNo": "741.645",
+          "landingCost": 741.645,
+          "sellingPrice": 893,
+          "mrp": 756.78,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "812.353",
+          "landingCost": 812.353,
+          "sellingPrice": 994,
+          "mrp": 842.37,
+          "openingStock": 0,
+          "stock": 0
         }
       ],
       "unloadingCharge": 0,
@@ -2849,11 +6787,51 @@
       "marginAmount": -121.528,
       "batches": [
         {
+          "batchNo": "891.018",
+          "landingCost": 891.018,
+          "sellingPrice": 908,
+          "mrp": 769.49,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "1258.5",
+          "landingCost": 1258.5,
+          "sellingPrice": 1510,
+          "mrp": 1279.66,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "1323.833",
+          "landingCost": 1323.833,
+          "sellingPrice": 1594,
+          "mrp": 1350.85,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "1450.537",
+          "landingCost": 1450.537,
+          "sellingPrice": 1773,
+          "mrp": 1502.54,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "1327.693",
+          "landingCost": 1327.693,
+          "sellingPrice": 1594,
+          "mrp": 1350.85,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
           "batchNo": "1319.973",
-          "openingStock": 1,
           "landingCost": 1319.973,
           "sellingPrice": 1594,
           "mrp": 1350.85,
+          "openingStock": 1,
           "stock": 1
         }
       ],
@@ -2902,28 +6880,26 @@
         {
           "batchNo": "451.728",
           "landingCost": 451.728,
-          "openingStock": 10,
-          "stock": 10,
-          "marginPercent": -13.51433,
-          "marginAmount": -61.048,
-          "gstExclRate": 451.728,
-          "gstInclRate": 461,
-          "mrp": 390.68,
           "sellingPrice": 461,
-          "costPrice": 451.728
+          "mrp": 390.68,
+          "openingStock": 10,
+          "stock": 10
         },
         {
           "batchNo": "396.125",
           "landingCost": 396.125,
-          "openingStock": 4,
-          "stock": 4,
-          "marginPercent": 2.048596,
-          "marginAmount": 8.11500000000001,
-          "gstExclRate": 396.125,
-          "gstInclRate": 477,
-          "mrp": 404.24,
           "sellingPrice": 477,
-          "costPrice": 396.125
+          "mrp": 404.24,
+          "openingStock": 4,
+          "stock": 4
+        },
+        {
+          "batchNo": "433.255",
+          "landingCost": 433.255,
+          "sellingPrice": 530,
+          "mrp": 449.15,
+          "openingStock": 0,
+          "stock": 0
         }
       ],
       "unloadingCharge": 0,
@@ -3022,15 +6998,10 @@
         {
           "batchNo": "438.51",
           "landingCost": 438.51,
-          "openingStock": 1,
-          "stock": 1,
-          "marginPercent": 1.847164,
-          "marginAmount": 8.1,
-          "gstExclRate": 438.51,
-          "gstInclRate": 527,
-          "mrp": 446.61,
           "sellingPrice": 527,
-          "costPrice": 438.51
+          "mrp": 446.61,
+          "openingStock": 1,
+          "stock": 1
         }
       ],
       "unloadingCharge": 0,
@@ -3075,6 +7046,14 @@
       "marginPercent": 2.560033,
       "marginAmount": 5,
       "batches": [
+        {
+          "batchNo": "195.31",
+          "landingCost": 195.31,
+          "sellingPrice": 256.4,
+          "mrp": 200.31,
+          "openingStock": 0,
+          "stock": 0
+        },
         {
           "batchNo": "199.22",
           "landingCost": 199.22,
@@ -3135,28 +7114,18 @@
         {
           "batchNo": "290.68",
           "landingCost": 290.68,
-          "openingStock": 4,
-          "stock": 4,
-          "marginPercent": 0,
-          "marginAmount": 0,
-          "gstExclRate": 290.68,
-          "gstInclRate": 343,
-          "mrp": 290.68,
           "sellingPrice": 343,
-          "costPrice": 290.68
+          "mrp": 290.68,
+          "openingStock": 4,
+          "stock": 4
         },
         {
           "batchNo": "309.02",
           "landingCost": 309.02,
-          "openingStock": 4,
-          "stock": 4,
-          "marginPercent": 4.210083,
-          "marginAmount": 13.01,
-          "gstExclRate": 309.02,
-          "gstInclRate": 380,
-          "mrp": 322.03,
           "sellingPrice": 380,
-          "costPrice": 309.02
+          "mrp": 322.03,
+          "openingStock": 4,
+          "stock": 4
         }
       ],
       "unloadingCharge": 0,
@@ -3201,6 +7170,22 @@
       "marginPercent": 2.039267,
       "marginAmount": 1.88,
       "batches": [
+        {
+          "batchNo": "92.19",
+          "landingCost": 92.19,
+          "sellingPrice": 111,
+          "mrp": 94.07,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "93",
+          "landingCost": 93,
+          "sellingPrice": 112,
+          "mrp": 94.92,
+          "openingStock": 0,
+          "stock": 0
+        },
         {
           "batchNo": "101.323",
           "landingCost": 101.323,
@@ -3255,15 +7240,10 @@
         {
           "batchNo": "713.56",
           "landingCost": 713.56,
-          "openingStock": 2,
-          "stock": 2,
-          "marginPercent": 2.137171,
-          "marginAmount": 15.25,
-          "gstExclRate": 713.56,
-          "gstInclRate": 860,
-          "mrp": 728.81,
           "sellingPrice": 860,
-          "costPrice": 713.56
+          "mrp": 728.81,
+          "openingStock": 2,
+          "stock": 2
         }
       ],
       "unloadingCharge": 0,
@@ -3362,15 +7342,10 @@
         {
           "batchNo": "109.32",
           "landingCost": 109.32,
-          "openingStock": 18,
-          "stock": 18,
-          "marginPercent": 4.656055,
-          "marginAmount": 5.09,
-          "gstExclRate": 109.32,
-          "gstInclRate": 135,
-          "mrp": 114.41,
           "sellingPrice": 135,
-          "costPrice": 109.32
+          "mrp": 114.41,
+          "openingStock": 18,
+          "stock": 18
         }
       ],
       "unloadingCharge": 0,
@@ -3418,15 +7393,10 @@
         {
           "batchNo": "52.54",
           "landingCost": 52.54,
-          "openingStock": 37,
-          "stock": 37,
-          "marginPercent": 4.834412,
-          "marginAmount": 2.54,
-          "gstExclRate": 52.54,
-          "gstInclRate": 65,
-          "mrp": 55.08,
           "sellingPrice": 65,
-          "costPrice": 52.54
+          "mrp": 55.08,
+          "openingStock": 37,
+          "stock": 37
         }
       ],
       "unloadingCharge": 0,
@@ -3472,7 +7442,7 @@
       "marginAmount": 0,
       "batches": [
         {
-          "batchNo": "0",
+          "batchNo": "Standard",
           "landingCost": 0,
           "sellingPrice": 0,
           "mrp": 0,
@@ -3580,6 +7550,22 @@
       "marginAmount": 7.02999999999997,
       "batches": [
         {
+          "batchNo": "250",
+          "landingCost": 250,
+          "sellingPrice": 329,
+          "mrp": 257.03,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "261.72",
+          "landingCost": 261.72,
+          "sellingPrice": 345,
+          "mrp": 269.53,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
           "batchNo": "265.63",
           "landingCost": 265.63,
           "sellingPrice": 352,
@@ -3639,15 +7625,10 @@
         {
           "batchNo": "1742.57",
           "landingCost": 1742.57,
-          "openingStock": 1,
-          "stock": 1,
-          "marginPercent": 3.58723,
-          "marginAmount": 62.51,
-          "gstExclRate": 1742.57,
-          "gstInclRate": 2130,
-          "mrp": 1805.08,
           "sellingPrice": 2130,
-          "costPrice": 1742.57
+          "mrp": 1805.08,
+          "openingStock": 1,
+          "stock": 1
         }
       ],
       "unloadingCharge": 0,
@@ -3695,15 +7676,10 @@
         {
           "batchNo": "265.152",
           "landingCost": 265.152,
-          "openingStock": 6,
-          "stock": 6,
-          "marginPercent": 3.872496,
-          "marginAmount": 10.268,
-          "gstExclRate": 265.152,
-          "gstInclRate": 325,
-          "mrp": 275.42,
           "sellingPrice": 325,
-          "costPrice": 265.152
+          "mrp": 275.42,
+          "openingStock": 6,
+          "stock": 6
         }
       ],
       "unloadingCharge": 0,
@@ -3751,15 +7727,10 @@
         {
           "batchNo": "115.994",
           "landingCost": 115.994,
-          "openingStock": 14,
-          "stock": 14,
-          "marginPercent": 3.746746,
-          "marginAmount": 4.346,
-          "gstExclRate": 115.994,
-          "gstInclRate": 142,
-          "mrp": 120.34,
           "sellingPrice": 142,
-          "costPrice": 115.994
+          "mrp": 120.34,
+          "openingStock": 14,
+          "stock": 14
         }
       ],
       "unloadingCharge": 0,
@@ -3856,43 +7827,156 @@
       "marginAmount": 1.3382265939116,
       "batches": [
         {
+          "batchNo": "37.0517734060884",
+          "landingCost": 37.0517734060884,
+          "sellingPrice": 43,
+          "mrp": 38.39,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "36.606",
+          "landingCost": 36.606,
+          "sellingPrice": 42.5,
+          "mrp": 37.95,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "35.713",
+          "landingCost": 35.713,
+          "sellingPrice": 42,
+          "mrp": 37.5,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "53.57",
+          "landingCost": 53.57,
+          "sellingPrice": 63,
+          "mrp": 56.25,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "34.821",
+          "landingCost": 34.821,
+          "sellingPrice": 41,
+          "mrp": 36.61,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "34.2",
+          "landingCost": 34.2,
+          "sellingPrice": 39,
+          "mrp": 34.82,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "34.197",
+          "landingCost": 34.197,
+          "sellingPrice": 39.7,
+          "mrp": 35.45,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "33.707",
+          "landingCost": 33.707,
+          "sellingPrice": 38.9,
+          "mrp": 34.73,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "35.401",
+          "landingCost": 35.401,
+          "sellingPrice": 41.5,
+          "mrp": 37.05,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "35.4",
+          "landingCost": 35.4,
+          "sellingPrice": 41,
+          "mrp": 36.61,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "34.286",
+          "landingCost": 34.286,
+          "sellingPrice": 39.5,
+          "mrp": 35.27,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "33.036",
+          "landingCost": 33.036,
+          "sellingPrice": 38.5,
+          "mrp": 34.38,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "32.588",
+          "landingCost": 32.588,
+          "sellingPrice": 38,
+          "mrp": 33.93,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "31.813",
+          "landingCost": 31.813,
+          "sellingPrice": 38,
+          "mrp": 33.93,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "32.143",
+          "landingCost": 32.143,
+          "sellingPrice": 38,
+          "mrp": 33.93,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
           "batchNo": "34.198",
           "landingCost": 34.198,
-          "openingStock": -202,
-          "stock": -202,
-          "marginPercent": 5.737178,
-          "marginAmount": 1.962,
-          "gstExclRate": 34.198,
-          "gstInclRate": 40.5,
-          "mrp": 36.16,
           "sellingPrice": 40.5,
-          "costPrice": 34.198
+          "mrp": 36.16,
+          "openingStock": -202,
+          "stock": -202
+        },
+        {
+          "batchNo": "63.39",
+          "landingCost": 63.39,
+          "sellingPrice": 73,
+          "mrp": 65.18,
+          "openingStock": 0,
+          "stock": 0
         },
         {
           "batchNo": "50",
           "landingCost": 50,
-          "openingStock": 688,
-          "stock": 688,
-          "marginPercent": 4.46,
-          "marginAmount": 2.23,
-          "gstExclRate": 50,
-          "gstInclRate": 58.5,
-          "mrp": 52.23,
           "sellingPrice": 58.5,
-          "costPrice": 50
+          "mrp": 52.23,
+          "openingStock": 688,
+          "stock": 688
         },
         {
           "batchNo": "54.88",
           "landingCost": 54.88,
-          "openingStock": 277,
-          "stock": 277,
-          "marginPercent": -7.270408,
-          "marginAmount": -3.99,
-          "gstExclRate": 54.88,
-          "gstInclRate": 57,
-          "mrp": 50.89,
           "sellingPrice": 57,
-          "costPrice": 54.88
+          "mrp": 50.89,
+          "openingStock": 277,
+          "stock": 277
         }
       ],
       "unloadingCharge": 0,
@@ -3946,22 +8030,97 @@
         {
           "batchNo": "63.39",
           "landingCost": 63.39,
-          "openingStock": 77,
-          "stock": 77,
-          "marginPercent": -25.351,
-          "marginAmount": -16.07,
-          "gstExclRate": 63.39,
-          "gstInclRate": 53,
-          "mrp": 47.32,
           "sellingPrice": 53,
-          "costPrice": 63.39
+          "mrp": 47.32,
+          "openingStock": 77,
+          "stock": 77
+        },
+        {
+          "batchNo": "44.644",
+          "landingCost": 44.644,
+          "sellingPrice": 51.5,
+          "mrp": 45.98,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "43.751",
+          "landingCost": 43.751,
+          "sellingPrice": 51,
+          "mrp": 45.54,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "47.19",
+          "landingCost": 47.19,
+          "sellingPrice": 54.92,
+          "mrp": 49.04,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "42.134",
+          "landingCost": 42.134,
+          "sellingPrice": 49,
+          "mrp": 43.75,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "44.25",
+          "landingCost": 44.25,
+          "sellingPrice": 51.5,
+          "mrp": 45.98,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "42.857",
+          "landingCost": 42.857,
+          "sellingPrice": 50,
+          "mrp": 44.64,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "41.295",
+          "landingCost": 41.295,
+          "sellingPrice": 48,
+          "mrp": 42.86,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "39.768",
+          "landingCost": 39.768,
+          "sellingPrice": 50,
+          "mrp": 44.64,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "40.179",
+          "landingCost": 40.179,
+          "sellingPrice": 48,
+          "mrp": 42.86,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "42.76",
+          "landingCost": 42.76,
+          "sellingPrice": 51,
+          "mrp": 45.54,
+          "openingStock": 0,
+          "stock": 0
         },
         {
           "batchNo": "42.75",
-          "openingStock": -9,
           "landingCost": 42.75,
           "sellingPrice": 51,
           "mrp": 45.54,
+          "openingStock": -9,
           "stock": -9
         }
       ],
@@ -4061,28 +8220,18 @@
         {
           "batchNo": "169.49",
           "landingCost": 169.49,
-          "openingStock": 30,
-          "stock": 30,
-          "marginPercent": 3.003127,
-          "marginAmount": 5.09,
-          "gstExclRate": 169.49,
-          "gstInclRate": 206,
-          "mrp": 174.58,
           "sellingPrice": 206,
-          "costPrice": 169.49
+          "mrp": 174.58,
+          "openingStock": 30,
+          "stock": 30
         },
         {
           "batchNo": "135.593",
           "landingCost": 135.593,
-          "openingStock": 200,
-          "stock": 200,
-          "marginPercent": 6.251798,
-          "marginAmount": 8.477,
-          "gstExclRate": 135.593,
-          "gstInclRate": 170,
-          "mrp": 144.07,
           "sellingPrice": 170,
-          "costPrice": 135.593
+          "mrp": 144.07,
+          "openingStock": 200,
+          "stock": 200
         }
       ],
       "unloadingCharge": 0,
@@ -4293,56 +8442,76 @@
       "marginAmount": 1.78800000000001,
       "batches": [
         {
+          "batchNo": "69.642",
+          "landingCost": 69.642,
+          "sellingPrice": 80,
+          "mrp": 71.43,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
           "batchNo": "68.387",
           "landingCost": 68.387,
-          "openingStock": 156,
-          "stock": 156,
-          "marginPercent": 2.490239,
-          "marginAmount": 1.703,
-          "gstExclRate": 68.387,
-          "gstInclRate": 78.5,
-          "mrp": 70.09,
           "sellingPrice": 78.5,
-          "costPrice": 68.387
+          "mrp": 70.09,
+          "openingStock": 156,
+          "stock": 156
+        },
+        {
+          "batchNo": "67.414",
+          "landingCost": 67.414,
+          "sellingPrice": 77.45,
+          "mrp": 69.15,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "66.071",
+          "landingCost": 66.071,
+          "sellingPrice": 76,
+          "mrp": 67.86,
+          "openingStock": 0,
+          "stock": 0
+        },
+        {
+          "batchNo": "63.625",
+          "landingCost": 63.625,
+          "sellingPrice": 75,
+          "mrp": 66.96,
+          "openingStock": 0,
+          "stock": 0
         },
         {
           "batchNo": "64.286",
           "landingCost": 64.286,
-          "openingStock": 48,
-          "stock": 48,
-          "marginPercent": 4.159537,
-          "marginAmount": 2.67399999999999,
-          "gstExclRate": 64.286,
-          "gstInclRate": 75,
-          "mrp": 66.96,
           "sellingPrice": 75,
-          "costPrice": 64.286
+          "mrp": 66.96,
+          "openingStock": 48,
+          "stock": 48
+        },
+        {
+          "batchNo": "76.79",
+          "landingCost": 76.79,
+          "sellingPrice": 89,
+          "mrp": 79.46,
+          "openingStock": 0,
+          "stock": 0
         },
         {
           "batchNo": "101.78",
           "landingCost": 101.78,
-          "openingStock": 110,
-          "stock": 110,
-          "marginPercent": 3.51739,
-          "marginAmount": 3.58,
-          "gstExclRate": 101.78,
-          "gstInclRate": 118,
-          "mrp": 105.36,
           "sellingPrice": 118,
-          "costPrice": 101.78
+          "mrp": 105.36,
+          "openingStock": 110,
+          "stock": 110
         },
         {
           "batchNo": "66.428",
           "landingCost": 66.428,
-          "openingStock": 536,
-          "stock": 536,
-          "marginPercent": 3.495514,
-          "marginAmount": 2.322,
-          "gstExclRate": 66.428,
-          "gstInclRate": 77,
-          "mrp": 68.75,
           "sellingPrice": 77,
-          "costPrice": 66.428
+          "mrp": 68.75,
+          "openingStock": 536,
+          "stock": 536
         }
       ],
       "unloadingCharge": 0,
@@ -4393,6 +8562,14 @@
       "marginPercent": 3.118558,
       "marginAmount": 9.38000000000005,
       "batches": [
+        {
+          "batchNo": "300.78",
+          "landingCost": 300.78,
+          "sellingPrice": 397,
+          "mrp": 310.16,
+          "openingStock": 0,
+          "stock": 0
+        },
         {
           "batchNo": "228.813",
           "landingCost": 228.813,
@@ -4555,15 +8732,10 @@
         {
           "batchNo": "508.47",
           "landingCost": 508.47,
-          "openingStock": 7,
-          "stock": 7,
-          "marginPercent": -8.332842,
-          "marginAmount": -42.37,
-          "gstExclRate": 508.47,
-          "gstInclRate": 550,
-          "mrp": 466.1,
           "sellingPrice": 550,
-          "costPrice": 508.47
+          "mrp": 466.1,
+          "openingStock": 7,
+          "stock": 7
         }
       ],
       "unloadingCharge": 0,
@@ -4611,15 +8783,10 @@
         {
           "batchNo": "932.2",
           "landingCost": 932.2,
-          "openingStock": 2,
-          "stock": 2,
-          "marginPercent": -10.9086,
-          "marginAmount": -101.69,
-          "gstExclRate": 932.2,
-          "gstInclRate": 980,
-          "mrp": 830.51,
           "sellingPrice": 980,
-          "costPrice": 932.2
+          "mrp": 830.51,
+          "openingStock": 2,
+          "stock": 2
         }
       ],
       "unloadingCharge": 0,
@@ -4667,15 +8834,10 @@
         {
           "batchNo": "1779.66",
           "landingCost": 1779.66,
-          "openingStock": 3,
-          "stock": 3,
-          "marginPercent": -14.28587,
-          "marginAmount": -254.24,
-          "gstExclRate": 1779.66,
-          "gstInclRate": 1800,
-          "mrp": 1525.42,
           "sellingPrice": 1800,
-          "costPrice": 1779.66
+          "mrp": 1525.42,
+          "openingStock": 3,
+          "stock": 3
         }
       ],
       "unloadingCharge": 0,
@@ -4723,15 +8885,10 @@
         {
           "batchNo": "131.36",
           "landingCost": 131.36,
-          "openingStock": 123,
-          "stock": 123,
-          "marginPercent": 7.742083,
-          "marginAmount": 10.17,
-          "gstExclRate": 131.36,
-          "gstInclRate": 167,
-          "mrp": 141.53,
           "sellingPrice": 167,
-          "costPrice": 131.36
+          "mrp": 141.53,
+          "openingStock": 123,
+          "stock": 123
         }
       ],
       "unloadingCharge": 0,
@@ -4836,28 +8993,18 @@
         {
           "batchNo": "372.88",
           "landingCost": 372.88,
-          "openingStock": 4,
-          "stock": 4,
-          "marginPercent": 2.27419,
-          "marginAmount": 8.48000000000002,
-          "gstExclRate": 372.88,
-          "gstInclRate": 450,
-          "mrp": 381.36,
           "sellingPrice": 450,
-          "costPrice": 372.88
+          "mrp": 381.36,
+          "openingStock": 4,
+          "stock": 4
         },
         {
           "batchNo": "338.98",
           "landingCost": 338.98,
-          "openingStock": 21,
-          "stock": 21,
-          "marginPercent": 2.501622,
-          "marginAmount": 8.47999999999996,
-          "gstExclRate": 338.98,
-          "gstInclRate": 410,
-          "mrp": 347.46,
           "sellingPrice": 410,
-          "costPrice": 338.98
+          "mrp": 347.46,
+          "openingStock": 21,
+          "stock": 21
         }
       ],
       "unloadingCharge": 0,
@@ -4905,15 +9052,10 @@
         {
           "batchNo": "254.24",
           "landingCost": 254.24,
-          "openingStock": 72,
-          "stock": 72,
-          "marginPercent": 3.331498,
-          "marginAmount": 8.46999999999997,
-          "gstExclRate": 254.24,
-          "gstInclRate": 310,
-          "mrp": 262.71,
           "sellingPrice": 310,
-          "costPrice": 254.24
+          "mrp": 262.71,
+          "openingStock": 72,
+          "stock": 72
         }
       ],
       "unloadingCharge": 0,
@@ -4961,15 +9103,10 @@
         {
           "batchNo": "669.49",
           "landingCost": 669.49,
-          "openingStock": 7,
-          "stock": 7,
-          "marginPercent": 2.531778,
-          "marginAmount": 16.95,
-          "gstExclRate": 669.49,
-          "gstInclRate": 810,
-          "mrp": 686.44,
           "sellingPrice": 810,
-          "costPrice": 669.49
+          "mrp": 686.44,
+          "openingStock": 7,
+          "stock": 7
         }
       ],
       "unloadingCharge": 0,
@@ -5017,15 +9154,10 @@
         {
           "batchNo": "805.08",
           "landingCost": 805.08,
-          "openingStock": 1,
-          "stock": 1,
-          "marginPercent": 2.632037,
-          "marginAmount": 21.1899999999999,
-          "gstExclRate": 805.08,
-          "gstInclRate": 975,
-          "mrp": 826.27,
           "sellingPrice": 975,
-          "costPrice": 805.08
+          "mrp": 826.27,
+          "openingStock": 1,
+          "stock": 1
         }
       ],
       "unloadingCharge": 0,
@@ -5073,15 +9205,10 @@
         {
           "batchNo": "2690.68",
           "landingCost": 2690.68,
-          "openingStock": 1,
-          "stock": 1,
-          "marginPercent": 2.047066,
-          "marginAmount": 55.0800000000004,
-          "gstExclRate": 2690.68,
-          "gstInclRate": 3240,
-          "mrp": 2745.76,
           "sellingPrice": 3240,
-          "costPrice": 2690.68
+          "mrp": 2745.76,
+          "openingStock": 1,
+          "stock": 1
         }
       ],
       "unloadingCharge": 0,
@@ -5129,15 +9256,10 @@
         {
           "batchNo": "93.22",
           "landingCost": 93.22,
-          "openingStock": 7,
-          "stock": 7,
-          "marginPercent": 9.09,
-          "marginAmount": 8.47,
-          "gstExclRate": 93.22,
-          "gstInclRate": 120,
-          "mrp": 101.69,
           "sellingPrice": 120,
-          "costPrice": 93.22
+          "mrp": 101.69,
+          "openingStock": 7,
+          "stock": 7
         }
       ],
       "unloadingCharge": 0,
@@ -5185,15 +9307,10 @@
         {
           "batchNo": "2415.25",
           "landingCost": 2415.25,
-          "openingStock": 1,
-          "stock": 1,
-          "marginPercent": 2.456475,
-          "marginAmount": 59.3299999999999,
-          "gstExclRate": 2415.25,
-          "gstInclRate": 2920,
-          "mrp": 2474.58,
           "sellingPrice": 2920,
-          "costPrice": 2415.25
+          "mrp": 2474.58,
+          "openingStock": 1,
+          "stock": 1
         }
       ],
       "unloadingCharge": 0,
@@ -28681,7 +32798,7 @@
       "tradeasyId": 2,
       "name": "PREVIOUS YEAR PROFIT",
       "groupName": "CAPITAL ACCOUNT",
-      "openingBalance": 402453.11226847925,
+      "openingBalance": 472086.2822684792,
       "balanceType": "Credit",
       "parentCustomerId": null,
       "isCustomerSubLedger": false
