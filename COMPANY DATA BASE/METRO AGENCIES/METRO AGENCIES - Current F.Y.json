@@ -1,5 +1,5 @@
 {
-  "_lastSaved": 1790054896690,
+  "_lastSaved": 1790057735609,
   "materials": [
     {
       "id": "MAT-0001",
@@ -27,8 +27,8 @@
       "alternateUnits": [],
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
-      "openingStock": 5702.03,
-      "stock": 5702.03,
+      "openingStock": 5701.2,
+      "stock": 5701.2,
       "landingCost": 70,
       "costPrice": 70,
       "sellingPrice": 60.8,
@@ -347,8 +347,8 @@
           "landingCost": 50,
           "sellingPrice": 60.18,
           "mrp": 51,
-          "openingStock": 0,
-          "stock": 0
+          "openingStock": 5.684341886080802e-14,
+          "stock": 5.684341886080802e-14
         },
         {
           "batchNo": "55.085",
@@ -379,8 +379,8 @@
           "landingCost": 55.932,
           "sellingPrice": 67.32,
           "mrp": 57.05,
-          "openingStock": -1.1368683772161603e-13,
-          "stock": -1.1368683772161603e-13
+          "openingStock": -129.83000000000013,
+          "stock": -129.83000000000013
         },
         {
           "batchNo": "51.695",
@@ -403,8 +403,8 @@
           "landingCost": 54.237,
           "sellingPrice": 65.5,
           "mrp": 55.51,
-          "openingStock": 2000.83,
-          "stock": 2000.83
+          "openingStock": 2129.83,
+          "stock": 2129.83
         },
         {
           "batchNo": "51.39",
@@ -31213,8 +31213,8 @@
       "gstin": "32AADCP5210D1Z5",
       "creditLimit": 0,
       "creditPeriod": 0,
-      "balance": 8356.4128,
-      "openingBalance": 8356.4128,
+      "balance": 8309.535456000001,
+      "openingBalance": 8309.535456000001,
       "balanceType": "Debit",
       "bankName": "STATE BANK OF INDIA",
       "acNo": "10620043387",
@@ -32798,7 +32798,7 @@
       "tradeasyId": 2,
       "name": "PREVIOUS YEAR PROFIT",
       "groupName": "CAPITAL ACCOUNT",
-      "openingBalance": 472086.2822684792,
+      "openingBalance": 472358.2289084794,
       "balanceType": "Credit",
       "parentCustomerId": null,
       "isCustomerSubLedger": false
@@ -33010,7 +33010,7 @@
       "tradeasyId": 33,
       "name": "INPUT SGST 9%",
       "groupName": "INPUT SGST",
-      "openingBalance": 654017.9236,
+      "openingBalance": 654013.871872,
       "balanceType": "Debit"
     },
     {
@@ -33050,7 +33050,7 @@
       "tradeasyId": 38,
       "name": "INPUT CGST 9%",
       "groupName": "INPUT CGST",
-      "openingBalance": 654017.9136,
+      "openingBalance": 654013.861872,
       "balanceType": "Debit"
     },
     {
@@ -34088,8 +34088,8 @@
       "code": "L031",
       "name": "FREIGHT ON PURCHASE",
       "groupName": "ADJUSTMENTS",
-      "openingBalance": 100,
-      "balanceType": "Credit"
+      "openingBalance": 0,
+      "balanceType": "Debit"
     },
     {
       "code": "L033",

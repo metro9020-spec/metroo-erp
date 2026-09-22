@@ -1,5 +1,5 @@
 {
-  "_lastSaved": 1790055819155,
+  "_lastSaved": 1790059451787,
   "materials": [
     {
       "id": "MAT-0001",
@@ -28,7 +28,7 @@
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
       "openingStock": 7182.3,
-      "stock": 5831.03,
+      "stock": 5701.2,
       "landingCost": 70,
       "costPrice": 70,
       "sellingPrice": 60.8,
@@ -588,7 +588,7 @@
           "batchNo": "55.932",
           "landingCost": 55.932,
           "openingStock": 0,
-          "stock": -1.1368683772161603e-13,
+          "stock": -129.83000000000013,
           "marginPercent": 1.998856,
           "marginAmount": 1.118,
           "gstExclRate": 55.932,
@@ -34458,7 +34458,7 @@
       "gstin": "32AADCP5210D1Z5",
       "creditLimit": 0,
       "creditPeriod": 0,
-      "balance": 0,
+      "balance": 16665.948256000003,
       "openingBalance": 0,
       "balanceType": "Credit",
       "bankName": "STATE BANK OF INDIA",
@@ -106762,28 +106762,23 @@
       "entries": [
         {
           "accountId": "VEND-0068",
-          "debit": 8356.4128,
+          "debit": 8309.535456000001,
           "credit": 0
         },
         {
           "accountId": "L0005",
           "debit": 0,
-          "credit": 6996.96
+          "credit": 7041.979200000001
         },
         {
           "accountId": "L0038",
           "debit": 0,
-          "credit": 629.7264
+          "credit": 633.778128
         },
         {
           "accountId": "L0033",
           "debit": 0,
-          "credit": 629.7264
-        },
-        {
-          "accountId": "L031",
-          "debit": 0,
-          "credit": 100
+          "credit": 633.778128
         }
       ]
     }
@@ -108908,7 +108903,35 @@
       "total": 3360.05
     }
   ],
-  "purchaseReturns": [],
+  "purchaseReturns": [
+    {
+      "id": "PR-001",
+      "billNo": "1002/26-27",
+      "date": "2026-09-20",
+      "contactId": "VEND-0068",
+      "contactName": "PRINCE TMT STEELS (P) LTD",
+      "state": "KERALA",
+      "items": [
+        {
+          "materialId": "MAT-0001",
+          "name": "TMT STEELS",
+          "quantity": 129.83,
+          "unit": "Kg",
+          "price": 54.24,
+          "amount": 7041.979200000001,
+          "gstPercent": 18,
+          "gstAmount": 1267.556256,
+          "batchNo": "55.932"
+        }
+      ],
+      "subtotal": 7041.979200000001,
+      "taxRate": 18,
+      "taxAmount": 1267.556256,
+      "adjustmentsList": [],
+      "roundOff": 0,
+      "total": 8309.535456000001
+    }
+  ],
   "conversions": [],
   "stockAdjustments": [],
   "productGroups": [
