@@ -1,5 +1,5 @@
 {
-  "_lastSaved": 1790155715166,
+  "_lastSaved": 1790162388686,
   "materials": [],
   "contacts": [],
   "invoices": [],
@@ -375,6 +375,216 @@
       "code": "L034",
       "name": "ROUND OFF",
       "groupName": "INDIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L035",
+      "name": "INPUT SGST 0%",
+      "groupName": "INPUT SGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L036",
+      "name": "INPUT SGST 2.5%",
+      "groupName": "INPUT SGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L037",
+      "name": "INPUT SGST 6%",
+      "groupName": "INPUT SGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L038",
+      "name": "INPUT SGST 9%",
+      "groupName": "INPUT SGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L039",
+      "name": "INPUT SGST 14%",
+      "groupName": "INPUT SGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L040",
+      "name": "INPUT CGST 0%",
+      "groupName": "INPUT CGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L041",
+      "name": "INPUT CGST 2.5%",
+      "groupName": "INPUT CGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L042",
+      "name": "INPUT CGST 6%",
+      "groupName": "INPUT CGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L043",
+      "name": "INPUT CGST 9%",
+      "groupName": "INPUT CGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L044",
+      "name": "INPUT CGST 14%",
+      "groupName": "INPUT CGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L045",
+      "name": "INPUT IGST 0%",
+      "groupName": "INPUT IGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L046",
+      "name": "INPUT IGST 5%",
+      "groupName": "INPUT IGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L047",
+      "name": "INPUT IGST 12%",
+      "groupName": "INPUT IGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L048",
+      "name": "INPUT IGST 18%",
+      "groupName": "INPUT IGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L049",
+      "name": "INPUT IGST 28%",
+      "groupName": "INPUT IGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L050",
+      "name": "OUTPUT SGST 0%",
+      "groupName": "OUTPUT SGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L051",
+      "name": "OUTPUT SGST 2.5%",
+      "groupName": "OUTPUT SGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L052",
+      "name": "OUTPUT SGST 6%",
+      "groupName": "OUTPUT SGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L053",
+      "name": "OUTPUT SGST 9%",
+      "groupName": "OUTPUT SGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L054",
+      "name": "OUTPUT SGST 14%",
+      "groupName": "OUTPUT SGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L055",
+      "name": "OUTPUT CGST 0%",
+      "groupName": "OUTPUT CGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L056",
+      "name": "OUTPUT CGST 2.5%",
+      "groupName": "OUTPUT CGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L057",
+      "name": "OUTPUT CGST 6%",
+      "groupName": "OUTPUT CGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L058",
+      "name": "OUTPUT CGST 9%",
+      "groupName": "OUTPUT CGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L059",
+      "name": "OUTPUT CGST 14%",
+      "groupName": "OUTPUT CGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L060",
+      "name": "OUTPUT IGST 0%",
+      "groupName": "OUTPUT IGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L061",
+      "name": "OUTPUT IGST 5%",
+      "groupName": "OUTPUT IGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L062",
+      "name": "OUTPUT IGST 12%",
+      "groupName": "OUTPUT IGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L063",
+      "name": "OUTPUT IGST 18%",
+      "groupName": "OUTPUT IGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L064",
+      "name": "OUTPUT IGST 28%",
+      "groupName": "OUTPUT IGST",
       "openingBalance": 0,
       "balanceType": "Debit"
     }
@@ -978,6 +1188,187 @@
       "isDefault": true
     }
   ],
-  "gstMaster": [],
+  "gstMaster": [
+    {
+      "id": "GST-001",
+      "name": "INPUT SGST 0%",
+      "percent": 0,
+      "accountGroup": "INPUT SGST"
+    },
+    {
+      "id": "GST-002",
+      "name": "INPUT SGST 2.5%",
+      "percent": 2.5,
+      "accountGroup": "INPUT SGST"
+    },
+    {
+      "id": "GST-003",
+      "name": "INPUT SGST 6%",
+      "percent": 6,
+      "accountGroup": "INPUT SGST"
+    },
+    {
+      "id": "GST-004",
+      "name": "INPUT SGST 9%",
+      "percent": 9,
+      "accountGroup": "INPUT SGST"
+    },
+    {
+      "id": "GST-005",
+      "name": "INPUT SGST 14%",
+      "percent": 14,
+      "accountGroup": "INPUT SGST"
+    },
+    {
+      "id": "GST-006",
+      "name": "INPUT CGST 0%",
+      "percent": 0,
+      "accountGroup": "INPUT CGST"
+    },
+    {
+      "id": "GST-007",
+      "name": "INPUT CGST 2.5%",
+      "percent": 2.5,
+      "accountGroup": "INPUT CGST"
+    },
+    {
+      "id": "GST-008",
+      "name": "INPUT CGST 6%",
+      "percent": 6,
+      "accountGroup": "INPUT CGST"
+    },
+    {
+      "id": "GST-009",
+      "name": "INPUT CGST 9%",
+      "percent": 9,
+      "accountGroup": "INPUT CGST"
+    },
+    {
+      "id": "GST-010",
+      "name": "INPUT CGST 14%",
+      "percent": 14,
+      "accountGroup": "INPUT CGST"
+    },
+    {
+      "id": "GST-011",
+      "name": "INPUT IGST 0%",
+      "percent": 0,
+      "accountGroup": "INPUT IGST"
+    },
+    {
+      "id": "GST-012",
+      "name": "INPUT IGST 5%",
+      "percent": 5,
+      "accountGroup": "INPUT IGST"
+    },
+    {
+      "id": "GST-013",
+      "name": "INPUT IGST 12%",
+      "percent": 12,
+      "accountGroup": "INPUT IGST"
+    },
+    {
+      "id": "GST-014",
+      "name": "INPUT IGST 18%",
+      "percent": 18,
+      "accountGroup": "INPUT IGST"
+    },
+    {
+      "id": "GST-015",
+      "name": "INPUT IGST 28%",
+      "percent": 28,
+      "accountGroup": "INPUT IGST"
+    },
+    {
+      "id": "GST-016",
+      "name": "OUTPUT SGST 0%",
+      "percent": 0,
+      "accountGroup": "OUTPUT SGST"
+    },
+    {
+      "id": "GST-017",
+      "name": "OUTPUT SGST 2.5%",
+      "percent": 2.5,
+      "accountGroup": "OUTPUT SGST"
+    },
+    {
+      "id": "GST-018",
+      "name": "OUTPUT SGST 6%",
+      "percent": 6,
+      "accountGroup": "OUTPUT SGST"
+    },
+    {
+      "id": "GST-019",
+      "name": "OUTPUT SGST 9%",
+      "percent": 9,
+      "accountGroup": "OUTPUT SGST"
+    },
+    {
+      "id": "GST-020",
+      "name": "OUTPUT SGST 14%",
+      "percent": 14,
+      "accountGroup": "OUTPUT SGST"
+    },
+    {
+      "id": "GST-021",
+      "name": "OUTPUT CGST 0%",
+      "percent": 0,
+      "accountGroup": "OUTPUT CGST"
+    },
+    {
+      "id": "GST-022",
+      "name": "OUTPUT CGST 2.5%",
+      "percent": 2.5,
+      "accountGroup": "OUTPUT CGST"
+    },
+    {
+      "id": "GST-023",
+      "name": "OUTPUT CGST 6%",
+      "percent": 6,
+      "accountGroup": "OUTPUT CGST"
+    },
+    {
+      "id": "GST-024",
+      "name": "OUTPUT CGST 9%",
+      "percent": 9,
+      "accountGroup": "OUTPUT CGST"
+    },
+    {
+      "id": "GST-025",
+      "name": "OUTPUT CGST 14%",
+      "percent": 14,
+      "accountGroup": "OUTPUT CGST"
+    },
+    {
+      "id": "GST-026",
+      "name": "OUTPUT IGST 0%",
+      "percent": 0,
+      "accountGroup": "OUTPUT IGST"
+    },
+    {
+      "id": "GST-027",
+      "name": "OUTPUT IGST 5%",
+      "percent": 5,
+      "accountGroup": "OUTPUT IGST"
+    },
+    {
+      "id": "GST-028",
+      "name": "OUTPUT IGST 12%",
+      "percent": 12,
+      "accountGroup": "OUTPUT IGST"
+    },
+    {
+      "id": "GST-029",
+      "name": "OUTPUT IGST 18%",
+      "percent": 18,
+      "accountGroup": "OUTPUT IGST"
+    },
+    {
+      "id": "GST-030",
+      "name": "OUTPUT IGST 28%",
+      "percent": 28,
+      "accountGroup": "OUTPUT IGST"
+    }
+  ],
   "preTakeOrders": []
 }

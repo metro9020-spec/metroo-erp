@@ -31,12 +31,15 @@
         "status": "Active"
       },
       {
-        "id": "USR-1790146079264",
+        "id": "USR-1790162014518",
         "username": "metro",
         "password": "asd",
         "fullName": "metro",
         "role": "Manager",
-        "status": "Active"
+        "status": "Active",
+        "allowedCompanies": [
+          "1"
+        ]
       }
     ],
     "financialYears": [

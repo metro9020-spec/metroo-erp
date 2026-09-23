@@ -29,14 +29,6 @@
         "fullName": "Administrator",
         "role": "Admin",
         "status": "Active"
-      },
-      {
-        "id": "USR-1790146079264",
-        "username": "metro",
-        "password": "asd",
-        "fullName": "metro",
-        "role": "Manager",
-        "status": "Active"
       }
     ],
     "financialYears": [
@@ -87,6 +79,17 @@
         "fullName": "Administrator",
         "role": "Admin",
         "status": "Active"
+      },
+      {
+        "id": "USR-1790162014518",
+        "username": "metro",
+        "password": "asd",
+        "fullName": "metro",
+        "role": "Billing / Sales Clerk",
+        "status": "Active",
+        "allowedCompanies": [
+          "1790155614129"
+        ]
       }
     ],
     "financialYears": [
