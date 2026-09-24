@@ -1,5 +1,5 @@
 {
-  "_lastSaved": 1790232203582,
+  "_lastSaved": 1790236137784,
   "materials": [
     {
       "id": "MAT-0001",
@@ -32473,7 +32473,7 @@
       "gstin": "",
       "creditLimit": 0,
       "creditPeriod": 0,
-      "balance": 28,
+      "balance": 0,
       "openingBalance": 0,
       "balanceType": "Debit",
       "tradeasyLedgerId": 1224,
@@ -108907,7 +108907,7 @@
     {
       "id": "24",
       "name": "PROVISIONS",
-      "under": "LIABILITIES",
+      "under": "CURRENT LIABILITIES",
       "isDefault": true
     },
     {
@@ -109003,25 +109003,25 @@
     {
       "id": "42",
       "name": "OUTSTANDING LIABILITIES & PROVISIONS",
-      "under": "LIABILITIES",
+      "under": "CURRENT LIABILITIES",
       "isDefault": true
     },
     {
       "id": "43",
       "name": "OTHER CURRENT ASSETS",
-      "under": "ASSETS",
+      "under": "CURRENT ASSETS",
       "isDefault": true
     },
     {
       "id": "44",
       "name": "DEPOSITS",
-      "under": "ASSETS",
+      "under": "CURRENT ASSETS",
       "isDefault": true
     },
     {
       "id": "45",
       "name": "ADAVANCE TO SUPPLIER",
-      "under": "ASSETS",
+      "under": "CURRENT ASSETS",
       "isDefault": true
     },
     {
@@ -109778,9 +109778,11 @@
       "code": "L0185",
       "tradeasyId": 185,
       "name": "GST PAYABLE",
-      "groupName": "OTHER CURRENT ASSETS",
+      "groupName": "DUTIES & TAXES",
       "openingBalance": 75466.47,
-      "balanceType": "Credit"
+      "balanceType": "Credit",
+      "parentCustomerId": null,
+      "isCustomerSubLedger": false
     },
     {
       "code": "L0186",
@@ -111228,7 +111230,8 @@
     "enableCessInSalesBill": false,
     "influencerLoyaltyRate": 1,
     "enablePartyClosingBalanceBottom": true,
-    "enableHeadloader": true
+    "enableHeadloader": true,
+    "allowPreviousYearEditing": false
   },
   "influencers": [],
   "influencerRedemptions": [],
