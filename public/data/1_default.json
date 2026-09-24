@@ -1,5 +1,5 @@
 {
-  "_lastSaved": 1790235276405,
+  "_lastSaved": 1790236137784,
   "materials": [
     {
       "id": "MAT-0001",
@@ -108907,7 +108907,7 @@
     {
       "id": "24",
       "name": "PROVISIONS",
-      "under": "LIABILITIES",
+      "under": "CURRENT LIABILITIES",
       "isDefault": true
     },
     {
@@ -109003,25 +109003,25 @@
     {
       "id": "42",
       "name": "OUTSTANDING LIABILITIES & PROVISIONS",
-      "under": "LIABILITIES",
+      "under": "CURRENT LIABILITIES",
       "isDefault": true
     },
     {
       "id": "43",
       "name": "OTHER CURRENT ASSETS",
-      "under": "ASSETS",
+      "under": "CURRENT ASSETS",
       "isDefault": true
     },
     {
       "id": "44",
       "name": "DEPOSITS",
-      "under": "ASSETS",
+      "under": "CURRENT ASSETS",
       "isDefault": true
     },
     {
       "id": "45",
       "name": "ADAVANCE TO SUPPLIER",
-      "under": "ASSETS",
+      "under": "CURRENT ASSETS",
       "isDefault": true
     },
     {
