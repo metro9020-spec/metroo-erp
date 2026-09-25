@@ -1,5 +1,5 @@
 {
-  "_lastSaved": 1790248776360,
+  "_lastSaved": 1790252917970,
   "materials": [
     {
       "id": "MAT-0001",
@@ -28,7 +28,7 @@
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
       "openingStock": 7182.3,
-      "stock": 5831.03,
+      "stock": 5646.03,
       "landingCost": 70,
       "costPrice": 70,
       "sellingPrice": 60.8,
@@ -627,7 +627,7 @@
           "batchNo": "54.237",
           "landingCost": 54.237,
           "openingStock": 0,
-          "stock": 2129.83,
+          "stock": 1944.83,
           "marginPercent": 2.347106,
           "marginAmount": 1.273,
           "gstExclRate": 54.237,
@@ -57577,6 +57577,57 @@
       "total": 3299.9959999999996,
       "paidAmount": 0,
       "status": "unpaid"
+    },
+    {
+      "id": "LSL-0371",
+      "seriesId": "SER-LOCAL-SALES",
+      "voucherNo": "LSL-0371",
+      "refNo": "LSL-0371",
+      "employee": "",
+      "influencer": "",
+      "date": "2026-09-24",
+      "dueDate": "2026-09-24",
+      "contactId": "__CASH__",
+      "contactName": "CASH SALES",
+      "siteName": "",
+      "state": "KERALA",
+      "payMode": "Cash",
+      "creditPeriod": "0",
+      "narration": "",
+      "headloaderType": "std",
+      "discountPercent": "0",
+      "discountAmount": "0.00",
+      "shippingAddress": "",
+      "vehicleNo": "",
+      "items": [
+        {
+          "materialId": "MAT-0001",
+          "name": "TMT STEELS",
+          "code": "ISI",
+          "batchNo": "54.237",
+          "quantity": 185,
+          "unit": "Kg",
+          "price": 65.5,
+          "mrp": 55.51,
+          "discountPercent": 0,
+          "discountAmount": 0,
+          "netValue": 12117.5,
+          "gstPercent": 18,
+          "gstAmount": 2181.15,
+          "netAmount": 14298.65
+        }
+      ],
+      "subtotal": 12117.5,
+      "totalDiscount": 0,
+      "totalGst": 2181.15,
+      "totalCess": 0,
+      "adjustments": 0,
+      "adjustmentsList": [],
+      "additionalCess": 0,
+      "roundOff": 0.35,
+      "total": 14299,
+      "paidAmount": 14299,
+      "status": "paid"
     }
   ],
   "salesOrders": [],
@@ -67053,43 +67104,6 @@
       ]
     },
     {
-      "id": "B2B0023",
-      "voucherId": "B2B0023",
-      "voucherType": "SALE",
-      "voucherNo": "B2B0023",
-      "date": "2026-07-24",
-      "reference": "B2B0023",
-      "description": "",
-      "siteName": "",
-      "entries": [
-        {
-          "accountId": "CUST-0427",
-          "debit": 43050,
-          "credit": 0
-        },
-        {
-          "accountId": "L0004",
-          "debit": 0,
-          "credit": 36483
-        },
-        {
-          "accountId": "L0053",
-          "debit": 0,
-          "credit": 3283.47
-        },
-        {
-          "accountId": "L0048",
-          "debit": 0,
-          "credit": 3283.47
-        },
-        {
-          "accountId": "L0012",
-          "debit": 0,
-          "credit": 0.06
-        }
-      ]
-    },
-    {
       "id": "LSL-0226",
       "voucherId": "LSL-0226",
       "voucherType": "SALE",
@@ -72430,31 +72444,6 @@
           "accountId": "L0100",
           "debit": 2000,
           "credit": 0,
-          "narration": ""
-        }
-      ]
-    },
-    {
-      "id": "TX-REC-176",
-      "voucherId": "176",
-      "voucherNo": "12",
-      "voucherType": "Receipt",
-      "date": "2026-04-01",
-      "reference": "RC-8",
-      "description": "Receipt from Customer: RAMSHI (RC-12)",
-      "contactId": "CUST-1210",
-      "siteName": "",
-      "entries": [
-        {
-          "accountId": "L0100",
-          "debit": 2000,
-          "credit": 0,
-          "narration": ""
-        },
-        {
-          "accountId": "CUST-1210",
-          "debit": 0,
-          "credit": 2000,
           "narration": ""
         }
       ]
@@ -78758,31 +78747,6 @@
       ]
     },
     {
-      "id": "TX-REC-334",
-      "voucherId": "334",
-      "voucherNo": "217",
-      "voucherType": "Receipt",
-      "date": "2026-05-05",
-      "reference": "RC-217",
-      "description": "Receipt from Customer: RASHID (RC-217)",
-      "contactId": "CUST-0457",
-      "siteName": "",
-      "entries": [
-        {
-          "accountId": "CUST-0457",
-          "debit": 0,
-          "credit": 360,
-          "narration": ""
-        },
-        {
-          "accountId": "L1096",
-          "debit": 360,
-          "credit": 0,
-          "narration": ""
-        }
-      ]
-    },
-    {
       "id": "TX-REC-577",
       "voucherId": "577",
       "voucherNo": "218",
@@ -80308,31 +80272,6 @@
       ]
     },
     {
-      "id": "TX-REC-371",
-      "voucherId": "371",
-      "voucherNo": "269",
-      "voucherType": "Receipt",
-      "date": "2026-05-13",
-      "reference": "RC-269",
-      "description": "Receipt from Customer: THASLEENA (RC-269)",
-      "contactId": "CUST-1235",
-      "siteName": "",
-      "entries": [
-        {
-          "accountId": "L1096",
-          "debit": 800,
-          "credit": 0,
-          "narration": ""
-        },
-        {
-          "accountId": "CUST-1235",
-          "debit": 0,
-          "credit": 800,
-          "narration": ""
-        }
-      ]
-    },
-    {
       "id": "TX-REC-372",
       "voucherId": "372",
       "voucherNo": "270",
@@ -80340,31 +80279,6 @@
       "date": "2026-05-13",
       "reference": "RC-270",
       "description": "Receipt from Customer: MADHUSOODHANAN (RC-270)",
-      "contactId": "CUST-1205",
-      "siteName": "",
-      "entries": [
-        {
-          "accountId": "CUST-1205",
-          "debit": 0,
-          "credit": 20,
-          "narration": ""
-        },
-        {
-          "accountId": "L1096",
-          "debit": 20,
-          "credit": 0,
-          "narration": ""
-        }
-      ]
-    },
-    {
-      "id": "TX-REC-373",
-      "voucherId": "373",
-      "voucherNo": "271",
-      "voucherType": "Receipt",
-      "date": "2026-05-13",
-      "reference": "RC-271",
-      "description": "Receipt from Customer: MADHUSOODHANAN (RC-271)",
       "contactId": "CUST-1205",
       "siteName": "",
       "entries": [
@@ -82177,31 +82091,6 @@
       ]
     },
     {
-      "id": "TX-REC-541",
-      "voucherId": "541",
-      "voucherNo": "332",
-      "voucherType": "Receipt",
-      "date": "2026-05-20",
-      "reference": "RC-332",
-      "description": "Receipt from Customer: MUHAMMED (RC-332)",
-      "contactId": "CUST-0426",
-      "siteName": "",
-      "entries": [
-        {
-          "accountId": "L0100",
-          "debit": 50,
-          "credit": 0,
-          "narration": ""
-        },
-        {
-          "accountId": "CUST-0426",
-          "debit": 0,
-          "credit": 50,
-          "narration": ""
-        }
-      ]
-    },
-    {
       "id": "TX-REC-542",
       "voucherId": "542",
       "voucherNo": "333",
@@ -83353,31 +83242,6 @@
           "accountId": "CUST-1254",
           "debit": 0,
           "credit": 2410,
-          "narration": ""
-        }
-      ]
-    },
-    {
-      "id": "TX-REC-551",
-      "voucherId": "551",
-      "voucherNo": "371",
-      "voucherType": "Receipt",
-      "date": "2026-05-25",
-      "reference": "RC-371",
-      "description": "Receipt from Customer: JITHIN K (RC-371)",
-      "contactId": "CUST-0441",
-      "siteName": "",
-      "entries": [
-        {
-          "accountId": "L0100",
-          "debit": 4380,
-          "credit": 0,
-          "narration": ""
-        },
-        {
-          "accountId": "CUST-0441",
-          "debit": 0,
-          "credit": 4380,
           "narration": ""
         }
       ]
@@ -89864,31 +89728,6 @@
       ]
     },
     {
-      "id": "TX-REC-925",
-      "voucherId": "925",
-      "voucherNo": "579",
-      "voucherType": "Receipt",
-      "date": "2026-07-07",
-      "reference": "RC-582",
-      "description": "Receipt from Customer: ASHIQUE (RC-579)",
-      "contactId": "CUST-1079",
-      "siteName": "",
-      "entries": [
-        {
-          "accountId": "L1096",
-          "debit": 10,
-          "credit": 0,
-          "narration": ""
-        },
-        {
-          "accountId": "CUST-1079",
-          "debit": 0,
-          "credit": 10,
-          "narration": ""
-        }
-      ]
-    },
-    {
       "id": "TX-CON-1030",
       "voucherId": "1030",
       "voucherNo": "83",
@@ -92164,31 +92003,6 @@
       ]
     },
     {
-      "id": "TX-REC-978",
-      "voucherId": "978",
-      "voucherNo": "654",
-      "voucherType": "Receipt",
-      "date": "2026-07-23",
-      "reference": "RC-654",
-      "description": "Receipt from Customer: SHIJU M (RC-654)",
-      "contactId": "CUST-0608",
-      "siteName": "",
-      "entries": [
-        {
-          "accountId": "L1096",
-          "debit": 360,
-          "credit": 0,
-          "narration": ""
-        },
-        {
-          "accountId": "CUST-0608",
-          "debit": 0,
-          "credit": 360,
-          "narration": ""
-        }
-      ]
-    },
-    {
       "id": "TX-REC-979",
       "voucherId": "979",
       "voucherNo": "655",
@@ -92939,31 +92753,6 @@
       ]
     },
     {
-      "id": "TX-REC-1061",
-      "voucherId": "1061",
-      "voucherNo": "681",
-      "voucherType": "Receipt",
-      "date": "2026-07-29",
-      "reference": "RC-676",
-      "description": "Receipt from Customer: AKBER (RC-681)",
-      "contactId": "CUST-1237",
-      "siteName": "",
-      "entries": [
-        {
-          "accountId": "CUST-1237",
-          "debit": 0,
-          "credit": 200,
-          "narration": ""
-        },
-        {
-          "accountId": "L0100",
-          "debit": 200,
-          "credit": 0,
-          "narration": ""
-        }
-      ]
-    },
-    {
       "id": "TX-REC-995",
       "voucherId": "995",
       "voucherNo": "673",
@@ -93283,31 +93072,6 @@
         {
           "accountId": "L1096",
           "debit": 760,
-          "credit": 0,
-          "narration": ""
-        }
-      ]
-    },
-    {
-      "id": "TX-REC-1008",
-      "voucherId": "1008",
-      "voucherNo": "688",
-      "voucherType": "Receipt",
-      "date": "2026-07-30",
-      "reference": "RC-688",
-      "description": "Receipt from Customer: HARI (RC-688)",
-      "contactId": "CUST-0203",
-      "siteName": "",
-      "entries": [
-        {
-          "accountId": "CUST-0203",
-          "debit": 0,
-          "credit": 50,
-          "narration": ""
-        },
-        {
-          "accountId": "L1096",
-          "debit": 50,
           "credit": 0,
           "narration": ""
         }
@@ -96703,31 +96467,6 @@
           "accountId": "CUST-1318",
           "debit": 0,
           "credit": 100,
-          "narration": ""
-        }
-      ]
-    },
-    {
-      "id": "TX-REC-1362",
-      "voucherId": "1362",
-      "voucherNo": "801",
-      "voucherType": "Receipt",
-      "date": "2026-08-14",
-      "reference": "RC-801",
-      "description": "Receipt from Customer: FALUL (RC-801)",
-      "contactId": "CUST-1318",
-      "siteName": "",
-      "entries": [
-        {
-          "accountId": "CUST-1318",
-          "debit": 0,
-          "credit": 100,
-          "narration": ""
-        },
-        {
-          "accountId": "L0100",
-          "debit": 100,
-          "credit": 0,
           "narration": ""
         }
       ]
@@ -103424,24 +103163,6 @@
       ]
     },
     {
-      "id": "TX-1555",
-      "date": "2026-07-07",
-      "reference": "LSL-0192 COGS",
-      "description": "Cost of Goods Sold for invoice LSL-0192",
-      "entries": [
-        {
-          "accountId": "5100",
-          "debit": 2030,
-          "credit": 0
-        },
-        {
-          "accountId": "1200",
-          "debit": 0,
-          "credit": 2030
-        }
-      ]
-    },
-    {
       "id": "TX-1556",
       "date": "2026-07-07",
       "reference": "LSL-0193 COGS",
@@ -103816,24 +103537,6 @@
           "accountId": "1200",
           "debit": 0,
           "credit": 1540
-        }
-      ]
-    },
-    {
-      "id": "TX-1577",
-      "date": "2026-07-17",
-      "reference": "LSL-0214 COGS",
-      "description": "Cost of Goods Sold for invoice LSL-0214",
-      "entries": [
-        {
-          "accountId": "5100",
-          "debit": 1960,
-          "credit": 0
-        },
-        {
-          "accountId": "1200",
-          "debit": 0,
-          "credit": 1960
         }
       ]
     },
@@ -104274,24 +103977,6 @@
       "date": "2026-07-24",
       "reference": "B2B0022 COGS",
       "description": "Cost of Goods Sold for invoice B2B0022",
-      "entries": [
-        {
-          "accountId": "5100",
-          "debit": 34321.95,
-          "credit": 0
-        },
-        {
-          "accountId": "1200",
-          "debit": 0,
-          "credit": 34321.95
-        }
-      ]
-    },
-    {
-      "id": "TX-1603",
-      "date": "2026-07-24",
-      "reference": "B2B0023 COGS",
-      "description": "Cost of Goods Sold for invoice B2B0023",
       "entries": [
         {
           "accountId": "5100",
@@ -104994,24 +104679,6 @@
       "date": "2026-08-07",
       "reference": "LSL-0267 COGS",
       "description": "Cost of Goods Sold for invoice LSL-0267",
-      "entries": [
-        {
-          "accountId": "5100",
-          "debit": 3480,
-          "credit": 0
-        },
-        {
-          "accountId": "1200",
-          "debit": 0,
-          "credit": 3480
-        }
-      ]
-    },
-    {
-      "id": "TX-1643",
-      "date": "2026-08-07",
-      "reference": "LSL-0268 COGS",
-      "description": "Cost of Goods Sold for invoice LSL-0268",
       "entries": [
         {
           "accountId": "5100",
@@ -106394,24 +106061,6 @@
       ]
     },
     {
-      "id": "TX-1720",
-      "date": "2026-04-27",
-      "reference": "LSL-0045 COGS",
-      "description": "Cost of Goods Sold for invoice LSL-0045",
-      "entries": [
-        {
-          "accountId": "5100",
-          "debit": 4350,
-          "credit": 0
-        },
-        {
-          "accountId": "1200",
-          "debit": 0,
-          "credit": 4350
-        }
-      ]
-    },
-    {
       "id": "TX-1721",
       "date": "2026-05-03",
       "reference": "LSL-0054 COGS",
@@ -106520,24 +106169,6 @@
       ]
     },
     {
-      "id": "TX-1727",
-      "date": "2026-06-06",
-      "reference": "LSL-0132 COGS",
-      "description": "Cost of Goods Sold for invoice LSL-0132",
-      "entries": [
-        {
-          "accountId": "5100",
-          "debit": 2900,
-          "credit": 0
-        },
-        {
-          "accountId": "1200",
-          "debit": 0,
-          "credit": 2900
-        }
-      ]
-    },
-    {
       "id": "TX-1728",
       "date": "2026-09-21",
       "reference": "RC-0876",
@@ -106553,6 +106184,98 @@
           "accountId": "L0001",
           "debit": 28,
           "credit": 0
+        }
+      ]
+    },
+    {
+      "id": "LSL-0371",
+      "voucherId": "LSL-0371",
+      "voucherType": "SALE",
+      "voucherNo": "LSL-0371",
+      "date": "2026-09-24",
+      "reference": "LSL-0371",
+      "description": "",
+      "siteName": "",
+      "entries": [
+        {
+          "accountId": "L0001",
+          "debit": 14299,
+          "credit": 0
+        },
+        {
+          "accountId": "L0004",
+          "debit": 0,
+          "credit": 12117.5
+        },
+        {
+          "accountId": "L0053",
+          "debit": 0,
+          "credit": 1090.58
+        },
+        {
+          "accountId": "L0048",
+          "debit": 0,
+          "credit": 1090.57
+        },
+        {
+          "accountId": "L0012",
+          "debit": 0,
+          "credit": 0.35
+        }
+      ]
+    },
+    {
+      "id": "TX-1729",
+      "date": "2026-09-24",
+      "reference": "LSL-0371 COGS",
+      "description": "Cost of Goods Sold for invoice LSL-0371",
+      "entries": [
+        {
+          "accountId": "5100",
+          "debit": 12950,
+          "credit": 0
+        },
+        {
+          "accountId": "1200",
+          "debit": 0,
+          "credit": 12950
+        }
+      ]
+    },
+    {
+      "id": "B2B0023",
+      "voucherId": "B2B0023",
+      "voucherType": "SALE",
+      "voucherNo": "B2B0023",
+      "date": "2026-07-24",
+      "reference": "B2B0023",
+      "description": "",
+      "siteName": "",
+      "entries": [
+        {
+          "accountId": "CUST-0427",
+          "debit": 43050,
+          "credit": 0
+        },
+        {
+          "accountId": "L0004",
+          "debit": 0,
+          "credit": 36483
+        },
+        {
+          "accountId": "L0053",
+          "debit": 0,
+          "credit": 3283.47
+        },
+        {
+          "accountId": "L0048",
+          "debit": 0,
+          "credit": 3283.47
+        },
+        {
+          "accountId": "L0012",
+          "debit": 0,
+          "credit": 0.06
         }
       ]
     }
@@ -111261,7 +110984,7 @@
       "prefix": "LSL-",
       "digits": 4,
       "startingNumber": 1,
-      "currentNumber": 339,
+      "currentNumber": 372,
       "ledgerCode": "L0004",
       "isActive": true
     },
