@@ -1,5 +1,5 @@
 {
-  "_lastSaved": 1790318645452,
+  "_lastSaved": 1790319096151,
   "materials": [
     {
       "id": "MAT-0010",
@@ -106870,8 +106870,33 @@
       "voucherType": "Receipt"
     },
     {
+      "id": "TX-2438",
+      "date": "2026-05-22",
+      "entries": [
+        {
+          "debit": 4107.360000000001,
+          "credit": 0,
+          "accountId": "5100"
+        },
+        {
+          "debit": 0,
+          "credit": 4107.360000000001,
+          "accountId": "1200"
+        }
+      ],
+      "siteName": "",
+      "reference": "LSL-0095 COGS",
+      "voucherId": "371",
+      "voucherNo": "LSL-0339",
+      "description": "Cost of Goods Sold for invoice LSL-0095",
+      "voucherType": "SALE"
+    },
+    {
       "id": "LPR-0033",
       "date": "2026-08-24",
+      "reference": "LPR-0033",
+      "description": "",
+      "siteName": "",
       "entries": [
         {
           "debit": 106779.6,
@@ -106899,34 +106924,9 @@
           "accountId": "L0012"
         }
       ],
-      "siteName": "",
-      "reference": "LPR-0033",
       "voucherId": "LPR-0033",
-      "voucherNo": "LPR-0033",
-      "description": "",
-      "voucherType": "PUR"
-    },
-    {
-      "id": "TX-2438",
-      "date": "2026-05-22",
-      "entries": [
-        {
-          "debit": 4107.360000000001,
-          "credit": 0,
-          "accountId": "5100"
-        },
-        {
-          "debit": 0,
-          "credit": 4107.360000000001,
-          "accountId": "1200"
-        }
-      ],
-      "siteName": "",
-      "reference": "LSL-0095 COGS",
-      "voucherId": "371",
-      "voucherNo": "LSL-0339",
-      "description": "Cost of Goods Sold for invoice LSL-0095",
-      "voucherType": "SALE"
+      "voucherType": "PUR",
+      "voucherNo": "LPR-0033"
     },
     {
       "id": "TX-2353",
@@ -127877,8 +127877,7 @@
     {
       "id": "std",
       "name": "Standard",
-      "isDefault": true,
-      "category": "both"
+      "isDefault": true
     }
   ],
   "gstMaster": [
