@@ -1,5 +1,5 @@
 {
-  "_lastSaved": 1790426103784,
+  "_lastSaved": 1790429763745,
   "materials": [
     {
       "id": "MAT-0001",
@@ -108977,6 +108977,12 @@
       "name": "ADJUSTMENTS",
       "under": "CURRENT LIABILITIES",
       "isDefault": true
+    },
+    {
+      "id": "46",
+      "name": "GST PAID/PAYABLE",
+      "under": "DUTIES & TAXES",
+      "isDefault": false
     }
   ],
   "ledgers": [
@@ -109556,9 +109562,11 @@
       "code": "L0118",
       "tradeasyId": 118,
       "name": "GST PAID",
-      "groupName": "DUTIES & TAXES",
+      "groupName": "GST PAID/PAYABLE",
       "openingBalance": 157099,
-      "balanceType": "Debit"
+      "balanceType": "Debit",
+      "parentCustomerId": null,
+      "isCustomerSubLedger": false
     },
     {
       "code": "L0120",
@@ -109726,9 +109734,11 @@
       "code": "L0185",
       "tradeasyId": 185,
       "name": "GST PAYABLE",
-      "groupName": "OTHER CURRENT ASSETS",
+      "groupName": "GST PAID/PAYABLE",
       "openingBalance": 75466.47,
-      "balanceType": "Credit"
+      "balanceType": "Credit",
+      "parentCustomerId": null,
+      "isCustomerSubLedger": false
     },
     {
       "code": "L0186",

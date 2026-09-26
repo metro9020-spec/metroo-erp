@@ -1,5 +1,5 @@
 {
-  "_lastSaved": 1790426217489,
+  "_lastSaved": 1790430252243,
   "materials": [
     {
       "id": "MAT-0001",
@@ -28,7 +28,7 @@
       "loadingChargeEnabled": false,
       "loadingCharge": 0,
       "openingStock": 7182.3,
-      "stock": 5702.03,
+      "stock": 5831.03,
       "landingCost": 70,
       "costPrice": 70,
       "sellingPrice": 60.8,
@@ -588,7 +588,7 @@
           "batchNo": "55.932",
           "landingCost": 55.932,
           "openingStock": 0,
-          "stock": -129.0000000000001,
+          "stock": -1.1368683772161603e-13,
           "marginPercent": 1.998856,
           "marginAmount": 1.118,
           "gstExclRate": 55.932,
@@ -34458,7 +34458,7 @@
       "gstin": "32AADCP5210D1Z5",
       "creditLimit": 0,
       "creditPeriod": 0,
-      "balance": 8356.4128,
+      "balance": 0,
       "openingBalance": 0,
       "balanceType": "Credit",
       "bankName": "STATE BANK OF INDIA",
@@ -108606,7 +108606,8 @@
         }
       ],
       "roundOff": 0,
-      "total": 8356.4128
+      "total": 8356.4128,
+      "isCancelled": true
     }
   ],
   "conversions": [],
@@ -108977,6 +108978,12 @@
       "name": "ADJUSTMENTS",
       "under": "CURRENT LIABILITIES",
       "isDefault": true
+    },
+    {
+      "id": "46",
+      "name": "GST PAID/PAYABLE",
+      "under": "DUTIES & TAXES",
+      "isDefault": false
     }
   ],
   "ledgers": [
@@ -109556,9 +109563,11 @@
       "code": "L0118",
       "tradeasyId": 118,
       "name": "GST PAID",
-      "groupName": "DUTIES & TAXES",
+      "groupName": "GST PAID/PAYABLE",
       "openingBalance": 157099,
-      "balanceType": "Debit"
+      "balanceType": "Debit",
+      "parentCustomerId": null,
+      "isCustomerSubLedger": false
     },
     {
       "code": "L0120",
@@ -109726,9 +109735,11 @@
       "code": "L0185",
       "tradeasyId": 185,
       "name": "GST PAYABLE",
-      "groupName": "OTHER CURRENT ASSETS",
+      "groupName": "GST PAID/PAYABLE",
       "openingBalance": 75466.47,
-      "balanceType": "Credit"
+      "balanceType": "Credit",
+      "parentCustomerId": null,
+      "isCustomerSubLedger": false
     },
     {
       "code": "L0186",
