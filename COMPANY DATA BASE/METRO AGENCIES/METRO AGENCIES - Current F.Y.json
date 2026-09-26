@@ -1,5 +1,5 @@
 {
-  "_lastSaved": 1790405234727,
+  "_lastSaved": 1790407905193,
   "materials": [
     {
       "id": "MAT-0001",
@@ -58162,6 +58162,57 @@
       "status": "paid"
     },
     {
+      "id": "LSL-0340",
+      "date": "2026-09-24",
+      "items": [
+        {
+          "mrp": 55.51,
+          "code": "ISI",
+          "name": "TMT STEELS",
+          "unit": "Kg",
+          "price": 65.5,
+          "batchNo": "54.237",
+          "netValue": 12117.5,
+          "quantity": 185,
+          "gstAmount": 2181.15,
+          "netAmount": 14298.65,
+          "gstPercent": 18,
+          "materialId": "MAT-0001",
+          "discountAmount": 0,
+          "discountPercent": 0
+        }
+      ],
+      "refNo": "LSL-0340",
+      "state": "KERALA",
+      "total": 14299,
+      "status": "paid",
+      "dueDate": "2026-09-24",
+      "payMode": "Cash",
+      "employee": "",
+      "roundOff": 0.35,
+      "seriesId": "SER-LOCAL-SALES",
+      "siteName": "",
+      "subtotal": 12117.5,
+      "totalGst": 2181.15,
+      "contactId": "__CASH__",
+      "narration": "",
+      "totalCess": 0,
+      "vehicleNo": "",
+      "voucherNo": "LSL-0340",
+      "influencer": "",
+      "paidAmount": 14299,
+      "adjustments": 0,
+      "contactName": "CASH SALES",
+      "creditPeriod": "0",
+      "totalDiscount": 0,
+      "additionalCess": 0,
+      "discountAmount": "0.00",
+      "headloaderType": "std",
+      "adjustmentsList": [],
+      "discountPercent": "0",
+      "shippingAddress": ""
+    },
+    {
       "id": "LSL-0343",
       "date": "2026-09-24",
       "items": [
@@ -58250,57 +58301,6 @@
       "totalCess": 0,
       "vehicleNo": "",
       "voucherNo": "LSL-0342",
-      "influencer": "",
-      "paidAmount": 14299,
-      "adjustments": 0,
-      "contactName": "CASH SALES",
-      "creditPeriod": "0",
-      "totalDiscount": 0,
-      "additionalCess": 0,
-      "discountAmount": "0.00",
-      "headloaderType": "std",
-      "adjustmentsList": [],
-      "discountPercent": "0",
-      "shippingAddress": ""
-    },
-    {
-      "id": "LSL-0340",
-      "date": "2026-09-24",
-      "items": [
-        {
-          "mrp": 55.51,
-          "code": "ISI",
-          "name": "TMT STEELS",
-          "unit": "Kg",
-          "price": 65.5,
-          "batchNo": "54.237",
-          "netValue": 12117.5,
-          "quantity": 185,
-          "gstAmount": 2181.15,
-          "netAmount": 14298.65,
-          "gstPercent": 18,
-          "materialId": "MAT-0001",
-          "discountAmount": 0,
-          "discountPercent": 0
-        }
-      ],
-      "refNo": "LSL-0340",
-      "state": "KERALA",
-      "total": 14299,
-      "status": "paid",
-      "dueDate": "2026-09-24",
-      "payMode": "Cash",
-      "employee": "",
-      "roundOff": 0.35,
-      "seriesId": "SER-LOCAL-SALES",
-      "siteName": "",
-      "subtotal": 12117.5,
-      "totalGst": 2181.15,
-      "contactId": "__CASH__",
-      "narration": "",
-      "totalCess": 0,
-      "vehicleNo": "",
-      "voucherNo": "LSL-0340",
       "influencer": "",
       "paidAmount": 14299,
       "adjustments": 0,
@@ -106992,43 +106992,6 @@
       "voucherType": "SALE"
     },
     {
-      "id": "LSL-0342",
-      "date": "2026-09-24",
-      "entries": [
-        {
-          "accountId": "L0001",
-          "debit": 14299,
-          "credit": 0
-        },
-        {
-          "accountId": "L0004",
-          "debit": 0,
-          "credit": 12117.5
-        },
-        {
-          "accountId": "L0053",
-          "debit": 0,
-          "credit": 1090.58
-        },
-        {
-          "accountId": "L0048",
-          "debit": 0,
-          "credit": 1090.57
-        },
-        {
-          "accountId": "L0012",
-          "debit": 0,
-          "credit": 0.35
-        }
-      ],
-      "siteName": "",
-      "reference": "LSL-0342",
-      "voucherId": "LSL-0342",
-      "voucherNo": "LSL-0342",
-      "description": "",
-      "voucherType": "SALE"
-    },
-    {
       "id": "TX-2533",
       "date": "2026-08-18",
       "entries": [
@@ -108318,43 +108281,6 @@
       "voucherNo": "RC-0102",
       "description": "Receipt from Customer: SAHAL (RC-93)",
       "voucherType": "Receipt"
-    },
-    {
-      "id": "LSL-0371",
-      "date": "2026-09-24",
-      "entries": [
-        {
-          "accountId": "L0001",
-          "debit": 14299,
-          "credit": 0
-        },
-        {
-          "accountId": "L0004",
-          "debit": 0,
-          "credit": 12117.5
-        },
-        {
-          "accountId": "L0053",
-          "debit": 0,
-          "credit": 1090.58
-        },
-        {
-          "accountId": "L0048",
-          "debit": 0,
-          "credit": 1090.57
-        },
-        {
-          "accountId": "L0012",
-          "debit": 0,
-          "credit": 0.35
-        }
-      ],
-      "siteName": "",
-      "reference": "LSL-0371",
-      "voucherId": "LSL-0371",
-      "voucherNo": "LSL-0371",
-      "description": "",
-      "voucherType": "SALE"
     },
     {
       "id": "LSL-0340",
@@ -111141,43 +111067,6 @@
       "voucherType": "Receipt"
     },
     {
-      "id": "LSL-0343",
-      "date": "2026-09-24",
-      "entries": [
-        {
-          "accountId": "L0001",
-          "debit": 14299,
-          "credit": 0
-        },
-        {
-          "accountId": "L0004",
-          "debit": 0,
-          "credit": 12117.5
-        },
-        {
-          "accountId": "L0053",
-          "debit": 0,
-          "credit": 1090.58
-        },
-        {
-          "accountId": "L0048",
-          "debit": 0,
-          "credit": 1090.57
-        },
-        {
-          "accountId": "L0012",
-          "debit": 0,
-          "credit": 0.35
-        }
-      ],
-      "siteName": "",
-      "reference": "LSL-0343",
-      "voucherId": "LSL-0343",
-      "voucherNo": "LSL-0343",
-      "description": "",
-      "voucherType": "SALE"
-    },
-    {
       "id": "B2B0064",
       "date": "2026-08-18",
       "entries": [
@@ -111687,43 +111576,6 @@
       "description": "Cost of Goods Sold for invoice LSL-0311"
     },
     {
-      "id": "LSL-0341",
-      "date": "2026-09-24",
-      "entries": [
-        {
-          "accountId": "L0001",
-          "debit": 14299,
-          "credit": 0
-        },
-        {
-          "accountId": "L0004",
-          "debit": 0,
-          "credit": 12117.5
-        },
-        {
-          "accountId": "L0053",
-          "debit": 0,
-          "credit": 1090.58
-        },
-        {
-          "accountId": "L0048",
-          "debit": 0,
-          "credit": 1090.57
-        },
-        {
-          "accountId": "L0012",
-          "debit": 0,
-          "credit": 0.35
-        }
-      ],
-      "siteName": "",
-      "reference": "LSL-0341",
-      "voucherId": "LSL-0341",
-      "voucherNo": "LSL-0341",
-      "description": "",
-      "voucherType": "SALE"
-    },
-    {
       "id": "LPR-0031",
       "date": "2026-09-08",
       "reference": "LPR-0031",
@@ -111897,6 +111749,154 @@
           "credit": 12950
         }
       ]
+    },
+    {
+      "id": "LSL-0342",
+      "date": "2026-09-24",
+      "entries": [
+        {
+          "accountId": "L0001",
+          "debit": 14299,
+          "credit": 0
+        },
+        {
+          "accountId": "L0004",
+          "debit": 0,
+          "credit": 12117.5
+        },
+        {
+          "accountId": "L0053",
+          "debit": 0,
+          "credit": 1090.58
+        },
+        {
+          "accountId": "L0048",
+          "debit": 0,
+          "credit": 1090.57
+        },
+        {
+          "accountId": "L0012",
+          "debit": 0,
+          "credit": 0.35
+        }
+      ],
+      "siteName": "",
+      "reference": "LSL-0342",
+      "voucherId": "LSL-0342",
+      "voucherNo": "LSL-0342",
+      "description": "",
+      "voucherType": "SALE"
+    },
+    {
+      "id": "LSL-0371",
+      "date": "2026-09-24",
+      "entries": [
+        {
+          "accountId": "L0001",
+          "debit": 14299,
+          "credit": 0
+        },
+        {
+          "accountId": "L0004",
+          "debit": 0,
+          "credit": 12117.5
+        },
+        {
+          "accountId": "L0053",
+          "debit": 0,
+          "credit": 1090.58
+        },
+        {
+          "accountId": "L0048",
+          "debit": 0,
+          "credit": 1090.57
+        },
+        {
+          "accountId": "L0012",
+          "debit": 0,
+          "credit": 0.35
+        }
+      ],
+      "siteName": "",
+      "reference": "LSL-0371",
+      "voucherId": "LSL-0371",
+      "voucherNo": "LSL-0371",
+      "description": "",
+      "voucherType": "SALE"
+    },
+    {
+      "id": "LSL-0343",
+      "date": "2026-09-24",
+      "entries": [
+        {
+          "accountId": "L0001",
+          "debit": 14299,
+          "credit": 0
+        },
+        {
+          "accountId": "L0004",
+          "debit": 0,
+          "credit": 12117.5
+        },
+        {
+          "accountId": "L0053",
+          "debit": 0,
+          "credit": 1090.58
+        },
+        {
+          "accountId": "L0048",
+          "debit": 0,
+          "credit": 1090.57
+        },
+        {
+          "accountId": "L0012",
+          "debit": 0,
+          "credit": 0.35
+        }
+      ],
+      "siteName": "",
+      "reference": "LSL-0343",
+      "voucherId": "LSL-0343",
+      "voucherNo": "LSL-0343",
+      "description": "",
+      "voucherType": "SALE"
+    },
+    {
+      "id": "LSL-0341",
+      "date": "2026-09-24",
+      "entries": [
+        {
+          "accountId": "L0001",
+          "debit": 14299,
+          "credit": 0
+        },
+        {
+          "accountId": "L0004",
+          "debit": 0,
+          "credit": 12117.5
+        },
+        {
+          "accountId": "L0053",
+          "debit": 0,
+          "credit": 1090.58
+        },
+        {
+          "accountId": "L0048",
+          "debit": 0,
+          "credit": 1090.57
+        },
+        {
+          "accountId": "L0012",
+          "debit": 0,
+          "credit": 0.35
+        }
+      ],
+      "siteName": "",
+      "reference": "LSL-0341",
+      "voucherId": "LSL-0341",
+      "voucherNo": "LSL-0341",
+      "description": "",
+      "voucherType": "SALE"
     }
   ],
   "purchases": [
@@ -117175,4 +117175,4 @@
     }
   ],
   "preTakeOrders": []
-}                                                                                                                                                                                                                                
+}
