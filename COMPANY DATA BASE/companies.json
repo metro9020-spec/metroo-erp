@@ -94,5 +94,18 @@
         "endDate": "2027-03-31"
       }
     ]
+  },
+  {
+    "id": "1790400810645",
+    "name": "company 2",
+    "financialYearStarts": "2026-04-01",
+    "financialYears": [
+      {
+        "id": "default",
+        "name": "Current F.Y",
+        "startDate": "2026-04-01",
+        "endDate": "2027-03-31"
+      }
+    ]
   }
 ]
