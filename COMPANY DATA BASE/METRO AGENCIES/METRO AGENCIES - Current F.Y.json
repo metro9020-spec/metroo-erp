@@ -1,5 +1,5 @@
 {
-  "_lastSaved": 1790394243380,
+  "_lastSaved": 1790396682425,
   "materials": [
     {
       "id": "MAT-0001",
@@ -108551,50 +108551,12 @@
   "productGroups": [
     "Structural Supply",
     "Finishing Materials",
-    "Plumbing & Fittings",
-    "STEEL",
-    "CEMENT",
-    "CEMENT MIX",
-    "ROOFING SHEET",
-    "UNAVAILABLE",
-    "BLOCK",
-    "SAND",
-    "PIPE",
-    "TILES GUM",
-    "SUPER PLASTER",
-    "BLOCK FIX",
-    "ECO PLASTER",
-    "EPOXY",
-    "TILES CLEANER"
+    "Plumbing & Fittings"
   ],
   "companies": [
     "Ultratech",
     "Jindal",
-    "Ambuja",
-    "PRINCE",
-    "ACC",
-    "JK",
-    "MYCEM",
-    "BEGER",
-    "CHETTINAD",
-    "BIRLA A1",
-    "JSW",
-    "ULTRATECH",
-    "VAJRAM",
-    "MAHASAKTHI",
-    "SPL",
-    "BIRLA SHAKTHI",
-    "MALABAR",
-    "DACCAN",
-    "IC",
-    "RAMCO",
-    "PRIYA",
-    "BAGALKOT",
-    "DIOMOND",
-    "ULTRA",
-    "UNAVAILABLE",
-    "SHAKTHI",
-    "PENNA"
+    "Ambuja"
   ],
   "categories": [
     "Cement",
@@ -108602,29 +108564,12 @@
     "Sand",
     "Bricks",
     "Aggregates",
-    "Other",
-    "STEEL",
-    "CEMENT",
-    "CEMENT MIX",
-    "ROOFING SHEET",
-    "UNAVAILABLE",
-    "BLOCK",
-    "SAND",
-    "PIPE",
-    "TILES GUM",
-    "SUPER PLASTER",
-    "BLOCK FIX",
-    "ECO PLASTER",
-    "EPOXY",
-    "TILES CLEANER"
+    "Other"
   ],
   "subCategories": [
     "OPC 53",
     "TMT Reb",
-    "River Sand",
-    "UNAVAILABLE",
-    "CEMENT MIX",
-    "CEMENT"
+    "River Sand"
   ],
   "productNames": [
     "TMT STEELS",
@@ -109137,76 +109082,6 @@
       "groupName": "OUTPUT IGST",
       "openingBalance": 0,
       "balanceType": "Debit"
-    },
-    {
-      "code": "L001",
-      "name": "ACCRUED INTEREST",
-      "groupName": "CURRENT ASSETS",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L002",
-      "name": "ADDITIONAL TAX",
-      "groupName": "DUTIES & TAXES",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L006",
-      "name": "AUDIT FEE PAYABLE",
-      "groupName": "CURRENT LIABILITIES",
-      "openingBalance": 22000,
-      "balanceType": "Credit"
-    },
-    {
-      "code": "L007",
-      "name": "BANK CHARGES",
-      "groupName": "INDIRECT EXPENSES",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L008",
-      "name": "BUSINESS PERQUISITES",
-      "groupName": "INDIRECT INCOME",
-      "openingBalance": 0,
-      "balanceType": "Credit"
-    },
-    {
-      "code": "L009",
-      "name": "CASH",
-      "groupName": "CASH-IN-HAND",
-      "openingBalance": 612951.91,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L011",
-      "name": "DEPRECIATION",
-      "groupName": "DEPRECIATION",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L013",
-      "name": "DISCOUNT ALLOWED",
-      "groupName": "INDIRECT EXPENSES",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L014",
-      "name": "DISCOUNT RECEIVED",
-      "groupName": "INDIRECT INCOME",
-      "openingBalance": 0,
-      "balanceType": "Credit"
-    },
-    {
-      "code": "L019",
-      "name": "INTERSTATE PURCHASE",
-      "groupName": "PURCHASE ACCOUNT",
-      "openingBalance": 0,
-      "balanceType": "Debit"
     }
   ],
   "salesAdjustments": [
@@ -109684,11 +109559,7 @@
     "enableInfluencerSales": true,
     "enableCess": true,
     "enable4DigitHsn": true,
-    "enableCessInSalesBill": false,
-    "enablePartyClosingBalanceBottom": true,
-    "enableHeadloader": true,
-    "influencerLoyaltyRate": 1,
-    "allowPreviousYearEditing": false
+    "enableCessInSalesBill": false
   },
   "influencers": [
     {
@@ -109723,7 +109594,7 @@
       "prefix": "LSL-",
       "digits": 4,
       "startingNumber": 1,
-      "currentNumber": 340,
+      "currentNumber": 1,
       "ledgerCode": "L022",
       "isActive": true
     },
@@ -109735,7 +109606,7 @@
       "prefix": "B2B00",
       "digits": 1,
       "startingNumber": 1,
-      "currentNumber": 33,
+      "currentNumber": 1,
       "ledgerCode": "L022",
       "isActive": true
     },
@@ -109771,7 +109642,7 @@
       "prefix": "LPR-",
       "digits": 4,
       "startingNumber": 1,
-      "currentNumber": 31,
+      "currentNumber": 1,
       "ledgerCode": "L018",
       "isActive": true
     },
@@ -109783,9 +109654,9 @@
       "prefix": "IPR-",
       "digits": 4,
       "startingNumber": 1,
-      "currentNumber": 4,
+      "currentNumber": 1,
       "ledgerCode": "L020",
-      "isActive": true
+      "isActive": false
     },
     {
       "id": "SER-NONTAXABLE-PURCHASE",
