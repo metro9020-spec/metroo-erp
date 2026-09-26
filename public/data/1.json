@@ -1,5 +1,5 @@
 {
-  "_lastSaved": 1790418535098,
+  "_lastSaved": 1790426103784,
   "materials": [
     {
       "id": "MAT-0001",
@@ -106451,23 +106451,6 @@
           "credit": 2942.4
         }
       ]
-    },
-    {
-      "id": "TX_TEST_ADJ_99",
-      "date": "2025-06-01",
-      "voucherType": "Journal",
-      "entries": [
-        {
-          "accountId": "L_TEST_ADJ_99",
-          "credit": 5000,
-          "debit": 0
-        },
-        {
-          "accountId": "1010",
-          "debit": 5000,
-          "credit": 0
-        }
-      ]
     }
   ],
   "purchases": [
@@ -108561,32 +108544,151 @@
       "total": 64998.99999999999
     }
   ],
-  "salesReturns": [],
-  "purchaseReturns": [],
+  "salesReturns": [
+    {
+      "id": "SR-001",
+      "billNo": "B2B009",
+      "date": "2026-09-20",
+      "contactId": "CUST-0427",
+      "contactName": "MANEESH PV",
+      "siteName": "",
+      "state": "KERALA",
+      "items": [
+        {
+          "materialId": "MAT-0003",
+          "name": "CEMENT",
+          "quantity": 10,
+          "unit": "Nos",
+          "price": 284.75,
+          "amount": 2847.5,
+          "gstPercent": 18,
+          "gstAmount": 512.55
+        }
+      ],
+      "subtotal": 2847.5,
+      "taxRate": 18,
+      "taxAmount": 512.55,
+      "adjustmentsList": [],
+      "roundOff": 0,
+      "total": 3360.05
+    }
+  ],
+  "purchaseReturns": [
+    {
+      "id": "PR-001",
+      "billNo": "1075/26-27",
+      "date": "2026-09-20",
+      "contactId": "VEND-0068",
+      "contactName": "PRINCE TMT STEELS (P) LTD",
+      "state": "KERALA",
+      "items": [
+        {
+          "materialId": "MAT-0001",
+          "name": "TMT STEELS",
+          "quantity": 129,
+          "unit": "Kg",
+          "price": 54.24,
+          "amount": 6996.96,
+          "gstPercent": 18,
+          "gstAmount": 1259.4528,
+          "batchNo": "55.932"
+        }
+      ],
+      "subtotal": 6996.96,
+      "taxRate": 18,
+      "taxAmount": 1259.4528,
+      "adjustmentsList": [
+        {
+          "type": "Add",
+          "name": "FREIGHT",
+          "amount": 100,
+          "ledgerCode": "L031"
+        }
+      ],
+      "roundOff": 0,
+      "total": 8356.4128
+    }
+  ],
   "conversions": [],
   "stockAdjustments": [],
   "productGroups": [
-    "Structural Supply",
-    "Finishing Materials",
-    "Plumbing & Fittings"
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    "STEEL",
+    "CEMENT",
+    "CEMENT MIX",
+    "ROOFING SHEET",
+    "UNAVAILABLE",
+    "BLOCK",
+    "SAND",
+    "PIPE",
+    "TILES GUM",
+    "SUPER PLASTER",
+    "BLOCK FIX",
+    "ECO PLASTER",
+    "EPOXY",
+    "TILES CLEANER"
   ],
   "companies": [
-    "Ultratech",
-    "Jindal",
-    "Ambuja"
+    "PRINCE",
+    "ACC",
+    "JK",
+    "MYCEM",
+    "BEGER",
+    "CHETTINAD",
+    "BIRLA A1",
+    "JSW",
+    "ULTRATECH",
+    "VAJRAM",
+    "MAHASAKTHI",
+    "SPL",
+    "BIRLA SHAKTHI",
+    "MALABAR",
+    "DACCAN",
+    "IC",
+    "RAMCO",
+    "PRIYA",
+    "BAGALKOT",
+    "DIOMOND",
+    "ULTRA",
+    "SHAKTHI",
+    "PENNA",
+    "UNAVAILABLE"
   ],
   "categories": [
-    "Cement",
-    "Steel",
-    "Sand",
-    "Bricks",
-    "Aggregates",
-    "Other"
+    "STEEL",
+    "CEMENT",
+    "CEMENT MIX",
+    "ROOFING SHEET",
+    "BLOCK",
+    "SAND",
+    "PIPE",
+    "TILES GUM",
+    "SUPER PLASTER",
+    "BLOCK FIX",
+    "ECO PLASTER",
+    "UNAVAILABLE",
+    "EPOXY",
+    "TILES CLEANER"
   ],
   "subCategories": [
-    "OPC 53",
-    "TMT Reb",
-    "River Sand"
+    "CEMENT MIX",
+    "CEMENT",
+    "UNAVAILABLE"
   ],
   "productNames": [
     "TMT STEELS",
@@ -108619,182 +108721,254 @@
   "adminPassword": "123",
   "accountGroups": [
     {
-      "id": "21",
-      "name": "PURCHASE ACCOUNT",
-      "under": "EXPENSE",
-      "isDefault": true
-    },
-    {
-      "id": "22",
-      "name": "SALES ACCOUNT",
-      "under": "INCOME",
-      "isDefault": true
-    },
-    {
       "id": "1",
-      "name": "ADAVANCE TO SUPPLIER",
-      "under": "CURRENT ASSETS",
-      "isDefault": true
-    },
-    {
-      "id": "2",
-      "name": "BANK ACCOUNTS",
-      "under": "CURRENT ASSETS",
-      "isDefault": true
-    },
-    {
-      "id": "3",
-      "name": "BANK OD A/C",
-      "under": "CURRENT LIABILITIES",
-      "isDefault": true
-    },
-    {
-      "id": "4",
-      "name": "BRANCH / DIVISIONS",
-      "under": "LIABILITIES",
-      "isDefault": true
-    },
-    {
-      "id": "5",
       "name": "CAPITAL ACCOUNT",
       "under": "EQUITY",
       "isDefault": true
     },
     {
-      "id": "6",
-      "name": "CASH-IN-HAND",
-      "under": "CURRENT ASSETS",
+      "id": "2",
+      "name": "LOANS(LIABILITY)",
+      "under": "LIABILITIES",
       "isDefault": true
     },
     {
-      "id": "7",
+      "id": "3",
+      "name": "CURRENT LIABILITIES",
+      "under": "LIABILITIES",
+      "isDefault": true
+    },
+    {
+      "id": "4",
+      "name": "FIXED ASSETS",
+      "under": "ASSETS",
+      "isDefault": true
+    },
+    {
+      "id": "5",
+      "name": "INVESTMENTS",
+      "under": "ASSETS",
+      "isDefault": true
+    },
+    {
+      "id": "6",
       "name": "CURRENT ASSETS",
       "under": "ASSETS",
       "isDefault": true
     },
     {
       "id": "8",
-      "name": "CURRENT LIABILITIES",
-      "under": "LIABILITIES",
+      "name": "SALES ACCOUNT",
+      "under": "INCOME",
       "isDefault": true
     },
     {
       "id": "9",
-      "name": "DEPOSITS",
-      "under": "CURRENT ASSETS",
-      "isDefault": true
-    },
-    {
-      "id": "10",
-      "name": "DEPOSITS (ASSETS)",
-      "under": "CURRENT ASSETS",
-      "isDefault": true
-    },
-    {
-      "id": "11",
-      "name": "DEPRECIATION",
+      "name": "PURCHASE ACCOUNT",
       "under": "EXPENSE",
       "isDefault": true
     },
     {
-      "id": "12",
+      "id": "10",
       "name": "DIRECT EXPENSES",
       "under": "EXPENSE",
       "isDefault": true
     },
     {
-      "id": "13",
+      "id": "11",
       "name": "DIRECT INCOME",
       "under": "INCOME",
       "isDefault": true
     },
     {
-      "id": "14",
-      "name": "DUTIES & TAXES",
-      "under": "CURRENT LIABILITIES",
-      "isDefault": true
-    },
-    {
-      "id": "15",
-      "name": "EMPLOYEE EXPENSES",
-      "under": "EXPENSE",
-      "isDefault": true
-    },
-    {
-      "id": "16",
-      "name": "FIXED ASSETS",
-      "under": "ASSETS",
-      "isDefault": true
-    },
-    {
-      "id": "17",
+      "id": "12",
       "name": "INDIRECT EXPENSES",
       "under": "EXPENSE",
       "isDefault": true
     },
     {
-      "id": "18",
+      "id": "13",
       "name": "INDIRECT INCOME",
       "under": "INCOME",
       "isDefault": true
     },
     {
-      "id": "19",
-      "name": "INVESTMENTS",
+      "id": "14",
+      "name": "CASH-IN-HAND",
+      "under": "CURRENT ASSETS",
+      "isDefault": true
+    },
+    {
+      "id": "15",
+      "name": "BANK ACCOUNTS",
+      "under": "CURRENT ASSETS",
+      "isDefault": true
+    },
+    {
+      "id": "16",
+      "name": "SUNDRY DEBTORS",
+      "under": "CURRENT ASSETS",
+      "isDefault": true
+    },
+    {
+      "id": "17",
+      "name": "SUNDRY CREDITORS",
+      "under": "CURRENT LIABILITIES",
+      "isDefault": true
+    },
+    {
+      "id": "18",
+      "name": "STOCK IN HAND",
       "under": "ASSETS",
       "isDefault": true
     },
     {
+      "id": "19",
+      "name": "BRANCH / DIVISIONS",
+      "under": "LIABILITIES",
+      "isDefault": true
+    },
+    {
       "id": "20",
+      "name": "RESERVES & SURPLUS",
+      "under": "ASSETS",
+      "isDefault": true
+    },
+    {
+      "id": "21",
+      "name": "DEPOSITS (ASSETS)",
+      "under": "CURRENT ASSETS",
+      "isDefault": true
+    },
+    {
+      "id": "22",
       "name": "LOANS & ADVANCES(ASSET)",
       "under": "CURRENT ASSETS",
       "isDefault": true
     },
     {
       "id": "23",
-      "name": "INPUT SGST",
-      "under": "DUTIES & TAXES",
+      "name": "DUTIES & TAXES",
+      "under": "CURRENT LIABILITIES",
       "isDefault": true
     },
     {
       "id": "24",
+      "name": "PROVISIONS",
+      "under": "CURRENT LIABILITIES",
+      "isDefault": true
+    },
+    {
+      "id": "25",
+      "name": "BANK OD A/C",
+      "under": "LIABILITIES",
+      "isDefault": true
+    },
+    {
+      "id": "26",
+      "name": "SECURED LOANS",
+      "under": "ASSETS",
+      "isDefault": true
+    },
+    {
+      "id": "27",
+      "name": "UNSECURED LOANS",
+      "under": "ASSETS",
+      "isDefault": true
+    },
+    {
+      "id": "28",
+      "name": "SUSPENSE A/C",
+      "under": "ASSETS",
+      "isDefault": true
+    },
+    {
+      "id": "29",
+      "name": "DEPRECIATION",
+      "under": "EXPENSE",
+      "isDefault": true
+    },
+    {
+      "id": "31",
+      "name": "EMPLOYEE EXPENSES",
+      "under": "EXPENSE",
+      "isDefault": true
+    },
+    {
+      "id": "32",
+      "name": "MANUFACTURING EXPENSE",
+      "under": "EXPENSE",
+      "isDefault": true
+    },
+    {
+      "id": "33",
+      "name": "TDS",
+      "under": "ASSETS",
+      "isDefault": true
+    },
+    {
+      "id": "34",
       "name": "INPUT CGST",
       "under": "DUTIES & TAXES",
       "isDefault": true
     },
     {
-      "id": "25",
+      "id": "35",
+      "name": "INPUT SGST",
+      "under": "DUTIES & TAXES",
+      "isDefault": true
+    },
+    {
+      "id": "36",
       "name": "INPUT IGST",
       "under": "DUTIES & TAXES",
       "isDefault": true
     },
     {
-      "id": "26",
-      "name": "OUTPUT SGST",
-      "under": "DUTIES & TAXES",
-      "isDefault": true
-    },
-    {
-      "id": "27",
+      "id": "37",
       "name": "OUTPUT CGST",
       "under": "DUTIES & TAXES",
       "isDefault": true
     },
     {
-      "id": "28",
+      "id": "38",
+      "name": "OUTPUT SGST",
+      "under": "DUTIES & TAXES",
+      "isDefault": true
+    },
+    {
+      "id": "39",
       "name": "OUTPUT IGST",
       "under": "DUTIES & TAXES",
       "isDefault": true
     },
     {
-      "id": "29",
-      "name": "SUNDRY CREDITORS",
+      "id": "41",
+      "name": "SALARY",
+      "under": "EXPENSE",
+      "isDefault": true
+    },
+    {
+      "id": "42",
+      "name": "OUTSTANDING LIABILITIES & PROVISIONS",
       "under": "CURRENT LIABILITIES",
       "isDefault": true
     },
     {
-      "id": "30",
-      "name": "SUNDRY DEBTORS",
+      "id": "43",
+      "name": "OTHER CURRENT ASSETS",
+      "under": "CURRENT ASSETS",
+      "isDefault": true
+    },
+    {
+      "id": "44",
+      "name": "DEPOSITS",
+      "under": "CURRENT ASSETS",
+      "isDefault": true
+    },
+    {
+      "id": "45",
+      "name": "ADAVANCE TO SUPPLIER",
       "under": "CURRENT ASSETS",
       "isDefault": true
     },
@@ -108807,29 +108981,1286 @@
   ],
   "ledgers": [
     {
-      "code": "L018",
+      "code": "L0001",
+      "tradeasyId": 1,
+      "name": "CASH",
+      "groupName": "CASH-IN-HAND",
+      "openingBalance": 2265649.23,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0002",
+      "tradeasyId": 2,
+      "name": "PREVIOUS YEAR PROFIT",
+      "groupName": "CAPITAL ACCOUNT",
+      "openingBalance": 338646.34,
+      "balanceType": "Credit",
+      "parentCustomerId": null,
+      "isCustomerSubLedger": false
+    },
+    {
+      "code": "L0003",
+      "tradeasyId": 3,
+      "name": "DEPRECIATION",
+      "groupName": "DEPRECIATION",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0004",
+      "tradeasyId": 4,
+      "name": "LOCAL SALES",
+      "groupName": "SALES ACCOUNT",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0005",
+      "tradeasyId": 5,
       "name": "LOCAL PURCHASE",
       "groupName": "PURCHASE ACCOUNT",
       "openingBalance": 0,
       "balanceType": "Debit"
     },
     {
-      "code": "L020",
+      "code": "L0006",
+      "tradeasyId": 6,
+      "name": "STOCK",
+      "groupName": "STOCK IN HAND",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0007",
+      "tradeasyId": 7,
+      "name": "LOCAL SALES RETURN",
+      "groupName": "SALES ACCOUNT",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0008",
+      "tradeasyId": 8,
+      "name": "LOCAL PURCHASE RETURN",
+      "groupName": "PURCHASE ACCOUNT",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0009",
+      "tradeasyId": 9,
+      "name": "DISCOUNT ALLOWED",
+      "groupName": "INDIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0010",
+      "tradeasyId": 10,
+      "name": "DISCOUNT RECEIVED",
+      "groupName": "INDIRECT INCOME",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0011",
+      "tradeasyId": 11,
+      "name": "ADDITIONAL TAX",
+      "groupName": "DUTIES & TAXES",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0012",
+      "tradeasyId": 12,
+      "name": "ROUND OFF",
+      "groupName": "INDIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit",
+      "parentCustomerId": null,
+      "isCustomerSubLedger": false
+    },
+    {
+      "code": "L0013",
+      "tradeasyId": 13,
+      "name": "FREIGHT",
+      "groupName": "DIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0014",
+      "tradeasyId": 14,
+      "name": "FOREX LOSS",
+      "groupName": "INDIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0015",
+      "tradeasyId": 15,
+      "name": "FOREX GAIN",
+      "groupName": "INDIRECT INCOME",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0016",
+      "tradeasyId": 16,
+      "name": "SERVICE CHARGE",
+      "groupName": "DIRECT INCOME",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0017",
+      "tradeasyId": 17,
+      "name": "SERVICE TAX COLLECTED",
+      "groupName": "DUTIES & TAXES",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0018",
+      "tradeasyId": 18,
+      "name": "SERVICE CESS",
+      "groupName": "DUTIES & TAXES",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0020",
+      "tradeasyId": 20,
+      "name": "SALES CESS",
+      "groupName": "DUTIES & TAXES",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0021",
+      "tradeasyId": 21,
+      "name": "PURCHASE CESS",
+      "groupName": "DUTIES & TAXES",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0022",
+      "tradeasyId": 22,
+      "name": "SERVICE TAX PAID",
+      "groupName": "DUTIES & TAXES",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0023",
+      "tradeasyId": 23,
+      "name": "SERVICE CESS PAID",
+      "groupName": "DUTIES & TAXES",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0028",
+      "tradeasyId": 28,
+      "name": "STOCK TRANSFER",
+      "groupName": "PURCHASE ACCOUNT",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0029",
+      "tradeasyId": 29,
+      "name": "STOCK RECEIPT",
+      "groupName": "PURCHASE ACCOUNT",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0030",
+      "tradeasyId": 30,
+      "name": "INPUT SGST 0%",
+      "groupName": "INPUT SGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0031",
+      "tradeasyId": 31,
+      "name": "INPUT SGST 2.5%",
+      "groupName": "INPUT SGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0032",
+      "tradeasyId": 32,
+      "name": "INPUT SGST 6%",
+      "groupName": "INPUT SGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0033",
+      "tradeasyId": 33,
+      "name": "INPUT SGST 9%",
+      "groupName": "INPUT SGST",
+      "openingBalance": 356462.69,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0034",
+      "tradeasyId": 34,
+      "name": "INPUT SGST 14%",
+      "groupName": "INPUT SGST",
+      "openingBalance": 260000.58,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0035",
+      "tradeasyId": 35,
+      "name": "INPUT CGST 0%",
+      "groupName": "INPUT CGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0036",
+      "tradeasyId": 36,
+      "name": "INPUT CGST 2.5%",
+      "groupName": "INPUT CGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0037",
+      "tradeasyId": 37,
+      "name": "INPUT CGST 6%",
+      "groupName": "INPUT CGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0038",
+      "tradeasyId": 38,
+      "name": "INPUT CGST 9%",
+      "groupName": "INPUT CGST",
+      "openingBalance": 356462.69,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0039",
+      "tradeasyId": 39,
+      "name": "INPUT CGST 14%",
+      "groupName": "INPUT CGST",
+      "openingBalance": 260000.58,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0040",
+      "tradeasyId": 40,
+      "name": "INPUT IGST 0%",
+      "groupName": "INPUT IGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0041",
+      "tradeasyId": 41,
+      "name": "INPUT IGST 5%",
+      "groupName": "INPUT IGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0042",
+      "tradeasyId": 42,
+      "name": "INPUT IGST 12%",
+      "groupName": "INPUT IGST",
+      "openingBalance": 75228.23,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0043",
+      "tradeasyId": 43,
+      "name": "INPUT IGST 18%",
+      "groupName": "INPUT IGST",
+      "openingBalance": 124560.99,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0044",
+      "tradeasyId": 44,
+      "name": "INPUT IGST 28%",
+      "groupName": "INPUT IGST",
+      "openingBalance": 49155,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0045",
+      "tradeasyId": 45,
+      "name": "OUTPUT SGST 0%",
+      "groupName": "OUTPUT SGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0046",
+      "tradeasyId": 46,
+      "name": "OUTPUT SGST 2.5%",
+      "groupName": "OUTPUT SGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0047",
+      "tradeasyId": 47,
+      "name": "OUTPUT SGST 6%",
+      "groupName": "OUTPUT SGST",
+      "openingBalance": 41623.64,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0048",
+      "tradeasyId": 48,
+      "name": "OUTPUT SGST 9%",
+      "groupName": "OUTPUT SGST",
+      "openingBalance": 491875.03,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0049",
+      "tradeasyId": 49,
+      "name": "OUTPUT SGST 14%",
+      "groupName": "OUTPUT SGST",
+      "openingBalance": 252121.98,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0050",
+      "tradeasyId": 50,
+      "name": "OUTPUT CGST 0%",
+      "groupName": "OUTPUT CGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0051",
+      "tradeasyId": 51,
+      "name": "OUTPUT CGST 2.5%",
+      "groupName": "OUTPUT CGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0052",
+      "tradeasyId": 52,
+      "name": "OUTPUT CGST 6%",
+      "groupName": "OUTPUT CGST",
+      "openingBalance": 41623.64,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0053",
+      "tradeasyId": 53,
+      "name": "OUTPUT CGST 9%",
+      "groupName": "OUTPUT CGST",
+      "openingBalance": 491875.03,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0054",
+      "tradeasyId": 54,
+      "name": "OUTPUT CGST 14%",
+      "groupName": "OUTPUT CGST",
+      "openingBalance": 252121.98,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0055",
+      "tradeasyId": 55,
+      "name": "OUTPUT IGST 0%",
+      "groupName": "OUTPUT IGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0056",
+      "tradeasyId": 56,
+      "name": "OUTPUT IGST 5%",
+      "groupName": "OUTPUT IGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0057",
+      "tradeasyId": 57,
+      "name": "OUTPUT IGST 12%",
+      "groupName": "OUTPUT IGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0058",
+      "tradeasyId": 58,
+      "name": "OUTPUT IGST 18%",
+      "groupName": "OUTPUT IGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0059",
+      "tradeasyId": 59,
+      "name": "OUTPUT IGST 28%",
+      "groupName": "OUTPUT IGST",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0060",
+      "tradeasyId": 60,
+      "name": "IGST SALES",
+      "groupName": "SALES ACCOUNT",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0061",
+      "tradeasyId": 61,
+      "name": "NON TAXABLE SALES",
+      "groupName": "SALES ACCOUNT",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0062",
+      "tradeasyId": 62,
       "name": "IGST PURCHASE",
       "groupName": "PURCHASE ACCOUNT",
       "openingBalance": 0,
       "balanceType": "Debit"
     },
     {
-      "code": "L021",
+      "code": "L0063",
+      "tradeasyId": 63,
       "name": "NON TAXABLE PURCHASE",
       "groupName": "PURCHASE ACCOUNT",
       "openingBalance": 0,
       "balanceType": "Debit"
     },
     {
-      "code": "L022",
-      "name": "LOCAL SALES",
+      "code": "L0064",
+      "tradeasyId": 64,
+      "name": "IGST SALES RETURN",
+      "groupName": "SALES ACCOUNT",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0065",
+      "tradeasyId": 65,
+      "name": "NON TAXABLE SALES RETURN",
+      "groupName": "SALES ACCOUNT",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0066",
+      "tradeasyId": 66,
+      "name": "IGST PURCHASE RETURN",
+      "groupName": "PURCHASE ACCOUNT",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0067",
+      "tradeasyId": 67,
+      "name": "NON TAXABLE PURCHASE RETURN",
+      "groupName": "PURCHASE ACCOUNT",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0081",
+      "tradeasyId": 81,
+      "name": "KGB BANK",
+      "groupName": "BANK ACCOUNTS",
+      "openingBalance": 22506.64,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0091",
+      "tradeasyId": 91,
+      "name": "BUILDING",
+      "groupName": "FIXED ASSETS",
+      "openingBalance": 779395,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0099",
+      "tradeasyId": 99,
+      "name": "BANK CHARGES",
+      "groupName": "INDIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0100",
+      "tradeasyId": 100,
+      "name": "FEDERARAL BANK",
+      "groupName": "BANK ACCOUNTS",
+      "openingBalance": 20725.9,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0101",
+      "tradeasyId": 101,
+      "name": "ROUND OFF1",
+      "groupName": "INDIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0102",
+      "tradeasyId": 102,
+      "name": "DISTRICT BANK",
+      "groupName": "BANK ACCOUNTS",
+      "openingBalance": 3469.24,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0110",
+      "tradeasyId": 110,
+      "name": "RAIN CEMENT LTD ADVANCE",
+      "groupName": "ADAVANCE TO SUPPLIER",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0114",
+      "tradeasyId": 114,
+      "name": "GOLD SCHEME RECEIVED",
+      "groupName": "INDIRECT INCOME",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0116",
+      "tradeasyId": 116,
+      "name": "RENT COLLECTED",
+      "groupName": "DIRECT INCOME",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0118",
+      "tradeasyId": 118,
+      "name": "GST PAID",
+      "groupName": "DUTIES & TAXES",
+      "openingBalance": 157099,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0120",
+      "tradeasyId": 120,
+      "name": "DIFFERENCE ON RATE",
+      "groupName": "DIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0124",
+      "tradeasyId": 124,
+      "name": "DISCOUNT RECEIVED INDIRECT",
+      "groupName": "INDIRECT INCOME",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0125",
+      "tradeasyId": 125,
+      "name": "RINAS",
+      "groupName": "LOANS & ADVANCES(ASSET)",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0126",
+      "tradeasyId": 126,
+      "name": "DISCOUNT RECEIVED DIRECT",
+      "groupName": "DIRECT INCOME",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0135",
+      "tradeasyId": 135,
+      "name": "INTEREST ON SD",
+      "groupName": "INDIRECT INCOME",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0139",
+      "tradeasyId": 139,
+      "name": "AMAZON GIFT CARD",
+      "groupName": "INDIRECT INCOME",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0146",
+      "tradeasyId": 146,
+      "name": "ELECTRICITY BILL",
+      "groupName": "INDIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0148",
+      "tradeasyId": 148,
+      "name": "GOLD SCHEME PRIYA",
+      "groupName": "INDIRECT INCOME",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0149",
+      "tradeasyId": 149,
+      "name": "ASINAR",
+      "groupName": "SALARY",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0150",
+      "tradeasyId": 150,
+      "name": "SUHAIL-SALARY",
+      "groupName": "SALARY",
+      "openingBalance": 0,
+      "balanceType": "Debit",
+      "parentCustomerId": null,
+      "isCustomerSubLedger": false
+    },
+    {
+      "code": "L0151",
+      "tradeasyId": 151,
+      "name": "GST LATE FEE",
+      "groupName": "INDIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0155",
+      "tradeasyId": 155,
+      "name": "PRICE CHANGE",
+      "groupName": "DIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0156",
+      "tradeasyId": 156,
+      "name": "SOFTWARE UPDATION",
+      "groupName": "INDIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0158",
+      "tradeasyId": 158,
+      "name": "KERALA FLOOD CESS",
+      "groupName": "DUTIES & TAXES",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0166",
+      "tradeasyId": 166,
+      "name": "KERALA FLOOD CESS PAYABLE",
+      "groupName": "OUTSTANDING LIABILITIES & PROVISIONS",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0171",
+      "tradeasyId": 171,
+      "name": "HAMSA M.P CAPITAL A/C",
+      "groupName": "CAPITAL ACCOUNT",
+      "openingBalance": 3888906.76,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0177",
+      "tradeasyId": 177,
+      "name": "GOLD RECEIVED CHETTINAD",
+      "groupName": "INDIRECT INCOME",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0181",
+      "tradeasyId": 181,
+      "name": "INCOME TAX PAID 2018-19",
+      "groupName": "PROVISIONS",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0183",
+      "tradeasyId": 183,
+      "name": "AUDIT FEE PAYABLE",
+      "groupName": "OUTSTANDING LIABILITIES & PROVISIONS",
+      "openingBalance": 22000,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0184",
+      "tradeasyId": 184,
+      "name": "ELECTRICITY BILL PAYABLE",
+      "groupName": "OUTSTANDING LIABILITIES & PROVISIONS",
+      "openingBalance": 2143,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0185",
+      "tradeasyId": 185,
+      "name": "GST PAYABLE",
+      "groupName": "OTHER CURRENT ASSETS",
+      "openingBalance": 75466.47,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0186",
+      "tradeasyId": 186,
+      "name": "VAT PAYABLE 14-15",
+      "groupName": "OUTSTANDING LIABILITIES & PROVISIONS",
+      "openingBalance": 1072,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0187",
+      "tradeasyId": 187,
+      "name": "VAT PAYABLE 15-16",
+      "groupName": "OUTSTANDING LIABILITIES & PROVISIONS",
+      "openingBalance": 15649,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0188",
+      "tradeasyId": 188,
+      "name": "FURNITURE & FITTINGS",
+      "groupName": "FIXED ASSETS",
+      "openingBalance": 4302.05,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0189",
+      "tradeasyId": 189,
+      "name": "WEIGHING MACHINE",
+      "groupName": "FIXED ASSETS",
+      "openingBalance": 9608.38,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0190",
+      "tradeasyId": 190,
+      "name": "TDS ON DEPOSIT",
+      "groupName": "OTHER CURRENT ASSETS",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0191",
+      "tradeasyId": 191,
+      "name": "DEALER DEPOSIT (THE INDIA CEMENTS)",
+      "groupName": "DEPOSITS",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0192",
+      "tradeasyId": 192,
+      "name": "DEALER DEPOSIT (RAIN CEMENTS LTD)",
+      "groupName": "DEPOSITS",
+      "openingBalance": 45300,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0193",
+      "tradeasyId": 193,
+      "name": "NSC DEPOSITS",
+      "groupName": "DEPOSITS",
+      "openingBalance": 5000,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0195",
+      "tradeasyId": 195,
+      "name": "SHAHUL SREEKANDAPURAM",
+      "groupName": "CURRENT LIABILITIES",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0196",
+      "tradeasyId": 196,
+      "name": "SCHEME RECEIVED- JSW CEMENT LTD",
+      "groupName": "INDIRECT INCOME",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0197",
+      "tradeasyId": 197,
+      "name": "DEALER DEPOSIT (KESORAM INDUSTRIES LTD)",
+      "groupName": "DEPOSITS",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0236",
+      "tradeasyId": 236,
+      "name": "PROFESSIONAL CHARGES PAYABLE",
+      "groupName": "OUTSTANDING LIABILITIES & PROVISIONS",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0237",
+      "tradeasyId": 237,
+      "name": "RAMEES",
+      "groupName": "UNSECURED LOANS",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0256",
+      "tradeasyId": 256,
+      "name": "TCS .1%",
+      "groupName": "CURRENT ASSETS",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0261",
+      "tradeasyId": 261,
+      "name": "INTEREST ON KFC",
+      "groupName": "INDIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0264",
+      "tradeasyId": 264,
+      "name": "GIFT CARD ACC",
+      "groupName": "INDIRECT INCOME",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0278",
+      "tradeasyId": 278,
+      "name": "DIGITAL SIGNATURE",
+      "groupName": "INDIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0301",
+      "tradeasyId": 301,
+      "name": "INCOME TAX PAID 2019-20",
+      "groupName": "INDIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0321",
+      "tradeasyId": 321,
+      "name": "ACCRUED INTEREST",
+      "groupName": "OTHER CURRENT ASSETS",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0322",
+      "tradeasyId": 322,
+      "name": "TRANSPORTATION CHARGES PAID",
+      "groupName": "INDIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0323",
+      "tradeasyId": 323,
+      "name": "REVERSE CHARGE PAYABLE",
+      "groupName": "CURRENT LIABILITIES",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0336",
+      "tradeasyId": 336,
+      "name": "SCHEME RECEIVED FROM ACC",
+      "groupName": "INDIRECT INCOME",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0349",
+      "tradeasyId": 349,
+      "name": "TRANSPORTATION CHARGES",
+      "groupName": "INDIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0379",
+      "tradeasyId": 379,
+      "name": "SHEME RECEIVED FROM CHETTINAD",
+      "groupName": "INDIRECT INCOME",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0396",
+      "tradeasyId": 396,
+      "name": "ASHTECH",
+      "groupName": "CURRENT LIABILITIES",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0406",
+      "tradeasyId": 406,
+      "name": "SALES PROMOTION EXPENSES",
+      "groupName": "INDIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0460",
+      "tradeasyId": 460,
+      "name": "RTGS COMMISSION",
+      "groupName": "INDIRECT INCOME",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0466",
+      "tradeasyId": 466,
+      "name": "DIARIES AND CALENDER",
+      "groupName": "INDIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0499",
+      "tradeasyId": 499,
+      "name": "SCHEME RECEIVED FROM CHETTINAD",
+      "groupName": "INDIRECT INCOME",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0510",
+      "tradeasyId": 510,
+      "name": "INCOME TAX 2020-21",
+      "groupName": "CURRENT LIABILITIES",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0519",
+      "tradeasyId": 519,
+      "name": "TCS U/S 206",
+      "groupName": "OTHER CURRENT ASSETS",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0547",
+      "tradeasyId": 547,
+      "name": "INTEREST ON KFC PAYABLE",
+      "groupName": "OUTSTANDING LIABILITIES & PROVISIONS",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0548",
+      "tradeasyId": 548,
+      "name": "UNLOADING CHARGES",
+      "groupName": "DIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0549",
+      "tradeasyId": 549,
+      "name": "SALARY - ASINAR",
+      "groupName": "INDIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0550",
+      "tradeasyId": 550,
+      "name": "INTERNET&UPI EXPENSES",
+      "groupName": "INDIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0551",
+      "tradeasyId": 551,
+      "name": "TELEPHONE EXPENSES",
+      "groupName": "INDIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0553",
+      "tradeasyId": 553,
+      "name": "SALARY- RINAS",
+      "groupName": "SALARY",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0610",
+      "tradeasyId": 610,
+      "name": "SCHEME RECEIVED FROM DALMIA",
+      "groupName": "INDIRECT INCOME",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0611",
+      "tradeasyId": 611,
+      "name": "SCHEME RECEIVED FROM ULTRA TECH",
+      "groupName": "INDIRECT INCOME",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0747",
+      "tradeasyId": 747,
+      "name": "INCOME TAX 2021-22 PAID",
+      "groupName": "INDIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0793",
+      "tradeasyId": 793,
+      "name": "PROVISION FOR INCOME TAX",
+      "groupName": "OUTSTANDING LIABILITIES & PROVISIONS",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0794",
+      "tradeasyId": 794,
+      "name": "GST APPEAL",
+      "groupName": "INDIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0816",
+      "tradeasyId": 816,
+      "name": "DONATION",
+      "groupName": "INDIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0818",
+      "tradeasyId": 818,
+      "name": "ELITE ENGINEERING COMPANY",
+      "groupName": "CURRENT LIABILITIES",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0846",
+      "tradeasyId": 846,
+      "name": "GENERATOR SERVICE",
+      "groupName": "INDIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0850",
+      "tradeasyId": 850,
+      "name": "ORHER REWARD&INCOME",
+      "groupName": "INDIRECT INCOME",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0888",
+      "tradeasyId": 888,
+      "name": "TRADEASY",
+      "groupName": "CURRENT LIABILITIES",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0889",
+      "tradeasyId": 889,
+      "name": "DEEPA ASSOCIATES",
+      "groupName": "CURRENT LIABILITIES",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0939",
+      "tradeasyId": 939,
+      "name": "TDS",
+      "groupName": "OTHER CURRENT ASSETS",
+      "openingBalance": 25028,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0943",
+      "tradeasyId": 943,
+      "name": "DIFFERENCE IN BANK",
+      "groupName": "SUSPENSE A/C",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0969",
+      "tradeasyId": 969,
+      "name": "INCOME TAX REFUNDF",
+      "groupName": "CURRENT LIABILITIES",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0970",
+      "tradeasyId": 970,
+      "name": "GENERATOR",
+      "groupName": "FIXED ASSETS",
+      "openingBalance": 216750,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0971",
+      "tradeasyId": 971,
+      "name": "SWEDINOX MANUFACTURERS PRIVATE LIMITED",
+      "groupName": "CURRENT LIABILITIES",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0972",
+      "tradeasyId": 972,
+      "name": "WATER TANK",
+      "groupName": "FIXED ASSETS",
+      "openingBalance": 19161.5,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L0983",
+      "tradeasyId": 983,
+      "name": "INDO ELECTRICAL MART",
+      "groupName": "CURRENT LIABILITIES",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L0984",
+      "tradeasyId": 984,
+      "name": "GOOGLE SERVICE",
+      "groupName": "INDIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L1011",
+      "tradeasyId": 1011,
+      "name": "BUSINESS PERQUSITES",
+      "groupName": "INDIRECT INCOME",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L1015",
+      "tradeasyId": 1015,
+      "name": "MUHSIN SALARY",
+      "groupName": "SALARY",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L1017",
+      "tradeasyId": 1017,
+      "name": "SCHEME RECEIVED FROM RAMCO CEMENT",
+      "groupName": "INDIRECT INCOME",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L1025",
+      "tradeasyId": 1025,
+      "name": "PAYTM SETTLMENT CHARGES",
+      "groupName": "INDIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L1026",
+      "tradeasyId": 1026,
+      "name": "PAYTM",
+      "groupName": "CURRENT ASSETS",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L1029",
+      "tradeasyId": 1029,
+      "name": "PROFESSIONAL TAX",
+      "groupName": "INDIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L1096",
+      "tradeasyId": 1096,
+      "name": "PHONEPAY BUSINESS",
+      "groupName": "BANK ACCOUNTS",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L1122",
+      "tradeasyId": 1122,
+      "name": "PHONEPE SERVICE CHARGES",
+      "groupName": "INDIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L1281",
+      "tradeasyId": 1281,
+      "name": "LOADING CHARGE",
+      "groupName": "INDIRECT INCOME",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L1303",
+      "tradeasyId": 1303,
+      "name": "REPAIRS&MAINTENANCE",
+      "groupName": "INDIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L017",
+      "name": "SALES A/C",
       "groupName": "SALES ACCOUNT",
       "openingBalance": 0,
       "balanceType": "Credit"
@@ -108837,20 +110268,6 @@
     {
       "code": "L023",
       "name": "INTERSTATE SALES",
-      "groupName": "SALES ACCOUNT",
-      "openingBalance": 0,
-      "balanceType": "Credit"
-    },
-    {
-      "code": "L024",
-      "name": "IGST SALES",
-      "groupName": "SALES ACCOUNT",
-      "openingBalance": 0,
-      "balanceType": "Credit"
-    },
-    {
-      "code": "L025",
-      "name": "NON TAXABLE SALES",
       "groupName": "SALES ACCOUNT",
       "openingBalance": 0,
       "balanceType": "Credit"
@@ -108870,13 +110287,6 @@
       "balanceType": "Debit"
     },
     {
-      "code": "L032",
-      "name": "LOADING CHARGE",
-      "groupName": "ADJUSTMENTS",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
       "code": "L033",
       "name": "UNLOADING CHARGE",
       "groupName": "ADJUSTMENTS",
@@ -108884,219 +110294,16 @@
       "balanceType": "Debit"
     },
     {
-      "code": "L034",
-      "name": "ROUND OFF",
-      "groupName": "INDIRECT EXPENSES",
+      "code": "L008",
+      "name": "BUSINESS PERQUISITES",
+      "groupName": "INDIRECT INCOME",
       "openingBalance": 0,
-      "balanceType": "Debit"
+      "balanceType": "Credit"
     },
     {
-      "code": "L035",
-      "name": "INPUT SGST 0%",
-      "groupName": "INPUT SGST",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L036",
-      "name": "INPUT SGST 2.5%",
-      "groupName": "INPUT SGST",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L037",
-      "name": "INPUT SGST 6%",
-      "groupName": "INPUT SGST",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L038",
-      "name": "INPUT SGST 9%",
-      "groupName": "INPUT SGST",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L039",
-      "name": "INPUT SGST 14%",
-      "groupName": "INPUT SGST",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L040",
-      "name": "INPUT CGST 0%",
-      "groupName": "INPUT CGST",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L041",
-      "name": "INPUT CGST 2.5%",
-      "groupName": "INPUT CGST",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L042",
-      "name": "INPUT CGST 6%",
-      "groupName": "INPUT CGST",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L043",
-      "name": "INPUT CGST 9%",
-      "groupName": "INPUT CGST",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L044",
-      "name": "INPUT CGST 14%",
-      "groupName": "INPUT CGST",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L045",
-      "name": "INPUT IGST 0%",
-      "groupName": "INPUT IGST",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L046",
-      "name": "INPUT IGST 5%",
-      "groupName": "INPUT IGST",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L047",
-      "name": "INPUT IGST 12%",
-      "groupName": "INPUT IGST",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L048",
-      "name": "INPUT IGST 18%",
-      "groupName": "INPUT IGST",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L049",
-      "name": "INPUT IGST 28%",
-      "groupName": "INPUT IGST",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L050",
-      "name": "OUTPUT SGST 0%",
-      "groupName": "OUTPUT SGST",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L051",
-      "name": "OUTPUT SGST 2.5%",
-      "groupName": "OUTPUT SGST",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L052",
-      "name": "OUTPUT SGST 6%",
-      "groupName": "OUTPUT SGST",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L053",
-      "name": "OUTPUT SGST 9%",
-      "groupName": "OUTPUT SGST",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L054",
-      "name": "OUTPUT SGST 14%",
-      "groupName": "OUTPUT SGST",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L055",
-      "name": "OUTPUT CGST 0%",
-      "groupName": "OUTPUT CGST",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L056",
-      "name": "OUTPUT CGST 2.5%",
-      "groupName": "OUTPUT CGST",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L057",
-      "name": "OUTPUT CGST 6%",
-      "groupName": "OUTPUT CGST",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L058",
-      "name": "OUTPUT CGST 9%",
-      "groupName": "OUTPUT CGST",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L059",
-      "name": "OUTPUT CGST 14%",
-      "groupName": "OUTPUT CGST",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L060",
-      "name": "OUTPUT IGST 0%",
-      "groupName": "OUTPUT IGST",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L061",
-      "name": "OUTPUT IGST 5%",
-      "groupName": "OUTPUT IGST",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L062",
-      "name": "OUTPUT IGST 12%",
-      "groupName": "OUTPUT IGST",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L063",
-      "name": "OUTPUT IGST 18%",
-      "groupName": "OUTPUT IGST",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L064",
-      "name": "OUTPUT IGST 28%",
-      "groupName": "OUTPUT IGST",
+      "code": "L019",
+      "name": "INTERSTATE PURCHASE",
+      "groupName": "PURCHASE ACCOUNT",
       "openingBalance": 0,
       "balanceType": "Debit"
     }
@@ -109108,11 +110315,11 @@
     },
     {
       "name": "LOADING CHARGE",
-      "ledgerCode": "L032"
+      "ledgerCode": "L1281"
     },
     {
       "name": "LOADING CHARGES",
-      "ledgerCode": "L032"
+      "ledgerCode": "L1281"
     },
     {
       "name": "UNLOADING CHARGE AT SITE",
@@ -109130,6 +110337,396 @@
     }
   ],
   "units": [
+    {
+      "id": "1",
+      "category": "COUNT",
+      "name": "Qutl",
+      "symbol": "Qutl",
+      "altNameInBill": "Qutl",
+      "conversionValue": 1,
+      "conversionUnit": "Qutl",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "2",
+      "category": "COUNT",
+      "name": "Kg",
+      "symbol": "Kg",
+      "altNameInBill": "Kg",
+      "conversionValue": 1,
+      "conversionUnit": "Kg",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "3",
+      "category": "COUNT",
+      "name": "Gm",
+      "symbol": "Gm",
+      "altNameInBill": "Gm",
+      "conversionValue": 1,
+      "conversionUnit": "Gm",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "4",
+      "category": "COUNT",
+      "name": "Mg",
+      "symbol": "Mg",
+      "altNameInBill": "Mg",
+      "conversionValue": 1,
+      "conversionUnit": "Mg",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "5",
+      "category": "COUNT",
+      "name": "Ltr",
+      "symbol": "Ltr",
+      "altNameInBill": "Ltr",
+      "conversionValue": 1,
+      "conversionUnit": "Ltr",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "6",
+      "category": "COUNT",
+      "name": "Mltr",
+      "symbol": "Mltr",
+      "altNameInBill": "Mltr",
+      "conversionValue": 1,
+      "conversionUnit": "Mltr",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "7",
+      "category": "COUNT",
+      "name": "Mtr",
+      "symbol": "Mtr",
+      "altNameInBill": "Mtr",
+      "conversionValue": 1,
+      "conversionUnit": "Mtr",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "8",
+      "category": "COUNT",
+      "name": "Cm",
+      "symbol": "Cm",
+      "altNameInBill": "Cm",
+      "conversionValue": 1,
+      "conversionUnit": "Cm",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "9",
+      "category": "COUNT",
+      "name": "Mm",
+      "symbol": "Mm",
+      "altNameInBill": "Mm",
+      "conversionValue": 1,
+      "conversionUnit": "Mm",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "10",
+      "category": "COUNT",
+      "name": "Ft",
+      "symbol": "Ft",
+      "altNameInBill": "Ft",
+      "conversionValue": 1,
+      "conversionUnit": "Ft",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "11",
+      "category": "COUNT",
+      "name": "Ich",
+      "symbol": "Ich",
+      "altNameInBill": "Ich",
+      "conversionValue": 1,
+      "conversionUnit": "Ich",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "12",
+      "category": "COUNT",
+      "name": "Sq.Ft",
+      "symbol": "Sq.Ft",
+      "altNameInBill": "Sq.Ft",
+      "conversionValue": 1,
+      "conversionUnit": "Sq.Ft",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "13",
+      "category": "COUNT",
+      "name": "Sq.Ich",
+      "symbol": "Sq.Ich",
+      "altNameInBill": "Sq.Ich",
+      "conversionValue": 1,
+      "conversionUnit": "Sq.Ich",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "14",
+      "category": "COUNT",
+      "name": "Sq.M",
+      "symbol": "Sq.M",
+      "altNameInBill": "Sq.M",
+      "conversionValue": 1,
+      "conversionUnit": "Sq.M",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "15",
+      "category": "COUNT",
+      "name": "Sq.Cm",
+      "symbol": "Sq.Cm",
+      "altNameInBill": "Sq.Cm",
+      "conversionValue": 1,
+      "conversionUnit": "Sq.Cm",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "16",
+      "category": "COUNT",
+      "name": "Nos",
+      "symbol": "Nos",
+      "altNameInBill": "Nos",
+      "conversionValue": 1,
+      "conversionUnit": "Nos",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "17",
+      "category": "COUNT",
+      "name": "Doz",
+      "symbol": "Doz",
+      "altNameInBill": "Doz",
+      "conversionValue": 1,
+      "conversionUnit": "Doz",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "18",
+      "category": "COUNT",
+      "name": "Tn",
+      "symbol": "Tn",
+      "altNameInBill": "Tn",
+      "conversionValue": 1,
+      "conversionUnit": "Tn",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "19",
+      "category": "COUNT",
+      "name": "Pac",
+      "symbol": "Pac",
+      "altNameInBill": "Pac",
+      "conversionValue": 1,
+      "conversionUnit": "Pac",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "1",
+      "category": "WEIGHT",
+      "name": "Quintel",
+      "symbol": "Qtl",
+      "altNameInBill": "Quintel",
+      "conversionValue": 100,
+      "conversionUnit": "Kilogram",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "3",
+      "category": "WEIGHT",
+      "name": "Gram",
+      "symbol": "g",
+      "altNameInBill": "Gram",
+      "conversionValue": 1000,
+      "conversionUnit": "Milligram",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "5",
+      "category": "VOLUME",
+      "name": "Litre",
+      "symbol": "L",
+      "altNameInBill": "Litre",
+      "conversionValue": 1000,
+      "conversionUnit": "Millilitre",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "6",
+      "category": "VOLUME",
+      "name": "Millilitre",
+      "symbol": "ml",
+      "altNameInBill": "Millilitre",
+      "conversionValue": 1,
+      "conversionUnit": "Millilitre",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "11",
+      "category": "LENGTH",
+      "name": "Inch",
+      "symbol": "In",
+      "altNameInBill": "Inch",
+      "conversionValue": 1,
+      "conversionUnit": "Inch",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "13",
+      "category": "AREA",
+      "name": "Sq.Inch",
+      "symbol": "Sq.In",
+      "altNameInBill": "Square Inch",
+      "conversionValue": 1,
+      "conversionUnit": "Sq.Inch",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "16",
+      "category": "COUNT",
+      "name": "Bags",
+      "symbol": "Bags",
+      "altNameInBill": "Bags",
+      "conversionValue": 1,
+      "conversionUnit": "Bags",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "17",
+      "category": "WEIGHT",
+      "name": "Tons",
+      "symbol": "Tons",
+      "altNameInBill": "Tons",
+      "conversionValue": 1000,
+      "conversionUnit": "Kilogram",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "18",
+      "category": "VOLUME",
+      "name": "CFT",
+      "symbol": "CFT",
+      "altNameInBill": "Cubic Feet",
+      "conversionValue": 1,
+      "conversionUnit": "CFT",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "19",
+      "category": "COUNT",
+      "name": "Pcs",
+      "symbol": "Pcs",
+      "altNameInBill": "Pieces",
+      "conversionValue": 1,
+      "conversionUnit": "Pcs",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "20",
+      "category": "VOLUME",
+      "name": "Brass",
+      "symbol": "Brass",
+      "altNameInBill": "Brass",
+      "conversionValue": 100,
+      "conversionUnit": "CFT",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "22",
+      "category": "COUNT",
+      "name": "Box",
+      "symbol": "Box",
+      "altNameInBill": "Box",
+      "conversionValue": 1,
+      "conversionUnit": "Box",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "23",
+      "category": "COUNT",
+      "name": "Carton",
+      "symbol": "Ctn",
+      "altNameInBill": "Carton",
+      "conversionValue": 1,
+      "conversionUnit": "Ctn",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "24",
+      "category": "COUNT",
+      "name": "Dozen",
+      "symbol": "Dzn",
+      "altNameInBill": "Dozen",
+      "conversionValue": 12,
+      "conversionUnit": "Pcs",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "25",
+      "category": "LENGTH",
+      "name": "Roll",
+      "symbol": "Roll",
+      "altNameInBill": "Roll",
+      "conversionValue": 1,
+      "conversionUnit": "Roll",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "26",
+      "category": "COUNT",
+      "name": "Set",
+      "symbol": "Set",
+      "altNameInBill": "Set",
+      "conversionValue": 1,
+      "conversionUnit": "Set",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "27",
+      "category": "COUNT",
+      "name": "Bundle",
+      "symbol": "Bdl",
+      "altNameInBill": "Bundle",
+      "conversionValue": 1,
+      "conversionUnit": "Bdl",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "28",
+      "category": "LENGTH",
+      "name": "Yard",
+      "symbol": "Yd",
+      "altNameInBill": "Yard",
+      "conversionValue": 3,
+      "conversionUnit": "Feet",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "29",
+      "category": "COUNT",
+      "name": "Pack",
+      "symbol": "Pak",
+      "altNameInBill": "Pack",
+      "conversionValue": 1,
+      "conversionUnit": "Pak",
+      "printNameInsteadOfSymbol": false
+    },
+    {
+      "id": "30",
+      "category": "COUNT",
+      "name": "Sheet",
+      "symbol": "Sht",
+      "altNameInBill": "Sheet",
+      "conversionValue": 1,
+      "conversionUnit": "Sht",
+      "printNameInsteadOfSymbol": false
+    },
     {
       "id": "1",
       "category": "COUNT",
@@ -109572,34 +111169,34 @@
     }
   ],
   "options": {
-    "enableEmployeeSales": true,
-    "enableInfluencerSales": true,
-    "enableCess": true,
+    "enableEmployeeSales": false,
+    "enableInfluencerSales": false,
+    "enableCess": false,
     "enable4DigitHsn": true,
-    "enableCessInSalesBill": false
+    "enableCessInSalesBill": false,
+    "influencerLoyaltyRate": 1,
+    "enablePartyClosingBalanceBottom": false,
+    "enableHeadloader": true,
+    "googleDriveBackupPath": "G:\\Google Drive\\ERP Backups",
+    "allowPreviousYearEditing": false
   },
-  "influencers": [
-    {
-      "id": "INF-001",
-      "name": "Anil Architect",
-      "address": "Kochi, Kerala",
-      "mobile": "9876543210"
-    },
-    {
-      "id": "INF-002",
-      "name": "Modern Builders",
-      "address": "Aluva, Kerala",
-      "mobile": "9876543211"
-    }
-  ],
+  "influencers": [],
   "influencerRedemptions": [],
   "loyaltyPrograms": [],
   "hsnCodes": [
-    "2523",
     "7214",
+    "2523",
+    "3824",
+    "68114010",
+    "6815",
     "2505",
-    "6901",
-    "2517"
+    "7307",
+    "321490",
+    "6809",
+    "39073010",
+    "3907",
+    "3402",
+    "3214"
   ],
   "hsnDescriptions": {},
   "seriesMaster": [
@@ -109611,8 +111208,8 @@
       "prefix": "LSL-",
       "digits": 4,
       "startingNumber": 1,
-      "currentNumber": 1,
-      "ledgerCode": "L022",
+      "currentNumber": 340,
+      "ledgerCode": "L0004",
       "isActive": true
     },
     {
@@ -109623,8 +111220,8 @@
       "prefix": "B2B00",
       "digits": 1,
       "startingNumber": 1,
-      "currentNumber": 1,
-      "ledgerCode": "L022",
+      "currentNumber": 33,
+      "ledgerCode": "L0004",
       "isActive": true
     },
     {
@@ -109636,7 +111233,7 @@
       "digits": 4,
       "startingNumber": 1,
       "currentNumber": 1,
-      "ledgerCode": "L024",
+      "ledgerCode": "L0060",
       "isActive": false
     },
     {
@@ -109648,7 +111245,7 @@
       "digits": 4,
       "startingNumber": 1,
       "currentNumber": 1,
-      "ledgerCode": "L025",
+      "ledgerCode": "L0004",
       "isActive": false
     },
     {
@@ -109659,8 +111256,8 @@
       "prefix": "LPR-",
       "digits": 4,
       "startingNumber": 1,
-      "currentNumber": 1,
-      "ledgerCode": "L018",
+      "currentNumber": 31,
+      "ledgerCode": "L0005",
       "isActive": true
     },
     {
@@ -109671,9 +111268,9 @@
       "prefix": "IPR-",
       "digits": 4,
       "startingNumber": 1,
-      "currentNumber": 1,
-      "ledgerCode": "L020",
-      "isActive": false
+      "currentNumber": 4,
+      "ledgerCode": "L0062",
+      "isActive": true
     },
     {
       "id": "SER-NONTAXABLE-PURCHASE",
@@ -109684,7 +111281,7 @@
       "digits": 4,
       "startingNumber": 1,
       "currentNumber": 1,
-      "ledgerCode": "L021",
+      "ledgerCode": "L0005",
       "isActive": false
     }
   ],
