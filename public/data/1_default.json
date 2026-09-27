@@ -1,5 +1,5 @@
 {
-  "_lastSaved": 1790484149482,
+  "_lastSaved": 1790487444065,
   "materials": [
     {
       "id": "MAT-0001",
@@ -59310,12 +59310,12 @@
         },
         {
           "accountId": "L0038",
-          "debit": 13271.202,
+          "debit": 13271.2,
           "credit": 0
         },
         {
           "accountId": "L0033",
-          "debit": 13271.202,
+          "debit": 13271.2,
           "credit": 0
         },
         {
@@ -59493,12 +59493,12 @@
         },
         {
           "accountId": "L0038",
-          "debit": 1464.408,
+          "debit": 1464.41,
           "credit": 0
         },
         {
           "accountId": "L0033",
-          "debit": 1464.408,
+          "debit": 1464.41,
           "credit": 0
         },
         {
@@ -59679,12 +59679,12 @@
         },
         {
           "accountId": "L0038",
-          "debit": 4957.605,
+          "debit": 4957.6,
           "credit": 0
         },
         {
           "accountId": "L0033",
-          "debit": 4957.605,
+          "debit": 4957.61,
           "credit": 0
         },
         {
@@ -59713,16 +59713,16 @@
         {
           "accountId": "VEND-0069",
           "debit": 0,
-          "credit": 64999.409999999996
+          "credit": 64999.41
         },
         {
           "accountId": "L0038",
-          "debit": 4957.5599999999995,
+          "debit": 4957.56,
           "credit": 0
         },
         {
           "accountId": "L0033",
-          "debit": 4957.5599999999995,
+          "debit": 4957.56,
           "credit": 0
         },
         {
@@ -60756,7 +60756,7 @@
         },
         {
           "accountId": "L0042",
-          "debit": 6942.888,
+          "debit": 6942.89,
           "credit": 0
         },
         {
@@ -60785,16 +60785,16 @@
         {
           "accountId": "VEND-0068",
           "debit": 0,
-          "credit": 590934.9979999999
+          "credit": 590935
         },
         {
           "accountId": "L0038",
-          "debit": 45071.333999999995,
+          "debit": 45071.33,
           "credit": 0
         },
         {
           "accountId": "L0033",
-          "debit": 45071.333999999995,
+          "debit": 45071.34,
           "credit": 0
         },
         {
@@ -61254,12 +61254,12 @@
         },
         {
           "accountId": "L0038",
-          "debit": 13194.945,
+          "debit": 13194.94,
           "credit": 0
         },
         {
           "accountId": "L0033",
-          "debit": 13194.945,
+          "debit": 13194.95,
           "credit": 0
         },
         {
@@ -65715,7 +65715,7 @@
       "entries": [
         {
           "accountId": "L0005",
-          "debit": 403360.2700000003,
+          "debit": 403360.27,
           "credit": 0
         },
         {
@@ -65725,12 +65725,12 @@
         },
         {
           "accountId": "L0038",
-          "debit": 36302.4243,
+          "debit": 36302.43,
           "credit": 0
         },
         {
           "accountId": "L0033",
-          "debit": 36302.4243,
+          "debit": 36302.42,
           "credit": 0
         },
         {
@@ -66355,12 +66355,12 @@
         },
         {
           "accountId": "L0038",
-          "debit": 9457.632,
+          "debit": 9457.63,
           "credit": 0
         },
         {
           "accountId": "L0033",
-          "debit": 9457.632,
+          "debit": 9457.63,
           "credit": 0
         },
         {
@@ -67282,12 +67282,12 @@
         },
         {
           "accountId": "L0038",
-          "debit": 20966.759100000003,
+          "debit": 20966.76,
           "credit": 0
         },
         {
           "accountId": "L0033",
-          "debit": 20966.759100000003,
+          "debit": 20966.76,
           "credit": 0
         },
         {
@@ -67458,17 +67458,17 @@
       "entries": [
         {
           "accountId": "L0062",
-          "debit": 39856.799999999996,
+          "debit": 39856.8,
           "credit": 0
         },
         {
           "accountId": "VEND-1219",
           "debit": 0,
-          "credit": 44639.99599999999
+          "credit": 44640
         },
         {
           "accountId": "L0042",
-          "debit": 4782.815999999999,
+          "debit": 4782.82,
           "credit": 0
         },
         {
@@ -67523,7 +67523,7 @@
       "entries": [
         {
           "accountId": "L0005",
-          "debit": 693996.009999106,
+          "debit": 693996.01,
           "credit": 0
         },
         {
@@ -67533,12 +67533,12 @@
         },
         {
           "accountId": "L0038",
-          "debit": 62459.622,
+          "debit": 62459.62,
           "credit": 0
         },
         {
           "accountId": "L0033",
-          "debit": 62459.622,
+          "debit": 62459.62,
           "credit": 0
         },
         {
@@ -70387,12 +70387,12 @@
         },
         {
           "accountId": "L0038",
-          "debit": 7207.623,
+          "debit": 7207.63,
           "credit": 0
         },
         {
           "accountId": "L0033",
-          "debit": 7207.623,
+          "debit": 7207.62,
           "credit": 0
         },
         {
@@ -70615,12 +70615,12 @@
         },
         {
           "accountId": "L0038",
-          "debit": 9762.732,
+          "debit": 9762.73,
           "credit": 0
         },
         {
           "accountId": "L0033",
-          "debit": 9762.732,
+          "debit": 9762.73,
           "credit": 0
         },
         {
@@ -71625,16 +71625,16 @@
         {
           "accountId": "VEND-1182",
           "debit": 0,
-          "credit": 5219.9996
+          "credit": 5220
         },
         {
           "accountId": "L0038",
-          "debit": 398.1348,
+          "debit": 398.13,
           "credit": 0
         },
         {
           "accountId": "L0033",
-          "debit": 398.1348,
+          "debit": 398.14,
           "credit": 0
         },
         {
