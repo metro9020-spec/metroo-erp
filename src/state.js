@@ -3721,7 +3721,11 @@ class StateManager {
       bestTx.siteName = inv.siteName || "";
       bestTx.entries = salesEntries;
 
-      // Preserve all transactions - do not delete duplicates automatically
+      // Purge any other matching duplicate/legacy transactions for this invoice
+      if (matchingTxs.length > 1) {
+        const othersToRemove = new Set(matchingTxs.filter(t => t !== bestTx));
+        this.transactions = this.transactions.filter(t => !othersToRemove.has(t));
+      }
     } else {
       this.transactions.push({
         id: sVoucherNo,
@@ -3782,6 +3786,37 @@ class StateManager {
       }
     }
     this.transactions = cleanTxs;
+
+    // 1b. Deduplicate by Voucher Reference / Number
+    const voucherBuckets = new Map();
+    const resultTxs = [];
+    for (const t of this.transactions) {
+      if (!t || !Array.isArray(t.entries) || t.entries.length === 0) continue;
+      const ref = String(t.reference || t.voucherNo || t.id || '').trim().toUpperCase();
+      const vType = String(t.voucherType || t.type || '').toUpperCase();
+      const desc = String(t.description || '').toUpperCase();
+      const isCogs = desc.includes("COST OF GOODS SOLD") || ref.includes("COGS");
+      
+      const vKey = isCogs ? `COGS::${ref}` : `${vType}::${ref}`;
+      if (ref && vKey && !ref.startsWith("TX-") && !ref.startsWith("TR-")) {
+        if (voucherBuckets.has(vKey)) {
+          const existing = voucherBuckets.get(vKey);
+          // Prefer transaction with more entries or canonical ID
+          const existingEntriesLen = Array.isArray(existing.entries) ? existing.entries.length : 0;
+          const currentEntriesLen = Array.isArray(t.entries) ? t.entries.length : 0;
+          if (currentEntriesLen > existingEntriesLen || (String(t.id).toUpperCase() === ref && String(existing.id).toUpperCase() !== ref)) {
+            const idx = resultTxs.indexOf(existing);
+            if (idx >= 0) resultTxs[idx] = t;
+            voucherBuckets.set(vKey, t);
+          }
+          stateChanged = true;
+          continue;
+        }
+        voucherBuckets.set(vKey, t);
+      }
+      resultTxs.push(t);
+    }
+    this.transactions = resultTxs;
 
     // 2. Ensure each transaction has a unique ID
     const seenTxIds = new Set();
@@ -4042,7 +4077,11 @@ class StateManager {
       bestTx.siteName = pur.siteName || "";
       bestTx.entries = purchaseEntries;
 
-      // Preserve all transactions - do not delete duplicates automatically
+      // Purge any other matching duplicate/legacy transactions for this purchase
+      if (matchingTxs.length > 1) {
+        const othersToRemove = new Set(matchingTxs.filter(t => t !== bestTx));
+        this.transactions = this.transactions.filter(t => !othersToRemove.has(t));
+      }
     } else {
       this.transactions.push({
         id: pVoucherNo,

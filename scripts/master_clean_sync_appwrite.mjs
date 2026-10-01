@@ -47,23 +47,44 @@ const ALL_COLLECTIONS = [
 async function purgeCollection(colId) {
   console.log(`\n🧹 Purging collection "${colId}"...`);
   let totalDeleted = 0;
+  let consecutiveFailures = 0;
   while (true) {
     try {
-      const res = await db.listDocuments(DATABASE_ID, colId, [Query.limit(100)]);
+      const res = await db.listDocuments(DATABASE_ID, colId, [Query.limit(50)]);
       if (!res || !res.documents || res.documents.length === 0) break;
 
-      const deleteBatch = res.documents.map(d => 
-        db.deleteDocument(DATABASE_ID, colId, d.$id).catch(e => {
-          console.warn(`  Warning deleting ${d.$id}: ${e.message}`);
-        })
-      );
-      await Promise.all(deleteBatch);
-      totalDeleted += res.documents.length;
+      let deletedInBatch = 0;
+      for (const d of res.documents) {
+        try {
+          await db.deleteDocument(DATABASE_ID, colId, d.$id);
+          deletedInBatch++;
+          totalDeleted++;
+          await sleep(50);
+        } catch (e) {
+          if (e.code === 404) {
+            deletedInBatch++;
+          } else if (e.code === 429) {
+            await sleep(1500);
+          } else {
+            console.warn(`  Warning deleting ${d.$id}: ${e.message}`);
+          }
+        }
+      }
+
       process.stdout.write(`\r  Purged: ${totalDeleted} documents from ${colId}`);
-      await sleep(150);
+      if (deletedInBatch === 0) {
+        consecutiveFailures++;
+        if (consecutiveFailures > 3) break;
+        await sleep(1000);
+      } else {
+        consecutiveFailures = 0;
+      }
+      await sleep(100);
     } catch (err) {
       console.error(`\n  Error querying ${colId}:`, err.message);
-      break;
+      consecutiveFailures++;
+      if (consecutiveFailures > 3) break;
+      await sleep(1500);
     }
   }
   console.log(`\n  ✅ Done purging ${colId} (Total removed: ${totalDeleted})`);

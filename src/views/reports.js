@@ -5722,22 +5722,34 @@ export function getLedgerEntries(ledgerId, fromDate, toDate, voucherTypeFilter, 
     }
   };
 
-  // Deduplicate entriesList safely so that transactions with distinct txId are never incorrectly dropped
+  // Deduplicate entriesList safely so that duplicate transactions/rows are never rendered twice
   const uniqueReportEntries = [];
   const seenReportEntryTxIds = new Set();
-  const seenReportEntryFallbackSigs = new Set();
+  const seenReportEntryVoucherKeys = new Set();
   entriesList.forEach((e) => {
-    if (e.txId) {
-      const txKey = `${e.txId}::${e.particulars || ''}::${e.debit || 0}::${e.credit || 0}`;
+    const vNo = String(e.vNo || "").trim().toUpperCase();
+    const txId = String(e.txId || "").trim().toUpperCase();
+    const vType = String(e.vType || "").trim().toUpperCase();
+    const dateStr = String(e.date || "").trim();
+    const drStr = (parseFloat(e.debit) || 0).toFixed(2);
+    const crStr = (parseFloat(e.credit) || 0).toFixed(2);
+    const partStr = String(e.particulars || "").trim().toUpperCase();
+
+    // 1. If exact txId + particulars + dr + cr has been seen, skip
+    if (txId) {
+      const txKey = `${txId}::${partStr}::${drStr}::${crStr}`;
       if (seenReportEntryTxIds.has(txKey)) return;
       seenReportEntryTxIds.add(txKey);
-      uniqueReportEntries.push(e);
-    } else {
-      const fallbackSig = `SIG::${e.vType || ''}::${e.vNo || ''}::${e.date || ''}::${(parseFloat(e.debit) || 0).toFixed(2)}::${(parseFloat(e.credit) || 0).toFixed(2)}::${e.particulars || ''}`;
-      if (seenReportEntryFallbackSigs.has(fallbackSig)) return;
-      seenReportEntryFallbackSigs.add(fallbackSig);
-      uniqueReportEntries.push(e);
     }
+
+    // 2. If voucher identity (vType + vNo + date + dr + cr + particulars) has been seen, skip
+    if (vNo && !vNo.startsWith("TX-") && !vNo.startsWith("TR-")) {
+      const vKey = `${vType}::${vNo}::${dateStr}::${drStr}::${crStr}::${partStr}`;
+      if (seenReportEntryVoucherKeys.has(vKey)) return;
+      seenReportEntryVoucherKeys.add(vKey);
+    }
+
+    uniqueReportEntries.push(e);
   });
   entriesList = uniqueReportEntries;
 
