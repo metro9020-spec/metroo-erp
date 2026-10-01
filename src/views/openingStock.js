@@ -212,30 +212,65 @@ export function showCreateBatchSubModal(mat, onCreated) {
   subModal.id = "os-create-batch-sub-overlay";
   subModal.style.cssText = "display:flex; justify-content:center; align-items:center; background: rgba(15,23,42,0.4); backdrop-filter: blur(1px); z-index:2200; position:fixed; top:0; left:0; width:100%; height:100%;";
 
+  const isCompUnregistered = state.isCompanyUnregistered ? state.isCompanyUnregistered() : false;
+  const igst = isCompUnregistered ? 0 : (parseFloat(mat.igst !== undefined && mat.igst !== null ? mat.igst : 18) || 0);
+
+  const initCost = parseFloat(mat.landingCost) || 350;
+  let initMargP = parseFloat(mat.marginPercent) || 30;
+  let initExcl = (mat.gstExclRate !== undefined && mat.gstExclRate !== null && !isNaN(parseFloat(mat.gstExclRate)) && parseFloat(mat.gstExclRate) > 0)
+    ? parseFloat(mat.gstExclRate)
+    : (initCost > 0 ? (initCost * (1 + initMargP / 100)) : 0);
+  let initMargA = initExcl - initCost;
+  if (initCost > 0 && initExcl > 0) {
+    initMargP = ((initExcl - initCost) / initCost) * 100;
+  }
+  const initIncl = initExcl * (1 + igst / 100);
+  const initMrp = parseFloat(mat.mrp) || (initExcl * 1.25);
+
   subModal.innerHTML = `
-    <div class="modal-container modal-sm" style="max-width:380px; width: 90vw; background-color:#cbd5e1; color:#0f172a; padding:10px; font-family: sans-serif; border: 2px solid #107c41; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-size:0.78rem; display:flex; flex-direction:column; gap:8px;">
-      <div style="background: linear-gradient(180deg, #107c41 0%, #16a34a 100%); color:white; padding:4px 8px; font-weight:700; display:flex; justify-content:space-between; align-items:center; border-radius: 2px;">
-        <div><i class="fa-solid fa-plus-circle"></i> Create New Batch</div>
+    <div class="modal-container modal-sm" style="max-width:460px; width: 92vw; background-color:#cbd5e1; color:#0f172a; padding:10px; font-family: sans-serif; border: 2px solid #107c41; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-size:0.78rem; display:flex; flex-direction:column; gap:8px;">
+      <div style="background: linear-gradient(180deg, #107c41 0%, #16a34a 100%); color:white; padding:5px 10px; font-weight:700; display:flex; justify-content:space-between; align-items:center; border-radius: 2px;">
+        <div style="display:flex; align-items:center; gap:6px;">
+          <i class="fa-solid fa-plus-circle"></i>
+          <span>Create New Batch (${mat.name})</span>
+        </div>
         <button type="button" style="background:none; border:none; color:white; font-size:1.2rem; cursor:pointer;" id="os-new-batch-close-x-btn">&times;</button>
       </div>
 
-      <form id="os-new-batch-form" style="display:flex; flex-direction:column; gap:10px; background:white; padding:12px; border:1px solid #94a3b8; border-radius:2px; color:black;">
-        <div>
-          <label style="font-weight:bold; display:block; margin-bottom:2px;">Landing Cost / Rate (Batch Name) *</label>
-          <input type="number" id="os-new-batch-cost" class="form-control" style="background:white; color:black;" step="0.01" min="0.01" required value="${(mat.landingCost || 350).toFixed(2)}">
+      <form id="os-new-batch-form" style="display:flex; flex-direction:column; gap:8px; background:white; padding:12px; border:1px solid #94a3b8; border-radius:2px; color:black;">
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px;">
+          <div>
+            <label style="font-weight:600; display:block; margin-bottom:2px; font-size:0.75rem;">Landing Cost *</label>
+            <input type="number" id="os-new-batch-cost" class="form-control" style="background:white; color:black; font-weight:bold; padding:2px 4px; font-size:0.78rem;" step="0.01" min="0.01" required value="${initCost.toFixed(2)}">
+          </div>
+          <div>
+            <label style="font-weight:600; display:block; margin-bottom:2px; font-size:0.75rem;">Margin %</label>
+            <input type="number" id="os-new-batch-margin-pct" class="form-control" style="background:white; color:black; padding:2px 4px; font-size:0.78rem;" step="0.1" value="${initMargP.toFixed(1)}">
+          </div>
+          <div>
+            <label style="font-weight:600; display:block; margin-bottom:2px; font-size:0.75rem;">Margin Amount</label>
+            <input type="number" id="os-new-batch-margin-amt" class="form-control" style="background:white; color:black; padding:2px 4px; font-size:0.78rem;" step="0.01" value="${initMargA.toFixed(2)}">
+          </div>
         </div>
-        <div>
-          <label style="font-weight:bold; display:block; margin-bottom:2px;">Selling Price *</label>
-          <input type="number" id="os-new-batch-selling" class="form-control" style="background:white; color:black;" step="0.01" min="0" required value="${(mat.gstExclRate || mat.sellingPrice || 380).toFixed(2)}">
-        </div>
-        <div>
-          <label style="font-weight:bold; display:block; margin-bottom:2px;">MRP *</label>
-          <input type="number" id="os-new-batch-mrp" class="form-control" style="background:white; color:black;" step="0.01" min="0" required value="${(mat.mrp || 400).toFixed(2)}">
+
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px;">
+          <div>
+            <label style="font-weight:600; display:block; margin-bottom:2px; font-size:0.75rem;">Selling Rate (Excl) *</label>
+            <input type="number" id="os-new-batch-selling" class="form-control" style="background:white; color:black; font-weight:bold; padding:2px 4px; font-size:0.78rem;" step="0.01" min="0" required value="${initExcl.toFixed(2)}">
+          </div>
+          <div>
+            <label style="font-weight:600; display:block; margin-bottom:2px; font-size:0.75rem;">Selling Rate (Incl)</label>
+            <input type="number" id="os-new-batch-selling-incl" class="form-control" style="background:white; color:#1e40af; font-weight:bold; padding:2px 4px; font-size:0.78rem;" step="0.01" min="0" value="${initIncl.toFixed(2)}">
+          </div>
+          <div>
+            <label style="font-weight:600; display:block; margin-bottom:2px; font-size:0.75rem;">MRP *</label>
+            <input type="number" id="os-new-batch-mrp" class="form-control" style="background:white; color:black; padding:2px 4px; font-size:0.78rem;" step="0.01" min="0" required value="${initMrp.toFixed(2)}">
+          </div>
         </div>
 
         <div style="display:flex; justify-content:flex-end; gap:8px; border-top:1px solid #94a3b8; padding-top:8px; margin-top:4px;">
-          <button type="submit" class="btn btn-primary" style="background:#107c41; color:white; font-weight:bold; padding:4px 12px; font-size:0.75rem; border:none; border-radius:3px;">Create</button>
-          <button type="button" class="btn btn-secondary" id="btn-os-new-batch-cancel" style="padding:4px 12px; font-weight:bold; background-color:#e2e8f0; border:1px solid #475569; color:black; font-size:0.75rem; border-radius:3px;">Cancel</button>
+          <button type="submit" class="btn btn-primary" style="background:#107c41; color:white; font-weight:bold; padding:4px 14px; font-size:0.78rem; border:none; border-radius:3px;">Create Batch</button>
+          <button type="button" class="btn btn-secondary" id="btn-os-new-batch-cancel" style="padding:4px 14px; font-weight:bold; background-color:#e2e8f0; border:1px solid #475569; color:black; font-size:0.78rem; border-radius:3px;">Cancel</button>
         </div>
       </form>
     </div>
@@ -247,12 +282,75 @@ export function showCreateBatchSubModal(mat, onCreated) {
   document.getElementById("os-new-batch-close-x-btn").addEventListener("click", closeSub);
   document.getElementById("btn-os-new-batch-cancel").addEventListener("click", closeSub);
 
+  const costIn = subModal.querySelector("#os-new-batch-cost");
+  const marginPctIn = subModal.querySelector("#os-new-batch-margin-pct");
+  const marginAmtIn = subModal.querySelector("#os-new-batch-margin-amt");
+  const sellingExclIn = subModal.querySelector("#os-new-batch-selling");
+  const sellingInclIn = subModal.querySelector("#os-new-batch-selling-incl");
+  const mrpIn = subModal.querySelector("#os-new-batch-mrp");
+
+  costIn.addEventListener("input", () => {
+    const lc = parseFloat(costIn.value) || 0;
+    const margP = parseFloat(marginPctIn.value) || 0;
+    const margA = lc * (margP / 100);
+    marginAmtIn.value = margA.toFixed(2);
+    const excl = lc + margA;
+    sellingExclIn.value = excl.toFixed(2);
+    sellingInclIn.value = (excl * (1 + igst / 100)).toFixed(2);
+    mrpIn.value = (excl * 1.25).toFixed(2);
+  });
+
+  marginPctIn.addEventListener("input", () => {
+    const lc = parseFloat(costIn.value) || 0;
+    const margP = parseFloat(marginPctIn.value) || 0;
+    const margA = lc * (margP / 100);
+    marginAmtIn.value = margA.toFixed(2);
+    const excl = lc + margA;
+    sellingExclIn.value = excl.toFixed(2);
+    sellingInclIn.value = (excl * (1 + igst / 100)).toFixed(2);
+    mrpIn.value = (excl * 1.25).toFixed(2);
+  });
+
+  marginAmtIn.addEventListener("input", () => {
+    const lc = parseFloat(costIn.value) || 0;
+    const margA = parseFloat(marginAmtIn.value) || 0;
+    if (lc > 0) marginPctIn.value = ((margA / lc) * 100).toFixed(1);
+    const excl = lc + margA;
+    sellingExclIn.value = excl.toFixed(2);
+    sellingInclIn.value = (excl * (1 + igst / 100)).toFixed(2);
+    mrpIn.value = (excl * 1.25).toFixed(2);
+  });
+
+  sellingExclIn.addEventListener("input", () => {
+    const lc = parseFloat(costIn.value) || 0;
+    const excl = parseFloat(sellingExclIn.value) || 0;
+    const diff = excl - lc;
+    marginAmtIn.value = diff.toFixed(2);
+    if (lc > 0) marginPctIn.value = ((diff / lc) * 100).toFixed(1);
+    sellingInclIn.value = (excl * (1 + igst / 100)).toFixed(2);
+    mrpIn.value = (excl * 1.25).toFixed(2);
+  });
+
+  sellingInclIn.addEventListener("input", () => {
+    const lc = parseFloat(costIn.value) || 0;
+    const incl = parseFloat(sellingInclIn.value) || 0;
+    const excl = igst > 0 ? (incl / (1 + igst / 100)) : incl;
+    sellingExclIn.value = excl.toFixed(2);
+    const diff = excl - lc;
+    marginAmtIn.value = diff.toFixed(2);
+    if (lc > 0) marginPctIn.value = ((diff / lc) * 100).toFixed(1);
+    mrpIn.value = (excl * 1.25).toFixed(2);
+  });
+
   document.getElementById("os-new-batch-form").addEventListener("submit", (e) => {
     e.preventDefault();
-    const cost = parseFloat(document.getElementById("os-new-batch-cost").value) || 0;
-    const selling = parseFloat(document.getElementById("os-new-batch-selling").value) || 0;
-    const mrp = parseFloat(document.getElementById("os-new-batch-mrp").value) || 0;
-    const bNo = String(cost);
+    const cost = parseFloat(costIn.value) || 0;
+    const selling = parseFloat(sellingExclIn.value) || 0;
+    const sellingIncl = parseFloat(sellingInclIn.value) || (selling * (1 + igst / 100));
+    const margP = parseFloat(marginPctIn.value) || 0;
+    const margA = parseFloat(marginAmtIn.value) || 0;
+    const mrp = parseFloat(mrpIn.value) || 0;
+    const bNo = formatRateValue(cost) || String(cost);
 
     mat.batches = mat.batches || [];
     const exists = mat.batches.some(b => {
@@ -275,6 +373,9 @@ export function showCreateBatchSubModal(mat, onCreated) {
       openingStock: 0,
       landingCost: cost,
       sellingPrice: selling,
+      gstInclRate: sellingIncl,
+      marginPercent: margP,
+      marginAmount: margA,
       mrp: mrp,
       stock: 0
     };

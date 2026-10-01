@@ -14,8 +14,9 @@ export function bringToFront(el) {
   let maxZ = topZIndex;
   const selectors = ".modal-overlay, .modal-container, .modal-content, #active-window";
   document.querySelectorAll(selectors).forEach((node) => {
+    if (node === winTarget || (winTarget.contains && winTarget.contains(node))) return;
     const z = parseInt(window.getComputedStyle(node).zIndex || node.style.zIndex || "0", 10);
-    if (!isNaN(z) && z > maxZ && z < 100000) {
+    if (!isNaN(z) && z > maxZ && z < 10000000) {
       maxZ = z;
     }
   });

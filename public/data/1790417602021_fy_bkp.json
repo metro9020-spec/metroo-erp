@@ -1,5 +1,5 @@
 {
-  "_lastSaved": 1789923864085,
+  "_lastSaved": 1790863150165,
   "materials": [],
   "contacts": [],
   "invoices": [],
@@ -37,6 +37,126 @@
   "adminPassword": "123",
   "accountGroups": [
     {
+      "id": "1",
+      "name": "ADAVANCE TO SUPPLIER",
+      "under": "CURRENT ASSETS",
+      "isDefault": true
+    },
+    {
+      "id": "2",
+      "name": "BANK ACCOUNTS",
+      "under": "CURRENT ASSETS",
+      "isDefault": true
+    },
+    {
+      "id": "3",
+      "name": "BANK OD A/C",
+      "under": "CURRENT LIABILITIES",
+      "isDefault": true
+    },
+    {
+      "id": "4",
+      "name": "BRANCH / DIVISIONS",
+      "under": "LIABILITIES",
+      "isDefault": true
+    },
+    {
+      "id": "5",
+      "name": "CAPITAL ACCOUNT",
+      "under": "EQUITY",
+      "isDefault": true
+    },
+    {
+      "id": "6",
+      "name": "CASH-IN-HAND",
+      "under": "CURRENT ASSETS",
+      "isDefault": true
+    },
+    {
+      "id": "7",
+      "name": "CURRENT ASSETS",
+      "under": "ASSETS",
+      "isDefault": true
+    },
+    {
+      "id": "8",
+      "name": "CURRENT LIABILITIES",
+      "under": "LIABILITIES",
+      "isDefault": true
+    },
+    {
+      "id": "9",
+      "name": "DEPOSITS",
+      "under": "CURRENT ASSETS",
+      "isDefault": true
+    },
+    {
+      "id": "10",
+      "name": "DEPOSITS (ASSETS)",
+      "under": "CURRENT ASSETS",
+      "isDefault": true
+    },
+    {
+      "id": "11",
+      "name": "DEPRECIATION",
+      "under": "EXPENSE",
+      "isDefault": true
+    },
+    {
+      "id": "12",
+      "name": "DIRECT EXPENSES",
+      "under": "EXPENSE",
+      "isDefault": true
+    },
+    {
+      "id": "13",
+      "name": "DIRECT INCOME",
+      "under": "INCOME",
+      "isDefault": true
+    },
+    {
+      "id": "14",
+      "name": "DUTIES & TAXES",
+      "under": "CURRENT LIABILITIES",
+      "isDefault": true
+    },
+    {
+      "id": "15",
+      "name": "EMPLOYEE EXPENSES",
+      "under": "EXPENSE",
+      "isDefault": true
+    },
+    {
+      "id": "16",
+      "name": "FIXED ASSETS",
+      "under": "ASSETS",
+      "isDefault": true
+    },
+    {
+      "id": "17",
+      "name": "INDIRECT EXPENSES",
+      "under": "EXPENSE",
+      "isDefault": true
+    },
+    {
+      "id": "18",
+      "name": "INDIRECT INCOME",
+      "under": "INCOME",
+      "isDefault": true
+    },
+    {
+      "id": "19",
+      "name": "INVESTMENTS",
+      "under": "ASSETS",
+      "isDefault": true
+    },
+    {
+      "id": "20",
+      "name": "LOANS & ADVANCES(ASSET)",
+      "under": "CURRENT ASSETS",
+      "isDefault": true
+    },
+    {
       "id": "21",
       "name": "PURCHASE ACCOUNT",
       "under": "EXPENSE",
@@ -46,18 +166,6 @@
       "id": "22",
       "name": "SALES ACCOUNT",
       "under": "INCOME",
-      "isDefault": true
-    },
-    {
-      "id": "29",
-      "name": "SUNDRY CREDITORS",
-      "under": "CURRENT LIABILITIES",
-      "isDefault": true
-    },
-    {
-      "id": "30",
-      "name": "SUNDRY DEBTORS",
-      "under": "CURRENT ASSETS",
       "isDefault": true
     },
     {
@@ -97,6 +205,18 @@
       "isDefault": true
     },
     {
+      "id": "29",
+      "name": "SUNDRY CREDITORS",
+      "under": "CURRENT LIABILITIES",
+      "isDefault": true
+    },
+    {
+      "id": "30",
+      "name": "SUNDRY DEBTORS",
+      "under": "CURRENT ASSETS",
+      "isDefault": true
+    },
+    {
       "id": "31",
       "name": "ADJUSTMENTS",
       "under": "CURRENT LIABILITIES",
@@ -105,8 +225,78 @@
   ],
   "ledgers": [
     {
+      "code": "L001",
+      "name": "ACCRUED INTEREST",
+      "groupName": "CURRENT ASSETS",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L002",
+      "name": "ADDITIONAL TAX",
+      "groupName": "DUTIES & TAXES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L006",
+      "name": "AUDIT FEE PAYABLE",
+      "groupName": "CURRENT LIABILITIES",
+      "openingBalance": 22000,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L007",
+      "name": "BANK CHARGES",
+      "groupName": "INDIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L008",
+      "name": "BUSINESS PERQUISITES",
+      "groupName": "INDIRECT INCOME",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L009",
+      "name": "CASH",
+      "groupName": "CASH-IN-HAND",
+      "openingBalance": 612951.91,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L011",
+      "name": "DEPRECIATION",
+      "groupName": "DEPRECIATION",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L013",
+      "name": "DISCOUNT ALLOWED",
+      "groupName": "INDIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L014",
+      "name": "DISCOUNT RECEIVED",
+      "groupName": "INDIRECT INCOME",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
       "code": "L018",
       "name": "LOCAL PURCHASE",
+      "groupName": "PURCHASE ACCOUNT",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L019",
+      "name": "INTERSTATE PURCHASE",
       "groupName": "PURCHASE ACCOUNT",
       "openingBalance": 0,
       "balanceType": "Debit"
@@ -397,76 +587,6 @@
       "groupName": "OUTPUT IGST",
       "openingBalance": 0,
       "balanceType": "Debit"
-    },
-    {
-      "code": "L019",
-      "name": "INTERSTATE PURCHASE",
-      "groupName": "PURCHASE ACCOUNT",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L001",
-      "name": "ACCRUED INTEREST",
-      "groupName": "CURRENT ASSETS",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L002",
-      "name": "ADDITIONAL TAX",
-      "groupName": "DUTIES & TAXES",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L006",
-      "name": "AUDIT FEE PAYABLE",
-      "groupName": "CURRENT LIABILITIES",
-      "openingBalance": 22000,
-      "balanceType": "Credit"
-    },
-    {
-      "code": "L007",
-      "name": "BANK CHARGES",
-      "groupName": "INDIRECT EXPENSES",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L008",
-      "name": "BUSINESS PERQUISITES",
-      "groupName": "INDIRECT INCOME",
-      "openingBalance": 0,
-      "balanceType": "Credit"
-    },
-    {
-      "code": "L009",
-      "name": "CASH",
-      "groupName": "CASH-IN-HAND",
-      "openingBalance": 612951.91,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L011",
-      "name": "DEPRECIATION",
-      "groupName": "DEPRECIATION",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L013",
-      "name": "DISCOUNT ALLOWED",
-      "groupName": "INDIRECT EXPENSES",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L014",
-      "name": "DISCOUNT RECEIVED",
-      "groupName": "INDIRECT INCOME",
-      "openingBalance": 0,
-      "balanceType": "Credit"
     }
   ],
   "salesAdjustments": [
@@ -947,7 +1067,8 @@
     "enableCessInSalesBill": false,
     "enablePartyClosingBalanceBottom": true,
     "enableHeadloader": true,
-    "influencerLoyaltyRate": 1
+    "influencerLoyaltyRate": 1,
+    "allowPreviousYearEditing": false
   },
   "influencers": [
     {
@@ -1043,7 +1164,7 @@
       "digits": 4,
       "startingNumber": 1,
       "currentNumber": 1,
-      "ledgerCode": "L020",
+      "ledgerCode": "L019",
       "isActive": false
     },
     {

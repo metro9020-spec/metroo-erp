@@ -19,14 +19,13 @@ export function renderInvoices(container) {
     return (inv.voucherNo || inv.id).toLowerCase().includes(searchInvoiceFilter.toLowerCase()) ||
            inv.contactName.toLowerCase().includes(searchInvoiceFilter.toLowerCase());
   }).sort((a, b) => {
-    const dateA = a.date || "";
-    const dateB = b.date || "";
-    if (dateA !== dateB) {
-      return dateA.localeCompare(dateB);
-    }
     const noA = String(a.voucherNo || a.id || "");
     const noB = String(b.voucherNo || b.id || "");
-    return noA.localeCompare(noB, undefined, { numeric: true, sensitivity: 'base' });
+    const cmp = noA.localeCompare(noB, undefined, { numeric: true, sensitivity: 'base' });
+    if (cmp !== 0) return cmp;
+    const dateA = a.date || "";
+    const dateB = b.date || "";
+    return dateA.localeCompare(dateB);
   });
 
   container.innerHTML = `
@@ -69,7 +68,10 @@ export function renderInvoices(container) {
           <input type="text" id="search-invoice" class="form-control" placeholder="Search by Invoice # or Customer..." value="${searchInvoiceFilter}" style="width: 300px;">
         </div>
       </div>
-      <button class="btn btn-primary" id="btn-add-invoice"><i class="fa-solid fa-plus"></i> Create Sales Invoice</button>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-secondary" id="btn-import-sales" style="background: #0284c7; color: white; border-color: #0369a1;"><i class="fa-solid fa-file-import"></i> Import Sales Invoices</button>
+        <button class="btn btn-primary" id="btn-add-invoice"><i class="fa-solid fa-plus"></i> Create Sales Invoice</button>
+      </div>
     </div>
 
     <!-- Invoices Table -->
@@ -145,6 +147,10 @@ export function renderInvoices(container) {
     document.getElementById("search-invoice").focus();
   });
 
+  document.getElementById("btn-import-sales")?.addEventListener("click", () => {
+    import("./importInvoicesModal.js").then(m => m.showImportInvoicesModal(() => renderInvoices(container)));
+  });
+
   document.getElementById("btn-add-invoice").addEventListener("click", () => {
     showCreateInvoiceModal(container, contacts, materials);
   });
@@ -196,8 +202,17 @@ export function generateInvoiceHtml(inv, printMode = 'standard') {
   const isUnregistered = state.isCompanyUnregistered ? state.isCompanyUnregistered() : false;
   const isNontaxable = (series && series.seriesType === "NONTAXABLE") || inv.postingLedger === "L022" || (inv.totalGst === 0 && (inv.items || []).every(item => parseFloat(item.gstPercent) === 0)) || isUnregistered;
 
-  const watermarkHTML = inv.isCancelled ? `
-    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 6rem; font-weight: 900; color: rgba(239, 68, 68, 0.18); pointer-events: none; white-space: nowrap; user-select: none; z-index: 9999;">
+  const custGstin = String((contact && contact.gstin) || inv.customerGstin || inv.contactGstin || inv.gstin || "").trim();
+  const hasCustomerGstin = custGstin.length > 0;
+  const invoiceBannerTitle = isNontaxable ? "RETAIL INVOICE (NON-TAXABLE)" : (hasCustomerGstin ? "TAX INVOICE" : "RETAIL INVOICE");
+
+  const rawPayMode = String(inv.payMode || inv.paymode || "").trim();
+  const isCreditBill = rawPayMode.toUpperCase() === "CREDIT" || (!rawPayMode && inv.contactId && inv.contactId !== "__CASH__");
+  const billTypeLabel = isCreditBill ? "CREDIT INVOICE" : "CASH BILL";
+
+  const isCancelled = !!(inv.isCancelled || inv.isCanceled || (inv.status && String(inv.status).toUpperCase() === "CANCELLED"));
+  const watermarkHTML = isCancelled ? `
+    <div class="cancelled-watermark" style="position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%) rotate(-35deg); font-size: 6.5rem; font-weight: 900; color: rgba(220, 38, 38, 0.28); border: 12px solid rgba(220, 38, 38, 0.28); padding: 10px 40px; border-radius: 20px; pointer-events: none; white-space: nowrap; user-select: none; z-index: 9999; text-transform: uppercase; letter-spacing: 12px; font-family: sans-serif; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;">
       CANCELLED
     </div>
   ` : "";
@@ -314,12 +329,12 @@ export function generateInvoiceHtml(inv, printMode = 'standard') {
         </div>
       </div>
 
-      <!-- Retail Invoice banner -->
+      <!-- Retail / Tax Invoice banner -->
       <div class="retail-invoice-banner" style="${isNoTax ? 'display: none;' : 'display: grid; grid-template-columns: 1.2fr 0.8fr; border: 1.5px solid #000; border-bottom: none; color: #000; font-size: 0.8rem;'}">
         <div style="text-align: center; border-right: 1.5px solid #000; padding: 0.25rem; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-          <strong style="font-size: 0.95rem; letter-spacing: 0.5px;">${isNontaxable ? "RETAIL INVOICE (NON-TAXABLE)" : "RETAIL INVOICE"}</strong>
+          <strong style="font-size: 0.95rem; letter-spacing: 0.5px;">${invoiceBannerTitle}</strong>
           <span style="font-size: 0.75rem; color: #333;">${isNontaxable ? "BILL OF SUPPLY" : "GSTINV-1"}</span>
-          <strong style="font-size: 0.85rem; margin-top: 2px;">CASH BILL</strong>
+          <strong style="font-size: 0.85rem; margin-top: 2px;">${billTypeLabel}</strong>
         </div>
         <div style="padding: 0.35rem 0.5rem; display: flex; flex-direction: column; justify-content: center; gap: 3px; font-size: 0.75rem;">
           <div style="display: flex; align-items: center; gap: 6px;"><input type="checkbox" checked disabled style="margin: 0; pointer-events: none;"> Original for Recipient</div>
@@ -631,6 +646,21 @@ export function generateInvoiceHtml(inv, printMode = 'standard') {
           <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: bold; border-top: 1px solid #000; padding-top: 3px; margin-top: 1px;">
             <span style="border: 1px solid #000; padding: 1px 4px; font-weight: bold; background-color: #f8fafc; font-size: 0.75rem;">Grand Total</span>
             <span style="font-size: 0.9rem; font-weight: bold;">\u20B9${invTotal.toFixed(2)}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Signatory & Vehicle No Box -->
+      <div class="invoice-footer-sign-block" style="${isNoTax ? 'display: none;' : 'display: flex; justify-content: space-between; align-items: flex-end; border: 1.5px solid #000; border-top: none; padding: 0.8rem 1rem 0.5rem 1rem; color: #000; font-size: 0.8rem; font-family: inherit; min-height: 55px; box-sizing: border-box;'}">
+        <div style="font-weight: bold; font-size: 0.8rem; letter-spacing: 0.3px;">
+          VEHICLE NUMBER : ${inv.vehicleNo || ''}
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 20px; text-align: right;">
+          <div style="font-size: 0.8rem;">
+            For : <strong style="font-weight: 800; font-size: 0.9rem; margin-left: 15px;">${companyName}</strong>
+          </div>
+          <div style="font-size: 0.75rem;">
+            Authorised Signatory
           </div>
         </div>
       </div>

@@ -10,9 +10,15 @@ export function formatDate(dStr) {
   }
   const str = String(dStr).trim();
   const p = str.split("-");
-  if (p.length === 3 && p[0].length === 4) {
-    // YYYY-MM-DD -> DD/MM/YYYY
-    return `${p[2].padStart(2, "0")}/${p[1].padStart(2, "0")}/${p[0]}`;
+  if (p.length === 3) {
+    if (p[0].length === 4) {
+      // YYYY-MM-DD -> DD/MM/YYYY
+      return `${p[2].padStart(2, "0")}/${p[1].padStart(2, "0")}/${p[0]}`;
+    }
+    if (p[2].length === 4) {
+      // DD-MM-YYYY -> DD/MM/YYYY
+      return `${p[0].padStart(2, "0")}/${p[1].padStart(2, "0")}/${p[2]}`;
+    }
   }
   const slashParts = str.split("/");
   if (slashParts.length === 3 && slashParts[2].length === 4) {

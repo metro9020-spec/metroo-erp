@@ -1,0 +1,2181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ERP Sales Executive Mobile Portal</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --success: #16a34a;
+      --warning: #eab308;
+      --danger: #dc2626;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      padding-bottom: 90px;
+    }
+
+    /* Top Navigation Header */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #1e293b;
+      color: white;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    }
+
+    .brand-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-title i {
+      color: #38bdf8;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-badge {
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 20px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .status-online { background: rgba(22, 163, 74, 0.2); color: #4ade80; }
+    .status-offline { background: rgba(220, 38, 38, 0.2); color: #f87171; }
+
+    /* Executive Identity Bar */
+    .exec-bar {
+      background: #0f172a;
+      color: #94a3b8;
+      padding: 10px 16px;
+      font-size: 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    .company-tag {
+      background: #38bdf8;
+      color: #0f172a;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 0.75rem;
+    }
+
+    /* Navigation Tabs */
+    .tab-bar {
+      display: flex;
+      background: white;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      border: none;
+      background: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+    }
+
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    /* Container Padding */
+    .content-area {
+      padding: 16px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Card Styling */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #334155;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Customer Selector */
+    .select-box, .input-box {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 0.95rem;
+      background: white;
+      outline: none;
+    }
+
+    .select-box:focus, .input-box:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+    }
+
+    /* Category Filter Pills */
+    .category-scroll {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+      scrollbar-width: none;
+    }
+    .category-scroll::-webkit-scrollbar { display: none; }
+
+    .cat-pill {
+      white-space: nowrap;
+      padding: 6px 14px;
+      border-radius: 20px;
+      background: #e2e8f0;
+      color: #475569;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+    }
+
+    .cat-pill.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    /* Product Cards List */
+    .product-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: border-color 0.2s;
+    }
+
+    .product-card.has-qty {
+      border-color: var(--primary);
+      background: #eff6ff;
+    }
+
+    .product-info {
+      flex: 1;
+      padding-right: 12px;
+    }
+
+    .product-name {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .product-meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .stock-badge {
+      background: #dcfce7;
+      color: #15803d;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 0.75rem;
+    }
+
+    .stock-out {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    /* Quantity Controls */
+    .qty-control {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #f1f5f9;
+      padding: 4px;
+      border-radius: 8px;
+    }
+
+    .qty-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 6px;
+      border: none;
+      background: white;
+      color: var(--text);
+      font-weight: 700;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    .qty-btn:active { background: #cbd5e1; }
+
+    .qty-input {
+      width: 44px;
+      text-align: center;
+      border: none;
+      background: transparent;
+      font-weight: 700;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    /* Fixed Bottom Action Bar */
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      border-top: 1px solid var(--border);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 -4px 12px rgba(0,0,0,0.08);
+      z-index: 1000;
+    }
+
+    .summary-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .summary-items {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .summary-total {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .btn-submit {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(37,99,235,0.3);
+    }
+    .btn-submit:disabled {
+      background: #94a3b8;
+      box-shadow: none;
+    }
+
+    /* Modal Sheet & Login View */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 2000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+
+    .login-card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+    }
+
+    .modal-sheet {
+      background: white;
+      width: 100%;
+      max-width: 600px;
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      padding: 20px;
+      max-height: 85vh;
+      overflow-y: auto;
+      animation: slideUp 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .order-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 16px;
+      font-size: 0.85rem;
+    }
+    .order-table th { background: #f8fafc; text-align: left; padding: 8px; color: var(--text-muted); }
+    .order-table td { padding: 8px; border-bottom: 1px solid var(--border); }
+
+    /* Interactive Order Entry Table Format */
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      background: white;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      margin-bottom: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .order-entry-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      min-width: 620px;
+    }
+
+    .order-entry-table th {
+      background: #1e293b;
+      color: #f8fafc;
+      font-weight: 700;
+      text-align: left;
+      padding: 10px 8px;
+      border-bottom: 2px solid #334155;
+      white-space: nowrap;
+      font-size: 0.8rem;
+    }
+
+    .order-entry-table td {
+      padding: 8px 6px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    .order-entry-table tr.row-active {
+      background-color: #eff6ff;
+    }
+
+    .table-input {
+      width: 100%;
+      padding: 6px 4px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      text-align: center;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .table-input:focus {
+      border-color: var(--primary);
+      outline: none;
+      background: #fff;
+      box-shadow: 0 0 0 2px rgba(37,99,235,0.2);
+    }
+
+    .table-select {
+      width: 100%;
+      padding: 6px 4px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      background: white;
+      color: #0f172a;
+      font-weight: 600;
+    }
+
+    .code-badge {
+      background: #f1f5f9;
+      color: #334155;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.78rem;
+      font-weight: 700;
+      display: inline-block;
+    }
+
+    /* Orders History Card */
+    .history-card {
+      border-left: 4px solid var(--primary);
+    }
+    .history-card.status-Pending { border-left-color: var(--warning); }
+    .history-card.status-Approved { border-left-color: var(--success); }
+    .history-card.status-Invoiced { border-left-color: var(--primary); }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .badge-Pending { background: #fef08a; color: #854d0e; }
+    .badge-Approved { background: #bbf7d0; color: #166534; }
+    .badge-Invoiced { background: #bfdbfe; color: #1e40af; }
+  </style>
+</head>
+<body>
+
+  <!-- Top App Header -->
+  <header class="app-header">
+    <div class="brand-title">
+      <i class="fa-solid fa-boxes-packing"></i>
+      <span>Metro ERP Sales</span>
+    </div>
+    <div class="header-actions">
+      <div id="net-status" class="status-badge status-online">
+        <i class="fa-solid fa-circle"></i> <span>Online</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Sales Executive & Active Company Sub-Header -->
+  <div id="app-sub-header" class="exec-bar" style="display: none;">
+    <div>
+      <span style="font-weight: 700; color: white;" id="header-exec-name">Sales Exec</span>
+      <span style="font-size: 0.75rem; color: #94a3b8;" id="header-exec-role">(Executive)</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <span class="company-tag" id="header-company-name" onclick="showCompanySelectionScreen(true)" style="cursor: pointer;" title="Click to Switch Company">Company</span>
+      <button onclick="showCompanySelectionScreen(true)" style="background: none; border: none; color: #38bdf8; font-size: 0.8rem; cursor: pointer;" title="Switch Company">
+        <i class="fa-solid fa-right-left"></i>
+      </button>
+      <button onclick="logoutSalesExec()" style="background: none; border: none; color: #f87171; font-size: 0.85rem; margin-left: 4px; cursor: pointer;" title="Logout">
+        <i class="fa-solid fa-power-off"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- View 1: Login View (Shown if not logged in) -->
+  <div id="view-login" class="modal-overlay">
+    <div class="login-card">
+      <div style="text-align: center; margin-bottom: 20px;">
+        <div style="width: 50px; height: 50px; background: #eff6ff; color: var(--primary); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 10px;">
+          <i class="fa-solid fa-user-lock"></i>
+        </div>
+        <h2 style="font-size: 1.25rem; font-weight: 800; color: #0f172a;">Sales Executive Login</h2>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">Enter your User ID and Password to view assigned companies and take orders.</p>
+      </div>
+
+      <div id="login-error" style="display: none; background: #fee2e2; color: #991b1b; padding: 10px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 14px; text-align: center;"></div>
+
+      <div style="margin-bottom: 14px;">
+        <label style="font-size: 0.8rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">User ID / Username:</label>
+        <input type="text" id="login-username" class="input-box" placeholder="e.g. admin or john" autocomplete="username" onkeydown="if(event.key==='Enter') handleSalesLogin()">
+      </div>
+
+      <div style="margin-bottom: 16px;">
+        <label style="font-size: 0.8rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Password:</label>
+        <input type="password" id="login-password" class="input-box" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter') handleSalesLogin()">
+      </div>
+
+      <button id="btn-login" class="btn-submit" style="width: 100%; justify-content: center; padding: 12px; font-size: 1rem;" onclick="handleSalesLogin()">
+        <i class="fa-solid fa-right-to-bracket"></i> <span>Login to Sales Portal</span>
+      </button>
+
+      <p style="font-size: 0.78rem; color: #64748b; margin-top: 12px; text-align: center; background: #f8fafc; padding: 8px; border-radius: 6px; border: 1px dashed #cbd5e1;">
+        🔑 Default Login: <strong>admin</strong> | Password: <strong>123</strong>
+      </p>
+
+      <div style="margin-top: 10px; text-align: center; display: flex; flex-direction: column; gap: 6px;">
+        <button type="button" onclick="promptServerUrl()" style="background: none; border: none; color: #0284c7; font-size: 0.78rem; font-weight: 700; cursor: pointer; text-decoration: underline;">
+          <i class="fa-solid fa-gear"></i> Server IP: <span id="current-server-ip-label">Loading...</span>
+        </button>
+        <button type="button" onclick="clearAppSessionCache()" style="background: none; border: none; color: #94a3b8; font-size: 0.75rem; cursor: pointer; text-decoration: underline;">
+          <i class="fa-solid fa-rotate-left"></i> Reset Session & Clear Cache
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- View 2: Main Application Views (Shown after login & company selection) -->
+  <div id="view-app" style="display: none;">
+    <!-- Navigation Tabs -->
+    <nav class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('new-order')"><i class="fa-solid fa-cart-plus"></i> New Order</button>
+      <button class="tab-btn" onclick="switchTab('order-history')"><i class="fa-solid fa-clock-rotate-left"></i> My Orders</button>
+    </nav>
+
+    <!-- Tab 1: New Order Form -->
+    <div id="tab-new-order" class="content-area">
+      <!-- Customer Selection Card (Inline Typable Combobox) -->
+      <div class="card">
+        <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+          <span><i class="fa-solid fa-user-tag"></i> Select Customer / Party</span>
+          <button onclick="loadCatalog(false)" style="background: #eff6ff; color: var(--primary); border: 1px solid #bfdbfe; padding: 4px 10px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Refresh live customer list from Main ERP">
+            <i class="fa-solid fa-rotate"></i> <span>Sync Live ERP</span>
+          </button>
+        </div>
+        <div style="position: relative;" id="cust-combobox-wrapper">
+          <input type="text" id="cust-combobox" class="input-box" placeholder="🔍 Type Customer Name, City, or Mobile..." autocomplete="off" spellcheck="false" style="font-weight: 700; padding-right: 32px;" onfocus="openCustDropdown()" oninput="filterCustCombobox()">
+          <span onclick="toggleCustDropdown()" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #64748b; font-size: 0.85rem;" title="Toggle customer list">▼</span>
+          <div id="cust-dropdown-panel" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid var(--primary); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 1000; max-height: 220px; overflow-y: auto; margin-top: 4px;">
+            <!-- Customer items rendered dynamically -->
+          </div>
+        </div>
+        <!-- Hidden select element for 100% backend compatibility -->
+        <select id="cust-select" style="display: none;">
+          <option value="CASH">💵 Cash Sale (General Customer)</option>
+        </select>
+      </div>
+
+      <!-- Banner for Assigned Pre-Take Orders from Main ERP -->
+      <div id="pre-take-orders-banner" class="card" style="display: none; background: #f0f9ff; border: 1px solid #7dd3fc; border-left: 5px solid #0284c7;">
+        <div class="card-title" style="color: #0369a1; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span><i class="fa-solid fa-file-import"></i> Pre-Take Order Assigned from Main ERP</span>
+          <span style="font-size: 0.75rem; background: #0284c7; color: white; padding: 2px 8px; border-radius: 12px; font-weight: 700;">ERP Assigned</span>
+        </div>
+        <p style="font-size: 0.8rem; color: #0369a1; margin-bottom: 10px;">
+          Main ERP has assigned a Pre-Take Order. Click below to load and pre-fill item quantities into your table.
+        </p>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <select id="pre-take-order-select" class="select-box" style="flex: 1; min-width: 220px; font-weight: 700; border-color: #7dd3fc;">
+            <!-- Options populated dynamically -->
+          </select>
+          <button class="btn-submit" style="background: #0284c7; padding: 0 14px; font-size: 0.85rem; height: 42px; white-space: nowrap;" onclick="loadAssignedPreTakeOrder()">
+            <i class="fa-solid fa-bolt"></i> <span>Auto-Fill Pre-Take Qty</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Product Picker Card (Inline Typable Comboboxes for Product Name & Code/Model) -->
+      <div class="card" style="padding-bottom: 14px;">
+        <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+          <span><i class="fa-solid fa-cart-plus"></i> Select Product to Add</span>
+          <span style="font-size: 0.75rem; color: #64748b; font-weight: normal;">Type directly into dropdowns</span>
+        </div>
+        
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <!-- Dropdown 1: Product Name -->
+          <div>
+            <label style="font-size: 0.78rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">
+              <i class="fa-solid fa-tag" style="color: var(--primary);"></i> 1. Product Name (Type or Select):
+            </label>
+            <div style="position: relative;" id="prod-name-wrapper">
+              <input type="text" id="prod-name-combobox" class="input-box" placeholder="🔍 Type or Select Product Name..." autocomplete="off" spellcheck="false" style="font-weight: 700; padding-right: 32px;" onfocus="openProdNameDropdown()" oninput="filterProdNameCombobox()">
+              <span onclick="toggleProdNameDropdown()" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #64748b; font-size: 0.85rem;" title="Toggle product list">▼</span>
+              <div id="prod-name-dropdown-panel" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid var(--primary); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 1000; max-height: 220px; overflow-y: auto; margin-top: 4px;">
+                <!-- Product name items rendered dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Dropdown 2: Code / Model -->
+          <div>
+            <label style="font-size: 0.78rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">
+              <i class="fa-solid fa-barcode" style="color: var(--primary);"></i> 2. Code / Model (Type or Select):
+            </label>
+            <div style="display: flex; gap: 8px;">
+              <div style="position: relative; flex: 1;" id="prod-code-wrapper">
+                <input type="text" id="prod-code-combobox" class="input-box" placeholder="🔍 Type or Select Code / Model..." autocomplete="off" spellcheck="false" style="font-weight: 700; padding-right: 32px;" onfocus="openProdCodeDropdown()" oninput="filterProdCodeCombobox()" disabled>
+                <span onclick="toggleProdCodeDropdown()" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #64748b; font-size: 0.85rem;" title="Toggle code list">▼</span>
+                <div id="prod-code-dropdown-panel" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid var(--primary); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 1000; max-height: 220px; overflow-y: auto; margin-top: 4px;">
+                  <!-- Code items rendered dynamically -->
+                </div>
+              </div>
+              <button class="btn-submit" style="padding: 0 16px; font-size: 0.88rem; height: 42px; white-space: nowrap;" onclick="handleAddButtonClick()">
+                <i class="fa-solid fa-plus"></i> Add Item
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Category Pills -->
+        <div id="category-pills" class="category-scroll" style="margin-top: 12px;">
+          <button class="cat-pill active" onclick="filterCategory('ALL', this)">All Categories</button>
+        </div>
+      </div>
+
+      <!-- Selected Products Order Entry Table -->
+      <div class="table-responsive">
+        <table class="order-entry-table">
+          <thead>
+            <tr>
+              <th style="min-width: 140px;">Product Name</th>
+              <th style="min-width: 85px;">Code / Model</th>
+              <th style="min-width: 110px;">Batch</th>
+              <th style="width: 80px; text-align: center;">Pre-Take Qty</th>
+              <th style="width: 80px; text-align: center;">Actual Qty</th>
+              <th style="width: 85px; text-align: right;">Amount (₹)</th>
+              <th style="width: 45px; text-align: center;">Remove</th>
+            </tr>
+          </thead>
+          <tbody id="product-table-body">
+            <!-- Dynamically populated selected product rows -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tab 2: Order History -->
+    <div id="tab-order-history" class="content-area" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h3 style="font-size: 1rem; color: #334155;">Submitted Orders</h3>
+        <button onclick="loadOrderHistory()" style="background: none; border: none; color: var(--primary); font-weight: 600; cursor: pointer;">
+          <i class="fa-solid fa-rotate"></i> Refresh
+        </button>
+      </div>
+      <div id="history-list">
+        <!-- Order History cards -->
+      </div>
+    </div>
+
+    <!-- Bottom Floating Summary Bar -->
+    <div class="bottom-bar">
+      <div class="summary-text">
+        <span class="summary-items"><span id="cart-item-count">0</span> Items (Pre: <span id="cart-pre-qty">0</span> | Act: <span id="cart-qty-count">0</span>)</span>
+        <span class="summary-total">₹ <span id="cart-total-amount">0.00</span></span>
+      </div>
+      <button id="btn-review" class="btn-submit" onclick="openReviewModal()" disabled>
+        <span>Review & Send</span> <i class="fa-solid fa-arrow-right"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Company Selection & Switcher Modal Screen -->
+  <div id="company-modal" class="modal-overlay" style="display: none;">
+    <div class="login-card" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a;"><i class="fa-solid fa-building" style="color: var(--primary);"></i> Select Accessible Company</h3>
+        <button id="btn-close-company-modal" onclick="closeCompanyModal()" style="background: none; border: none; font-size: 1.4rem; color: #64748b; cursor: pointer;">&times;</button>
+      </div>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
+        Logged in as <strong id="company-modal-user-name">Executive</strong>. Select the company you want to access:
+      </p>
+      <div id="company-list-options" style="display: flex; flex-direction: column; gap: 10px; max-height: 55vh; overflow-y: auto; padding-right: 4px;">
+        <!-- Dynamically populated company selection buttons -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Review Bottom Sheet Modal -->
+  <div id="review-modal" class="modal-overlay" style="display: none; align-items: flex-end; padding: 0;">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3 style="font-size: 1.1rem; font-weight: 700;"><i class="fa-solid fa-clipboard-check"></i> Order Summary</h3>
+        <button onclick="closeReviewModal()" style="background: none; border: none; font-size: 1.4rem; color: #64748b; cursor: pointer;">&times;</button>
+      </div>
+
+      <div style="background: #f1f5f9; padding: 10px; border-radius: 8px; margin-bottom: 12px; font-size: 0.85rem;">
+        <div><strong>Company:</strong> <span id="summary-company-name">-</span></div>
+        <div><strong>Customer:</strong> <span id="summary-cust-name">-</span></div>
+        <div><strong>Sales Exec:</strong> <span id="summary-exec-name">-</span></div>
+      </div>
+
+      <div style="overflow-x: auto; margin-bottom: 12px;">
+        <table class="order-table" style="min-width: 500px;">
+          <thead>
+            <tr>
+              <th>Item Name</th>
+              <th>Code/Model</th>
+              <th>Batch</th>
+              <th style="text-align: center;">Pre Qty</th>
+              <th style="text-align: center;">Act Qty</th>
+              <th style="text-align: right;">Rate</th>
+              <th style="text-align: right;">Amount</th>
+            </tr>
+          </thead>
+          <tbody id="summary-table-body">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-bottom: 12px;">
+        <label style="font-size: 0.8rem; font-weight: 600; color: #475569; display: block; margin-bottom: 4px;">Order Remarks / Special Delivery Instructions:</label>
+        <textarea id="order-remarks" class="input-box" rows="2" placeholder="e.g. Deliver before 4 PM, call party before dispatch..."></textarea>
+      </div>
+
+      <button id="btn-confirm-send" class="btn-submit" style="width: 100%; justify-content: center; padding: 14px; font-size: 1rem;" onclick="submitOrderToERP()">
+        <i class="fa-solid fa-paper-plane"></i> <span>🚀 Send Order to Main ERP</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script>
+    const getApiBase = () => {
+      const customUrl = localStorage.getItem("custom_server_url");
+      if (customUrl && customUrl.trim()) {
+        let clean = customUrl.trim();
+        if (!clean.startsWith("http://") && !clean.startsWith("https://")) {
+          clean = "http://" + clean;
+        }
+        return clean.replace(/\/+$/, "");
+      }
+      if (window.location.origin && window.location.origin !== "null" && !window.location.protocol.startsWith("file")) {
+        if (window.location.port === "3001") {
+          return window.location.origin;
+        }
+        const host = window.location.hostname || "localhost";
+        const proto = window.location.protocol.startsWith("http") ? window.location.protocol : "http:";
+        return `${proto}//${host}:3001`;
+      }
+      return "http://localhost:3001";
+    };
+    const API_BASE = getApiBase();
+    let currentUser = null;
+    let userCompanies = [];
+    let activeCompany = null;
+    let fyId = "default";
+    let catalog = { contacts: [], materials: [] };
+    let cart = {}; // { materialId: quantity }
+    let selectedCategory = "ALL";
+    let selectedProductName = "";
+    let assignedPreTakeOrders = [];
+    let activePreTakeOrderId = null;
+
+    function updateServerIpLabel() {
+      const el = document.getElementById("current-server-ip-label");
+      if (el) el.textContent = API_BASE;
+    }
+
+    function promptServerUrl() {
+      const current = localStorage.getItem("custom_server_url") || API_BASE;
+      const input = prompt("Enter Server IP Address & Port (e.g. http://192.168.1.11:3001 or http://100.66.24.43:3001):", current);
+      if (input !== null && input.trim() !== "") {
+        let clean = input.trim();
+        if (!clean.startsWith("http://") && !clean.startsWith("https://")) {
+          clean = "http://" + clean;
+        }
+        clean = clean.replace(/\/+$/, "");
+        localStorage.setItem("custom_server_url", clean);
+        window.location.href = window.location.pathname + "?t=" + Date.now();
+      } else if (input !== null && input.trim() === "") {
+        localStorage.removeItem("custom_server_url");
+        window.location.href = window.location.pathname + "?t=" + Date.now();
+      }
+    }
+
+    function clearAppSessionCache() {
+      const customUrl = localStorage.getItem("custom_server_url");
+      try {
+        localStorage.clear();
+        if (customUrl) {
+          localStorage.setItem("custom_server_url", customUrl);
+        }
+      } catch(e) {}
+      window.location.href = window.location.pathname + "?reset=" + Date.now();
+    }
+
+    const initAppOnLoad = async () => {
+      updateServerIpLabel();
+
+      // Clear any legacy catalog caches on launch to force live fetch
+      try {
+        Object.keys(localStorage).forEach(k => {
+          if (k.startsWith("sales_catalog_cache_")) {
+            localStorage.removeItem(k);
+          }
+        });
+      } catch(e) {}
+
+      // Check network status
+      updateNetStatus();
+      window.addEventListener("online", updateNetStatus);
+      window.addEventListener("offline", updateNetStatus);
+
+      // Check saved login session
+      const savedSession = localStorage.getItem("sales_exec_session");
+      if (savedSession) {
+        try {
+          const sessionData = JSON.parse(savedSession);
+          currentUser = sessionData.user;
+          userCompanies = Array.isArray(sessionData.companies) ? sessionData.companies : [];
+          activeCompany = sessionData.activeCompany || null;
+          
+          if (currentUser && userCompanies.length > 0) {
+            if (activeCompany) {
+              await initAppSession();
+            } else if (userCompanies.length === 1) {
+              await selectCompany(userCompanies[0].id);
+            } else {
+              showCompanySelectionScreen(false);
+            }
+            return;
+          }
+        } catch (e) {
+          console.warn("Clearing invalid session:", e);
+          localStorage.removeItem("sales_exec_session");
+        }
+      }
+
+      // Show Login Modal
+      showLoginView();
+    };
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initAppOnLoad);
+    } else {
+      initAppOnLoad();
+    }
+
+    function showLoginView() {
+      document.getElementById("view-login").style.display = "flex";
+      document.getElementById("view-app").style.display = "none";
+      document.getElementById("app-sub-header").style.display = "none";
+      document.getElementById("company-modal").style.display = "none";
+      updateServerIpLabel();
+    }
+
+    function updateNetStatus() {
+      const el = document.getElementById("net-status");
+      if (!el) return;
+      if (navigator.onLine) {
+        el.className = "status-badge status-online";
+        el.innerHTML = '<i class="fa-solid fa-circle"></i> <span>Online</span>';
+        syncPendingOfflineOrders();
+      } else {
+        el.className = "status-badge status-offline";
+        el.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> <span>Offline</span>';
+      }
+    }
+
+    async function handleSalesLogin() {
+      const uIn = document.getElementById("login-username").value.trim();
+      const pIn = document.getElementById("login-password").value.trim();
+      const errEl = document.getElementById("login-error");
+      const btn = document.getElementById("btn-login");
+
+      if (!uIn || !pIn) {
+        errEl.textContent = "Please enter both User ID and Password.";
+        errEl.style.display = "block";
+        return;
+      }
+
+      errEl.style.display = "none";
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Authenticating...';
+
+      try {
+        const res = await fetch(`${API_BASE}/api/sales-login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: uIn, password: pIn })
+        });
+
+        const data = await res.json();
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> <span>Login to Sales Portal</span>';
+
+        if (res.ok && data.success) {
+          currentUser = data.user;
+          userCompanies = data.companies || [];
+          document.getElementById("view-login").style.display = "none";
+
+          if (userCompanies.length === 1) {
+            await selectCompany(userCompanies[0].id);
+          } else {
+            activeCompany = null;
+            saveSession();
+            showCompanySelectionScreen(false);
+          }
+        } else {
+          errEl.textContent = data.error || "Invalid User ID or Password.";
+          errEl.style.display = "block";
+        }
+      } catch (err) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> <span>Login to Sales Portal</span>';
+        console.error("Login fetch error:", err);
+        errEl.innerHTML = `⚠️ Network Error connecting to server at <strong>${API_BASE}</strong>.<br><a href="#" onclick="promptServerUrl(); return false;" style="color:#0284c7; text-decoration:underline; font-weight:bold; margin-top:4px; display:inline-block;">Click here to configure Server IP</a>`;
+        errEl.style.display = "block";
+      }
+    }
+
+    function saveSession() {
+      localStorage.setItem("sales_exec_session", JSON.stringify({
+        user: currentUser,
+        companies: userCompanies,
+        activeCompany: activeCompany
+      }));
+    }
+
+    function logoutSalesExec() {
+      if (confirm("Are you sure you want to log out?")) {
+        localStorage.removeItem("sales_exec_session");
+        window.location.reload();
+      }
+    }
+
+    function showCompanySelectionScreen(allowCancel = false) {
+      const modal = document.getElementById("company-modal");
+      const closeBtn = document.getElementById("btn-close-company-modal");
+      const userNameEl = document.getElementById("company-modal-user-name");
+      const container = document.getElementById("company-list-options");
+
+      if (userNameEl && currentUser) {
+        userNameEl.textContent = currentUser.fullName || currentUser.username;
+      }
+
+      closeBtn.style.display = allowCancel ? "block" : "none";
+
+      if (!userCompanies || userCompanies.length === 0) {
+        container.innerHTML = `
+          <div style="text-align:center; padding: 20px; color: #dc2626; font-size: 0.9rem;">
+            <i class="fa-solid fa-triangle-exclamation" style="font-size: 1.8rem; margin-bottom: 8px;"></i>
+            <br>No accessible companies found for this user account.
+          </div>
+          <button onclick="logoutSalesExec()" style="width: 100%; padding: 10px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 8px; font-weight: 700; color: #475569; cursor: pointer; margin-top: 10px;">
+            Back to Login
+          </button>
+        `;
+      } else {
+        container.innerHTML = userCompanies.map(c => {
+          const isSelected = activeCompany && activeCompany.id === c.id;
+          return `
+            <div onclick="selectCompany('${c.id}')" style="background: ${isSelected ? '#eff6ff' : 'white'}; border: 2px solid ${isSelected ? '#2563eb' : '#e2e8f0'}; padding: 14px; border-radius: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 40px; height: 40px; background: ${isSelected ? '#2563eb' : '#f0f9ff'}; color: ${isSelected ? 'white' : '#0284c7'}; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold;">
+                  <i class="fa-solid fa-building"></i>
+                </div>
+                <div>
+                  <div style="font-weight: 800; font-size: 1rem; color: #0f172a;">${c.name}</div>
+                  <div style="font-size: 0.78rem; color: #64748b;">ID: ${c.id} ${c.city ? '&bull; ' + c.city : ''}</div>
+                </div>
+              </div>
+              <div style="text-align: right;">
+                ${isSelected ? '<span style="background: #2563eb; color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;"><i class="fa-solid fa-check"></i> Active</span>' : '<span style="background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;">Select &rarr;</span>'}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      modal.style.display = "flex";
+    }
+
+    function openCompanyModal() {
+      showCompanySelectionScreen(true);
+    }
+
+    function closeCompanyModal() {
+      if (!activeCompany) {
+        return;
+      }
+      document.getElementById("company-modal").style.display = "none";
+    }
+
+    async function selectCompany(coId) {
+      const match = userCompanies.find(c => String(c.id) === String(coId));
+      if (match) {
+        activeCompany = match;
+        saveSession();
+        document.getElementById("company-modal").style.display = "none";
+        cart = {};
+        updateCartSummary();
+        await initAppSession();
+      }
+    }
+
+    let liveSyncInterval = null;
+
+    async function initAppSession() {
+      if (!activeCompany) {
+        showCompanySelectionScreen(false);
+        return;
+      }
+
+      document.getElementById("view-login").style.display = "none";
+      document.getElementById("company-modal").style.display = "none";
+      document.getElementById("view-app").style.display = "block";
+      document.getElementById("app-sub-header").style.display = "flex";
+
+      document.getElementById("header-exec-name").textContent = currentUser ? (currentUser.fullName || currentUser.username) : "Sales Exec";
+      document.getElementById("header-exec-role").textContent = `(${currentUser ? (currentUser.role || 'Executive') : 'Executive'})`;
+      document.getElementById("header-company-name").textContent = activeCompany.name;
+
+      // Filter customer search listener
+      document.getElementById("cust-search").oninput = filterCustomers;
+
+      await loadCatalog(false);
+
+      // Start live real-time background sync polling every 6 seconds
+      startLiveSync();
+    }
+
+    function startLiveSync() {
+      if (liveSyncInterval) clearInterval(liveSyncInterval);
+      liveSyncInterval = setInterval(() => {
+        if (activeCompany && currentUser && document.getElementById("view-app").style.display !== "none") {
+          loadCatalog(true); // background silent poll
+        }
+      }, 6000);
+    }
+
+    async function loadCatalog(isSilent = false) {
+      if (!activeCompany) return;
+      const coId = String(activeCompany.id);
+
+      if (!isSilent) {
+        // Reset state immediately on manual refresh or company switch
+        catalog = { contacts: [], materials: [] };
+        selectedCategory = "ALL";
+
+        const select = document.getElementById("cust-select");
+        if (select) {
+          select.innerHTML = '<option value="">⏳ Fetching live ERP data for ' + activeCompany.name + '...</option>';
+        }
+        renderCategories();
+        renderProductNameOptions();
+        renderProductCodeOptions();
+        renderProductsTable();
+      }
+
+      try {
+        // Use cache-busting timestamp ?t= to guarantee fresh real-time data from Main ERP
+        const res = await fetch(`${API_BASE}/api/catalog/${coId}/${fyId}?t=${Date.now()}`);
+        if (res.ok) {
+          const resData = await res.json();
+          if (!resData.companyId || String(resData.companyId) === coId) {
+            const newStr = JSON.stringify(resData);
+            const oldStr = JSON.stringify(catalog);
+
+            if (newStr !== oldStr || !isSilent) {
+              // Preserve active customer choice during silent background refresh
+              const currentSelectVal = document.getElementById("cust-select") ? document.getElementById("cust-select").value : "";
+              
+              catalog = resData;
+              localStorage.setItem(`sales_catalog_cache_${coId}`, JSON.stringify(catalog));
+
+              renderCustomerOptions();
+              renderCategories();
+              renderProductNameOptions();
+              renderProductCodeOptions();
+              renderProductsTable();
+
+              if (currentSelectVal && document.getElementById("cust-select")) {
+                document.getElementById("cust-select").value = currentSelectVal;
+              }
+            }
+          }
+        }
+      } catch (err) {
+        if (!isSilent) {
+          console.warn("Could not fetch live catalog, trying cache for company " + coId);
+          const cached = localStorage.getItem(`sales_catalog_cache_${coId}`);
+          if (cached) {
+            try {
+              catalog = JSON.parse(cached);
+              renderCustomerOptions();
+              renderCategories();
+              renderProductNameOptions();
+              renderProductCodeOptions();
+              renderProductsTable();
+            } catch(e) {}
+          }
+        }
+      }
+
+      await fetchAssignedPreTakeOrders(isSilent);
+    }
+
+    async function fetchAssignedPreTakeOrders(isSilent = false) {
+      if (!activeCompany) return;
+      const coId = String(activeCompany.id);
+      try {
+        const res = await fetch(`${API_BASE}/api/pre-take-orders/${coId}/${fyId}?t=${Date.now()}`);
+        if (res.ok) {
+          const list = await res.json();
+          if (Array.isArray(list)) {
+            assignedPreTakeOrders = list;
+            renderPreTakeOrdersBanner();
+
+            // Automatically notify backend that assigned orders have been SEEN by Executive
+            if (list.some(o => !o.seen)) {
+              fetch(`${API_BASE}/api/pre-take-orders/${coId}/${fyId}/mark-seen-all`, { method: "POST" }).catch(e => console.warn("Error marking orders seen:", e));
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("Failed to fetch assigned pre-take orders:", err);
+      }
+    }
+
+    function renderPreTakeOrdersBanner() {
+      const banner = document.getElementById("pre-take-orders-banner");
+      const select = document.getElementById("pre-take-order-select");
+      if (!banner || !select) return;
+
+      if (!assignedPreTakeOrders || assignedPreTakeOrders.length === 0) {
+        banner.style.display = "none";
+        return;
+      }
+
+      banner.style.display = "block";
+      const currentSelected = select.value;
+      const hasUpdated = assignedPreTakeOrders.some(o => o.isUpdated);
+
+      if (hasUpdated) {
+        banner.style.background = "#fffbeb";
+        banner.style.borderColor = "#fde047";
+        banner.style.borderLeft = "5px solid #eab308";
+      } else {
+        banner.style.background = "#f0f9ff";
+        banner.style.borderColor = "#7dd3fc";
+        banner.style.borderLeft = "5px solid #0284c7";
+      }
+
+      select.innerHTML = assignedPreTakeOrders.map(o => {
+        const custName = o.customerName || "General Party";
+        const itemCount = Array.isArray(o.items) ? o.items.length : 0;
+        const dateStr = o.date || "";
+        const updateBadge = o.isUpdated ? " 🔄 [UPDATED BY ERP]" : "";
+        return `<option value="${o.id}">[${o.id}] ${custName} (${itemCount} items - ${dateStr})${updateBadge}</option>`;
+      }).join('');
+
+      if (currentSelected && assignedPreTakeOrders.some(o => String(o.id) === String(currentSelected))) {
+        select.value = currentSelected;
+      }
+    }
+
+    function loadAssignedPreTakeOrder() {
+      const select = document.getElementById("pre-take-order-select");
+      if (!select || !select.value) {
+        alert("Please select a pre-take order from the dropdown list.");
+        return;
+      }
+
+      const orderId = select.value;
+      const order = assignedPreTakeOrders.find(o => String(o.id) === String(orderId));
+      if (!order) {
+        alert("Selected pre-take order not found.");
+        return;
+      }
+
+      activePreTakeOrderId = order.id;
+
+      // Select matching customer if available in customer dropdown
+      if (order.customerId) {
+        const custSelect = document.getElementById("cust-select");
+        if (custSelect) {
+          const matchingOpt = Array.from(custSelect.options).find(opt => opt.value === String(order.customerId));
+          if (matchingOpt) {
+            custSelect.value = String(order.customerId);
+          }
+        }
+      }
+
+      // Reset cart and pre-fill items from assigned order
+      cart = {};
+
+      if (Array.isArray(order.items) && order.items.length > 0) {
+        order.items.forEach(item => {
+          let mat = (catalog.materials || []).find(m => m.id === item.materialId || m.id === item.id);
+          if (!mat && item.code) {
+            mat = (catalog.materials || []).find(m => (m.code || '').toLowerCase() === String(item.code).toLowerCase());
+          }
+          if (!mat && item.materialName) {
+            mat = (catalog.materials || []).find(m => (m.name || '').toLowerCase() === String(item.materialName).toLowerCase());
+          }
+
+          if (mat) {
+            let availableBatches = [];
+            if (Array.isArray(mat.batches)) {
+              availableBatches = mat.batches.filter(b => (parseFloat(b.stock) > 0));
+            }
+            let chosenBatch = item.batch || 'DEFAULT';
+            if (availableBatches.length > 0 && (!item.batch || !availableBatches.some(b => (b.batchNo || b.name) === item.batch))) {
+              chosenBatch = availableBatches[0].batchNo || availableBatches[0].name || 'DEFAULT';
+            }
+
+            const pQty = parseFloat(item.preTakeQty || item.quantity || 1) || 1;
+            const aQty = (item.actualQty !== undefined && item.actualQty !== null) ? parseFloat(item.actualQty) : pQty;
+            const itemRate = parseFloat(item.rate || mat.rate) || 0;
+
+            cart[mat.id] = {
+              preTakeQty: pQty,
+              actualQty: aQty,
+              batch: chosenBatch,
+              rate: itemRate
+            };
+          }
+        });
+      }
+
+      renderProductsTable();
+      updateCartSummary();
+
+      const custLabel = order.customerName ? ` for ${order.customerName}` : '';
+      alert(`⚡ Pre-Take Order #${order.id}${custLabel} successfully loaded into table!`);
+    }
+
+    let selectedCustomerId = "CASH";
+
+    function renderCustomerOptions() {
+      const select = document.getElementById("cust-select");
+      if (!select) return;
+
+      const contacts = catalog.contacts || [];
+      select.innerHTML = '<option value="CASH">💵 Cash Sale (General Customer)</option>';
+      contacts.forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = c.id;
+        opt.textContent = `${c.name} ${c.city ? '(' + c.city + ')' : ''} ${c.mobile ? '- ' + c.mobile : ''}`;
+        select.appendChild(opt);
+      });
+
+      renderCustDropdownList();
+      syncCustComboboxFromSelect();
+    }
+
+    function syncCustComboboxFromSelect() {
+      const select = document.getElementById("cust-select");
+      const combobox = document.getElementById("cust-combobox");
+      if (!select || !combobox) return;
+
+      const selectedOpt = select.options[select.selectedIndex];
+      if (selectedOpt) {
+        combobox.value = selectedOpt.textContent.trim();
+        selectedCustomerId = select.value;
+      } else {
+        combobox.value = "💵 Cash Sale (General Customer)";
+        selectedCustomerId = "CASH";
+      }
+    }
+
+    function openCustDropdown(forceAll = false) {
+      const panel = document.getElementById("cust-dropdown-panel");
+      if (!panel) return;
+
+      const inputVal = (document.getElementById("cust-combobox")?.value || "").trim();
+      const select = document.getElementById("cust-select");
+      const selectedOptText = select && select.options[select.selectedIndex] ? select.options[select.selectedIndex].textContent.trim() : "";
+      
+      let q = forceAll ? "" : inputVal.toLowerCase();
+      if (!forceAll && selectedOptText && inputVal === selectedOptText) {
+        q = "";
+      }
+
+      const contacts = catalog.contacts || [];
+      const filtered = q ? contacts.filter(c => 
+        (c.name && c.name.toLowerCase().includes(q)) ||
+        (c.city && c.city.toLowerCase().includes(q)) ||
+        (c.mobile && String(c.mobile).includes(q))
+      ) : contacts;
+
+      renderCustDropdownList(filtered, q);
+      panel.style.display = "block";
+    }
+
+    function closeCustDropdown() {
+      const panel = document.getElementById("cust-dropdown-panel");
+      if (panel) panel.style.display = "none";
+    }
+
+    function toggleCustDropdown() {
+      const panel = document.getElementById("cust-dropdown-panel");
+      if (!panel) return;
+      if (panel.style.display === "block") {
+        closeCustDropdown();
+      } else {
+        openCustDropdown(true);
+        document.getElementById("cust-combobox")?.focus();
+      }
+    }
+
+    function filterCustCombobox() {
+      const panel = document.getElementById("cust-dropdown-panel");
+      if (!panel) return;
+
+      const q = (document.getElementById("cust-combobox")?.value || "").toLowerCase().trim();
+      const contacts = catalog.contacts || [];
+      const filtered = q ? contacts.filter(c => 
+        (c.name && c.name.toLowerCase().includes(q)) ||
+        (c.city && c.city.toLowerCase().includes(q)) ||
+        (c.mobile && String(c.mobile).includes(q))
+      ) : contacts;
+
+      renderCustDropdownList(filtered, q);
+      panel.style.display = "block";
+    }
+
+    function renderCustDropdownList(filteredContacts, query = "") {
+      const panel = document.getElementById("cust-dropdown-panel");
+      if (!panel) return;
+
+      const contacts = filteredContacts !== undefined ? filteredContacts : (catalog.contacts || []);
+      let html = '';
+
+      if (!query || "cash sale (general customer)".includes(query) || "cash".includes(query)) {
+        const isCashSelected = selectedCustomerId === "CASH";
+        html += `<div class="dropdown-item ${isCashSelected ? 'selected' : ''}" onclick="selectCustOption('CASH', '💵 Cash Sale (General Customer)')" style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-weight: 700; color: #0f172a; background: ${isCashSelected ? '#eff6ff' : 'white'};">💵 Cash Sale (General Customer)</div>`;
+      }
+
+      if (contacts.length === 0 && query && !"cash sale (general customer)".includes(query) && !"cash".includes(query)) {
+        html += '<div style="padding: 12px; color: #94a3b8; text-align: center; font-size: 0.85rem;">-- No matching customers found --</div>';
+      } else {
+        contacts.forEach(c => {
+          const isSelected = String(selectedCustomerId) === String(c.id);
+          const label = `${c.name} ${c.city ? '(' + c.city + ')' : ''} ${c.mobile ? '- ' + c.mobile : ''}`;
+          html += `<div class="dropdown-item ${isSelected ? 'selected' : ''}" onclick="selectCustOption('${c.id}', '${label.replace(/'/g, "\\'")}')" style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 0.85rem; color: #1e293b; background: ${isSelected ? '#eff6ff' : 'white'};">
+            <div style="font-weight: 700;">${c.name}</div>
+            <div style="font-size: 0.75rem; color: #64748b;">${c.city ? c.city + ' ' : ''}${c.mobile ? '• ' + c.mobile : ''}</div>
+          </div>`;
+        });
+      }
+
+      panel.innerHTML = html;
+    }
+
+    function selectCustOption(id, label) {
+      selectedCustomerId = id;
+      const combobox = document.getElementById("cust-combobox");
+      const select = document.getElementById("cust-select");
+      if (combobox) combobox.value = label;
+      if (select) select.value = id;
+      closeCustDropdown();
+    }
+
+    function renderProductNameOptions() {
+      renderProdNameDropdownList();
+    }
+
+    function openProdNameDropdown(forceAll = false) {
+      const panel = document.getElementById("prod-name-dropdown-panel");
+      if (!panel) return;
+
+      const inputVal = (document.getElementById("prod-name-combobox")?.value || "").trim();
+      let q = forceAll ? "" : inputVal.toLowerCase();
+      if (!forceAll && selectedProductName && inputVal === selectedProductName) {
+        q = "";
+      }
+
+      renderProdNameDropdownList(q);
+      panel.style.display = "block";
+    }
+
+    function closeProdNameDropdown() {
+      const panel = document.getElementById("prod-name-dropdown-panel");
+      if (panel) panel.style.display = "none";
+    }
+
+    function toggleProdNameDropdown() {
+      const panel = document.getElementById("prod-name-dropdown-panel");
+      if (!panel) return;
+      if (panel.style.display === "block") {
+        closeProdNameDropdown();
+      } else {
+        openProdNameDropdown(true);
+        document.getElementById("prod-name-combobox")?.focus();
+      }
+    }
+
+    function filterProdNameCombobox() {
+      const panel = document.getElementById("prod-name-dropdown-panel");
+      if (!panel) return;
+
+      const q = (document.getElementById("prod-name-combobox")?.value || "").toLowerCase().trim();
+      renderProdNameDropdownList(q);
+      panel.style.display = "block";
+    }
+
+    function renderProdNameDropdownList(filterQuery = "") {
+      const panel = document.getElementById("prod-name-dropdown-panel");
+      if (!panel) return;
+
+      const q = filterQuery !== undefined && typeof filterQuery === "string" ? filterQuery : (document.getElementById("prod-name-combobox")?.value || "").toLowerCase().trim();
+
+      const materials = (catalog.materials || []).filter(m => {
+        const matchesCat = selectedCategory === "ALL" || m.category === selectedCategory;
+        const matchesSearch = !q || 
+          (m.name && m.name.toLowerCase().includes(q)) || 
+          (m.code && m.code.toLowerCase().includes(q));
+        return matchesCat && matchesSearch;
+      });
+
+      const nameMap = new Map();
+      materials.forEach(m => {
+        if (m.name) {
+          const count = (nameMap.get(m.name) || 0) + 1;
+          nameMap.set(m.name, count);
+        }
+      });
+
+      const uniqueNames = Array.from(nameMap.keys()).sort();
+
+      if (uniqueNames.length === 0) {
+        panel.innerHTML = '<div style="padding: 12px; color: #94a3b8; text-align: center; font-size: 0.85rem;">-- No matching product names found --</div>';
+        return;
+      }
+
+      let html = '';
+      uniqueNames.forEach(name => {
+        const modelCount = nameMap.get(name);
+        const isSelected = selectedProductName === name;
+        html += `<div class="dropdown-item ${isSelected ? 'selected' : ''}" onclick="selectProdNameOption('${name.replace(/'/g, "\\'")}')" style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 0.88rem; font-weight: 600; color: #0f172a; background: ${isSelected ? '#eff6ff' : 'white'}; display: flex; justify-content: space-between; align-items: center;">
+          <span>${name}</span>
+          <span style="font-size: 0.72rem; background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 4px;">${modelCount} ${modelCount === 1 ? 'Model' : 'Models'}</span>
+        </div>`;
+      });
+
+      panel.innerHTML = html;
+    }
+
+    function selectProdNameOption(name) {
+      selectedProductName = name;
+      const combobox = document.getElementById("prod-name-combobox");
+      if (combobox) combobox.value = name;
+      closeProdNameDropdown();
+
+      const codeCombobox = document.getElementById("prod-code-combobox");
+      if (codeCombobox) {
+        codeCombobox.value = "";
+        codeCombobox.disabled = false;
+        codeCombobox.placeholder = "🔍 Type or Select Code / Model...";
+      }
+
+      renderProductCodeOptions();
+      setTimeout(() => {
+        openProdCodeDropdown(true);
+        document.getElementById("prod-code-combobox")?.focus();
+      }, 100);
+    }
+
+    function renderProductCodeOptions() {
+      const combobox = document.getElementById("prod-code-combobox");
+      if (!combobox) return;
+
+      if (!selectedProductName) {
+        combobox.value = "";
+        combobox.placeholder = "🔒 Select Product Name First";
+        combobox.disabled = true;
+        closeProdCodeDropdown();
+        return;
+      }
+
+      combobox.disabled = false;
+      renderProdCodeDropdownList();
+    }
+
+    function openProdCodeDropdown(forceAll = false) {
+      if (!selectedProductName) return;
+      const panel = document.getElementById("prod-code-dropdown-panel");
+      if (!panel) return;
+
+      const inputVal = (document.getElementById("prod-code-combobox")?.value || "").trim();
+      let q = forceAll ? "" : inputVal.toLowerCase();
+
+      renderProdCodeDropdownList(q);
+      panel.style.display = "block";
+    }
+
+    function closeProdCodeDropdown() {
+      const panel = document.getElementById("prod-code-dropdown-panel");
+      if (panel) panel.style.display = "none";
+    }
+
+    function toggleProdCodeDropdown() {
+      if (!selectedProductName) {
+        alert("Please select a Product Name first!");
+        return;
+      }
+      const panel = document.getElementById("prod-code-dropdown-panel");
+      if (!panel) return;
+      if (panel.style.display === "block") {
+        closeProdCodeDropdown();
+      } else {
+        openProdCodeDropdown(true);
+        document.getElementById("prod-code-combobox")?.focus();
+      }
+    }
+
+    function filterProdCodeCombobox() {
+      if (!selectedProductName) return;
+      const panel = document.getElementById("prod-code-dropdown-panel");
+      if (!panel) return;
+
+      const q = (document.getElementById("prod-code-combobox")?.value || "").toLowerCase().trim();
+      renderProdCodeDropdownList(q);
+      panel.style.display = "block";
+    }
+
+    function renderProdCodeDropdownList(filterQuery = "") {
+      const panel = document.getElementById("prod-code-dropdown-panel");
+      if (!panel) return;
+
+      if (!selectedProductName) {
+        panel.innerHTML = '<div style="padding: 12px; color: #94a3b8; text-align: center; font-size: 0.85rem;">-- Select Product Name First --</div>';
+        return;
+      }
+
+      const q = filterQuery !== undefined && typeof filterQuery === "string" ? filterQuery : (document.getElementById("prod-code-combobox")?.value || "").toLowerCase().trim();
+
+      const matches = (catalog.materials || []).filter(m => {
+        const matchesName = m.name === selectedProductName;
+        const matchesCat = selectedCategory === "ALL" || m.category === selectedCategory;
+        const matchesSearch = !q || 
+          (m.name && m.name.toLowerCase().includes(q)) || 
+          (m.code && m.code.toLowerCase().includes(q));
+        return matchesName && matchesCat && matchesSearch;
+      });
+
+      if (matches.length === 0) {
+        panel.innerHTML = '<div style="padding: 12px; color: #94a3b8; text-align: center; font-size: 0.85rem;">-- No matching Code / Model found --</div>';
+        return;
+      }
+
+      let html = '';
+      matches.forEach(m => {
+        const isAdded = !!cart[m.id];
+        const codeText = m.code || 'Standard';
+        html += `<div class="dropdown-item" onclick="selectProdCodeOption('${m.id}', '${codeText.replace(/'/g, "\\'")}')" style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 0.88rem; color: #0f172a; display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-weight: 700;">${codeText}</span>
+          ${isAdded ? '<span style="font-size: 0.75rem; color: #16a34a; font-weight: 700;">✓ In Cart</span>' : ''}
+        </div>`;
+      });
+
+      panel.innerHTML = html;
+
+      if (matches.length === 1 && !q && !document.getElementById("prod-code-combobox").value) {
+        const single = matches[0];
+        document.getElementById("prod-code-combobox").value = single.code || 'Standard';
+      }
+    }
+
+    function selectProdCodeOption(matId, codeText) {
+      const combobox = document.getElementById("prod-code-combobox");
+      if (combobox) combobox.value = codeText;
+      closeProdCodeDropdown();
+      addProductFromDropdown(matId);
+    }
+
+    function handleAddButtonClick() {
+      if (!selectedProductName) {
+        alert("Please select a Product Name first!");
+        return;
+      }
+      const codeVal = (document.getElementById("prod-code-combobox")?.value || "").trim();
+      const matches = (catalog.materials || []).filter(m => m.name === selectedProductName);
+      
+      let targetMat = null;
+      if (codeVal) {
+        targetMat = matches.find(m => (m.code || 'Standard').toLowerCase() === codeVal.toLowerCase());
+      }
+      if (!targetMat && matches.length > 0) {
+        targetMat = matches[0];
+      }
+
+      if (!targetMat) {
+        alert("Please select or type a valid Code / Model!");
+        return;
+      }
+
+      addProductFromDropdown(targetMat.id);
+    }
+
+    function renderCategories() {
+      const categories = ["ALL", ...new Set((catalog.materials || []).map(m => m.category).filter(Boolean))];
+      const pillsContainer = document.getElementById("category-pills");
+      if (!pillsContainer) return;
+      pillsContainer.innerHTML = "";
+      categories.forEach(cat => {
+        const btn = document.createElement("button");
+        btn.className = `cat-pill ${cat === selectedCategory ? 'active' : ''}`;
+        btn.textContent = cat === "ALL" ? "All Categories" : cat;
+        btn.onclick = () => filterCategory(cat, btn);
+        pillsContainer.appendChild(btn);
+      });
+    }
+
+    function filterCategory(cat, btn) {
+      selectedCategory = cat;
+      document.querySelectorAll(".cat-pill").forEach(b => b.classList.remove("active"));
+      if (btn) btn.classList.add("active");
+      selectedProductName = "";
+      const nameInput = document.getElementById("prod-name-combobox");
+      if (nameInput) nameInput.value = "";
+      const codeInput = document.getElementById("prod-code-combobox");
+      if (codeInput) {
+        codeInput.value = "";
+        codeInput.disabled = true;
+        codeInput.placeholder = "🔒 Select Product Name First";
+      }
+      renderProductNameOptions();
+      renderProductCodeOptions();
+    }
+
+    function addProductFromDropdown(matId) {
+      if (!matId) return;
+      const mat = (catalog.materials || []).find(m => m.id === matId);
+      if (!mat) return;
+
+      if (!cart[matId]) {
+        let availableBatches = [];
+        if (mat && Array.isArray(mat.batches)) {
+          availableBatches = mat.batches.filter(b => (parseFloat(b.stock) > 0));
+        }
+        let defaultBatch = 'DEFAULT';
+        if (availableBatches.length > 0) {
+          defaultBatch = availableBatches[0].batchNo || availableBatches[0].name || 'DEFAULT';
+        } else if (mat && Array.isArray(mat.batches) && mat.batches.length > 0) {
+          defaultBatch = mat.batches[0].batchNo || mat.batches[0].name || 'DEFAULT';
+        }
+
+        cart[matId] = { preTakeQty: 1, actualQty: 1, batch: defaultBatch, rate: mat.rate || 0 };
+      }
+
+      renderProductsTable();
+      updateCartSummary();
+
+      selectedProductName = "";
+      const nameInput = document.getElementById("prod-name-combobox");
+      if (nameInput) nameInput.value = "";
+      const codeInput = document.getElementById("prod-code-combobox");
+      if (codeInput) {
+        codeInput.value = "";
+        codeInput.disabled = true;
+        codeInput.placeholder = "🔒 Select Product Name First";
+      }
+      renderProductCodeOptions();
+      renderProductNameOptions();
+
+      setTimeout(() => {
+        const input = document.getElementById(`preqty-${matId}`);
+        if (input) {
+          input.focus();
+          input.select();
+        }
+      }, 50);
+    }
+
+    document.addEventListener("click", function (e) {
+      const custWrap = document.getElementById("cust-combobox-wrapper");
+      if (custWrap && !custWrap.contains(e.target)) {
+        closeCustDropdown();
+      }
+      const prodNameWrap = document.getElementById("prod-name-wrapper");
+      if (prodNameWrap && !prodNameWrap.contains(e.target)) {
+        closeProdNameDropdown();
+      }
+      const prodCodeWrap = document.getElementById("prod-code-wrapper");
+      if (prodCodeWrap && !prodCodeWrap.contains(e.target)) {
+        closeProdCodeDropdown();
+      }
+    });
+
+    function removeProductFromTable(matId) {
+      if (cart[matId]) {
+        delete cart[matId];
+      }
+      renderProductsTable();
+      renderProductNameOptions();
+      renderProductCodeOptions();
+      updateCartSummary();
+    }
+
+    function renderProductsTable() {
+      const tbody = document.getElementById("product-table-body");
+      if (!tbody) return;
+
+      const cartIds = Object.keys(cart).filter(id => cart[id] && (cart[id].preTakeQty > 0 || cart[id].actualQty > 0));
+
+      if (cartIds.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 28px; color: #64748b; font-size: 0.9rem;">
+          <i class="fa-solid fa-cart-arrow-down" style="font-size: 1.6rem; margin-bottom: 8px; color: #94a3b8;"></i><br>
+          <strong>No products added to table yet.</strong><br>
+          <small>Select a product from the dropdown above to add it to your order table.</small>
+        </td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = cartIds.map(id => {
+        const m = (catalog.materials || []).find(mat => mat.id === id);
+        if (!m) return '';
+
+        const item = cart[id];
+        const effectiveRate = item.rate || m.rate || 0;
+        const effectiveQty = item.actualQty > 0 ? item.actualQty : item.preTakeQty;
+        const rowAmt = effectiveQty * effectiveRate;
+
+        // Filter: ONLY show available batches (stock > 0)
+        let availableBatches = [];
+        if (Array.isArray(m.batches)) {
+          availableBatches = m.batches.filter(b => (parseFloat(b.stock) > 0));
+        }
+
+        let batchOptionsHtml = '';
+        if (availableBatches.length > 0) {
+          batchOptionsHtml = availableBatches.map(b => {
+            const bName = b.batchNo || b.name || 'DEFAULT';
+            const bStock = b.stock !== undefined ? ` (Stk: ${b.stock})` : '';
+            const isSel = (item.batch === bName || (!item.batch && b === availableBatches[0])) ? 'selected' : '';
+            return `<option value="${bName}" ${isSel}>${bName}${bStock}</option>`;
+          }).join('');
+        } else {
+          // Fallback if no specific batch has stock > 0
+          batchOptionsHtml = '<option value="DEFAULT">DEFAULT (Main Stock)</option>';
+        }
+
+        return `
+          <tr id="prow-${m.id}" class="row-active">
+            <td>
+              <div style="font-weight: 800; color: #0f172a; font-size: 0.88rem;">${m.name}</div>
+              <small style="color: #64748b; font-size: 0.75rem;">Unit: ${m.unit || 'Pcs'} | Stk: ${m.stock || 0} | ₹${effectiveRate.toFixed(2)}</small>
+            </td>
+            <td>
+              <span class="code-badge">${m.code || 'N/A'}</span>
+            </td>
+            <td>
+              <select class="table-select" onchange="updateRowBatch('${m.id}', this.value)">
+                ${batchOptionsHtml}
+              </select>
+            </td>
+            <td>
+              <input type="number" class="table-input" id="preqty-${m.id}" value="${item.preTakeQty || ''}" placeholder="0" min="0" oninput="updatePreTakeQty('${m.id}', this.value)">
+            </td>
+            <td>
+              <input type="number" class="table-input" id="actqty-${m.id}" value="${item.actualQty || ''}" placeholder="0" min="0" oninput="updateActualQty('${m.id}', this.value)">
+            </td>
+            <td id="rowamt-${m.id}" style="text-align: right; font-weight: 800; color: var(--primary); font-size: 0.88rem;">
+              ₹ ${rowAmt.toFixed(2)}
+            </td>
+            <td style="text-align: center;">
+              <button onclick="removeProductFromTable('${m.id}')" style="background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; border-radius: 6px; width: 30px; height: 30px; font-size: 0.85rem; cursor: pointer;" title="Remove Item">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function updatePreTakeQty(id, val) {
+      const num = parseFloat(val) || 0;
+      if (!cart[id]) {
+        const mat = catalog.materials.find(m => m.id === id);
+        const defaultBatch = (mat && Array.isArray(mat.batches) && mat.batches.length > 0) ? (mat.batches[0].batchNo || mat.batches[0].name || 'DEFAULT') : 'DEFAULT';
+        cart[id] = { preTakeQty: num, actualQty: num, batch: defaultBatch, rate: mat ? mat.rate : 0 };
+        const actInput = document.getElementById(`actqty-${id}`);
+        if (actInput) actInput.value = num || '';
+      } else {
+        const wasSynced = cart[id].actualQty === cart[id].preTakeQty || cart[id].actualQty === 0;
+        cart[id].preTakeQty = num;
+        if (wasSynced) {
+          cart[id].actualQty = num;
+          const actInput = document.getElementById(`actqty-${id}`);
+          if (actInput) actInput.value = num || '';
+        }
+      }
+
+      if (cart[id].preTakeQty <= 0 && cart[id].actualQty <= 0) {
+        delete cart[id];
+      }
+
+      updateCartRowUI(id);
+      updateCartSummary();
+    }
+
+    function updateActualQty(id, val) {
+      const num = parseFloat(val) || 0;
+      if (!cart[id]) {
+        const mat = catalog.materials.find(m => m.id === id);
+        const defaultBatch = (mat && Array.isArray(mat.batches) && mat.batches.length > 0) ? (mat.batches[0].batchNo || mat.batches[0].name || 'DEFAULT') : 'DEFAULT';
+        cart[id] = { preTakeQty: 0, actualQty: num, batch: defaultBatch, rate: mat ? mat.rate : 0 };
+      } else {
+        cart[id].actualQty = num;
+      }
+
+      if (cart[id].preTakeQty <= 0 && cart[id].actualQty <= 0) {
+        delete cart[id];
+      }
+
+      updateCartRowUI(id);
+      updateCartSummary();
+    }
+
+    function updateRowBatch(id, batchName) {
+      if (!cart[id]) {
+        const mat = catalog.materials.find(m => m.id === id);
+        cart[id] = { preTakeQty: 0, actualQty: 0, batch: batchName, rate: mat ? mat.rate : 0 };
+      } else {
+        cart[id].batch = batchName;
+      }
+
+      const mat = catalog.materials.find(m => m.id === id);
+      if (mat && Array.isArray(mat.batches)) {
+        const bMatch = mat.batches.find(b => (b.batchNo || b.name || 'DEFAULT') === batchName);
+        if (bMatch && (bMatch.gstInclRate || bMatch.mrp || bMatch.rate)) {
+          cart[id].rate = parseFloat(bMatch.gstInclRate || bMatch.mrp || bMatch.rate) || mat.rate;
+        }
+      }
+
+      updateCartRowUI(id);
+      updateCartSummary();
+    }
+
+    function updateCartRowUI(id) {
+      const row = document.getElementById(`prow-${id}`);
+      const amtEl = document.getElementById(`rowamt-${id}`);
+      const item = cart[id];
+      if (row) {
+        if (item && (item.preTakeQty > 0 || item.actualQty > 0)) {
+          row.classList.add("row-active");
+        } else {
+          row.classList.remove("row-active");
+        }
+      }
+      if (amtEl) {
+        const mat = catalog.materials.find(m => m.id === id);
+        const rate = (item && item.rate) ? item.rate : (mat ? mat.rate : 0);
+        const qty = item ? (item.actualQty > 0 ? item.actualQty : item.preTakeQty) : 0;
+        amtEl.textContent = "₹ " + (qty * rate).toFixed(2);
+      }
+    }
+
+    function updateCartSummary() {
+      let itemCount = 0;
+      let preQtyTotal = 0;
+      let actQtyTotal = 0;
+      let totalAmount = 0;
+
+      Object.keys(cart).forEach(id => {
+        const item = cart[id];
+        if (item && (item.preTakeQty > 0 || item.actualQty > 0)) {
+          const mat = catalog.materials.find(m => m.id === id);
+          if (mat) {
+            itemCount++;
+            preQtyTotal += (item.preTakeQty || 0);
+            actQtyTotal += (item.actualQty || 0);
+            const effectiveQty = item.actualQty > 0 ? item.actualQty : item.preTakeQty;
+            const rate = item.rate || mat.rate || 0;
+            totalAmount += effectiveQty * rate;
+          }
+        }
+      });
+
+      document.getElementById("cart-item-count").textContent = itemCount;
+      if (document.getElementById("cart-pre-qty")) document.getElementById("cart-pre-qty").textContent = preQtyTotal;
+      document.getElementById("cart-qty-count").textContent = actQtyTotal || preQtyTotal;
+      document.getElementById("cart-total-amount").textContent = totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+
+      document.getElementById("btn-review").disabled = itemCount === 0;
+    }
+
+    function openReviewModal() {
+      const custId = document.getElementById("cust-select").value || "CASH";
+      const cust = catalog.contacts.find(c => String(c.id) === String(custId));
+
+      document.getElementById("summary-company-name").textContent = activeCompany ? activeCompany.name : "Company";
+      document.getElementById("summary-cust-name").textContent = cust ? cust.name : "Cash Sale";
+      document.getElementById("summary-exec-name").textContent = currentUser ? currentUser.fullName : "Sales Exec";
+
+      const tbody = document.getElementById("summary-table-body");
+      tbody.innerHTML = "";
+
+      let grandTotal = 0;
+      Object.keys(cart).forEach(id => {
+        const item = cart[id];
+        if (item && (item.preTakeQty > 0 || item.actualQty > 0)) {
+          const mat = catalog.materials.find(m => m.id === id);
+          if (mat) {
+            const rate = item.rate || mat.rate || 0;
+            const effectiveQty = item.actualQty > 0 ? item.actualQty : item.preTakeQty;
+            const amt = effectiveQty * rate;
+            grandTotal += amt;
+
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td><strong>${mat.name}</strong> <br><small style="color:#64748b;">Unit: ${mat.unit || 'Pcs'}</small></td>
+              <td><span class="code-badge">${mat.code || 'N/A'}</span></td>
+              <td><small>${item.batch || 'DEFAULT'}</small></td>
+              <td style="text-align: center;">${item.preTakeQty || 0}</td>
+              <td style="text-align: center; font-weight: 700;">${item.actualQty || 0}</td>
+              <td style="text-align: right;">₹ ${rate.toFixed(2)}</td>
+              <td style="text-align: right; font-weight: 700; color: var(--primary);">₹ ${amt.toFixed(2)}</td>
+            `;
+            tbody.appendChild(tr);
+          }
+        }
+      });
+
+      const trTotal = document.createElement("tr");
+      trTotal.style.background = "#f8fafc";
+      trTotal.innerHTML = `
+        <td colspan="6" style="text-align: right; font-weight: 800;">Total Amount:</td>
+        <td style="text-align: right; font-weight: 800; color: var(--primary); font-size: 1rem;">₹ ${grandTotal.toFixed(2)}</td>
+      `;
+      tbody.appendChild(trTotal);
+
+      document.getElementById("review-modal").style.display = "flex";
+    }
+
+    function closeReviewModal() {
+      document.getElementById("review-modal").style.display = "none";
+    }
+
+    async function submitOrderToERP() {
+      if (!activeCompany) return;
+      const coId = activeCompany.id;
+
+      const custId = document.getElementById("cust-select").value || "CASH";
+      const cust = catalog.contacts.find(c => String(c.id) === String(custId));
+      const execName = currentUser ? currentUser.fullName : "Sales Exec";
+      const remarks = document.getElementById("order-remarks").value;
+
+      const items = [];
+      let totalAmount = 0;
+
+      Object.keys(cart).forEach(id => {
+        const item = cart[id];
+        if (item && (item.preTakeQty > 0 || item.actualQty > 0)) {
+          const mat = catalog.materials.find(m => m.id === id);
+          if (mat) {
+            const rate = item.rate || mat.rate || 0;
+            const preQty = item.preTakeQty || 0;
+            const actQty = item.actualQty || 0;
+            const effectiveQty = actQty > 0 ? actQty : preQty;
+            const amount = effectiveQty * rate;
+            totalAmount += amount;
+
+            items.push({
+              materialId: mat.id,
+              materialName: mat.name,
+              code: mat.code,
+              codeModel: mat.code || "N/A",
+              batch: item.batch || "DEFAULT",
+              unit: mat.unit || "Pcs",
+              preTakeQty: preQty,
+              actualQty: actQty,
+              quantity: effectiveQty,
+              rate: rate,
+              amount: amount
+            });
+          }
+        }
+      });
+
+      const orderPayload = {
+        salesExec: execName,
+        username: currentUser ? currentUser.username : "",
+        companyId: coId,
+        companyName: activeCompany.name,
+        customerId: cust ? cust.id : "CASH",
+        customerName: cust ? cust.name : "Cash Sale",
+        customerMobile: cust ? cust.mobile : "",
+        customerCity: cust ? cust.city : "",
+        date: new Date().toISOString().split('T')[0],
+        items: items,
+        totalItems: items.length,
+        totalQty: items.reduce((sum, i) => sum + i.quantity, 0),
+        totalAmount: totalAmount,
+        remarks: remarks,
+        status: "Pending"
+      };
+
+      const btn = document.getElementById("btn-confirm-send");
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending Order...';
+
+      try {
+        if (!navigator.onLine) {
+          saveOfflineOrder(orderPayload);
+          alert("📡 You are offline. Order saved locally! It will automatically upload to ERP when internet reconnects.");
+          finishOrderSubmission();
+          return;
+        }
+
+        const res = await fetch(`${API_BASE}/api/sales-orders/${coId}/${fyId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(orderPayload)
+        });
+
+        if (res.ok) {
+          const result = await res.json();
+          alert(`✅ Order Placed Successfully!\n\nCompany: ${activeCompany.name}\nOrder Ref: ${result.order?.id || 'SO-OK'}\nCustomer: ${orderPayload.customerName}\nAmount: ₹ ${totalAmount.toFixed(2)}`);
+          finishOrderSubmission();
+        } else {
+          throw new Error("Server returned error");
+        }
+      } catch (err) {
+        console.warn("Failed online submit, saving offline:", err);
+        saveOfflineOrder(orderPayload);
+        alert("⚠️ Saved to Offline Queue! Will auto-sync when online.");
+        finishOrderSubmission();
+      }
+    }
+
+    function saveOfflineOrder(payload) {
+      let pending = JSON.parse(localStorage.getItem("offline_sales_orders") || "[]");
+      payload.offlineId = "OFF-" + Date.now();
+      pending.push(payload);
+      localStorage.setItem("offline_sales_orders", JSON.stringify(pending));
+    }
+
+    async function syncPendingOfflineOrders() {
+      let pending = JSON.parse(localStorage.getItem("offline_sales_orders") || "[]");
+      if (pending.length === 0) return;
+
+      console.log(`Syncing ${pending.length} offline orders to ERP...`);
+      const remaining = [];
+      for (const order of pending) {
+        try {
+          const coId = order.companyId || (activeCompany ? activeCompany.id : "1");
+          const res = await fetch(`${API_BASE}/api/sales-orders/${coId}/${fyId}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(order)
+          });
+          if (!res.ok) remaining.push(order);
+        } catch (e) {
+          remaining.push(order);
+        }
+      }
+      localStorage.setItem("offline_sales_orders", JSON.stringify(remaining));
+      if (remaining.length === 0) {
+        console.log("All offline orders synced successfully!");
+      }
+    }
+
+    function finishOrderSubmission() {
+      if (activePreTakeOrderId && activeCompany) {
+        const delCoId = activeCompany.id;
+        const delId = activePreTakeOrderId;
+        activePreTakeOrderId = null;
+        fetch(`${API_BASE}/api/pre-take-orders/${delCoId}/${fyId}/${delId}`, { method: "DELETE" })
+          .then(() => fetchAssignedPreTakeOrders(true))
+          .catch(e => console.warn("Error clearing pre-take order:", e));
+      }
+
+      cart = {};
+      selectedProductName = "";
+      document.getElementById("cust-select").value = "";
+      document.getElementById("cust-search").value = "";
+      document.getElementById("order-remarks").value = "";
+      document.getElementById("btn-confirm-send").disabled = false;
+      document.getElementById("btn-confirm-send").innerHTML = '<i class="fa-solid fa-paper-plane"></i> <span>🚀 Send Order to Main ERP</span>';
+      closeReviewModal();
+      renderProductNameOptions();
+      renderProductCodeOptions();
+      renderProductsTable();
+      updateCartSummary();
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.getElementById("tab-new-order").style.display = tabId === "new-order" ? "block" : "none";
+      document.getElementById("tab-order-history").style.display = tabId === "order-history" ? "block" : "none";
+      
+      event.target.classList.add("active");
+      if (tabId === "order-history") loadOrderHistory();
+    }
+
+    async function loadOrderHistory() {
+      if (!activeCompany) return;
+      const coId = activeCompany.id;
+
+      const container = document.getElementById("history-list");
+      container.innerHTML = '<div style="text-align: center; padding: 20px;"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>';
+
+      try {
+        const res = await fetch(`${API_BASE}/api/sales-orders/${coId}/${fyId}`);
+        if (res.ok) {
+          const orders = await res.json();
+          if (orders.length === 0) {
+            container.innerHTML = '<div style="text-align: center; padding: 30px; color: var(--text-muted);">No sales orders submitted for this company yet.</div>';
+            return;
+          }
+          container.innerHTML = orders.map(o => `
+            <div class="card history-card status-${o.status || 'Pending'}">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+                <div>
+                  <strong style="font-size: 0.95rem; color: var(--text);">${o.id || 'SO-PENDING'}</strong>
+                  <div style="font-size: 0.8rem; color: var(--text-muted);">${o.date} &bull; Exec: ${o.salesExec || 'Staff'}</div>
+                </div>
+                <span class="badge badge-${o.status || 'Pending'}">${o.status || 'Pending'}</span>
+              </div>
+              <div style="font-size: 0.9rem; font-weight: 700; color: #334155; margin-bottom: 4px;">
+                👤 ${o.customerName}
+              </div>
+              <div style="font-size: 0.85rem; color: var(--text-muted); display: flex; justify-content: space-between;">
+                <span>${o.totalItems || o.items?.length || 0} Items (${o.totalQty || 0} Qty)</span>
+                <strong style="color: var(--primary);">₹ ${(o.totalAmount || 0).toLocaleString('en-IN', {minimumFractionDigits: 2})}</strong>
+              </div>
+            </div>
+          `).join('');
+        }
+      } catch (err) {
+        container.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--danger);">Offline - Could not fetch remote history.</div>';
+      }
+    }
+  </script>
+</body>
+</html>

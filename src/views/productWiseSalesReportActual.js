@@ -181,7 +181,11 @@ export function showProductWiseSalesReportActualModal(container) {
       let hasRenderedBillHeader = false;
 
       inv.items.forEach((item, index) => {
-        const mat = materials.find(m => m.id === item.materialId || m.code === item.code);
+        const mat = materials.find(m => 
+          (item.materialId && m.id === item.materialId) || 
+          (item.code && m.code && String(m.code).trim().toUpperCase() === String(item.code).trim().toUpperCase()) ||
+          (item.name && m.name && String(m.name).trim().toUpperCase() === String(item.name).trim().toUpperCase())
+        );
         const pName = mat?.name || item.name || "";
         const pModel = mat?.code || item.code || "";
 
@@ -195,11 +199,13 @@ export function showProductWiseSalesReportActualModal(container) {
         const disc = parseFloat(item.discountAmount) || 0;
         const taxAmt = parseFloat(item.gstAmount) || ((parseFloat(item.cgstAmount) || 0) + (parseFloat(item.sgstAmount) || 0) + (parseFloat(item.igstAmount) || 0));
         
-        const rowTotal = parseFloat(item.netAmount) || parseFloat(item.amount) || ((qty * rate) - disc);
-        const sellingPriceExcl = parseFloat(item.netValue) || (rowTotal - taxAmt);
+        const rowTotal = parseFloat(item.netAmount) || parseFloat(item.amount) || ((qty * rate) - disc + taxAmt);
+        const sellingPriceExcl = parseFloat(item.netValue) || (rowTotal - taxAmt) || ((qty * rate) - disc);
         
         const batch = mat?.batches?.find(b => b.batchNo === item.batchNo) || mat?.batches?.[0];
-        const purchaseCost = batch ? (parseFloat(batch.landingCost) || 0) : 0;
+        const purchaseCost = (batch && parseFloat(batch.landingCost) > 0)
+          ? parseFloat(batch.landingCost)
+          : (parseFloat(mat?.landingCost) || parseFloat(mat?.purchaseRate) || parseFloat(mat?.purchasePrice) || parseFloat(item.landingCost) || parseFloat(item.purchasePrice) || 0);
         const itemCost = purchaseCost * qty;
         const itemMargin = sellingPriceExcl - itemCost;
 

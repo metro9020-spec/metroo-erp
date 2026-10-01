@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Clear ERP Cache</title>
+  <style>
+    body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f1f5f9; }
+    .box { background: white; border: 2px solid #1e3a8a; border-radius: 8px; padding: 30px 40px; text-align: center; max-width: 500px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+    h2 { color: #1e3a8a; margin-top: 0; }
+    .btn { background: #1e3a8a; color: white; border: none; padding: 12px 30px; font-size: 16px; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 15px; }
+    .btn:hover { background: #3b82f6; }
+    .result { margin-top: 15px; font-weight: bold; font-size: 14px; }
+    .success { color: #15803d; }
+    .info { color: #475569; font-size: 13px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>🧹 ERP Local Cache Cleaner</h2>
+    <p>This will clear the browser's cached company data so the ERP loads fresh from the server file.</p>
+    <p class="info">Use this when old invoice data (like LSL-0367 to LSL-0370) keeps reappearing after being deleted.</p>
+    <button class="btn" onclick="clearCache()">Clear Cache & Reload ERP</button>
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    function clearCache() {
+      const resultEl = document.getElementById('result');
+      let cleared = 0;
+      const keysToRemove = [];
+
+      // Find all ERP company data keys in localStorage
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.startsWith('erp_company_data_') || key === 'erp_companies' || key === 'erp_active_company_id')) {
+          keysToRemove.push(key);
+        }
+      }
+
+      keysToRemove.forEach(k => {
+        localStorage.removeItem(k);
+        cleared++;
+      });
+
+      resultEl.innerHTML = `<span class="success">✅ Cleared ${cleared} cached key(s).<br>Redirecting to ERP in 2 seconds...</span>`;
+
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 2000);
+    }
+  </script>
+</body>
+</html>

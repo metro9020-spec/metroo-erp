@@ -162,7 +162,11 @@ export function showProductWiseDetailedReportModal(container) {
       let billRowsHtml = "";
 
       inv.items.forEach((item, index) => {
-        const mat = materials.find(m => m.id === item.materialId || m.code === item.code);
+        const mat = materials.find(m => 
+          (item.materialId && m.id === item.materialId) || 
+          (item.code && m.code && String(m.code).trim().toUpperCase() === String(item.code).trim().toUpperCase()) ||
+          (item.name && m.name && String(m.name).trim().toUpperCase() === String(item.name).trim().toUpperCase())
+        );
         const itemCat = mat?.category || "UNAVAILABLE";
         const itemSub = mat?.subCategory || "All";
 
@@ -176,11 +180,13 @@ export function showProductWiseDetailedReportModal(container) {
         const disc = parseFloat(item.discountAmount) || 0;
         const taxAmt = parseFloat(item.gstAmount) || ((parseFloat(item.cgstAmount) || 0) + (parseFloat(item.sgstAmount) || 0) + (parseFloat(item.igstAmount) || 0));
         
-        const rowTotal = parseFloat(item.netAmount) || parseFloat(item.amount) || ((qty * rate) - disc); // Total includes GST
-        const sellingPriceExcl = parseFloat(item.netValue) || (rowTotal - taxAmt); // Excludes GST
+        const rowTotal = parseFloat(item.netAmount) || parseFloat(item.amount) || ((qty * rate) - disc + taxAmt); // Total includes GST
+        const sellingPriceExcl = parseFloat(item.netValue) || (rowTotal - taxAmt) || ((qty * rate) - disc); // Excludes GST
         
         const batch = mat?.batches?.find(b => b.batchNo === item.batchNo) || mat?.batches?.[0];
-        const purchaseCost = batch ? (parseFloat(batch.landingCost) || 0) : 0;
+        const purchaseCost = (batch && parseFloat(batch.landingCost) > 0)
+          ? parseFloat(batch.landingCost)
+          : (parseFloat(mat?.landingCost) || parseFloat(mat?.purchaseRate) || parseFloat(mat?.purchasePrice) || parseFloat(item.landingCost) || parseFloat(item.purchasePrice) || 0);
         const itemCost = purchaseCost * qty;
         const itemMargin = sellingPriceExcl - itemCost;
 

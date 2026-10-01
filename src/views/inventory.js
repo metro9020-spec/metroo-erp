@@ -1,4 +1,4 @@
-import { state } from "../state.js";
+import { state, formatRateValue } from "../state.js";
 import { formatDate } from "../utils/dateUtils.js";
 
 let searchFilters = {
@@ -304,40 +304,40 @@ export function renderInventory(container) {
     </div>
 
     <!-- Materials Table -->
-    <div class="panel" style="padding-top: 0.5rem;">
-      <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 1rem; border-bottom: 1px solid var(--border-color); font-size: 0.85rem; color: var(--text-muted);">
+    <div class="panel" style="padding: 0.5rem; margin-top: 0.5rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--border-color); font-size: 0.8rem; color: var(--text-muted);">
         <span>Showing <strong>${filteredRecords.length > 0 ? startIndex + 1 : 0} - ${Math.min(startIndex + PAGE_SIZE, filteredRecords.length)}</strong> of <strong>${filteredRecords.length.toLocaleString()}</strong> items ${hasActiveFilters ? `(filtered from ${materials.length.toLocaleString()})` : ''}</span>
         <div style="display: flex; gap: 0.5rem; align-items: center;">
-          <button class="btn btn-secondary btn-sm" id="btn-prev-page" ${currentPage === 1 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}><i class="fa-solid fa-chevron-left"></i> Prev</button>
+          <button class="btn btn-secondary btn-sm" id="btn-prev-page" style="padding: 2px 8px; font-size: 0.75rem;" ${currentPage === 1 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}><i class="fa-solid fa-chevron-left"></i> Prev</button>
           <span>Page <strong>${currentPage}</strong> of <strong>${totalPages}</strong></span>
-          <button class="btn btn-secondary btn-sm" id="btn-next-page" ${currentPage === totalPages ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>Next <i class="fa-solid fa-chevron-right"></i></button>
+          <button class="btn btn-secondary btn-sm" id="btn-next-page" style="padding: 2px 8px; font-size: 0.75rem;" ${currentPage === totalPages ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>Next <i class="fa-solid fa-chevron-right"></i></button>
         </div>
       </div>
-      <div class="table-responsive">
-        <table class="data-table">
+      <div class="table-responsive" style="width: 100%; overflow-x: auto;">
+        <table class="data-table" style="width: 100%; border-collapse: collapse; font-size: 0.78rem;">
           <thead>
             <tr>
-              <th>Product Name</th>
-              <th>Item Code</th>
-              <th>Company</th>
-              <th>Category</th>
-              <th>Group</th>
-              ${isCompUnregistered ? '' : '<th>HSN Code</th>'}
-              <th>Stock</th>
-              <th>Unit</th>
-              <th style="text-align: right;">Landing Cost</th>
-              <th style="text-align: right;">MRP</th>
-              <th style="text-align: right;">Stock Value</th>
-              <th style="text-align: center;">Actions</th>
+              <th style="padding: 6px 8px; font-size: 0.75rem; white-space: normal; min-width: 140px; max-width: 220px;">Product Name</th>
+              <th style="padding: 6px 6px; font-size: 0.75rem; white-space: nowrap;">Item Code</th>
+              <th style="padding: 6px 6px; font-size: 0.75rem; white-space: nowrap;">Company</th>
+              <th style="padding: 6px 6px; font-size: 0.75rem; white-space: nowrap;">Category</th>
+              <th style="padding: 6px 6px; font-size: 0.75rem; white-space: nowrap;">Group</th>
+              ${isCompUnregistered ? '' : '<th style="padding: 6px 6px; font-size: 0.75rem; white-space: nowrap;">HSN Code</th>'}
+              <th style="padding: 6px 6px; font-size: 0.75rem; white-space: nowrap; text-align: center;">Stock</th>
+              <th style="padding: 6px 6px; font-size: 0.75rem; white-space: nowrap;">Unit</th>
+              <th style="padding: 6px 6px; font-size: 0.75rem; white-space: nowrap; text-align: right;">Landing Cost</th>
+              <th style="padding: 6px 6px; font-size: 0.75rem; white-space: nowrap; text-align: right;">MRP</th>
+              <th style="padding: 6px 6px; font-size: 0.75rem; white-space: nowrap; text-align: right;">Stock Value</th>
+              <th style="padding: 6px 6px; font-size: 0.75rem; white-space: nowrap; text-align: center;">Actions</th>
             </tr>
           </thead>
           <tbody>
             ${pageRecords.length === 0 ? `
               <tr>
-                <td colspan="${isCompUnregistered ? 11 : 12}" style="text-align: center; color: var(--text-muted); padding: 3rem;">
-                  <i class="fa-solid fa-box-open" style="font-size: 2rem; display: block; margin-bottom: 0.5rem; opacity: 0.4;"></i>
+                <td colspan="${isCompUnregistered ? 11 : 12}" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                  <i class="fa-solid fa-box-open" style="font-size: 1.8rem; display: block; margin-bottom: 0.5rem; opacity: 0.4;"></i>
                   No products match the search filter criteria.
-                  ${hasActiveFilters ? `<br><button class="btn btn-secondary btn-sm" id="btn-empty-clear" style="margin-top:0.5rem;"><i class="fa-solid fa-rotate-left"></i> Clear All Filters</button>` : ''}
+                  ${hasActiveFilters ? `<br><button class="btn btn-secondary btn-sm" id="btn-empty-clear" style="margin-top:0.5rem; padding: 2px 8px; font-size: 0.75rem;"><i class="fa-solid fa-rotate-left"></i> Clear All Filters</button>` : ''}
                 </td>
               </tr>
             ` : pageRecords.map(r => {
@@ -345,28 +345,28 @@ export function renderInventory(container) {
               
               return `
                 <tr>
-                  <td>
+                  <td style="padding: 5px 8px; font-size: 0.78rem; white-space: normal; word-break: break-word; max-width: 220px;">
                     <strong style="color: #0f172a;">${r.name}</strong>
                   </td>
-                  <td><code class="highlight-text" style="font-weight:700; color:#2563eb;">${r.code || "-"}</code></td>
-                  <td><span style="font-weight: 500;">${r.company || "-"}</span></td>
-                  <td><span class="badge muted">${r.category || "-"}</span></td>
-                  <td>${r.productGroup || "-"}</td>
-                  ${isCompUnregistered ? '' : `<td><code>${r.hsnCode || "-"}</code></td>`}
-                  <td>
+                  <td style="padding: 5px 6px; font-size: 0.78rem;"><code class="highlight-text" style="font-weight:700; color:#2563eb;">${r.code || "-"}</code></td>
+                  <td style="padding: 5px 6px; font-size: 0.76rem; max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${r.company || ''}"><span style="font-weight: 500;">${r.company || "-"}</span></td>
+                  <td style="padding: 5px 6px; font-size: 0.76rem; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${r.category || ''}"><span class="badge muted" style="padding: 1px 5px; font-size: 0.7rem;">${r.category || "-"}</span></td>
+                  <td style="padding: 5px 6px; font-size: 0.76rem; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${r.productGroup || ''}">${r.productGroup || "-"}</td>
+                  ${isCompUnregistered ? '' : `<td style="padding: 5px 6px; font-size: 0.78rem;"><code>${r.hsnCode || "-"}</code></td>`}
+                  <td style="padding: 5px 6px; font-size: 0.78rem; text-align: center;">
                     <span style="font-weight: 700;" class="${isLow ? 'text-danger' : 'text-success'}">
                       ${r.stock.toLocaleString()}
                     </span>
                     ${isLow ? `<i class="fa-solid fa-circle-exclamation text-danger" style="margin-left: 0.25rem;" title="Low Stock Alert"></i>` : ""}
                   </td>
-                  <td>${r.unit}</td>
-                  <td style="text-align: right;">\u20B9${r.landingCost.toFixed(2)}</td>
-                  <td style="text-align: right; font-weight: 600;">\u20B9${r.mrp.toFixed(2)}</td>
-                  <td style="text-align: right; font-weight: 600;">\u20B9${r.value.toLocaleString("en-US", { minimumFractionDigits: 2 })}</td>
-                  <td style="text-align: center; white-space: nowrap;">
-                    <button class="btn btn-secondary btn-icon edit-pm-btn" data-id="${r.materialId}" title="Open Product Master"><i class="fa-solid fa-pen-to-square"></i> Master</button>
-                    <button class="btn btn-secondary btn-icon adjust-single-btn" data-id="${r.materialId}" title="Adjust stock"><i class="fa-solid fa-sliders"></i></button>
-                    <button class="btn btn-danger btn-icon delete-pm-btn" data-id="${r.materialId}" style="background-color:#ef4444; color:white; border:none;" title="Delete product"><i class="fa-solid fa-trash-can"></i></button>
+                  <td style="padding: 5px 6px; font-size: 0.78rem;">${r.unit}</td>
+                  <td style="padding: 5px 6px; font-size: 0.78rem; text-align: right;">\u20B9${r.landingCost.toFixed(2)}</td>
+                  <td style="padding: 5px 6px; font-size: 0.78rem; text-align: right; font-weight: 600;">\u20B9${r.mrp.toFixed(2)}</td>
+                  <td style="padding: 5px 6px; font-size: 0.78rem; text-align: right; font-weight: 600;">\u20B9${r.value.toLocaleString("en-US", { minimumFractionDigits: 2 })}</td>
+                  <td style="padding: 5px 6px; text-align: center; white-space: nowrap;">
+                    <button class="btn btn-secondary btn-icon edit-pm-btn" data-id="${r.materialId}" style="padding: 2px 6px; font-size: 0.72rem;" title="Open Product Master"><i class="fa-solid fa-pen-to-square"></i> Master</button>
+                    <button class="btn btn-secondary btn-icon adjust-single-btn" data-id="${r.materialId}" style="padding: 2px 6px; font-size: 0.72rem;" title="Adjust stock"><i class="fa-solid fa-sliders"></i></button>
+                    <button class="btn btn-danger btn-icon delete-pm-btn" data-id="${r.materialId}" style="padding: 2px 6px; font-size: 0.72rem; background-color:#ef4444; color:white; border:none;" title="Delete product"><i class="fa-solid fa-trash-can"></i></button>
                   </td>
                 </tr>
               `;
@@ -558,21 +558,26 @@ export function renderInventory(container) {
 // COMPREHENSIVE PRODUCT MASTER FORM DIALOG WORKSPACE
 // -------------------------------------------------------------
 export function showProductMasterModal(container, materialId, batchNo, onSuccess = null) {
-  const root = document.getElementById("modal-container-root");
+  let root = container || document.getElementById("modal-container-root");
+  if (!root) {
+    root = document.createElement("div");
+    root.id = "modal-container-root";
+    document.body.appendChild(root);
+  }
   const isEdit = !!materialId;
-  const mat = isEdit ? state.getMaterials().find(m => m.id === materialId) : null;
+  const mat = isEdit ? (state.getMaterials() || []).find(m => m && m.id === materialId) : null;
   // Backward compat: if preset loading set a charge but flag wasn't written, still show as enabled
-  const loadingEnabled = isEdit && (mat.loadingChargeEnabled === true || (mat.loadingChargeEnabled === undefined && (mat.loadingCharge || 0) > 0));
+  const loadingEnabled = isEdit && mat && (mat.loadingChargeEnabled === true || (mat.loadingChargeEnabled === undefined && (mat.loadingCharge || 0) > 0));
 
   const isCompUnregistered = state.isCompanyUnregistered ? state.isCompanyUnregistered() : false;
 
-  // Retrieve metadata lists
-  const currentGroups = [...state.getProductGroups()];
-  const currentCompanies = [...state.getCompanies()];
-  const currentCategories = [...state.getCategories()];
-  const currentSubCategories = [...state.getSubCategories()];
-  const currentNames = [...state.getProductNames()];
-  const currentHsn = [...state.getHsnCodes()];
+  // Retrieve metadata lists with fallback to []
+  const currentGroups = [...(state.getProductGroups ? (state.getProductGroups() || []) : [])];
+  const currentCompanies = [...(state.getCompanies ? (state.getCompanies() || []) : [])];
+  const currentCategories = [...(state.getCategories ? (state.getCategories() || []) : [])];
+  const currentSubCategories = [...(state.getSubCategories ? (state.getSubCategories() || []) : [])];
+  const currentNames = [...(state.getProductNames ? (state.getProductNames() || []) : [])];
+  const currentHsn = [...(state.getHsnCodes ? (state.getHsnCodes() || []) : [])];
 
   if (isEdit && mat) {
     if (mat.name && !currentNames.includes(mat.name)) currentNames.push(mat.name);
@@ -586,7 +591,7 @@ export function showProductMasterModal(container, materialId, batchNo, onSuccess
   // Render a Desktop-like double-column Product Master Overlay
   root.innerHTML = `
     <div class="modal-overlay active" id="modal-overlay" style="display:flex;">
-      <div class="modal-container modal-lg" style="max-width:1150px; background-color: #cbd5e1; color: #0f172a; padding: 10px; font-family: var(--font-body); border: 2px solid #64748b;">
+      <div class="modal-container modal-lg" style="width: 95vw; max-width: 1400px; max-height: 94vh; overflow-y: auto; background-color: #cbd5e1; color: #0f172a; padding: 12px; font-family: var(--font-body); border: 2px solid #64748b; border-radius: 6px;">
         
         <!-- Header Ribbon -->
         <div style="background-color: #3b82f6; color: white; display: flex; justify-content: space-between; align-items: center; padding: 4px 10px; font-weight: 700; font-size: 0.9rem; border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;">
@@ -838,7 +843,7 @@ export function showProductMasterModal(container, materialId, batchNo, onSuccess
   `;
 
   // --- ALTERNATE UNITS MANAGEMENT STATE ---
-  let localAltUnits = isEdit ? [...mat.alternateUnits] : [];
+  let localAltUnits = (isEdit && mat && mat.alternateUnits && Array.isArray(mat.alternateUnits)) ? [...mat.alternateUnits] : [];
 
   // Enforce uppercase on all text inputs/textareas typed in product master form
   const pmFormEl = document.getElementById("pm-form");
@@ -1407,7 +1412,14 @@ export function showProductMasterModal(container, materialId, batchNo, onSuccess
 
   document.getElementById("btn-pm-search").addEventListener("click", () => {
     close();
-    window.location.hash = "#inventory";
+    const modalRoot = document.getElementById("modal-container-root");
+    if (modalRoot) modalRoot.innerHTML = "";
+    if (window.location.hash === "#inventory") {
+      const winEl = document.getElementById("window-content-area") || document.getElementById("window-content") || container;
+      renderInventory(winEl);
+    } else {
+      window.location.hash = "#inventory";
+    }
   });
 
   document.getElementById("btn-pm-new").addEventListener("click", () => {
@@ -1468,7 +1480,7 @@ export function showProductMasterModal(container, materialId, batchNo, onSuccess
   pmForm.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       // If it's a textarea or button, let default behavior happen
-      if (e.target.tagName === "TEXTAREA" || e.target.tagName === "BUTTON") {
+      if (!e.target || !e.target.tagName || e.target.tagName === "TEXTAREA" || e.target.tagName === "BUTTON") {
         return;
       }
       e.preventDefault();
@@ -1562,7 +1574,7 @@ export function showProductMasterModal(container, materialId, batchNo, onSuccess
       
       if (onSuccess) {
         close();
-        onSuccess();
+        onSuccess(savedMat);
       } else {
         alert("PRODUCT SAVED SUCCESSFULLY.");
         renderInventory(container);
@@ -2009,7 +2021,7 @@ export function showDetailedStockRegisterModal(container) {
     });
 
     state.getSalesReturns().forEach(sr => {
-      if (sr.date && sr.date > dateTo) return;
+      if (!sr || sr.isCancelled || sr.isCanceled || sr.status === "CANCELLED" || sr.status === "cancelled" || (sr.date && sr.date > dateTo)) return;
       (sr.items || []).forEach(item => {
         if (item.materialId === m.id) {
           stock += (parseFloat(item.quantity) || 0);
@@ -2027,7 +2039,7 @@ export function showDetailedStockRegisterModal(container) {
     });
 
     state.getPurchaseReturns().forEach(pr => {
-      if (pr.date && pr.date > dateTo) return;
+      if (!pr || pr.isCancelled || pr.isCanceled || pr.status === "CANCELLED" || pr.status === "cancelled" || (pr.date && pr.date > dateTo)) return;
       (pr.items || []).forEach(item => {
         if (item.materialId === m.id) {
           stock -= (parseFloat(item.quantity) || 0);
@@ -2475,6 +2487,7 @@ export function showItemWiseStockRegisterModal(container, preselectedProduct = n
 
     // 4. Sales Returns
     state.getSalesReturns().forEach(sr => {
+      if (!sr || sr.isCancelled || sr.isCanceled || sr.status === "CANCELLED" || sr.status === "cancelled") return;
       if (selectedLoc !== "All" && !matchLoc(sr.siteName)) return;
 
       (sr.items || []).forEach(item => {
@@ -2494,6 +2507,7 @@ export function showItemWiseStockRegisterModal(container, preselectedProduct = n
 
     // 5. Purchase Returns
     state.getPurchaseReturns().forEach(pr => {
+      if (!pr || pr.isCancelled || pr.isCanceled || pr.status === "CANCELLED" || pr.status === "cancelled") return;
       if (selectedLoc !== "All" && !matchLoc(pr.siteName)) return;
 
       (pr.items || []).forEach(item => {
@@ -2698,6 +2712,9 @@ export function showBatchSellingRateModal(materialId, onSaved = null) {
   modalDiv.id = "batch-selling-rate-overlay";
   modalDiv.style.cssText = "display:flex; justify-content:center; align-items:center; background: rgba(15,23,42,0.4); backdrop-filter: blur(1px); z-index:1000100; position:fixed; top:0; left:0; width:100%; height:100%;";
 
+  const isCompUnregistered = state.isCompanyUnregistered ? state.isCompanyUnregistered() : false;
+  const igst = isCompUnregistered ? 0 : (parseFloat(mat.igst !== undefined && mat.igst !== null ? mat.igst : 18) || 0);
+
   const naturalCompare = (a, b) => {
     const strA = String(a || "").trim();
     const strB = String(b || "").trim();
@@ -2714,13 +2731,39 @@ export function showBatchSellingRateModal(materialId, onSaved = null) {
   let currentSortAsc = true;
   let batchFilterText = "";
 
-  const allBatches = (mat.batches || []).map(b => ({
-    batchNo: b.batchNo,
-    stock: b.stock || 0,
-    landingCost: b.landingCost || 0,
-    sellingPrice: b.sellingPrice || 0,
-    mrp: b.mrp || 0
-  }));
+  const allBatches = (mat.batches || []).map(b => {
+    const lCost = parseFloat(b.landingCost);
+    const bNum = parseFloat(b.batchNo);
+    const cost = !isNaN(lCost) && lCost > 0 ? lCost : (!isNaN(bNum) && bNum > 0 ? bNum : (parseFloat(mat.landingCost) || 0));
+    const bNo = formatRateValue(cost) || String(b.batchNo);
+    const sellingPrice = (b.sellingPrice !== undefined && b.sellingPrice !== null && !isNaN(parseFloat(b.sellingPrice)))
+      ? parseFloat(b.sellingPrice)
+      : (parseFloat(mat.gstExclRate) || 0);
+    const gstInclRate = (b.gstInclRate !== undefined && b.gstInclRate !== null && !isNaN(parseFloat(b.gstInclRate)) && parseFloat(b.gstInclRate) > 0)
+      ? parseFloat(b.gstInclRate)
+      : parseFloat((sellingPrice * (1 + igst / 100)).toFixed(2));
+    const diff = sellingPrice - cost;
+    const marginAmount = (b.marginAmount !== undefined && b.marginAmount !== null && !isNaN(parseFloat(b.marginAmount)))
+      ? parseFloat(b.marginAmount)
+      : diff;
+    const marginPercent = (b.marginPercent !== undefined && b.marginPercent !== null && !isNaN(parseFloat(b.marginPercent)))
+      ? parseFloat(b.marginPercent)
+      : (cost > 0 ? parseFloat(((diff / cost) * 100).toFixed(1)) : 0);
+    const mrp = (b.mrp !== undefined && b.mrp !== null && !isNaN(parseFloat(b.mrp)) && parseFloat(b.mrp) > 0)
+      ? parseFloat(b.mrp)
+      : parseFloat((sellingPrice * 1.25).toFixed(2));
+
+    return {
+      batchNo: bNo,
+      stock: b.stock || 0,
+      landingCost: cost,
+      marginPercent: marginPercent,
+      marginAmount: marginAmount,
+      sellingPrice: sellingPrice,
+      gstInclRate: gstInclRate,
+      mrp: mrp
+    };
+  });
 
   // Initial sort by batchNo
   allBatches.sort((a, b) => naturalCompare(a.batchNo, b.batchNo));
@@ -2733,6 +2776,9 @@ export function showBatchSellingRateModal(materialId, onSaved = null) {
       return String(b.batchNo).toLowerCase().includes(q) ||
              String(b.landingCost).includes(q) ||
              String(b.sellingPrice).includes(q) ||
+             String(b.gstInclRate).includes(q) ||
+             String(b.marginPercent).includes(q) ||
+             String(b.marginAmount).includes(q) ||
              String(b.mrp).includes(q);
     });
 
@@ -2745,8 +2791,14 @@ export function showBatchSellingRateModal(materialId, onSaved = null) {
         cmp = (a.stock || 0) - (b.stock || 0);
       } else if (currentSortCol === "landingCost") {
         cmp = (a.landingCost || 0) - (b.landingCost || 0);
+      } else if (currentSortCol === "marginPercent") {
+        cmp = (a.marginPercent || 0) - (b.marginPercent || 0);
+      } else if (currentSortCol === "marginAmount") {
+        cmp = (a.marginAmount || 0) - (b.marginAmount || 0);
       } else if (currentSortCol === "sellingPrice") {
         cmp = (a.sellingPrice || 0) - (b.sellingPrice || 0);
+      } else if (currentSortCol === "gstInclRate") {
+        cmp = (a.gstInclRate || 0) - (b.gstInclRate || 0);
       } else if (currentSortCol === "mrp") {
         cmp = (a.mrp || 0) - (b.mrp || 0);
       }
@@ -2759,31 +2811,38 @@ export function showBatchSellingRateModal(materialId, onSaved = null) {
     };
 
     modalDiv.innerHTML = `
-      <div class="modal-container modal-md" style="max-width:680px; width: 95vw; background-color:#cbd5e1; color:#0f172a; padding:10px; font-family: sans-serif; border: 2px solid #d97706; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-size:0.8rem; display:flex; flex-direction:column; gap:8px;">
-        <div style="background: linear-gradient(180deg, #d97706 0%, #f59e0b 100%); color:white; padding:4px 8px; font-weight:700; display:flex; justify-content:space-between; align-items:center; border-radius: 2px;">
-          <div><i class="fa-solid fa-tags"></i> Edit Batch Selling Rates (${allBatches.length} Batches)</div>
-          <button type="button" style="background:none; border:none; color:white; font-size:1.2rem; cursor:pointer;" id="batch-rates-close-x-btn">&times;</button>
+      <div class="modal-container modal-md" style="max-width:880px; width: 95vw; background-color:#cbd5e1; color:#0f172a; padding:10px; font-family: sans-serif; border: 2px solid #d97706; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-size:0.8rem; display:flex; flex-direction:column; gap:8px;">
+        <div style="background: linear-gradient(180deg, #d97706 0%, #f59e0b 100%); color:white; padding:6px 10px; font-weight:700; display:flex; justify-content:space-between; align-items:center; border-radius: 3px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <i class="fa-solid fa-tags"></i>
+            <span>Edit Batch Selling Rates (${allBatches.length} Batches)</span>
+          </div>
+          <button type="button" style="background:none; border:none; color:white; font-size:1.2rem; cursor:pointer;" id="batch-rates-close-x-btn" title="Close">&times;</button>
         </div>
         
-        <div style="background:white; padding:12px; border:1px solid #94a3b8; border-radius:2px; display:flex; flex-direction:column; gap:8px; color:black;">
+        <div style="background:white; padding:12px; border:1px solid #94a3b8; border-radius:3px; display:flex; flex-direction:column; gap:8px; color:black;">
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:4px;">
-            <div style="display:flex; gap:16px;">
+            <div style="display:flex; gap:16px; align-items:center;">
               <div>
-                <span style="font-weight:bold; color:#475569; display:block; font-size:0.75rem;">Product Name</span>
-                <span style="font-size:0.9rem; font-weight:bold;">${mat.name}</span>
+                <span style="font-weight:bold; color:#475569; display:block; font-size:0.72rem; text-transform:uppercase;">Product Name</span>
+                <span style="font-size:0.95rem; font-weight:bold; color:#0f172a;">${mat.name}</span>
               </div>
               <div>
-                <span style="font-weight:bold; color:#475569; display:block; font-size:0.75rem;">Code/Model</span>
-                <span style="font-size:0.9rem; font-weight:bold; color:#2563eb;">${mat.code || mat.id}</span>
+                <span style="font-weight:bold; color:#475569; display:block; font-size:0.72rem; text-transform:uppercase;">Code/Model</span>
+                <span style="font-size:0.95rem; font-weight:bold; color:#2563eb;">${mat.code || mat.id}</span>
+              </div>
+              <div>
+                <span style="font-weight:bold; color:#475569; display:block; font-size:0.72rem; text-transform:uppercase;">Tax / GST</span>
+                <span style="font-size:0.85rem; font-weight:bold; background:#e0f2fe; color:#0369a1; padding:2px 8px; border-radius:3px; border:1px solid #bae6fd;">${igst}%</span>
               </div>
             </div>
 
             <div style="display:flex; align-items:center; gap:6px;">
-              <input type="text" id="batch-filter-input" class="form-control" placeholder="Search batch / rate..." value="${batchFilterText}" style="padding: 2px 6px; font-size: 0.78rem; height: 26px; width: 160px; border: 1px solid #94a3b8;">
+              <input type="text" id="batch-filter-input" class="form-control" placeholder="Search batch / rate / margin..." value="${batchFilterText}" style="padding: 3px 8px; font-size: 0.78rem; height: 28px; width: 200px; border: 1px solid #94a3b8; border-radius:3px;">
             </div>
           </div>
 
-          <div style="max-height: 280px; overflow-y: auto; border: 1px solid #cbd5e1; border-radius: 3px;">
+          <div style="max-height: 320px; overflow-y: auto; border: 1px solid #cbd5e1; border-radius: 3px;">
             <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.78rem;">
               <thead>
                 <tr style="background-color: #f1f5f9; border-bottom: 1px solid #cbd5e1; font-weight: bold; position: sticky; top: 0; z-index: 10;">
@@ -2796,8 +2855,17 @@ export function showBatchSellingRateModal(materialId, onSaved = null) {
                   <th style="padding: 6px 8px; text-align: right; cursor: pointer; user-select: none;" class="sort-batch-th" data-col="landingCost">
                     Landing Cost ${sortIndicator("landingCost")}
                   </th>
+                  <th style="padding: 6px 8px; text-align: right; cursor: pointer; user-select: none;" class="sort-batch-th" data-col="marginPercent">
+                    Margin % ${sortIndicator("marginPercent")}
+                  </th>
+                  <th style="padding: 6px 8px; text-align: right; cursor: pointer; user-select: none;" class="sort-batch-th" data-col="marginAmount">
+                    Margin Amt ${sortIndicator("marginAmount")}
+                  </th>
                   <th style="padding: 6px 8px; cursor: pointer; user-select: none;" class="sort-batch-th" data-col="sellingPrice">
-                    Selling Price * ${sortIndicator("sellingPrice")}
+                    Selling (Excl) * ${sortIndicator("sellingPrice")}
+                  </th>
+                  <th style="padding: 6px 8px; cursor: pointer; user-select: none;" class="sort-batch-th" data-col="gstInclRate">
+                    Selling (Incl) ${sortIndicator("gstInclRate")}
                   </th>
                   <th style="padding: 6px 8px; cursor: pointer; user-select: none;" class="sort-batch-th" data-col="mrp">
                     MRP * ${sortIndicator("mrp")}
@@ -2806,24 +2874,33 @@ export function showBatchSellingRateModal(materialId, onSaved = null) {
               </thead>
               <tbody>
                 ${displayList.map((b) => `
-                  <tr style="border-bottom: 1px dashed #cbd5e1;">
-                    <td style="padding: 6px 8px; font-weight: bold; color: #1e3b8b;">
+                  <tr style="border-bottom: 1px dashed #cbd5e1;" data-batch-row="${b.batchNo}">
+                    <td style="padding: 6px 8px; font-weight: bold; color: #1e3b8b; white-space:nowrap;">
                       ${b.batchNo}
                       <input type="hidden" class="batch-no-input" value="${b.batchNo}">
                     </td>
-                    <td style="padding: 6px 8px; text-align: right; font-weight: 500;">${(b.stock || 0).toFixed(2)}</td>
-                    <td style="padding: 6px 8px; text-align: right; font-weight: 500;">\u20B9${(b.landingCost || 0).toFixed(2)}</td>
-                    <td style="padding: 4px 6px;">
-                      <input type="number" class="form-control batch-selling-input" data-batch="${b.batchNo}" style="padding: 2px 4px; font-size: 0.78rem; text-align: right; width: 90px;" step="0.01" min="0" value="${(b.sellingPrice || 0).toFixed(2)}" required>
+                    <td style="padding: 6px 8px; text-align: right; font-weight: 500; white-space:nowrap;">${(b.stock || 0).toFixed(2)}</td>
+                    <td style="padding: 6px 8px; text-align: right; font-weight: bold; white-space:nowrap;">₹${(b.landingCost || 0).toFixed(2)}</td>
+                    <td style="padding: 4px 6px; text-align: right;">
+                      <input type="number" class="form-control batch-margin-pct-input" data-batch="${b.batchNo}" style="padding: 2px 4px; font-size: 0.78rem; text-align: right; width: 65px; border: 1px solid #94a3b8; border-radius: 2px;" step="0.1" value="${(b.marginPercent || 0).toFixed(1)}">
+                    </td>
+                    <td style="padding: 4px 6px; text-align: right;">
+                      <input type="number" class="form-control batch-margin-amt-input" data-batch="${b.batchNo}" style="padding: 2px 4px; font-size: 0.78rem; text-align: right; width: 72px; border: 1px solid #94a3b8; border-radius: 2px; background:#f8fafc;" step="0.01" value="${(b.marginAmount || 0).toFixed(2)}">
                     </td>
                     <td style="padding: 4px 6px;">
-                      <input type="number" class="form-control batch-mrp-input" data-batch="${b.batchNo}" style="padding: 2px 4px; font-size: 0.78rem; text-align: right; width: 90px;" step="0.01" min="0" value="${(b.mrp || 0).toFixed(2)}" required>
+                      <input type="number" class="form-control batch-selling-input" data-batch="${b.batchNo}" style="padding: 2px 4px; font-size: 0.78rem; text-align: right; width: 85px; font-weight: bold; border: 1px solid #94a3b8; border-radius: 2px;" step="0.01" min="0" value="${(b.sellingPrice || 0).toFixed(2)}" required>
+                    </td>
+                    <td style="padding: 4px 6px;">
+                      <input type="number" class="form-control batch-incl-input" data-batch="${b.batchNo}" style="padding: 2px 4px; font-size: 0.78rem; text-align: right; width: 85px; font-weight: bold; color: #1e40af; border: 1px solid #94a3b8; border-radius: 2px;" step="0.01" min="0" value="${(b.gstInclRate || 0).toFixed(2)}" required>
+                    </td>
+                    <td style="padding: 4px 6px;">
+                      <input type="number" class="form-control batch-mrp-input" data-batch="${b.batchNo}" style="padding: 2px 4px; font-size: 0.78rem; text-align: right; width: 80px; border: 1px solid #94a3b8; border-radius: 2px;" step="0.01" min="0" value="${(b.mrp || 0).toFixed(2)}" required>
                     </td>
                   </tr>
                 `).join("")}
                 ${displayList.length === 0 ? `
                   <tr>
-                    <td colspan="5" style="text-align: center; padding: 20px; color: #64748b; font-style: italic;">No batches matching the criteria.</td>
+                    <td colspan="8" style="text-align: center; padding: 20px; color: #64748b; font-style: italic;">No batches matching the criteria.</td>
                   </tr>
                 ` : ""}
               </tbody>
@@ -2835,8 +2912,8 @@ export function showBatchSellingRateModal(materialId, onSaved = null) {
               Showing <strong>${displayList.length}</strong> of <strong>${allBatches.length}</strong> batches
             </div>
             <div style="display:flex; gap:8px;">
-              <button type="button" class="btn btn-primary" id="btn-batch-rates-save" style="background:#d97706; border:none; color:white; font-weight:bold; padding:4px 16px; font-size:0.78rem; border-radius:3px; cursor:pointer;" ${allBatches.length === 0 ? 'disabled' : ''}><i class="fa-solid fa-save"></i> Save Rates</button>
-              <button type="button" class="btn btn-secondary" id="btn-batch-rates-cancel" style="padding:4px 16px; font-weight:bold; background-color:#e2e8f0; border:1px solid #475569; color:black; font-size:0.78rem; border-radius:3px; cursor:pointer;">Cancel</button>
+              <button type="button" class="btn btn-primary" id="btn-batch-rates-save" style="background:#d97706; border:none; color:white; font-weight:bold; padding:5px 18px; font-size:0.8rem; border-radius:3px; cursor:pointer;" ${allBatches.length === 0 ? 'disabled' : ''}><i class="fa-solid fa-save"></i> Save Rates</button>
+              <button type="button" class="btn btn-secondary" id="btn-batch-rates-cancel" style="padding:5px 18px; font-weight:bold; background-color:#e2e8f0; border:1px solid #475569; color:black; font-size:0.8rem; border-radius:3px; cursor:pointer;">Cancel</button>
             </div>
           </div>
         </div>
@@ -2880,20 +2957,111 @@ export function showBatchSellingRateModal(materialId, onSaved = null) {
       });
     });
 
-    // Inputs change listeners to update memory
-    modalDiv.querySelectorAll(".batch-selling-input").forEach(inp => {
-      inp.addEventListener("input", (e) => {
-        const bNo = e.target.getAttribute("data-batch");
-        const found = allBatches.find(x => x.batchNo === bNo);
-        if (found) found.sellingPrice = parseFloat(e.target.value) || 0;
-      });
-    });
-    modalDiv.querySelectorAll(".batch-mrp-input").forEach(inp => {
-      inp.addEventListener("input", (e) => {
-        const bNo = e.target.getAttribute("data-batch");
-        const found = allBatches.find(x => x.batchNo === bNo);
-        if (found) found.mrp = parseFloat(e.target.value) || 0;
-      });
+    // Inputs change listeners with smooth bidirectional updates
+    modalDiv.querySelectorAll("tbody tr").forEach(row => {
+      const bNo = row.getAttribute("data-batch-row");
+      const found = allBatches.find(x => x.batchNo === bNo);
+      if (!found) return;
+
+      const sellingInp = row.querySelector(".batch-selling-input");
+      const inclInp = row.querySelector(".batch-incl-input");
+      const marginPctInp = row.querySelector(".batch-margin-pct-input");
+      const marginAmtInp = row.querySelector(".batch-margin-amt-input");
+      const mrpInp = row.querySelector(".batch-mrp-input");
+
+      if (sellingInp) {
+        sellingInp.addEventListener("input", (e) => {
+          const excl = parseFloat(e.target.value) || 0;
+          const lc = found.landingCost || 0;
+          const diff = excl - lc;
+          const pct = lc > 0 ? ((diff / lc) * 100) : 0;
+          const incl = excl * (1 + igst / 100);
+          const mrp = excl * 1.25;
+
+          found.sellingPrice = excl;
+          found.marginAmount = diff;
+          found.marginPercent = pct;
+          found.gstInclRate = parseFloat(incl.toFixed(2));
+          found.mrp = parseFloat(mrp.toFixed(2));
+
+          if (marginAmtInp) marginAmtInp.value = diff.toFixed(2);
+          if (marginPctInp) marginPctInp.value = pct.toFixed(1);
+          if (inclInp) inclInp.value = incl.toFixed(2);
+          if (mrpInp) mrpInp.value = mrp.toFixed(2);
+        });
+      }
+
+      if (inclInp) {
+        inclInp.addEventListener("input", (e) => {
+          const incl = parseFloat(e.target.value) || 0;
+          const excl = igst > 0 ? (incl / (1 + igst / 100)) : incl;
+          const lc = found.landingCost || 0;
+          const diff = excl - lc;
+          const pct = lc > 0 ? ((diff / lc) * 100) : 0;
+          const mrp = excl * 1.25;
+
+          found.sellingPrice = parseFloat(excl.toFixed(2));
+          found.gstInclRate = incl;
+          found.marginAmount = diff;
+          found.marginPercent = pct;
+          found.mrp = parseFloat(mrp.toFixed(2));
+
+          if (sellingInp) sellingInp.value = excl.toFixed(2);
+          if (marginAmtInp) marginAmtInp.value = diff.toFixed(2);
+          if (marginPctInp) marginPctInp.value = pct.toFixed(1);
+          if (mrpInp) mrpInp.value = mrp.toFixed(2);
+        });
+      }
+
+      if (marginPctInp) {
+        marginPctInp.addEventListener("input", (e) => {
+          const pct = parseFloat(e.target.value) || 0;
+          const lc = found.landingCost || 0;
+          const margA = lc * (pct / 100);
+          const excl = lc + margA;
+          const incl = excl * (1 + igst / 100);
+          const mrp = excl * 1.25;
+
+          found.marginPercent = pct;
+          found.marginAmount = margA;
+          found.sellingPrice = parseFloat(excl.toFixed(2));
+          found.gstInclRate = parseFloat(incl.toFixed(2));
+          found.mrp = parseFloat(mrp.toFixed(2));
+
+          if (marginAmtInp) marginAmtInp.value = margA.toFixed(2);
+          if (sellingInp) sellingInp.value = excl.toFixed(2);
+          if (inclInp) inclInp.value = incl.toFixed(2);
+          if (mrpInp) mrpInp.value = mrp.toFixed(2);
+        });
+      }
+
+      if (marginAmtInp) {
+        marginAmtInp.addEventListener("input", (e) => {
+          const margA = parseFloat(e.target.value) || 0;
+          const lc = found.landingCost || 0;
+          const pct = lc > 0 ? ((margA / lc) * 100) : 0;
+          const excl = lc + margA;
+          const incl = excl * (1 + igst / 100);
+          const mrp = excl * 1.25;
+
+          found.marginPercent = pct;
+          found.marginAmount = margA;
+          found.sellingPrice = parseFloat(excl.toFixed(2));
+          found.gstInclRate = parseFloat(incl.toFixed(2));
+          found.mrp = parseFloat(mrp.toFixed(2));
+
+          if (marginPctInp) marginPctInp.value = pct.toFixed(1);
+          if (sellingInp) sellingInp.value = excl.toFixed(2);
+          if (inclInp) inclInp.value = incl.toFixed(2);
+          if (mrpInp) mrpInp.value = mrp.toFixed(2);
+        });
+      }
+
+      if (mrpInp) {
+        mrpInp.addEventListener("input", (e) => {
+          found.mrp = parseFloat(e.target.value) || 0;
+        });
+      }
     });
 
     // Save rates action
@@ -2901,7 +3069,11 @@ export function showBatchSellingRateModal(materialId, onSaved = null) {
       allBatches.forEach(b => {
         state.addOrUpdateMaterialBatch(materialId, {
           batchNo: b.batchNo,
+          landingCost: b.landingCost,
           sellingPrice: b.sellingPrice,
+          gstInclRate: b.gstInclRate,
+          marginPercent: b.marginPercent,
+          marginAmount: b.marginAmount,
           mrp: b.mrp
         });
       });

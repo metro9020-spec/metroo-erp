@@ -24,9 +24,16 @@ export function showPurchaseReportModal(container) {
   const categories = [...new Set(materials.map(m => m.category).filter(Boolean))];
   const subCategories = [...new Set(materials.map(m => m.subCategory || "All").filter(Boolean))];
 
-  // Default dates (current month)
+  // Default dates (Active Financial Year Start to Today)
   const today = new Date();
-  const firstDay = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split("T")[0];
+  const activeFyStart = state.getActiveFinancialYearStartDate() || "2026-04-01";
+  let firstDay = activeFyStart;
+  if (purchases && purchases.length > 0) {
+    const dates = purchases.map(p => p.date).filter(Boolean).sort();
+    if (dates.length > 0 && dates[0] < firstDay) {
+      firstDay = dates[0];
+    }
+  }
   const lastDay = today.toISOString().split("T")[0];
 
   const modalEl = document.createElement("div");
@@ -876,16 +883,25 @@ export function showBillwiseMarginReportModal(container) {
       let billMargin = 0;
       let costSum = 0;
       
-      inv.items.forEach(item => {
-        const mat = materials.find(m => m.id === item.materialId || m.code === item.code);
+      (inv.items || []).forEach(item => {
+        const mat = materials.find(m => 
+          (item.materialId && m.id === item.materialId) || 
+          (item.code && m.code && String(m.code).trim().toUpperCase() === String(item.code).trim().toUpperCase()) ||
+          (item.name && m.name && String(m.name).trim().toUpperCase() === String(item.name).trim().toUpperCase())
+        );
         const batch = mat?.batches?.find(b => b.batchNo === item.batchNo) || mat?.batches?.[0];
-        const purchaseCost = batch ? (parseFloat(batch.landingCost) || 0) : 0;
+        const purchaseCost = (batch && parseFloat(batch.landingCost) > 0)
+          ? parseFloat(batch.landingCost)
+          : (parseFloat(mat?.landingCost) || parseFloat(mat?.purchaseRate) || parseFloat(mat?.purchasePrice) || parseFloat(item.landingCost) || parseFloat(item.purchasePrice) || 0);
         
-        // Selling Price (without adjustment or GST) after discount:
-        const basePrice = parseFloat(item.amount) || (item.quantity * item.price);
-        const itemDiscount = parseFloat(item.discountAmount) || 0;
-        const sellingPrice = parseFloat(item.netValue) || (basePrice - itemDiscount);
-        const itemCost = purchaseCost * item.quantity;
+        const qty = parseFloat(item.quantity) || 0;
+        const rate = parseFloat(item.price) || 0;
+        const disc = parseFloat(item.discountAmount) || 0;
+        const taxAmt = parseFloat(item.gstAmount) || ((parseFloat(item.cgstAmount) || 0) + (parseFloat(item.sgstAmount) || 0) + (parseFloat(item.igstAmount) || 0));
+        const rowTotal = parseFloat(item.netAmount) || parseFloat(item.amount) || ((qty * rate) - disc + taxAmt);
+        const sellingPrice = parseFloat(item.netValue) || (rowTotal - taxAmt) || ((qty * rate) - disc);
+        
+        const itemCost = purchaseCost * qty;
         const itemMargin = sellingPrice - itemCost;
         
         billMargin += itemMargin;
@@ -1110,19 +1126,29 @@ export function showProductwiseMarginReportModal(container) {
       inv.items.forEach(item => {
         if (selectedProd !== "All" && item.name !== selectedProd) return;
 
-        const mat = materials.find(m => m.id === item.materialId || m.code === item.code);
+        const mat = materials.find(m => 
+          (item.materialId && m.id === item.materialId) || 
+          (item.code && m.code && String(m.code).trim().toUpperCase() === String(item.code).trim().toUpperCase()) ||
+          (item.name && m.name && String(m.name).trim().toUpperCase() === String(item.name).trim().toUpperCase())
+        );
         const comp = (mat && mat.company) ? mat.company : "UNAVAILABLE";
         const cat = (mat && mat.category) ? mat.category : "UNAVAILABLE";
         const subcat = (mat && mat.subCategory) ? mat.subCategory : "UNAVAILABLE";
         const unit = (mat && mat.unit) ? mat.unit : "Nos";
 
         const batch = mat?.batches?.find(b => b.batchNo === item.batchNo) || mat?.batches?.[0];
-        const purchaseCost = batch ? (parseFloat(batch.landingCost) || 0) : 0;
+        const purchaseCost = (batch && parseFloat(batch.landingCost) > 0)
+          ? parseFloat(batch.landingCost)
+          : (parseFloat(mat?.landingCost) || parseFloat(mat?.purchaseRate) || parseFloat(mat?.purchasePrice) || parseFloat(item.landingCost) || parseFloat(item.purchasePrice) || 0);
         
-        const basePrice = parseFloat(item.amount) || (item.quantity * item.price);
-        const itemDiscount = parseFloat(item.discountAmount) || 0;
-        const sellingPrice = parseFloat(item.netValue) || (basePrice - itemDiscount);
-        const itemCost = purchaseCost * item.quantity;
+        const qty = parseFloat(item.quantity) || 0;
+        const rate = parseFloat(item.price) || 0;
+        const disc = parseFloat(item.discountAmount) || 0;
+        const taxAmt = parseFloat(item.gstAmount) || ((parseFloat(item.cgstAmount) || 0) + (parseFloat(item.sgstAmount) || 0) + (parseFloat(item.igstAmount) || 0));
+        const rowTotal = parseFloat(item.netAmount) || parseFloat(item.amount) || ((qty * rate) - disc + taxAmt);
+        const sellingPrice = parseFloat(item.netValue) || (rowTotal - taxAmt) || ((qty * rate) - disc);
+        
+        const itemCost = purchaseCost * qty;
         const itemMargin = sellingPrice - itemCost;
 
         const key = `${item.name}-${item.code}-${comp}`;

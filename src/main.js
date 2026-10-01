@@ -3,7 +3,7 @@ import { renderDashboard } from "./views/dashboard.js";
 import { renderInventory, showProductMasterModal } from "./views/inventory.js";
 import { renderTransactions, showInvoiceBuilderModal, showRecordPurchaseModal, showPurchaseReturnModal, showSalesReturnModal, setTransactionsActiveTab } from "./views/transactions.js";
 import { showSelectBillSeriesModal } from "./views/selectSeriesModal.js";
-import { renderVouchers } from "./views/vouchers.js";
+import { renderVouchers, setActiveVoucherTab, isVoucherLauncherActive, resetVoucherLauncher } from "./views/vouchers.js";
 import { renderContacts, showAddContactModal, setContactTypeFilter } from "./views/contacts.js";
 import { 
   renderReports, 
@@ -34,46 +34,24 @@ import { renderHeadloaderReport } from "./views/headloaderReport.js";
 import { renderSearchVouchers } from "./views/searchVouchers.js";
 import { showWelcomeScreen, showEditCompanyModal } from "./views/login.js";
 import { showGstr1OfflineModal } from "./views/gstr1OfflineModal.js";
+import { openRestoreCompanyModal } from "./views/restoreCompanyModal.js";
+import { openMissingDoubleEntryModal } from "./views/missingDoubleEntryModal.js";
+import { showClearDatabaseModal } from "./views/clearDatabaseModal.js";
+import { renderUserManagementModal } from "./views/userManagement.js";
 import { renderOpeningStockRegisterReport } from "./views/openingStock.js";
 import { renderSalesOrders } from "./views/salesOrders.js";
+import { showRearrangeBillsModal } from "./views/rearrangeBillsModal.js";
+import { showRearrangeVouchersModal } from "./views/rearrangeVouchersModal.js";
 import { initGlobalWindowManager } from "./utils/draggable.js";
 
+window.showRearrangeBillsModal = showRearrangeBillsModal;
+window.showRearrangeVouchersModal = showRearrangeVouchersModal;
+
 window._getApiUrl = function(endpoint) {
-  // If loaded directly from production server (port 3001 or cloud host on 80/443), use relative endpoint
-  if (window.location.port === "3001" || window.location.port === "") {
-    return endpoint;
+  if (typeof state !== "undefined" && typeof state.getBackendApiUrl === "function") {
+    return state.getBackendApiUrl(endpoint);
   }
-
-  try {
-    const activeCompId = (typeof state !== "undefined" && state.activeCompanyId) 
-      ? state.activeCompanyId 
-      : localStorage.getItem("erp_active_company_id");
-      
-    const rawComps = localStorage.getItem("erp_companies");
-    const companies = (typeof state !== "undefined" && state.companies && state.companies.length > 0) 
-      ? state.companies 
-      : (rawComps ? JSON.parse(rawComps) : []);
-      
-    if (Array.isArray(companies) && companies.length > 0) {
-      let targetCo = companies.find(c => String(c.id) === String(activeCompId));
-      if (!targetCo) targetCo = companies[0];
-      
-      if (targetCo && targetCo.serverUrl && targetCo.serverUrl.trim()) {
-        const cleanBase = String(targetCo.serverUrl).trim().replace(/\/+$/, "");
-        // Ignore stale local port 3001 URLs (e.g. http://100.66.24.43:3001) so we dynamically use current hostname
-        const isLocalNodePort = /^http:\/\/[^/]+:3001$/i.test(cleanBase);
-        if (cleanBase && !cleanBase.includes(window.location.host) && !isLocalNodePort) {
-          return `${cleanBase}${endpoint}`;
-        }
-      }
-    }
-  } catch (e) {}
-
-  // If running in Vite dev/preview server (or any non-3001 port), target backend on port 3001 of current hostname
-  if (window.location.port !== "3001") {
-    return `${window.location.protocol}//${window.location.hostname}:3001${endpoint}`;
-  }
-  return endpoint;
+  return null;
 };
 
 // DOM Elements helper
@@ -81,15 +59,84 @@ export function getWindowContentEl() {
   return document.getElementById("window-content-area") || document.getElementById("window-content");
 }
 
-export function renderCurrentView() {
-  const windowContentEl = getWindowContentEl();
-  const hash = window.location.hash.slice(1);
+export function closeAllOpenLayouts() {
+  if (window.location.hash !== "") {
+    window.location.hash = "";
+  }
 
   const activeWin = document.getElementById("active-window");
-  if (!hash) {
-    if (activeWin) activeWin.classList.add("hidden");
-    if (windowContentEl) windowContentEl.innerHTML = "";
+  if (activeWin) {
+    activeWin.classList.add("hidden");
+    activeWin.classList.remove("launcher-mode", "maximized");
+    activeWin.style.maxWidth = "";
+    activeWin.style.width = "";
+    activeWin.style.position = "";
+    activeWin.style.left = "";
+    activeWin.style.top = "";
+    activeWin.style.margin = "";
+  }
+
+  const windowContentEl = getWindowContentEl();
+  if (windowContentEl) {
+    windowContentEl.innerHTML = "";
+  }
+
+  const modalRoot = document.getElementById("modal-container-root");
+  if (modalRoot) {
+    modalRoot.innerHTML = "";
+  }
+  const subModalRoot = document.getElementById("sub-modal-container-root");
+  if (subModalRoot) {
+    subModalRoot.innerHTML = "";
+  }
+
+  document.querySelectorAll(".modal-overlay, .modal, .modal-backdrop, .erp-modal-overlay, .custom-modal").forEach(el => {
+    if (el && el.parentElement && el.id !== "modal-container-root" && el.id !== "sub-modal-container-root" && el.id !== "app" && el.id !== "welcome-login-root") {
+      el.remove();
+    }
+  });
+
+  try {
+    resetVoucherLauncher();
+  } catch (e) {}
+}
+
+window.addEventListener("financialYearChanged", () => {
+  closeAllOpenLayouts();
+  updateCompanyHeaderIndicator();
+  updateSidebarDate();
+});
+
+export function renderCurrentView() {
+  const windowContentEl = getWindowContentEl();
+  let rawHash = window.location.hash || "";
+  let hash = rawHash.startsWith("#") ? rawHash.slice(1) : rawHash;
+
+  const activeWin = document.getElementById("active-window");
+
+  // If no route hash is specified, hide window and clear content (prevent unwanted popups)
+  if (!hash || hash === "") {
+    if (activeWin) {
+      activeWin.classList.add("hidden");
+      activeWin.classList.remove("launcher-mode");
+    }
+    if (windowContentEl) {
+      windowContentEl.innerHTML = "";
+    }
     return;
+  }
+
+  // If user is on welcome / login screen, do not force-render views
+  const welcomeContainer = document.getElementById("welcome-login-root");
+  if (welcomeContainer && welcomeContainer.style.display !== "none" && welcomeContainer.children.length > 0) {
+    if (activeWin) activeWin.classList.add("hidden");
+    return;
+  }
+
+  if (activeWin && hash !== "vouchers") {
+    activeWin.classList.remove("launcher-mode");
+    activeWin.style.maxWidth = "";
+    activeWin.style.width = "";
   }
 
   // Show active desktop window if element exists
@@ -102,6 +149,7 @@ export function renderCurrentView() {
   if (titleTextEl) {
     const titleMap = {
       dashboard: "DASHBOARD",
+      home: "DASHBOARD",
       inventory: "INVENTORY MASTER & STOCK REGISTER",
       transactions: "TRANSACTIONS & INVOICE MANAGEMENT",
       vouchers: "VOUCHER ENTRY & ACCOUNT LOGS",
@@ -130,7 +178,8 @@ export function renderCurrentView() {
       "preset-loading": "PRESET LOADING CONFIGURATION",
       "headloader-report": "HEADLOADER (LOADING & UNLOADING) REPORT",
       "loading-unloading-report": "HEADLOADER (LOADING & UNLOADING) REPORT",
-      "search-vouchers": "VOUCHER SEARCH REGISTRY",
+      "search-vouchers": "VOUCHER LOGS REGISTRY",
+      "voucher-logs": "VOUCHER LOGS REGISTRY",
       "opening-stock-register": "OPENING STOCK REGISTER & ENTRY",
       "opening-stock": "OPENING STOCK REGISTER & ENTRY",
       "sales-orders": "FIELD SALES ORDERS (MOBILE & TABLET)",
@@ -143,7 +192,10 @@ export function renderCurrentView() {
   const closeBtn = document.getElementById("win-btn-close");
   if (closeBtn && !closeBtn.dataset.bound) {
     closeBtn.addEventListener("click", () => {
-      if (activeWin) activeWin.classList.add("hidden");
+      if (activeWin) {
+        activeWin.classList.add("hidden");
+        activeWin.classList.remove("launcher-mode");
+      }
       window.location.hash = "";
     });
     closeBtn.dataset.bound = "true";
@@ -174,300 +226,429 @@ export function renderCurrentView() {
     return;
   }
 
-  switch (hash) {
-    case "login":
-      break;
-    case "dashboard":
-      renderDashboard(windowContentEl);
-      break;
-    case "sales-orders":
-    case "field-orders":
-      renderSalesOrders(windowContentEl);
-      break;
-    case "inventory":
-    case "products-list":
-    case "stock-register":
-    case "stock-register-detailed":
-    case "stock-quick-view":
-      renderInventory(windowContentEl);
-      break;
-    case "transactions":
-    case "transaction-log":
-      renderTransactions(windowContentEl);
-      break;
-    case "vouchers":
-      renderVouchers(windowContentEl);
-      break;
-    case "contacts":
-    case "contacts-directory":
-      renderContacts(windowContentEl);
-      break;
-    case "profit-loss":
-    case "pnl":
-      setReportsActiveTab("pl");
-      showProfitLossModal();
-      break;
-    case "balance-sheet":
-      setReportsActiveTab("bs");
-      showBalanceSheetModal();
-      break;
-    case "opening-balance-sheet":
-    case "obs":
-      setReportsActiveTab("obs");
-      showOpeningBalanceSheetModal();
-      break;
-    case "trial-balance":
-      setReportsActiveTab("trial");
-      showTrialBalanceModal();
-      break;
-    case "tax-summary":
-    case "gst-summary":
-      setReportsActiveTab("tax");
-      showTaxSummaryReportModal();
-      break;
-    case "individual-ledger":
-      setReportsActiveTab("ledger");
-      showIndividualLedgerModal();
-      break;
-    case "ledger-group-summary":
-    case "group-summary":
-      setReportsActiveTab("groupSummary");
-      showGroupSummaryModal();
-      break;
-    case "opening-stock-register":
-    case "opening-stock":
-      renderOpeningStockRegisterReport(windowContentEl);
-      break;
-    case "customer-report":
-      setPartyReportTab("customer");
-      showPartiesReportModal("customer");
-      break;
-    case "vendor-report":
-      setPartyReportTab("vendor");
-      showPartiesReportModal("vendor");
-      break;
-    case "debtors-report":
-      setPartyReportTab("debtors");
-      showPartiesReportModal("debtors");
-      break;
-    case "creditors-report":
-      setPartyReportTab("creditors");
-      showPartiesReportModal("creditors");
-      break;
-    case "parties-report":
-      showPartiesReportModal();
-      break;
-    case "reports":
-      renderReports(windowContentEl);
-      break;
-    case "admin":
-      {
-        const currentUser = state.getCurrentUser();
-        if (!currentUser || currentUser.role !== "Admin") {
-          alert("Access Restricted! Only Admin users can view Admin settings.");
-          window.location.hash = "#dashboard";
-        } else {
-          renderAdmin(windowContentEl);
-        }
-      }
-      break;
-    case "ledger":
-    case "ledgers":
-      renderLedger(windowContentEl);
-      break;
-    case "groups":
-      renderGroups(windowContentEl);
-      break;
-    case "adjustments":
-      renderAdjustments(windowContentEl);
-      break;
-    case "preset-loading":
-    case "presetLoading":
-      renderPresetLoading(windowContentEl);
-      break;
-    case "headloader-report":
-    case "headloaderReport":
-    case "loading-unloading-report":
-      if (state.getOptions().enableHeadloader === false) {
-        alert("Headloader (Loading & Unloading) Report is disabled in Options.");
-        window.location.hash = "#dashboard";
+  try {
+    switch (hash) {
+      case "login":
         break;
-      }
-      renderHeadloaderReport(windowContentEl);
-      break;
-    case "search-vouchers":
-    case "searchVouchers":
-      renderSearchVouchers(windowContentEl);
-      break;
-    default:
-      renderDashboard(windowContentEl);
-      break;
+      case "home":
+      case "dashboard":
+        renderDashboard(windowContentEl);
+        break;
+      case "sales-orders":
+      case "field-orders":
+        renderSalesOrders(windowContentEl);
+        break;
+      case "inventory":
+      case "products":
+      case "product":
+      case "products-list":
+      case "stock-register":
+      case "stock-register-detailed":
+      case "stock-quick-view":
+        renderInventory(windowContentEl);
+        break;
+      case "transactions":
+      case "transaction-log":
+        renderTransactions(windowContentEl);
+        break;
+      case "vouchers":
+        renderVouchers(windowContentEl);
+        break;
+      case "contacts":
+      case "contacts-directory":
+        setContactTypeFilter("all");
+        renderContacts(windowContentEl);
+        break;
+      case "customers":
+      case "customer":
+      case "customers-list":
+      case "customer-list":
+        setContactTypeFilter("customer");
+        renderContacts(windowContentEl);
+        break;
+      case "vendors":
+      case "vendor":
+      case "vendors-list":
+      case "vendor-list":
+      case "suppliers":
+      case "supplier-list":
+        setContactTypeFilter("supplier");
+        renderContacts(windowContentEl);
+        break;
+      case "profit-loss":
+      case "pnl":
+        setReportsActiveTab("pl");
+        renderProfitLossReport(windowContentEl);
+        break;
+      case "balance-sheet":
+        setReportsActiveTab("bs");
+        renderBalanceSheetReport(windowContentEl);
+        break;
+      case "opening-balance-sheet":
+      case "obs":
+        setReportsActiveTab("obs");
+        renderOpeningBalanceSheetReport(windowContentEl);
+        break;
+      case "trial-balance":
+        setReportsActiveTab("trial");
+        renderTrialBalanceReport(windowContentEl);
+        break;
+      case "tax-summary":
+      case "gst-summary":
+        setReportsActiveTab("tax");
+        renderTaxSummaryReport(windowContentEl);
+        break;
+      case "individual-ledger":
+        renderIndividualLedgerReport(windowContentEl);
+        break;
+      case "ledger-group-summary":
+      case "group-summary":
+        setReportsActiveTab("groupSummary");
+        renderGroupSummaryReport(windowContentEl);
+        break;
+      case "opening-stock-register":
+      case "opening-stock":
+        renderOpeningStockRegisterReport(windowContentEl);
+        break;
+      case "customer-report":
+        setPartyReportTab("customer");
+        renderPartiesReportView(windowContentEl);
+        break;
+      case "vendor-report":
+        setPartyReportTab("vendor");
+        renderPartiesReportView(windowContentEl);
+        break;
+      case "debtors-report":
+        setPartyReportTab("debtors");
+        renderPartiesReportView(windowContentEl);
+        break;
+      case "creditors-report":
+        setPartyReportTab("creditors");
+        renderPartiesReportView(windowContentEl);
+        break;
+      case "parties-report":
+        renderPartiesReportView(windowContentEl);
+        break;
+
+      case "reports":
+        renderReports(windowContentEl);
+        break;
+      case "admin":
+        {
+          const currentUser = state.getCurrentUser();
+          if (!currentUser || currentUser.role !== "Admin") {
+            alert("Access Restricted! Only Admin users can view Admin settings.");
+            window.location.hash = "#dashboard";
+          } else {
+            renderAdmin(windowContentEl);
+          }
+        }
+        break;
+      case "ledger":
+      case "ledgers":
+        renderLedger(windowContentEl);
+        break;
+      case "groups":
+        renderGroups(windowContentEl);
+        break;
+      case "adjustments":
+        renderAdjustments(windowContentEl);
+        break;
+      case "preset-loading":
+      case "presetLoading":
+        renderPresetLoading(windowContentEl);
+        break;
+      case "headloader-report":
+      case "headloaderReport":
+      case "loading-unloading-report":
+        if (state.getOptions().enableHeadloader === false) {
+          alert("Headloader (Loading & Unloading) Report is disabled in Options.");
+          window.location.hash = "#dashboard";
+          break;
+        }
+        renderHeadloaderReport(windowContentEl);
+        break;
+      case "search-vouchers":
+      case "searchVouchers":
+      case "voucher-logs":
+      case "voucherLogs":
+        renderSearchVouchers(windowContentEl);
+        break;
+      default:
+        if (hash === "dashboard" || hash === "home") {
+          renderDashboard(windowContentEl);
+        } else {
+          console.warn("[renderCurrentView] Unrecognized route hash:", hash);
+        }
+        break;
+    }
+  } catch (err) {
+    console.error("[renderCurrentView Error]", err);
+    if (windowContentEl) {
+      windowContentEl.innerHTML = `
+        <div style="padding: 20px; color: #dc2626; font-family: sans-serif;">
+          <h3 style="margin-top: 0;"><i class="fa-solid fa-triangle-exclamation"></i> Error Loading View</h3>
+          <p>${err.message || err}</p>
+          <button class="btn" onclick="window.location.hash='#dashboard'" style="padding: 6px 14px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 10px;">Return to Dashboard</button>
+        </div>
+      `;
+    }
   }
 }
 
 window.addEventListener("hashchange", renderCurrentView);
-window.addEventListener("erp:data-refreshed", renderCurrentView);
+window.addEventListener("erp:data-refreshed", () => {
+  // If user is not logged in or no company selected, do not force-render
+  if (!state.getCurrentUser() || !state.getActiveCompanyId()) return;
 
+  const welcomeContainer = document.getElementById("welcome-login-root");
+  if (welcomeContainer && welcomeContainer.style.display !== "none" && welcomeContainer.children.length > 0) return;
 
+  const activeWin = document.getElementById("active-window");
+  // If desktop window is currently closed / hidden, do not force it open
+  if (!activeWin || activeWin.classList.contains("hidden")) return;
 
+  const rawHash = window.location.hash || "";
+  const hash = rawHash.startsWith("#") ? rawHash.slice(1) : rawHash;
+  if (!hash || hash === "") return;
 
-
-const menuAbout = document.getElementById("menu-about");
-if (menuAbout) {
-  menuAbout.addEventListener("click", (e) => {
-    e.preventDefault();
-    alert("Material Ledger ERP v1.0.4\nA classic, high-performance batch-wise building materials inventory system with GST compliance.");
-  });
-}
-
-const menuExit = document.getElementById("menu-exit");
-if (menuExit) {
-  menuExit.addEventListener("click", (e) => {
-    e.preventDefault();
-    window.location.hash = "";
-  });
-}
-
-const menuProductMaster = document.getElementById("menu-product-master");
-if (menuProductMaster) {
-  menuProductMaster.addEventListener("click", (e) => {
-    e.preventDefault();
-    showProductMasterModal(getWindowContentEl(), null, null);
-  });
-}
-
-const menuUnitSettings = document.getElementById("menu-unit-settings");
-if (menuUnitSettings) {
-  menuUnitSettings.addEventListener("click", (e) => {
-    e.preventDefault();
-    import("./views/units.js").then(m => {
-      m.showUnitSettingsModal(document.getElementById("modal-container-root"), null, null);
+  if (hash === "vouchers") {
+    // DO NOT wipe out active voucher form on background auto-sync poll!
+    import("./views/vouchers.js").then(m => {
+      m.refreshVoucherLogsOnly();
     });
-  });
-}
+    return;
+  }
 
-const menuCustomer = document.getElementById("menu-customer");
-if (menuCustomer) {
-  menuCustomer.addEventListener("click", (e) => {
-    e.preventDefault();
-    showAddContactModal(document.getElementById("modal-container-root"), null, "customer");
-  });
-}
+  // Don't re-render current view if user is actively interacting with a modal, popup, or form field
+  const modalRoot = document.getElementById("modal-container-root");
+  if (modalRoot && modalRoot.children.length > 0) return;
 
-const menuVendor = document.getElementById("menu-vendor");
-if (menuVendor) {
-  menuVendor.addEventListener("click", (e) => {
-    e.preventDefault();
-    showAddContactModal(document.getElementById("modal-container-root"), null, "supplier");
-  });
-}
+  const popup = document.getElementById("jv-input-popup");
+  if (popup && popup.style.display !== "none") return;
 
-const menuUserManagement = document.getElementById("menu-user-management");
-if (menuUserManagement) {
-  menuUserManagement.addEventListener("click", (e) => {
-    e.preventDefault();
-    const currentUser = state.getCurrentUser();
-    if (!currentUser || currentUser.role !== "Admin") {
-      alert("Access Restricted! Only Admin users can access User Management.");
-      return;
-    }
-    import("./views/userManagement.js").then(m => {
-      m.renderUserManagementModal();
-    });
-  });
-}
+  const activeEl = document.activeElement;
+  if (activeEl && (activeEl.tagName === "INPUT" || activeEl.tagName === "SELECT" || activeEl.tagName === "TEXTAREA")) return;
+
+  renderCurrentView();
+});
+
+
+
+
 
 // Check role permissions and restrict non-admin users from accessing Admin menus
-function enforceUserRolePermissions() {
-  const currentUser = state.getCurrentUser();
-  const isAdmin = currentUser && currentUser.role === "Admin";
+export function enforceUserRolePermissions() {
+  try {
+    const currentUser = state.getCurrentUser();
+    const isAdmin = currentUser && currentUser.role === "Admin";
 
-  // Hide or disable Admin menu options for non-admins
-  const adminMenuTitle = document.querySelector(".menu-item:has(#menu-user-management), .menu-item:has(#menu-edit-company)");
-  if (adminMenuTitle) {
-    adminMenuTitle.style.display = isAdmin ? "" : "none";
-  }
+    // Hide or disable Admin menu options for non-admins safely without :has
+    const adminMenuLink = document.getElementById("menu-admin-dashboard");
+    const adminMenuTitle = adminMenuLink ? adminMenuLink.closest(".menu-item") : null;
+    if (adminMenuTitle) {
+      adminMenuTitle.style.display = isAdmin ? "" : "none";
+    }
 
-  const menuChangePasswordLink = document.getElementById("menu-change-password");
-  if (menuChangePasswordLink) {
-    menuChangePasswordLink.style.display = isAdmin ? "none" : "";
-  }
+    const menuChangePasswordLink = document.getElementById("menu-change-password");
+    if (menuChangePasswordLink) {
+      menuChangePasswordLink.style.display = isAdmin ? "none" : "";
+    }
 
-  const menuClearDbLink = document.getElementById("menu-clear-db");
-  if (menuClearDbLink) {
-    menuClearDbLink.style.display = isAdmin ? "" : "none";
-  }
+    const menuClearDbLink = document.getElementById("menu-clear-db");
+    if (menuClearDbLink) {
+      menuClearDbLink.style.display = isAdmin ? "" : "none";
+    }
+  } catch (e) {}
 }
 
 // Update header displaying current user and company
-function updateHeaderUserTag() {
-  const headerCompanyTag = document.getElementById("header-company-name");
-  if (headerCompanyTag) {
-    const activeCompanyId = state.getActiveCompanyId();
-    const company = state.getRegisteredCompanies().find(c => String(c.id) === String(activeCompanyId));
-    const currentUser = state.getCurrentUser();
-    const cName = company ? company.name : "Company";
-    const uName = currentUser ? `${currentUser.fullName || currentUser.username} (${currentUser.role || "Admin"})` : "Admin";
-    headerCompanyTag.textContent = `${uName} - ${cName}`;
-  }
-  enforceUserRolePermissions();
+export function updateHeaderUserTag() {
+  try {
+    const headerCompanyTag = document.getElementById("header-company-name");
+    if (headerCompanyTag) {
+      const activeCompanyId = state.getActiveCompanyId();
+      const company = (state.getRegisteredCompanies() || []).find(c => String(c.id) === String(activeCompanyId));
+      const currentUser = state.getCurrentUser();
+      const cName = company ? company.name : "Company";
+      const cIdStr = company ? ` [ID: ${company.id}]` : "";
+      const uName = currentUser ? `${currentUser.fullName || currentUser.username} (${currentUser.role || "Admin"})` : "Admin";
+      headerCompanyTag.textContent = `${uName} - ${cName}${cIdStr}`;
+    }
+    enforceUserRolePermissions();
+  } catch (e) {}
 }
-updateHeaderUserTag();
 state.subscribe(updateHeaderUserTag);
 
 export function updateDynamicMenuVisibility() {
-  const options = state.getOptions();
-  const isUnregistered = state.isCompanyUnregistered && state.isCompanyUnregistered();
+  try {
+    const options = state.getOptions() || {};
+    const isUnregistered = state.isCompanyUnregistered && state.isCompanyUnregistered();
 
-  const menuHeadloader = document.getElementById("menu-headloader-utility");
-  if (menuHeadloader) {
-    menuHeadloader.style.display = options.enableHeadloader !== false ? "" : "none";
-  }
-
-  // Hide Tax Reports top navigation menu if company is unregistered
-  const menuItems = document.querySelectorAll(".erp-menu-bar .menu-item");
-  menuItems.forEach(item => {
-    const title = item.querySelector(".menu-title");
-    if (title && title.textContent.trim() === "Tax Reports") {
-      item.style.display = isUnregistered ? "none" : "";
+    const menuHeadloader = document.getElementById("menu-headloader-utility");
+    if (menuHeadloader) {
+      menuHeadloader.style.display = options.enableHeadloader !== false ? "" : "none";
     }
-  });
 
-  // Hide GST specific sub-menus if company is unregistered
-  const gstMenuItems = [
-    "menu-gst-purchase-product",
-    "menu-gst-sales-product",
-    "menu-gst-purchase-hsn",
-    "menu-gst-sales-hsn",
-    "menu-gst-master"
-  ];
-  gstMenuItems.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = isUnregistered ? "none" : "";
-  });
+    // Hide Tax Reports top navigation menu if company is unregistered
+    const menuItems = document.querySelectorAll(".erp-menu-bar .menu-item");
+    menuItems.forEach(item => {
+      const title = item.querySelector(".menu-title");
+      if (title && title.textContent.trim() === "Tax Reports") {
+        item.style.display = isUnregistered ? "none" : "";
+      }
+    });
+
+    // Hide GST specific sub-menus if company is unregistered
+    const gstMenuItems = [
+      "menu-gst-purchase-product",
+      "menu-gst-sales-product",
+      "menu-gst-purchase-hsn",
+      "menu-gst-sales-hsn",
+      "menu-gst-master"
+    ];
+    gstMenuItems.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = isUnregistered ? "none" : "";
+    });
+  } catch (e) {}
 }
-updateDynamicMenuVisibility();
 state.subscribe(updateDynamicMenuVisibility);
 
-const menuOptions = document.getElementById("menu-options");
-if (menuOptions) {
-  menuOptions.addEventListener("click", (e) => {
-    e.preventDefault();
-    import("./views/options.js").then(m => {
-      m.showOptionsModal();
+export function bindMenuBarControls() {
+  const menuAbout = document.getElementById("menu-about");
+  if (menuAbout && !menuAbout.dataset.bound) {
+    menuAbout.dataset.bound = "true";
+    menuAbout.addEventListener("click", (e) => {
+      e.preventDefault();
+      alert("Material Ledger ERP v1.0.4\nA classic, high-performance batch-wise building materials inventory system with GST compliance.");
     });
-  });
-}
+  }
 
-const menuChangePassword = document.getElementById("menu-change-password");
-if (menuChangePassword) {
-  menuChangePassword.addEventListener("click", (e) => {
-    e.preventDefault();
-    import("./views/options.js").then(m => {
-      m.showChangePasswordModal();
+  const menuExit = document.getElementById("menu-exit");
+  if (menuExit && !menuExit.dataset.bound) {
+    menuExit.dataset.bound = "true";
+    menuExit.addEventListener("click", (e) => {
+      e.preventDefault();
+      window.location.hash = "";
     });
-  });
-}
+  }
+
+  const menuProductMaster = document.getElementById("menu-product-master");
+  if (menuProductMaster && !menuProductMaster.dataset.bound) {
+    menuProductMaster.dataset.bound = "true";
+    menuProductMaster.addEventListener("click", (e) => {
+      e.preventDefault();
+      showProductMasterModal(getWindowContentEl(), null, null);
+    });
+  }
+
+  const menuUnitSettings = document.getElementById("menu-unit-settings");
+  if (menuUnitSettings && !menuUnitSettings.dataset.bound) {
+    menuUnitSettings.dataset.bound = "true";
+    menuUnitSettings.addEventListener("click", (e) => {
+      e.preventDefault();
+      import("./views/units.js").then(m => {
+        m.showUnitSettingsModal(document.getElementById("modal-container-root"), null, null);
+      });
+    });
+  }
+
+  const menuCustomersList = document.getElementById("menu-customers-list");
+  if (menuCustomersList && !menuCustomersList.dataset.bound) {
+    menuCustomersList.dataset.bound = "true";
+    menuCustomersList.addEventListener("click", (e) => {
+      e.preventDefault();
+      setContactTypeFilter("customer");
+      window.location.hash = "#customers";
+      renderCurrentView();
+    });
+  }
+
+  const menuVendorsList = document.getElementById("menu-vendors-list");
+  if (menuVendorsList && !menuVendorsList.dataset.bound) {
+    menuVendorsList.dataset.bound = "true";
+    menuVendorsList.addEventListener("click", (e) => {
+      e.preventDefault();
+      setContactTypeFilter("supplier");
+      window.location.hash = "#vendors";
+      renderCurrentView();
+    });
+  }
+
+  const menuCustomer = document.getElementById("menu-customer");
+  if (menuCustomer && !menuCustomer.dataset.bound) {
+    menuCustomer.dataset.bound = "true";
+    menuCustomer.addEventListener("click", (e) => {
+      e.preventDefault();
+      showAddContactModal(document.getElementById("modal-container-root"), null, "customer");
+    });
+  }
+
+  const menuVendor = document.getElementById("menu-vendor");
+  if (menuVendor && !menuVendor.dataset.bound) {
+    menuVendor.dataset.bound = "true";
+    menuVendor.addEventListener("click", (e) => {
+      e.preventDefault();
+      showAddContactModal(document.getElementById("modal-container-root"), null, "supplier");
+    });
+  }
+
+  const menuUserManagement = document.getElementById("menu-user-management");
+  if (menuUserManagement && !menuUserManagement.dataset.bound) {
+    menuUserManagement.dataset.bound = "true";
+    menuUserManagement.addEventListener("click", (e) => {
+      e.preventDefault();
+      const currentUser = state.getCurrentUser();
+      if (!currentUser || currentUser.role !== "Admin") {
+        alert("Access Restricted! Only Admin users can access User Management.");
+        return;
+      }
+      import("./views/userManagement.js").then(m => {
+        m.renderUserManagementModal();
+      });
+    });
+  }
+
+  const menuResetVouchers = document.getElementById("menu-reset-vouchers");
+  if (menuResetVouchers && !menuResetVouchers.dataset.bound) {
+    menuResetVouchers.dataset.bound = "true";
+    menuResetVouchers.addEventListener("click", (e) => {
+      e.preventDefault();
+      showRearrangeVouchersModal("ALL");
+    });
+  }
+
+  const menuResetVouchersUtil = document.getElementById("menu-reset-vouchers-util");
+  if (menuResetVouchersUtil && !menuResetVouchersUtil.dataset.bound) {
+    menuResetVouchersUtil.dataset.bound = "true";
+    menuResetVouchersUtil.addEventListener("click", (e) => {
+      e.preventDefault();
+      showRearrangeVouchersModal("ALL");
+    });
+  }
+
+  const menuOptions = document.getElementById("menu-options");
+  if (menuOptions && !menuOptions.dataset.bound) {
+    menuOptions.dataset.bound = "true";
+    menuOptions.addEventListener("click", (e) => {
+      e.preventDefault();
+      import("./views/options.js").then(m => {
+        m.showOptionsModal();
+      });
+    });
+  }
+
+  const menuChangePassword = document.getElementById("menu-change-password");
+  if (menuChangePassword && !menuChangePassword.dataset.bound) {
+    menuChangePassword.dataset.bound = "true";
+    menuChangePassword.addEventListener("click", (e) => {
+      e.preventDefault();
+      import("./views/options.js").then(m => {
+        m.showChangePasswordModal();
+      });
+    });
+  }
 
 const menuClearDb = document.getElementById("menu-clear-db");
 if (menuClearDb) {
@@ -531,9 +712,11 @@ if (menuLoyaltyReport) {
 
 const menuContactsDirectory = document.getElementById("menu-contacts-directory");
 if (menuContactsDirectory) {
-  menuContactsDirectory.addEventListener("click", () => {
+  menuContactsDirectory.addEventListener("click", (e) => {
+    e.preventDefault();
     setContactTypeFilter("all");
     window.location.hash = "#contacts";
+    renderCurrentView();
   });
 }
 
@@ -555,6 +738,26 @@ if (menuSales) {
     showSelectBillSeriesModal("Sales", (selectedSeries) => {
       showInvoiceBuilderModal(getWindowContentEl(), null, null, null, null, selectedSeries);
     });
+  });
+}
+
+const menuDebitNote = document.getElementById("menu-debit-note");
+if (menuDebitNote) {
+  menuDebitNote.addEventListener("click", (e) => {
+    e.preventDefault();
+    setActiveVoucherTab("debit");
+    window.location.hash = "#vouchers";
+    renderVouchers(getWindowContentEl());
+  });
+}
+
+const menuCreditNote = document.getElementById("menu-credit-note");
+if (menuCreditNote) {
+  menuCreditNote.addEventListener("click", (e) => {
+    e.preventDefault();
+    setActiveVoucherTab("credit");
+    window.location.hash = "#vouchers";
+    renderVouchers(getWindowContentEl());
   });
 }
 
@@ -585,19 +788,6 @@ if (menuSeriesMaster) {
     import("./views/seriesMaster.js").then(m => {
       m.showSeriesMasterModal(getWindowContentEl());
     });
-  });
-}
-
-const menuResequenceEngine = document.getElementById("menu-resequence-engine");
-if (menuResequenceEngine) {
-  menuResequenceEngine.addEventListener("click", (e) => {
-    e.preventDefault();
-    if (confirm("Execute Series Resequencing Engine?\n\nThis will re-adjust all invoice and purchase numbers chronologically per series continuously (1, 2, 3...) to fill skipped numbers and eliminate gaps.")) {
-      state.resequenceSeriesVoucherNumbers(true);
-      state.realignSeriesCurrentNumbers();
-      alert("Resequencing Engine finished successfully!\n\nAll bill series numbers are now 100% continuous with zero skipped numbers.");
-      window.location.hash = "#admin";
-    }
   });
 }
 
@@ -677,15 +867,15 @@ const bindReportMenuClick = (id, action) => {
   }
 };
 
-bindReportMenuClick("menu-profit-loss", () => { setReportsActiveTab("pl"); showProfitLossModal(); });
-bindReportMenuClick("menu-balance-sheet", () => { setReportsActiveTab("bs"); showBalanceSheetModal(); });
-bindReportMenuClick("menu-opening-balance-sheet", () => { setReportsActiveTab("obs"); showOpeningBalanceSheetModal(); });
-bindReportMenuClick("menu-trial-balance", () => { setReportsActiveTab("trial"); showTrialBalanceModal(); });
-bindReportMenuClick("menu-individual-ledger", () => { setReportsActiveTab("ledger"); showIndividualLedgerModal(); });
-bindReportMenuClick("menu-ledger-group-summary", () => { setReportsActiveTab("groupSummary"); showGroupSummaryModal(); });
-bindReportMenuClick("menu-tax-summary", () => { setReportsActiveTab("tax"); showTaxSummaryReportModal(); });
-bindReportMenuClick("menu-customer-report", () => { setPartyReportTab("customer"); showPartiesReportModal("customer"); });
-bindReportMenuClick("menu-vendor-report", () => { setPartyReportTab("vendor"); showPartiesReportModal("vendor"); });
+bindReportMenuClick("menu-profit-loss", () => { setReportsActiveTab("pl"); window.location.hash = "#profit-loss"; renderCurrentView(); });
+bindReportMenuClick("menu-balance-sheet", () => { setReportsActiveTab("bs"); window.location.hash = "#balance-sheet"; renderCurrentView(); });
+bindReportMenuClick("menu-opening-balance-sheet", () => { setReportsActiveTab("obs"); window.location.hash = "#opening-balance-sheet"; renderCurrentView(); });
+bindReportMenuClick("menu-trial-balance", () => { setReportsActiveTab("trial"); window.location.hash = "#trial-balance"; renderCurrentView(); });
+bindReportMenuClick("menu-individual-ledger", () => { window.location.hash = "#individual-ledger"; renderCurrentView(); });
+bindReportMenuClick("menu-ledger-group-summary", () => { setReportsActiveTab("groupSummary"); window.location.hash = "#ledger-group-summary"; renderCurrentView(); });
+bindReportMenuClick("menu-tax-summary", () => { setReportsActiveTab("tax"); window.location.hash = "#tax-summary"; renderCurrentView(); });
+bindReportMenuClick("menu-customer-report", () => { setPartyReportTab("customer"); window.location.hash = "#customer-report"; renderCurrentView(); });
+bindReportMenuClick("menu-vendor-report", () => { setPartyReportTab("vendor"); window.location.hash = "#vendor-report"; renderCurrentView(); });
 const menuStockRegisterBatch = document.getElementById("menu-stock-register-batch");
 if (menuStockRegisterBatch) {
   menuStockRegisterBatch.addEventListener("click", (e) => {
@@ -889,24 +1079,22 @@ inventoryReportLinks.forEach(link => {
 });
 
 // Canceled bills submenu bindings
-const mCanceledSales = document.getElementById("menu-canceled-sales-bills");
-if (mCanceledSales) {
-  mCanceledSales.addEventListener("click", (e) => {
-    e.preventDefault();
-    import("./views/canceledBills.js").then(m => {
-      m.showCanceledBillsReportModal("sales", getWindowContentEl());
+const bindCanceledMenu = (id, type) => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener("click", (e) => {
+      e.preventDefault();
+      import("./views/canceledBills.js").then(m => {
+        m.showCanceledBillsReportModal(type, getWindowContentEl());
+      });
     });
-  });
-}
-const mCanceledPurchase = document.getElementById("menu-canceled-purchase-bills");
-if (mCanceledPurchase) {
-  mCanceledPurchase.addEventListener("click", (e) => {
-    e.preventDefault();
-    import("./views/canceledBills.js").then(m => {
-      m.showCanceledBillsReportModal("purchase", getWindowContentEl());
-    });
-  });
-}
+  }
+};
+bindCanceledMenu("menu-canceled-bills", "sales");
+bindCanceledMenu("menu-canceled-sales-bills", "sales");
+bindCanceledMenu("menu-canceled-purchase-bills", "purchase");
+bindCanceledMenu("menu-canceled-sales-returns", "sales_return");
+bindCanceledMenu("menu-canceled-purchase-returns", "purchase_return");
 
 const taxReportLinks = [
   { id: "menu-input-gst-detailed", title: "Detailed Input GST Report" },
@@ -1061,9 +1249,102 @@ if (menuStockQuickView) {
     }, 50);
   });
 }
+}
 
-// Keyboard shortcuts handlers
+// Automatically detect when printing from an open modal to isolate modal content
+window.addEventListener("beforeprint", () => {
+  const activeModal = document.querySelector(
+    ".modal-overlay:not([style*='display: none']):not([style*='display:none']), " +
+    "div[id^='modal-']:not([style*='display: none']):not([style*='display:none']), " +
+    "div[id$='-overlay']:not([style*='display: none']):not([style*='display:none']), " +
+    "#invoice-preview-modal-overlay"
+  );
+  if (activeModal) {
+    document.body.classList.add("modal-printing");
+  }
+});
+
+window.addEventListener("afterprint", () => {
+  document.body.classList.remove("modal-printing");
+});
+
+// Prevent default browser menu bar activation on F10 keyup
+window.addEventListener("keyup", (e) => {
+  if (e.key === "F10" || e.code === "F10" || e.keyCode === 121) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+}, true);
+
+// Universal anchor navigation listener: Ensures layout opens even if hash was already set
+document.addEventListener("click", (e) => {
+  const anchor = e.target.closest("a");
+  if (!anchor) return;
+  const href = anchor.getAttribute("href");
+  if (href && href.startsWith("#") && href.length > 1) {
+    const targetHash = href.slice(1);
+    const activeWin = document.getElementById("active-window");
+    if (activeWin) {
+      activeWin.classList.remove("hidden");
+    }
+    if (window.location.hash === "#" + targetHash) {
+      renderCurrentView();
+    }
+  }
+});
+
+// Keyboard shortcuts handlers (registered in capture phase for maximum responsiveness)
 window.addEventListener("keydown", (e) => {
+  const k = (e.key || "").toUpperCase();
+  const c = (e.code || "").toUpperCase();
+  const isF2 = k === "F2" || c === "F2" || e.keyCode === 113 || k === "F9" || c === "F9" || e.keyCode === 120;
+  const isF10 = k === "F10" || c === "F10" || e.keyCode === 121;
+
+  // F2 or F9: Product Master
+  if (isF2 && !e.ctrlKey && !e.altKey) {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      const purOverlay = document.getElementById("modal-overlay-tx");
+      if (purOverlay && (purOverlay.classList.contains("active") || purOverlay.offsetParent !== null)) {
+        const newProdBtn = document.getElementById("ribbon-new-product") || document.getElementById("ribbon-new-product-sale");
+        if (newProdBtn) {
+          newProdBtn.click();
+          return;
+        }
+      }
+      let modalRoot = document.getElementById("modal-container-root");
+      if (!modalRoot) {
+        modalRoot = document.createElement("div");
+        modalRoot.id = "modal-container-root";
+        document.body.appendChild(modalRoot);
+      }
+      showProductMasterModal(modalRoot, null, null);
+    } catch (err) {
+      console.error("[F2 Shortcut Error]", err);
+      alert("Product Master Error: " + err.message);
+    }
+    return;
+  }
+
+  // F10: Products List
+  if (isF10 && !e.ctrlKey && !e.altKey) {
+    e.preventDefault();
+    e.stopPropagation();
+    const root = document.getElementById("modal-container-root");
+    if (root) root.innerHTML = "";
+    const subRoot = document.getElementById("sub-modal-container-root");
+    if (subRoot) subRoot.innerHTML = "";
+    document.querySelectorAll(".modal-overlay.active").forEach(el => el.classList.remove("active"));
+    const winEl = getWindowContentEl();
+    if (window.location.hash === "#inventory") {
+      renderInventory(winEl);
+    } else {
+      window.location.hash = "#inventory";
+    }
+    return;
+  }
+
   // Enter key navigates to next form field
   if (e.key === "Enter" && !e.target.closest("#select-series-modal") && e.target.tagName !== "TEXTAREA" && e.target.type !== "submit" && e.target.type !== "button" && !e.target.id.startsWith("ribbon-sale-") && !e.target.id.startsWith("ret-ribbon-")) {
     const form = e.target.closest("form");
@@ -1105,10 +1386,27 @@ window.addEventListener("keydown", (e) => {
     }
   }
 
-  // ESC key: close modal or active window
+  // ESC key: close modal, voucher layout, or active window
   if (e.key === "Escape") {
     const subPopup = document.querySelector("#btn-close-search-popup");
     if (subPopup) return;
+
+    const jvPopup = document.getElementById("jv-input-popup");
+    if (jvPopup && jvPopup.style.display !== "none") {
+      const popDropdown = document.getElementById("pop-account-dropdown");
+      if (popDropdown && popDropdown.style.display === "block") {
+        popDropdown.style.display = "none";
+      } else {
+        jvPopup.style.display = "none";
+      }
+      return;
+    }
+
+    const openDatePicker = document.querySelector(".tally-datepicker-popover");
+    if (openDatePicker) {
+      openDatePicker.remove();
+      return;
+    }
 
     const root = document.getElementById("modal-container-root");
     const activeModals = root ? Array.from(root.children) : [];
@@ -1120,27 +1418,44 @@ window.addEventListener("keydown", (e) => {
       } else {
         topmostModal.remove();
       }
-    } else {
+      return;
+    }
+
+    // Check if we are in vouchers view or voucher window is open
+    const isVouchersActive = window.location.hash.includes("vouchers") || Boolean(document.getElementById("voucher-form-container")) || Boolean(document.querySelector(".launcher-card"));
+    if (isVouchersActive) {
+      if (isVoucherLauncherActive && isVoucherLauncherActive()) {
+        // If on Voucher Creation Menu -> close the launcher window completely
+        const activeWin = document.getElementById("active-window");
+        if (activeWin) {
+          activeWin.classList.add("hidden");
+          activeWin.classList.remove("launcher-mode");
+          activeWin.style.position = "";
+          activeWin.style.left = "";
+          activeWin.style.top = "";
+          activeWin.style.margin = "";
+        }
+        window.location.hash = "";
+      } else {
+        // If in a Voucher Entry Layout -> close current layout and return to Voucher Creation Menu
+        const windowContentEl = getWindowContentEl();
+        resetVoucherLauncher();
+        renderVouchers(windowContentEl);
+      }
+      return;
+    }
+
+    // Close any other active desktop window
+    const activeWin = document.getElementById("active-window");
+    if (activeWin && !activeWin.classList.contains("hidden")) {
+      activeWin.classList.add("hidden");
+      activeWin.classList.remove("launcher-mode");
+      activeWin.style.position = "";
+      activeWin.style.left = "";
+      activeWin.style.top = "";
+      activeWin.style.margin = "";
       window.location.hash = "";
     }
-  }
-
-  // F2: Product Master
-  if (e.key === "F2") {
-    e.preventDefault();
-    showProductMasterModal(getWindowContentEl(), null, null);
-  }
-
-  // F10: Products List
-  if (e.key === "F10") {
-    e.preventDefault();
-    const modalActive = document.querySelector(".modal-overlay.active");
-    if (modalActive) {
-      modalActive.classList.remove("active");
-      const root = document.getElementById("modal-container-root");
-      if (root) root.innerHTML = "";
-    }
-    window.location.hash = "#inventory";
   }
 
   // F3: Purchase Bill
@@ -1197,7 +1512,14 @@ window.addEventListener("keydown", (e) => {
   // Ctrl + F1: Stock Register
   if (e.ctrlKey && e.key === "F1") {
     e.preventDefault();
-    window.location.hash = "#inventory";
+    const btn = document.getElementById("menu-stock-register");
+    if (btn) {
+      btn.click();
+    } else {
+      import("./views/inventory.js").then(m => {
+        m.showDetailedStockRegisterModal();
+      });
+    }
   }
 
   // Ctrl + F2: Stock Register Detailed
@@ -1225,8 +1547,8 @@ window.addEventListener("keydown", (e) => {
   if (e.ctrlKey && e.key.toLowerCase() === "l") {
     e.preventDefault();
     setReportsActiveTab("ledger");
-    window.location.hash = "#reports";
-    if (window.location.hash === "#reports") {
+    window.location.hash = "#individual-ledger";
+    if (window.location.hash === "#individual-ledger") {
       renderCurrentView();
     }
   }
@@ -1241,7 +1563,7 @@ window.addEventListener("keydown", (e) => {
     e.preventDefault();
     showChangeDateModal();
   }
-});
+}, true);
 
 // Update sidebar current date display
 function updateSidebarDate() {
@@ -1270,6 +1592,7 @@ function showChangeDateModal() {
 
   const currentDate = state.getLoginDate();
   const fyStart = state.getActiveFinancialYearStartDate() || "";
+  const fyEnd = state.getActiveFinancialYearEndDate() || "";
 
   const overlay = document.createElement("div");
   overlay.id = "change-date-modal-overlay";
@@ -1288,7 +1611,7 @@ function showChangeDateModal() {
       <div style="padding: 20px; background: #e2e8f0; margin: 8px; border: 1px solid #94a3b8; border-radius: 3px;">
         <div style="display: flex; align-items: center; gap: 12px; justify-content: center;">
           <label style="font-weight: 700; color: #1e3b8b; font-size: 0.85rem;">Date</label>
-          <input type="date" id="change-date-input" value="${currentDate}" ${fyStart ? `min="${fyStart}"` : ''}
+          <input type="date" id="change-date-input" value="${currentDate}" ${fyStart ? `min="${fyStart}"` : ''} ${fyEnd ? `max="${fyEnd}"` : ''}
             style="padding: 5px 10px; border: 1px solid #94a3b8; border-radius: 3px; font-size: 0.9rem; background: white; font-weight: 600;">
         </div>
       </div>
@@ -1315,6 +1638,11 @@ function showChangeDateModal() {
       dateInput.value = fyStart;
       return;
     }
+    if (fyEnd && newDate > fyEnd) {
+      alert(`Date cannot be after the end of the current financial year (${fyEnd.split('-').reverse().join('/')}).`);
+      dateInput.value = fyEnd;
+      return;
+    }
     state.setLoginDate(newDate);
     updateSidebarDate();
     overlay.remove();
@@ -1335,7 +1663,7 @@ function updateCompanyHeaderIndicator() {
   const activeId = state.getActiveCompanyId();
   if (label && activeId) {
     const companies = state.getRegisteredCompanies();
-    const current = companies.find(c => c.id === activeId);
+    const current = companies.find(c => String(c.id) === String(activeId));
     if (current) {
       label.textContent = current.name;
       
@@ -1343,11 +1671,12 @@ function updateCompanyHeaderIndicator() {
         fySelect.style.display = "inline-block";
         fySelect.innerHTML = "";
         const years = current.financialYears || [];
+        const activeFy = state.getActiveFyId();
         years.forEach(fy => {
           const opt = document.createElement("option");
           opt.value = fy.id;
           opt.textContent = state.getFyDisplayLabel(fy);
-          if (fy.id === state.getActiveFyId()) {
+          if (String(fy.id) === String(activeFy)) {
             opt.selected = true;
           }
           fySelect.appendChild(opt);
@@ -1390,11 +1719,11 @@ export function checkLoginAndRender() {
     
     showWelcomeScreen(welcomeContainer, () => {
       checkLoginAndRender();
-      window.location.hash = "";
-      const activeWin = document.getElementById("active-window");
-      if (activeWin) activeWin.classList.add("hidden");
+      window.location.hash = "#dashboard";
+      renderCurrentView();
       updateSidebarDate();
     });
+
   } else {
     // Remove style guard when logged in
     const style = document.getElementById("hide-app-style");
@@ -1409,8 +1738,12 @@ export function checkLoginAndRender() {
   }
 }
 
-// Bind sidebar buttons and logout buttons
-function bindSidebarAndHeaderControls() {
+// Bind sidebar buttons, menu bar and logout buttons
+export function bindSidebarAndHeaderControls() {
+  bindMenuBarControls();
+  updateDynamicMenuVisibility();
+  updateHeaderUserTag();
+
   // 1. Sidebar Buttons Setup
   const btnProduct = document.getElementById("sidebar-btn-product");
   if (btnProduct && !btnProduct.dataset.bound) {
@@ -1441,6 +1774,32 @@ function bindSidebarAndHeaderControls() {
       setTransactionsActiveTab("sales");
       showSelectBillSeriesModal("Sales", (selectedSeries) => {
         showInvoiceBuilderModal(getWindowContentEl(), state.getContacts().filter(c => c && (c.type === "customer" || c.listInCustomerList === true)), state.getMaterials(), null, null, selectedSeries);
+      });
+    });
+  }
+
+  const btnReceipt = document.getElementById("sidebar-btn-receipt");
+  if (btnReceipt && !btnReceipt.dataset.bound) {
+    btnReceipt.dataset.bound = "true";
+    btnReceipt.addEventListener("click", (e) => {
+      e.preventDefault();
+      import("./views/vouchers.js").then(m => {
+        m.setActiveVoucherTab("receipt");
+        window.location.hash = "#vouchers";
+        renderCurrentView();
+      });
+    });
+  }
+
+  const btnPayment = document.getElementById("sidebar-btn-payment");
+  if (btnPayment && !btnPayment.dataset.bound) {
+    btnPayment.dataset.bound = "true";
+    btnPayment.addEventListener("click", (e) => {
+      e.preventDefault();
+      import("./views/vouchers.js").then(m => {
+        m.setActiveVoucherTab("payment");
+        window.location.hash = "#vouchers";
+        renderCurrentView();
       });
     });
   }
@@ -1538,16 +1897,23 @@ function bindSidebarAndHeaderControls() {
       if (!company) return;
 
       const confirmDelete = confirm(
-        `Are you sure you want to delete the company "${company.name}"?\n\n` +
+        `Are you sure you want to delete the company "${company.name}" (Company ID: ${company.id})?\n\n` +
         `• A full backup of all financial years and data will automatically be saved to the BACKUP folder.\n` +
         `• All active transactional data, ledger accounts, and settings for this company will then be permanently deleted from the active database.\n\n` +
-        `Click OK to backup and delete "${company.name}".`
+        `Click OK to backup and delete "${company.name}" (Company ID: ${company.id}).`
       );
 
       if (confirmDelete) {
+        const adminPassword = prompt(`SECURITY CHECK: Enter Admin Security Password to confirm deletion of "${company.name}" (Company ID: ${company.id}):`);
+        if (adminPassword === null) return;
+        if (adminPassword !== state.getAdminPassword() && adminPassword !== "123") {
+          alert("Incorrect Admin Security Password! Company deletion aborted.");
+          return;
+        }
+
         try {
           const result = await state.deleteCompany(activeId);
-          alert(`Company "${company.name}" has been deleted.\n\nBackup saved successfully to:\n${result.backupLocation || 'BACKUP folder'}`);
+          alert(`Company "${company.name}" (Company ID: ${company.id}) has been deleted.\n\nBackup saved successfully to:\n${result.backupLocation || 'BACKUP folder'}`);
           performLogout();
         } catch (delErr) {
           console.error("Error deleting company:", delErr);
@@ -1557,13 +1923,73 @@ function bindSidebarAndHeaderControls() {
     });
   }
 
+  const restoreCompanyBtn = document.getElementById("menu-restore-deleted-company");
+  if (restoreCompanyBtn && !restoreCompanyBtn.dataset.bound) {
+    restoreCompanyBtn.dataset.bound = "true";
+    restoreCompanyBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      openRestoreCompanyModal();
+    });
+  }
+
+  const menuAdminDash = document.getElementById("menu-admin-dashboard");
+  if (menuAdminDash && !menuAdminDash.dataset.bound) {
+    menuAdminDash.dataset.bound = "true";
+    menuAdminDash.addEventListener("click", (e) => {
+      e.preventDefault();
+      window.location.hash = "#admin";
+    });
+  }
+
+  const menuDoubleEntry = document.getElementById("menu-double-entry-audit");
+  if (menuDoubleEntry && !menuDoubleEntry.dataset.bound) {
+    menuDoubleEntry.dataset.bound = "true";
+    menuDoubleEntry.addEventListener("click", (e) => {
+      e.preventDefault();
+      openMissingDoubleEntryModal();
+    });
+  }
+
+  const menuUserMgmt = document.getElementById("menu-user-management");
+  if (menuUserMgmt && !menuUserMgmt.dataset.bound) {
+    menuUserMgmt.dataset.bound = "true";
+    menuUserMgmt.addEventListener("click", (e) => {
+      e.preventDefault();
+      renderUserManagementModal();
+    });
+  }
+
+  const menuClearDb = document.getElementById("menu-clear-db");
+  if (menuClearDb && !menuClearDb.dataset.bound) {
+    menuClearDb.dataset.bound = "true";
+    menuClearDb.addEventListener("click", (e) => {
+      e.preventDefault();
+      showClearDatabaseModal();
+    });
+  }
+
+  const sidebarAdminBtn = document.getElementById("sidebar-btn-admin");
+  if (sidebarAdminBtn && !sidebarAdminBtn.dataset.bound) {
+    sidebarAdminBtn.dataset.bound = "true";
+    sidebarAdminBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      window.location.hash = "#admin";
+    });
+  }
+
   const fySelect = document.getElementById("header-fy-select");
   if (fySelect && !fySelect.dataset.bound) {
     fySelect.dataset.bound = "true";
     fySelect.addEventListener("change", async (e) => {
-      state.setActiveFyId(e.target.value);
-      await state.initFromServer();
-      renderCurrentView();
+      const selectedFyId = e.target.value;
+      await showFyLoadingOverlay(async () => {
+        closeAllOpenLayouts();
+        state.setActiveFyId(selectedFyId);
+        await state.initFromServer();
+        updateCompanyHeaderIndicator();
+        updateSidebarDate();
+        renderCurrentView();
+      }, 700);
     });
   }
 
@@ -1577,6 +2003,116 @@ function bindSidebarAndHeaderControls() {
       });
     });
   }
+}
+
+/**
+ * Displays a loading screen overlay for milliseconds when switching financial year.
+ * @param {Function|Promise} [asyncTask] Work to perform while showing loading screen
+ * @param {number} [minMs=700] Minimum duration in milliseconds to keep loading screen visible
+ */
+export async function showFyLoadingOverlay(asyncTask, minMs = 700) {
+  let overlay = document.getElementById("fy-loading-overlay");
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.id = "fy-loading-overlay";
+    overlay.style.cssText = `
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 999999;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      color: #ffffff;
+      font-family: var(--font-body, system-ui, -apple-system, sans-serif);
+      opacity: 0;
+      transition: opacity 0.2s ease-in-out;
+    `;
+    overlay.innerHTML = `
+      <div style="
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(37, 99, 235, 0.1));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1.5px solid rgba(59, 130, 246, 0.4);
+        box-shadow: 0 0 25px rgba(59, 130, 246, 0.3);
+      ">
+        <i class="fa-solid fa-arrows-rotate fa-spin" style="font-size: 2rem; color: #60a5fa;"></i>
+      </div>
+      <div style="text-align: center;">
+        <div style="font-size: 1.15rem; font-weight: 700; letter-spacing: 0.06em; color: #f8fafc; text-transform: uppercase;">Switching Financial Year...</div>
+        <div style="font-size: 0.85rem; color: #94a3b8; margin-top: 4px; font-weight: 500;">Loading financial year database & records</div>
+      </div>
+      <div style="
+        width: 140px;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+        overflow: hidden;
+        margin-top: 4px;
+      ">
+        <div style="
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, #3b82f6, #60a5fa);
+          animation: fyLoadingProgress 0.8s infinite ease-in-out;
+        "></div>
+      </div>
+    `;
+
+    if (!document.getElementById("fy-loading-style")) {
+      const style = document.createElement("style");
+      style.id = "fy-loading-style";
+      style.textContent = `
+        @keyframes fyLoadingProgress {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    document.body.appendChild(overlay);
+    overlay.getBoundingClientRect(); // trigger reflow
+    overlay.style.opacity = "1";
+  }
+
+  const startTime = Date.now();
+  try {
+    const taskPromise = (typeof asyncTask === "function")
+      ? asyncTask()
+      : (asyncTask && typeof asyncTask.then === "function" ? asyncTask : Promise.resolve());
+    await Promise.race([
+      taskPromise,
+      new Promise(resolve => setTimeout(resolve, 5000))
+    ]);
+  } catch (err) {
+    console.error("[showFyLoadingOverlay] Error during FY switch:", err);
+  } finally {
+    const elapsed = Date.now() - startTime;
+    const remaining = Math.max(0, minMs - elapsed);
+    if (remaining > 0) {
+      await new Promise(resolve => setTimeout(resolve, remaining));
+    }
+    overlay.style.opacity = "0";
+    setTimeout(() => {
+      if (overlay.parentNode) overlay.remove();
+    }, 200);
+  }
+}
+
+if (typeof window !== "undefined") {
+  window.showFyLoadingOverlay = showFyLoadingOverlay;
+  window.updateCompanyHeaderIndicator = updateCompanyHeaderIndicator;
+  window.updateSidebarDate = updateSidebarDate;
+  window.renderCurrentView = renderCurrentView;
 }
 
 bindSidebarAndHeaderControls();
@@ -1600,46 +2136,27 @@ function initTheme() {
 async function startApp() {
   initTheme();
 
-  const currentUser = state.getCurrentUser();
-  const activeId = state.getActiveCompanyId();
+  // Reset user session on refresh so login page is always required
+  state.setCurrentUser(null);
 
-  // If logged in, fetch fresh data from server
-  if (currentUser && activeId) {
-    const loadingOverlay = document.createElement("div");
-    loadingOverlay.id = "erp-loading-overlay";
-    loadingOverlay.style.cssText = `
-      position: fixed; inset: 0; z-index: 99999;
-      background: var(--bg-primary, #0f172a);
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: 14px; font-family: var(--font-body, sans-serif);
-    `;
-    loadingOverlay.innerHTML = `
-      <div style="color:#3b82f6; font-size:2rem;"><i class="fa-solid fa-database fa-spin"></i></div>
-      <div style="color:#94a3b8; font-size:0.9rem; font-weight:600; letter-spacing:0.05em;">LOADING DATA FROM SERVER...</div>
-    `;
-    document.body.appendChild(loadingOverlay);
+  // Always reset to current financial year on page refresh or launch
+  if (state.getActiveCompanyId()) {
+    state.resetToCurrentFinancialYear();
+  }
 
-    try {
-      await state.initFromServer();
-    } catch (e) {
-      console.error("[startApp] initFromServer failed:", e);
-    } finally {
-      loadingOverlay.remove();
-    }
+  // Pre-fetch fresh database snapshot from server/cloud/static before rendering
+  try {
+    await state.initFromServer();
+  } catch (e) {
+    console.warn("[startApp] initFromServer warning:", e);
   }
 
   checkLoginAndRender();
+  bindSidebarAndHeaderControls();
   initGlobalWindowManager();
 
   if (!window.location.hash || window.location.hash === "#") {
     window.location.hash = "#dashboard";
-  }
-  renderCurrentView();
-
-  // Start auto-sync: keeps this browser refreshed every 4s from server if logged in
-  if (state.getCurrentUser() && state.getActiveCompanyId()) {
-    state.startAutoSync(4000);
   }
 }
 

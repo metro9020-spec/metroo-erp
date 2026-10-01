@@ -14,22 +14,42 @@ export function setContactTypeFilter(type) {
   currentContactPage = 1;
 }
 
+export function isCustomer(c) {
+  if (!c) return false;
+  if (c.listInCustomerList === true) return true;
+  const t = String(c.type || "").trim().toLowerCase();
+  const g = String(c.groupName || "").trim().toUpperCase();
+  if (t === "customer" || t === "both" || t === "client") return true;
+  if (g.includes("DEBTORS") || g.includes("CUSTOMER")) return true;
+  return t !== "supplier" && t !== "vendor" && !g.includes("CREDITORS");
+}
+
+export function isSupplier(c) {
+  if (!c) return false;
+  if (c.listInVendorList === true) return true;
+  const t = String(c.type || "").trim().toLowerCase();
+  const g = String(c.groupName || "").trim().toUpperCase();
+  if (t === "supplier" || t === "vendor" || t === "both") return true;
+  if (g.includes("CREDITORS") || g.includes("VENDOR") || g.includes("SUPPLIER")) return true;
+  return false;
+}
+
 export function renderContacts(container) {
   const contacts = state.getContacts();
 
   // Metrics calculations
-  const customers = contacts.filter(c => c.type === "customer" || c.listInCustomerList === true);
-  const suppliers = contacts.filter(c => c.type === "supplier" || c.listInVendorList === true);
+  const customers = contacts.filter(isCustomer);
+  const suppliers = contacts.filter(isSupplier);
 
   const totalReceivables = customers.reduce((sum, c) => sum + Math.max(0, c.balance || 0), 0);
   const totalPayables = suppliers.reduce((sum, c) => sum + Math.abs(Math.min(0, c.balance || 0)), 0);
 
   const filteredContacts = contacts.filter(c => {
     const term = searchContactFilter.trim().toLowerCase();
-    const matchesSearch = !term || c.name.toLowerCase().includes(term) || (c.contactPerson && c.contactPerson.toLowerCase().includes(term)) || (c.gstin && c.gstin.toLowerCase().includes(term));
+    const matchesSearch = !term || (c.name || "").toLowerCase().includes(term) || (c.contactPerson && c.contactPerson.toLowerCase().includes(term)) || (c.gstin && c.gstin.toLowerCase().includes(term));
     if (activeContactTypeFilter === "all") return matchesSearch;
-    if (activeContactTypeFilter === "customer") return matchesSearch && (c.type === "customer" || c.listInCustomerList === true);
-    if (activeContactTypeFilter === "supplier") return matchesSearch && (c.type === "supplier" || c.listInVendorList === true);
+    if (activeContactTypeFilter === "customer") return matchesSearch && isCustomer(c);
+    if (activeContactTypeFilter === "supplier") return matchesSearch && isSupplier(c);
     return matchesSearch;
   });
 

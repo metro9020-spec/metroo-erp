@@ -1,4 +1,4 @@
-﻿import fs from "fs";
+import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -10,6 +10,14 @@ const publicDataDir = path.join(rootDir, "public", "data");
 
 if (!fs.existsSync(publicDataDir)) {
   fs.mkdirSync(publicDataDir, { recursive: true });
+} else {
+  // Clean public/data directory to remove any old / orphaned snapshot files
+  const existingFiles = fs.readdirSync(publicDataDir);
+  for (const f of existingFiles) {
+    if (f.endsWith('.json')) {
+      try { fs.unlinkSync(path.join(publicDataDir, f)); } catch (e) {}
+    }
+  }
 }
 
 const companiesFile = path.join(dataDir, "companies.json");
@@ -44,6 +52,8 @@ if (fs.existsSync(companiesFile)) {
 
           if (fy.id === "default") {
             fs.copyFileSync(srcFile, path.join(publicDataDir, `${company.id}.json`));
+            fs.copyFileSync(srcFile, path.join(publicDataDir, `${company.id}_Current_F_Y.json`));
+            fs.copyFileSync(srcFile, path.join(publicDataDir, `${company.id}_fy_bkp.json`));
           }
           console.log(` [Sync] Bundled ${company.name} (${fyName}) -> public/data/${company.id}_${fy.id}.json`);
         } else {
@@ -57,3 +67,7 @@ if (fs.existsSync(companiesFile)) {
 } else {
   console.warn(" [Sync] No COMPANY DATA BASE/companies.json found.");
 }
+
+const buildVersionFile = path.join(rootDir, "public", "build-version.json");
+fs.writeFileSync(buildVersionFile, JSON.stringify({ version: Date.now() }), "utf8");
+console.log(" [Sync] Updated build-version.json");

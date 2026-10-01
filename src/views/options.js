@@ -3,6 +3,8 @@ import { state } from "../state.js";
 export function showOptionsModal() {
   const root = document.getElementById("modal-container-root");
   const options = state.getOptions();
+  const currentUser = state.getCurrentUser();
+  const isAdmin = !currentUser || currentUser.role === "Admin" || currentUser.role === "admin";
 
   root.innerHTML = `
     <div class="modal-overlay active" id="options-modal-overlay" style="display:flex; justify-content:center; align-items:center; background: rgba(15,23,42,0.3); backdrop-filter: blur(1px); z-index:2000;">
@@ -46,6 +48,12 @@ export function showOptionsModal() {
                 <input type="checkbox" id="opt-headloader" ${options.enableHeadloader !== false ? 'checked' : ''} style="cursor:pointer;">
                 Enable Headloaders Report in Utilities & Load/Unload Types in Bills
               </label>
+              ${isAdmin ? `
+              <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; cursor:pointer; font-weight: 700; color: #1e3a8a; background: #e0f2fe; padding: 4px 8px; border-radius: 4px; border: 1px solid #bae6fd;">
+                <input type="checkbox" id="opt-allow-py-editing" ${options.allowPreviousYearEditing === true ? 'checked' : ''} style="cursor:pointer;">
+                Allow Editing & Entering Transactions in Previous Financial Years (PY)
+              </label>
+              ` : ''}
             </div>
           </fieldset>
           
@@ -76,6 +84,8 @@ export function showOptionsModal() {
     const enableCessInSalesBill = document.getElementById("opt-addlcess-sales").checked;
     const enablePartyClosingBalanceBottom = document.getElementById("opt-closing-balance").checked;
     const enableHeadloader = document.getElementById("opt-headloader").checked;
+    const pyCheckbox = document.getElementById("opt-allow-py-editing");
+    const allowPreviousYearEditing = pyCheckbox ? pyCheckbox.checked : (options.allowPreviousYearEditing === true);
 
     // Reset cached custom HSN list if switching format to prevent incorrect digit mixes
     const oldOption = state.getOptions().enable4DigitHsn !== false;
@@ -90,7 +100,8 @@ export function showOptionsModal() {
       enable4DigitHsn,
       enableCessInSalesBill,
       enablePartyClosingBalanceBottom,
-      enableHeadloader
+      enableHeadloader,
+      allowPreviousYearEditing
     });
 
     alert("Options updated successfully.");

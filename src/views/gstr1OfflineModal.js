@@ -111,7 +111,7 @@ export function showGstr1OfflineModal() {
       });
 
       salesReturns.forEach(sr => {
-        if (sr.isCanceled) return;
+        if (!sr || sr.isCanceled || sr.isCancelled || sr.status === "cancelled" || sr.status === "CANCELLED") return;
         const d = sr.date || sr.returnDate;
         if (d && typeof d === "string") {
           const parts = d.split("-");
@@ -165,9 +165,14 @@ export function showGstr1OfflineModal() {
     document.getElementById("gstr1-btn-close").addEventListener("click", closeOverlay);
 
     async function fetchFromBackend(endpoint, options) {
-      const host = window.location.hostname || "localhost";
-      const targetUrl = `http://${host}:3001${endpoint}`;
+      const targetUrl = (typeof window._getApiUrl === "function")
+        ? window._getApiUrl(endpoint)
+        : (state.getBackendApiUrl ? state.getBackendApiUrl(endpoint) : null);
       
+      if (!targetUrl) {
+        return { _error: new Error("Local backend server is not available in cloud static mode. Please run ERP locally with start.bat.") };
+      }
+
       try {
         const res = await fetch(targetUrl, options);
         if (res.ok) {
@@ -177,13 +182,6 @@ export function showGstr1OfflineModal() {
           return { _error: new Error(`HTTP ${res.status} from ${targetUrl}: ${txt.substring(0, 150)}`) };
         }
       } catch (e) {
-        if (host !== "localhost" && host !== "127.0.0.1") {
-          try {
-            const fallbackUrl = `http://localhost:3001${endpoint}`;
-            const fallbackRes = await fetch(fallbackUrl, options);
-            if (fallbackRes.ok) return fallbackRes;
-          } catch (fbErr) {}
-        }
         return { _error: new Error(`Could not connect to ${targetUrl}: ${e.message}`) };
       }
     }
@@ -407,7 +405,7 @@ function generateGstr1CsvData(month, year) {
 
   // Filter Sales Returns within month
   const monthSalesReturns = salesReturns.filter(sr => {
-    if (sr.isCanceled) return false;
+    if (!sr || sr.isCanceled || sr.isCancelled || sr.status === "cancelled" || sr.status === "CANCELLED") return false;
     const date = sr.date || sr.returnDate;
     if (!date || typeof date !== "string") return false;
     const parts = date.split("-");

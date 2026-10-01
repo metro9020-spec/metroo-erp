@@ -1,12 +1,102 @@
-// Segmented DD/MM/YYYY Date Picker Utility
-// Formats dates as DD/MM/YYYY (e.g. 01/04/2026, 15/08/2026)
-// Provides smart segmented typing rules:
-// - DD: typing 0..3 waits for 2nd digit; typing 4..9 auto-prefixes '0' and jumps to MM
-// - MM: typing 0..1 waits for 2nd digit; typing 2..9 auto-prefixes '0' and jumps to YYYY
-// - Auto-advances fields and includes dropdown calendar popover
+import { state } from "../state.js";
 
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const FULL_MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+/**
+ * Gets the active Financial Year boundaries (Start and End dates, years, and months)
+ */
+export function getActiveFyBounds() {
+  let startStr = (typeof state !== "undefined" && state && state.getActiveFinancialYearStartDate)
+    ? state.getActiveFinancialYearStartDate()
+    : null;
+  let endStr = (typeof state !== "undefined" && state && state.getActiveFinancialYearEndDate)
+    ? state.getActiveFinancialYearEndDate()
+    : null;
+
+  if (!startStr) startStr = "2026-04-01";
+  if (!endStr) endStr = "2027-03-31";
+
+  const sParts = startStr.split("-").map(Number);
+  const eParts = endStr.split("-").map(Number);
+
+  return {
+    startStr,
+    endStr,
+    startYear: sParts[0],
+    startMonth: sParts[1],
+    startDay: sParts[2],
+    endYear: eParts[0],
+    endMonth: eParts[1],
+    endDay: eParts[2]
+  };
+}
+
+/**
+ * Calculates the exact Financial Year year for a given month number (1..12).
+ * For standard Indian FY (Apr 2026 - Mar 2027):
+ * - Months 4..12 -> 2026
+ * - Months 1..3  -> 2027
+ */
+export function getFyYearForMonth(monthNum, fy = getActiveFyBounds()) {
+  const m = parseInt(monthNum, 10);
+  if (isNaN(m) || m < 1 || m > 12) return fy.startYear;
+  if (fy.startYear === fy.endYear) return fy.startYear;
+
+  if (fy.startMonth > fy.endMonth) {
+    if (m >= fy.startMonth) return fy.startYear;
+    if (m <= fy.endMonth) return fy.endYear;
+    const distEnd = Math.abs(m - fy.endMonth);
+    const distStart = Math.abs(fy.startMonth - m);
+    return distEnd < distStart ? fy.endYear : fy.startYear;
+  } else {
+    return fy.startYear;
+  }
+}
+
+/**
+ * Clamps a year, month, and day into active Financial Year boundaries.
+ * Returns { y, m, d, iso }
+ */
+export function clampToFy(y, m, d, fy = getActiveFyBounds(), allowBeyondFy = false) {
+  let reqY = parseInt(y, 10);
+  let reqM = parseInt(m, 10);
+  let reqD = parseInt(d, 10);
+
+  if (isNaN(reqM) || reqM < 1) reqM = 1;
+  if (reqM > 12) reqM = 12;
+
+  let finalYear = reqY;
+  if (isNaN(finalYear) || !finalYear) {
+    finalYear = getFyYearForMonth(reqM, fy);
+  } else if (!allowBeyondFy) {
+    // If not allowed beyond FY, lock year strictly to FY year for this month
+    finalYear = getFyYearForMonth(reqM, fy);
+  } else {
+    // allowBeyondFy is true: if requested year is before fy.startYear, map to startYear or FY year
+    if (finalYear < fy.startYear) {
+      finalYear = getFyYearForMonth(reqM, fy);
+    }
+  }
+
+  // Max days in finalMonth/finalYear
+  const maxDays = new Date(finalYear, reqM, 0).getDate();
+  if (isNaN(reqD) || reqD < 1) reqD = 1;
+  if (reqD > maxDays) reqD = maxDays;
+
+  let isoStr = toIso(finalYear, reqM, reqD);
+
+  if (isoStr < fy.startStr) {
+    const s = fy.startStr.split("-").map(Number);
+    return { y: s[0], m: s[1], d: s[2], iso: fy.startStr };
+  }
+  if (!allowBeyondFy && isoStr > fy.endStr) {
+    const e = fy.endStr.split("-").map(Number);
+    return { y: e[0], m: e[1], d: e[2], iso: fy.endStr };
+  }
+
+  return { y: finalYear, m: reqM, d: reqD, iso: isoStr };
+}
 
 /**
  * Format ISO date string YYYY-MM-DD or Date object into DD/MM/YYYY format
@@ -145,8 +235,15 @@ function closeActivePopover() {
 /**
  * Creates HTML template string for a Tally-style DatePicker input control
  */
-export function renderTallyDatePickerHtml({ id, name, value, className = "form-control", style = "", width = "135px" }) {
-  const isoVal = parseSmartDate(value) || value || "";
+export function renderTallyDatePickerHtml({ id, name, value, className = "form-control", style = "", width = "135px", allowBeyondFy = false }) {
+  const fy = getActiveFyBounds();
+  const isBeyondAllowed = allowBeyondFy || (id && id.includes("duedate"));
+  let rawIso = parseSmartDate(value) || value || fy.startStr;
+  let isoVal = rawIso;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(rawIso)) {
+    const p = rawIso.split("-").map(Number);
+    isoVal = clampToFy(p[0], p[1], p[2], fy, isBeyondAllowed).iso;
+  }
   const displayVal = formatTallyDate(isoVal);
   return `
     <div class="tally-date-wrapper" style="display: inline-flex; align-items: center; position: relative; width: ${width}; vertical-align: middle;">
@@ -157,6 +254,7 @@ export function renderTallyDatePickerHtml({ id, name, value, className = "form-c
              style="width: 100%; padding-right: 20px; text-align: center; font-weight: 600; letter-spacing: 0.5px; ${style}" 
              value="${displayVal}" 
              data-iso-date="${isoVal}" 
+             data-allow-beyond-fy="${isBeyondAllowed ? "true" : "false"}"
              autocomplete="off" 
              placeholder="DD/MM/YYYY" />
       <button type="button" class="tally-date-btn" style="position: absolute; right: 2px; background: transparent; border: none; cursor: pointer; padding: 2px 4px; color: #475569; font-size: 0.75rem; line-height: 1; user-select: none;" title="Open Calendar">▾</button>
@@ -190,20 +288,35 @@ export function attachTallyDatePicker(inputEl, onChangeCallback) {
 
   const btn = wrapper.querySelector(".tally-date-btn");
 
-  let internalIso = inputEl.dataset.isoDate || parseSmartDate(inputEl.value) || "2026-04-01";
+  const allowBeyondFy = inputEl.dataset.allowBeyondFy === "true" || (inputEl.id && inputEl.id.includes("duedate"));
+  const fy = getActiveFyBounds();
+  let initialRaw = inputEl.dataset.isoDate || parseSmartDate(inputEl.value) || fy.startStr;
+  let initP = initialRaw.split("-").map(Number);
+  let clampedInit = clampToFy(initP[0] || fy.startYear, initP[1] || fy.startMonth, initP[2] || fy.startDay, fy, allowBeyondFy);
+
+  let internalIso = clampedInit.iso;
   inputEl.dataset.isoDate = internalIso;
 
   // Closure state for date parts & typing
-  let parts = { dd: "01", mm: "04", yyyy: "2026" };
-  const updatePartsFromIso = (iso) => {
-    const p = formatTallyDate(iso).split("/");
-    parts = {
-      dd: p[0] || "01",
-      mm: p[1] || "04",
-      yyyy: p[2] || "2026"
-    };
+  let parts = {
+    dd: String(clampedInit.d).padStart(2, "0"),
+    mm: String(clampedInit.m).padStart(2, "0"),
+    yyyy: String(clampedInit.y)
   };
-  updatePartsFromIso(internalIso);
+
+  const updatePartsFromIso = (isoStr) => {
+    const fyNow = getActiveFyBounds();
+    const parsedIso = parseSmartDate(isoStr) || isoStr;
+    const p = parsedIso.split("-").map(Number);
+    const c = clampToFy(p[0] || fyNow.startYear, p[1] || fyNow.startMonth, p[2] || fyNow.startDay, fyNow, allowBeyondFy);
+    parts = {
+      dd: String(c.d).padStart(2, "0"),
+      mm: String(c.m).padStart(2, "0"),
+      yyyy: String(c.y)
+    };
+    internalIso = c.iso;
+    inputEl.dataset.isoDate = c.iso;
+  };
 
   let activeSegment = 0; // 0 = DD, 1 = MM, 2 = YYYY
   let segmentTyped = "";
@@ -257,10 +370,7 @@ export function attachTallyDatePicker(inputEl, onChangeCallback) {
       return internalIso;
     },
     set(newVal) {
-      const parsed = parseSmartDate(newVal, newVal);
-      internalIso = parsed;
-      inputEl.dataset.isoDate = parsed;
-      updatePartsFromIso(parsed);
+      updatePartsFromIso(newVal);
       if (document.activeElement !== inputEl) {
         renderAndHighlight(activeSegment);
       }
@@ -289,27 +399,36 @@ export function attachTallyDatePicker(inputEl, onChangeCallback) {
     else selectSegment(2);
   });
 
-  const commitAndNotify = () => {
+  const commitAndNotify = (emitChange = true) => {
+    const fyNow = getActiveFyBounds();
     let y = parseInt(parts.yyyy, 10);
     let m = parseInt(parts.mm, 10);
     let d = parseInt(parts.dd, 10);
 
     if (y < 100) y += (y < 50 ? 2000 : 1900);
     if (!isValidDateParts(y, m, d)) {
-      y = 2026; m = 4; d = 1;
-      parts = { dd: "01", mm: "04", yyyy: "2026" };
+      y = fyNow.startYear; m = fyNow.startMonth; d = fyNow.startDay;
     }
 
-    const iso = toIso(y, m, d);
-    internalIso = iso;
-    inputEl.dataset.isoDate = iso;
+    const clamped = clampToFy(y, m, d, fyNow, allowBeyondFy);
+    internalIso = clamped.iso;
+    inputEl.dataset.isoDate = clamped.iso;
+    parts = {
+      dd: String(clamped.d).padStart(2, "0"),
+      mm: String(clamped.m).padStart(2, "0"),
+      yyyy: String(clamped.y)
+    };
+
     renderAndHighlight(activeSegment);
 
-    if (onChangeCallback) onChangeCallback(iso);
-    inputEl.dispatchEvent(new Event("change", { bubbles: true }));
+    if (emitChange) {
+      if (onChangeCallback) onChangeCallback(clamped.iso);
+      inputEl.dispatchEvent(new Event("change", { bubbles: true }));
+    }
   };
 
   inputEl.addEventListener("keydown", (e) => {
+    e.stopPropagation();
     const key = e.key;
 
     if (key === "Tab") {
@@ -327,7 +446,7 @@ export function attachTallyDatePicker(inputEl, onChangeCallback) {
 
     if (key === "Enter") {
       e.preventDefault();
-      commitAndNotify();
+      commitAndNotify(true);
       closeActivePopover();
       inputEl.blur();
       return;
@@ -352,33 +471,76 @@ export function attachTallyDatePicker(inputEl, onChangeCallback) {
 
     if (key === "ArrowUp" || key === "ArrowDown") {
       e.preventDefault();
+      const pos = inputEl.selectionStart || 0;
+      if (pos <= 2) activeSegment = 0;
+      else if (pos <= 5) activeSegment = 1;
+      else activeSegment = 2;
+
+      const fyNow = getActiveFyBounds();
       let y = parseInt(parts.yyyy, 10);
       let m = parseInt(parts.mm, 10);
       let d = parseInt(parts.dd, 10);
       if (isNaN(y) || isNaN(m) || isNaN(d)) {
-        y = 2026; m = 4; d = 1;
+        y = fyNow.startYear; m = fyNow.startMonth; d = fyNow.startDay;
       }
       if (y < 100) y += (y < 50 ? 2000 : 1900);
 
-      const dt = new Date(y, m - 1, d);
       const delta = (key === "ArrowUp") ? 1 : -1;
 
       if (activeSegment === 0) {
+        // --- DAY (DD) ---
+        let dt = new Date(y, m - 1, d);
         dt.setDate(dt.getDate() + delta);
+        const clamped = clampToFy(dt.getFullYear(), dt.getMonth() + 1, dt.getDate(), fyNow, allowBeyondFy);
+        parts = {
+          dd: String(clamped.d).padStart(2, "0"),
+          mm: String(clamped.m).padStart(2, "0"),
+          yyyy: String(clamped.y)
+        };
       } else if (activeSegment === 1) {
-        dt.setMonth(dt.getMonth() + delta);
+        // --- MONTH (MM) ---
+        let newMonth = m + delta;
+        let newYear = y;
+        if (newMonth > 12) {
+          newMonth = 1;
+          if (allowBeyondFy) newYear++;
+        }
+        if (newMonth < 1) {
+          newMonth = 12;
+          if (allowBeyondFy) newYear--;
+        }
+        const clamped = clampToFy(newYear, newMonth, d, fyNow, allowBeyondFy);
+        parts = {
+          dd: String(clamped.d).padStart(2, "0"),
+          mm: String(clamped.m).padStart(2, "0"),
+          yyyy: String(clamped.y)
+        };
       } else if (activeSegment === 2) {
-        dt.setFullYear(dt.getFullYear() + delta);
+        // --- YEAR (YYYY) ---
+        if (allowBeyondFy) {
+          let targetYear = y + delta;
+          if (targetYear < fyNow.startYear) targetYear = fyNow.startYear;
+          const clamped = clampToFy(targetYear, m, d, fyNow, true);
+          parts = {
+            dd: String(clamped.d).padStart(2, "0"),
+            mm: String(clamped.m).padStart(2, "0"),
+            yyyy: String(clamped.y)
+          };
+        } else {
+          // Lock year to the FY year for current month!
+          const targetYear = getFyYearForMonth(m, fyNow);
+          const clamped = clampToFy(targetYear, m, d, fyNow, false);
+          parts = {
+            dd: String(clamped.d).padStart(2, "0"),
+            mm: String(clamped.m).padStart(2, "0"),
+            yyyy: String(clamped.y)
+          };
+        }
       }
 
-      parts = {
-        dd: String(dt.getDate()).padStart(2, "0"),
-        mm: String(dt.getMonth() + 1).padStart(2, "0"),
-        yyyy: String(dt.getFullYear())
-      };
-
       segmentTyped = "";
-      commitAndNotify();
+      commitAndNotify(false);
+      selectSegment(activeSegment);
       return;
     }
 
@@ -396,13 +558,16 @@ export function attachTallyDatePicker(inputEl, onChangeCallback) {
     // Digit typing logic
     if (/^[0-9]$/.test(key)) {
       e.preventDefault();
+      const fyNow = getActiveFyBounds();
 
       if (activeSegment === 0) {
         // --- DAY (DD) ---
         if (segmentTyped === "") {
           if (key >= "4") {
             // 4..9 immediately sets '04'..'09' and advances to MM
-            parts.dd = "0" + key;
+            let dayNum = parseInt("0" + key, 10);
+            const clamped = clampToFy(parts.yyyy, parts.mm, dayNum, fyNow, allowBeyondFy);
+            parts.dd = String(clamped.d).padStart(2, "0");
             selectSegment(1);
           } else {
             // 0..3 waits for 2nd digit
@@ -412,9 +577,8 @@ export function attachTallyDatePicker(inputEl, onChangeCallback) {
         } else {
           // 2nd digit typed for Day
           let dayNum = parseInt(segmentTyped + key, 10);
-          if (dayNum > 31) dayNum = 31;
-          if (dayNum === 0) dayNum = 1;
-          parts.dd = String(dayNum).padStart(2, "0");
+          const clamped = clampToFy(parts.yyyy, parts.mm, dayNum, fyNow, allowBeyondFy);
+          parts.dd = String(clamped.d).padStart(2, "0");
           selectSegment(1);
         }
       } else if (activeSegment === 1) {
@@ -422,7 +586,11 @@ export function attachTallyDatePicker(inputEl, onChangeCallback) {
         if (segmentTyped === "") {
           if (key >= "2") {
             // 2..9 immediately sets '02'..'09' and advances to YYYY
-            parts.mm = "0" + key;
+            let mNum = parseInt("0" + key, 10);
+            const clamped = clampToFy(parts.yyyy, mNum, parts.dd, fyNow, allowBeyondFy);
+            parts.mm = String(clamped.m).padStart(2, "0");
+            parts.yyyy = String(clamped.y);
+            parts.dd = String(clamped.d).padStart(2, "0");
             selectSegment(2);
           } else {
             // 0..1 waits for 2nd digit
@@ -434,7 +602,10 @@ export function attachTallyDatePicker(inputEl, onChangeCallback) {
           let mNum = parseInt(segmentTyped + key, 10);
           if (mNum > 12) mNum = 12;
           if (mNum === 0) mNum = 1;
-          parts.mm = String(mNum).padStart(2, "0");
+          const clamped = clampToFy(parts.yyyy, mNum, parts.dd, fyNow, allowBeyondFy);
+          parts.mm = String(clamped.m).padStart(2, "0");
+          parts.yyyy = String(clamped.y);
+          parts.dd = String(clamped.d).padStart(2, "0");
           selectSegment(2);
         }
       } else if (activeSegment === 2) {
@@ -443,11 +614,14 @@ export function attachTallyDatePicker(inputEl, onChangeCallback) {
         if (segmentTyped.length === 2) {
           let yShort = parseInt(segmentTyped, 10);
           let yFull = yShort + (yShort < 50 ? 2000 : 1900);
-          parts.yyyy = String(yFull);
+          const clamped = clampToFy(yFull, parts.mm, parts.dd, fyNow, allowBeyondFy);
+          parts.yyyy = String(clamped.y);
           renderAndHighlight(2);
         } else if (segmentTyped.length >= 4) {
-          parts.yyyy = segmentTyped.substring(0, 4);
-          commitAndNotify();
+          let yFull = parseInt(segmentTyped.substring(0, 4), 10);
+          const clamped = clampToFy(yFull, parts.mm, parts.dd, fyNow, allowBeyondFy);
+          parts.yyyy = String(clamped.y);
+          commitAndNotify(true);
           selectSegment(2);
         } else {
           parts.yyyy = segmentTyped.padStart(4, "0");
@@ -475,6 +649,7 @@ export function attachTallyDatePicker(inputEl, onChangeCallback) {
     showCalendarPopover(inputEl, internalIso, (selectedIso) => {
       internalIso = selectedIso;
       inputEl.dataset.isoDate = selectedIso;
+      updatePartsFromIso(selectedIso);
       updateRawDisplay(formatTallyDate(selectedIso));
       if (onChangeCallback) onChangeCallback(selectedIso);
       inputEl.dispatchEvent(new Event("change", { bubbles: true }));
@@ -488,11 +663,18 @@ export function attachTallyDatePicker(inputEl, onChangeCallback) {
  * Renders Calendar Dropdown Popover
  */
 function showCalendarPopover(inputEl, currentIso, onSelect) {
+  const allowBeyondFy = inputEl.dataset.allowBeyondFy === "true" || (inputEl.id && inputEl.id.includes("duedate"));
+  const fy = getActiveFyBounds();
   let currDate = currentIso ? new Date(currentIso) : new Date();
   if (isNaN(currDate.getTime())) currDate = new Date();
 
-  let viewYear = currDate.getFullYear();
   let viewMonth = currDate.getMonth();
+  let viewYear = currDate.getFullYear();
+  if (!allowBeyondFy) {
+    viewYear = getFyYearForMonth(viewMonth + 1, fy);
+  } else if (viewYear < fy.startYear) {
+    viewYear = fy.startYear;
+  }
 
   const popover = document.createElement("div");
   popover.className = "tally-calendar-popover";
@@ -517,6 +699,9 @@ function showCalendarPopover(inputEl, currentIso, onSelect) {
   popover.style.left = `${window.scrollX + rect.left}px`;
 
   const renderCalendar = () => {
+    if (!allowBeyondFy) {
+      viewYear = getFyYearForMonth(viewMonth + 1, fy);
+    }
     const monthName = FULL_MONTH_NAMES[viewMonth];
     const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
     const firstDayIdx = new Date(viewYear, viewMonth, 1).getDay();
@@ -544,17 +729,23 @@ function showCalendarPopover(inputEl, currentIso, onSelect) {
       const dayIso = toIso(viewYear, viewMonth + 1, day);
       const isSelected = dayIso === selIso;
       const isToday = dayIso === todayIso;
+      const isOutOfFy = dayIso < fy.startStr || (!allowBeyondFy && dayIso > fy.endStr);
 
-      let style = "padding: 4px 0; border-radius: 4px; cursor: pointer; font-size: 0.78rem;";
-      if (isSelected) {
-        style += " background: #2563eb; color: #ffffff; font-weight: bold;";
-      } else if (isToday) {
-        style += " background: #eff6ff; color: #1d4ed8; font-weight: bold; border: 1px solid #bfdbfe;";
+      let style = "padding: 4px 0; border-radius: 4px; font-size: 0.78rem;";
+      if (isOutOfFy) {
+        style += " opacity: 0.35; cursor: not-allowed; pointer-events: none; background: #f8fafc; color: #94a3b8;";
+        html += `<div class="cal-day disabled" style="${style}">${day}</div>`;
       } else {
-        style += " background: transparent; color: #334155;";
+        style += " cursor: pointer;";
+        if (isSelected) {
+          style += " background: #2563eb; color: #ffffff; font-weight: bold;";
+        } else if (isToday) {
+          style += " background: #eff6ff; color: #1d4ed8; font-weight: bold; border: 1px solid #bfdbfe;";
+        } else {
+          style += " background: transparent; color: #334155;";
+        }
+        html += `<div class="cal-day" data-iso="${dayIso}" style="${style}">${day}</div>`;
       }
-
-      html += `<div class="cal-day" data-iso="${dayIso}" style="${style}">${day}</div>`;
     }
 
     html += `</div>`;
@@ -567,6 +758,9 @@ function showCalendarPopover(inputEl, currentIso, onSelect) {
         viewMonth = 11;
         viewYear--;
       }
+      if (!allowBeyondFy) {
+        viewYear = getFyYearForMonth(viewMonth + 1, fy);
+      }
       renderCalendar();
     });
 
@@ -577,10 +771,13 @@ function showCalendarPopover(inputEl, currentIso, onSelect) {
         viewMonth = 0;
         viewYear++;
       }
+      if (!allowBeyondFy) {
+        viewYear = getFyYearForMonth(viewMonth + 1, fy);
+      }
       renderCalendar();
     });
 
-    popover.querySelectorAll(".cal-day").forEach((el) => {
+    popover.querySelectorAll(".cal-day:not(.disabled)").forEach((el) => {
       el.addEventListener("mouseenter", () => {
         if (!el.style.background.includes("2563eb")) {
           el.style.background = "#f1f5f9";
@@ -606,11 +803,85 @@ function showCalendarPopover(inputEl, currentIso, onSelect) {
 }
 
 /**
- * Automatically initializes all inputs with class 'tally-date-input' inside a container
+ * Automatically initializes all inputs with class 'tally-date-input' inside a container,
+ * and enforces Financial Year bounds on all date inputs.
  */
 export function initTallyDatePickers(container = document, onChangeCallback) {
+  enforceGlobalFyOnInputs(container, onChangeCallback);
+}
+
+export function enforceGlobalFyOnInputs(container = document, onChangeCallback) {
+  if (!container || !container.querySelectorAll) return;
+
+  const fy = getActiveFyBounds();
+
+  // 1. Attach Tally Date Picker to all .tally-date-input elements
   const inputs = container.querySelectorAll(".tally-date-input");
   inputs.forEach((input) => {
     attachTallyDatePicker(input, onChangeCallback);
   });
+
+  // 2. Attach FY min/max & clamping to all standard <input type="date"> elements
+  const standardDateInputs = container.querySelectorAll("input[type='date']");
+  standardDateInputs.forEach((input) => {
+    // Skip inputs that define/configure FY dates
+    if (input.id && (input.id.includes("fy-start") || input.id.includes("fy-end") || input.id.includes("comp-fy") || input.id.includes("ye-next") || input.id.includes("ye-current"))) {
+      return;
+    }
+
+    const isBeyond = input.dataset.allowBeyondFy === "true" || (input.id && input.id.includes("duedate"));
+
+    input.setAttribute("min", fy.startStr);
+    if (!isBeyond) {
+      input.setAttribute("max", fy.endStr);
+    } else {
+      input.removeAttribute("max");
+    }
+
+    if (input.value) {
+      if (input.value < fy.startStr) input.value = fy.startStr;
+      if (!isBeyond && input.value > fy.endStr) input.value = fy.endStr;
+    }
+
+    const clampStandardInput = () => {
+      if (!input.value) return;
+      if (input.value < fy.startStr) {
+        input.value = fy.startStr;
+      } else if (!isBeyond && input.value > fy.endStr) {
+        input.value = fy.endStr;
+      }
+    };
+
+    input.removeEventListener("change", clampStandardInput);
+    input.addEventListener("change", clampStandardInput);
+    input.removeEventListener("blur", clampStandardInput);
+    input.addEventListener("blur", clampStandardInput);
+  });
 }
+
+// Global MutationObserver to automatically enforce FY restrictions on dynamically added DOM nodes
+let fyMutationTimer = null;
+if (typeof window !== "undefined" && typeof document !== "undefined") {
+  const fyObserver = new MutationObserver(() => {
+    if (fyMutationTimer) clearTimeout(fyMutationTimer);
+    fyMutationTimer = setTimeout(() => {
+      if (document.body) {
+        enforceGlobalFyOnInputs(document.body);
+      }
+    }, 150);
+  });
+
+  const startObserver = () => {
+    if (document.body) {
+      enforceGlobalFyOnInputs(document.body);
+      fyObserver.observe(document.body, { childList: true, subtree: true });
+    }
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", startObserver);
+  } else {
+    startObserver();
+  }
+}
+

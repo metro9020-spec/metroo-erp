@@ -42,14 +42,20 @@ export function showCustomerSalesHistoryModal(customer, onSelectInvoice = null) 
   let unselectedOnly = false;
 
   const modalOverlay = document.createElement("div");
-  modalOverlay.className = "modal-overlay active";
+  modalOverlay.className = "modal-overlay active blocking-modal";
   modalOverlay.id = "cust-history-modal-overlay";
-  modalOverlay.style.zIndex = "100000";
+  modalOverlay.style.position = "fixed";
+  modalOverlay.style.top = "0";
+  modalOverlay.style.left = "0";
+  modalOverlay.style.width = "100vw";
+  modalOverlay.style.height = "100vh";
+  modalOverlay.style.zIndex = "2000000";
+  modalOverlay.style.pointerEvents = "auto";
   modalOverlay.style.display = "flex";
   modalOverlay.style.justifyContent = "center";
   modalOverlay.style.alignItems = "center";
-  modalOverlay.style.background = "rgba(15,23,42,0.35)";
-  modalOverlay.style.backdropFilter = "blur(1px)";
+  modalOverlay.style.background = "rgba(15,23,42,0.45)";
+  modalOverlay.style.backdropFilter = "blur(2px)";
   modalOverlay.tabIndex = -1;
 
   function getFilteredInvoices() {
@@ -279,6 +285,7 @@ export function showCustomerSalesHistoryModal(customer, onSelectInvoice = null) 
   function handleKeydown(e) {
     if (e.key === "Escape") {
       e.preventDefault();
+      e.stopPropagation();
       window.removeEventListener("keydown", handleKeydown);
       modalOverlay.remove();
       return;
@@ -287,11 +294,13 @@ export function showCustomerSalesHistoryModal(customer, onSelectInvoice = null) 
     const list = getFilteredInvoices();
     if (e.key === "ArrowDown") {
       e.preventDefault();
+      e.stopPropagation();
       if (selectedIndex < list.length - 1) {
         updateRowSelection(selectedIndex + 1);
       }
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
+      e.stopPropagation();
       if (selectedIndex > 0) {
         updateRowSelection(selectedIndex - 1);
       }
@@ -299,6 +308,7 @@ export function showCustomerSalesHistoryModal(customer, onSelectInvoice = null) 
       const list = getFilteredInvoices();
       if (list[selectedIndex]) {
         e.preventDefault();
+        e.stopPropagation();
         const invId = list[selectedIndex].id;
         window.removeEventListener("keydown", handleKeydown);
         modalOverlay.remove();

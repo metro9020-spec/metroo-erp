@@ -10,8 +10,13 @@ export function renderDashboard(container) {
   // Find low stock items
   const lowStockItems = materials.filter(m => m.stock <= m.reorderLevel);
 
-  // Get last 5 transactions
+  // Get last 5 transactions (excluding background COGS entries)
   const recentTxs = [...txs]
+    .filter(tx => {
+      const ref = (tx.reference || "").toUpperCase();
+      const desc = (tx.description || "").toUpperCase();
+      return !ref.includes("COGS") && !desc.includes("COST OF GOODS SOLD");
+    })
     .sort((a, b) => new Date(b.date) - new Date(a.date))
     .slice(0, 5);
 
@@ -36,14 +41,14 @@ export function renderDashboard(container) {
         <div class="metric-icon"><i class="fa-solid fa-arrow-up-right-dots"></i></div>
         <div class="metric-details">
           <span class="metric-label">Sales Revenue</span>
-          <span class="metric-value">\u20B9${(pl?.revenue?.total || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          <span class="metric-value">\u20B9${(pl?.sales ?? pl?.revenueTotal ?? pl?.revenue?.total ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
         </div>
       </div>
       <div class="metric-card expenses">
         <div class="metric-icon"><i class="fa-solid fa-arrow-down-left-dots"></i></div>
         <div class="metric-details">
           <span class="metric-label">Total Expenses</span>
-          <span class="metric-value">\u20B9${(pl?.expenses?.total || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          <span class="metric-value">\u20B9${(pl?.expensesTotal ?? pl?.expenses?.total ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
         </div>
       </div>
       <div class="metric-card cash">

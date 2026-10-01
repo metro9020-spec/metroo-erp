@@ -2,6 +2,9 @@ import { state, ACCOUNTS } from "../state.js";
 import { formatDate } from "../utils/dateUtils.js";
 import { renderTallyDatePickerHtml, initTallyDatePickers } from "../utils/datePicker.js";
 import { invalidateReportCache } from "./reports.js";
+import { showRearrangeVouchersModal } from "./rearrangeVouchersModal.js";
+import { showSingleEntryVoucherModal } from "./singleEntryVoucher.js";
+export { showSingleEntryVoucherModal };
 
 let activeVoucherTab = "contra"; // 'contra', 'receipt', 'payment', 'journal'
 let showVoucherLauncher = true;
@@ -16,6 +19,18 @@ export function resetVoucherLauncher() {
   showVoucherLauncher = true;
   showLogs = false;
   showLogsPanel = false;
+  const activeWin = document.getElementById("active-window");
+  if (activeWin) {
+    activeWin.style.position = "";
+    activeWin.style.left = "";
+    activeWin.style.top = "";
+    activeWin.style.margin = "";
+    activeWin.style.height = "";
+  }
+}
+
+export function isVoucherLauncherActive() {
+  return showVoucherLauncher;
 }
 
 export function setActiveVoucherTab(tab) {
@@ -23,15 +38,19 @@ export function setActiveVoucherTab(tab) {
   showVoucherLauncher = false;
   showLogs = false;
   showLogsPanel = false;
+  lastSeenHash = "#vouchers";
 }
 
-// Auto-reset launcher on navigation
+// Auto-reset launcher on navigation only when coming from another page
+let lastSeenHash = window.location.hash;
 window.addEventListener("hashchange", () => {
-  if (window.location.hash === "#vouchers") {
+  const currentHash = window.location.hash;
+  if (currentHash === "#vouchers" && lastSeenHash !== "#vouchers") {
     showVoucherLauncher = true;
     showLogs = false;
     showLogsPanel = false;
   }
+  lastSeenHash = currentHash;
 });
 
 // Setup menu listener shortcuts
@@ -46,12 +65,12 @@ setTimeout(() => {
 }, 500);
 
 function getSearchPanelHTML() {
-  const todayStr = new Date().toISOString().split("T")[0];
+  const todayStr = state.getLoginDate() || new Date().toISOString().split("T")[0];
   if (!searchFromDate) searchFromDate = todayStr;
   if (!searchToDate) searchToDate = todayStr;
   return `
     <div class="panel" style="margin-bottom: 1rem; padding: 10px; background-color: var(--bg-secondary); border: 1px solid var(--border-color); font-family: var(--font-body); border-radius: 4px;">
-      <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; color: var(--text-primary);">
+      <div style="display: flex; gap: 0.8rem; align-items: center; flex-wrap: wrap; color: var(--text-primary);">
         <div style="display: flex; align-items: center; gap: 5px;">
           <label style="font-weight:700; color: var(--text-secondary); font-size:0.85rem; margin: 0;">From</label>
           ${renderTallyDatePickerHtml({ id: "search-from-date", value: searchFromDate, style: "height:26px; padding:2px 6px; font-size:0.8rem; border:1px solid #7f9db9; border-radius:3px;", width: "130px" })}
@@ -61,13 +80,14 @@ function getSearchPanelHTML() {
           ${renderTallyDatePickerHtml({ id: "search-to-date", value: searchToDate, style: "height:26px; padding:2px 6px; font-size:0.8rem; border:1px solid #7f9db9; border-radius:3px;", width: "130px" })}
         </div>
 
-
-
         <div style="display: flex; align-items: center; gap: 5px;">
-          <input type="text" id="search-txt" class="form-control" placeholder="Search VNo/Narration..." style="width:180px; height:30px; padding:2px 5px; background: var(--bg-tertiary); color: var(--text-primary); border:1px solid var(--border-color);" value="${searchTxt}">
+          <input type="text" id="search-txt" class="form-control" placeholder="Search VNo/Narration..." style="width:160px; height:30px; padding:2px 5px; background: var(--bg-tertiary); color: var(--text-primary); border:1px solid var(--border-color);" value="${searchTxt}">
         </div>
-        <button class="btn btn-primary" id="btn-search-go" style="height:30px; padding: 0 15px; font-size:0.85rem; font-weight:700;">Search</button>
-        <button class="btn btn-secondary" id="btn-search-reset" style="height:30px; padding: 0 15px; font-size:0.85rem; font-weight:700; background: var(--bg-tertiary); color: var(--text-primary); border:1px solid var(--border-color);">Reset</button>
+        <button class="btn btn-primary" id="btn-search-go" style="height:30px; padding: 0 12px; font-size:0.85rem; font-weight:700;">Search</button>
+        <button class="btn btn-secondary" id="btn-search-reset" style="height:30px; padding: 0 12px; font-size:0.85rem; font-weight:700; background: var(--bg-tertiary); color: var(--text-primary); border:1px solid var(--border-color);">Reset</button>
+        <button class="btn btn-secondary" id="btn-search-rearrange-vouchers" style="height:30px; padding: 0 12px; font-size:0.8rem; font-weight:700; background:#2563eb; color:white; border:1px solid #1d4ed8; margin-left:auto; display:flex; align-items:center; gap:5px;" title="Reset and renumber vouchers in ascending date order">
+          <i class="fa-solid fa-arrow-down-1-9"></i> Reset Numbers
+        </button>
       </div>
     </div>
     <style>
@@ -97,16 +117,40 @@ function getSearchPanelHTML() {
   `;
 }
 
+let voucherSearchDebounceTimer = null;
 function bindSearchEvents(container, refreshCallback) {
+  initTallyDatePickers(container);
+
   const fromDate = document.getElementById("search-from-date");
-
-
   const toDate = document.getElementById("search-to-date");
   const txt = document.getElementById("search-txt");
   
-  if (fromDate) fromDate.addEventListener("change", (e) => { searchFromDate = e.target.value; });
-  if (toDate) toDate.addEventListener("change", (e) => { searchToDate = e.target.value; });
-  if (txt) txt.addEventListener("input", (e) => { searchTxt = e.target.value; });
+  if (fromDate) fromDate.addEventListener("change", (e) => { 
+    searchFromDate = e.target.value;
+    refreshCallback();
+  });
+  if (toDate) toDate.addEventListener("change", (e) => { 
+    searchToDate = e.target.value;
+    refreshCallback();
+  });
+  if (txt) {
+    txt.addEventListener("input", (e) => {
+      searchTxt = e.target.value;
+      if (voucherSearchDebounceTimer) clearTimeout(voucherSearchDebounceTimer);
+      voucherSearchDebounceTimer = setTimeout(() => {
+        showLogs = true;
+        refreshCallback();
+      }, 250);
+    });
+    txt.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        if (voucherSearchDebounceTimer) clearTimeout(voucherSearchDebounceTimer);
+        showLogs = true;
+        refreshCallback();
+      }
+    });
+  }
 
   const goBtn = document.getElementById("btn-search-go");
   if (goBtn) goBtn.addEventListener("click", () => {
@@ -116,37 +160,79 @@ function bindSearchEvents(container, refreshCallback) {
 
   const resetBtn = document.getElementById("btn-search-reset");
   if (resetBtn) resetBtn.addEventListener("click", () => {
-    const todayStr = new Date().toISOString().split("T")[0];
+    const todayStr = state.getLoginDate() || new Date().toISOString().split("T")[0];
     searchFromDate = todayStr;
     searchToDate = todayStr;
     searchTxt = "";
     showLogs = false;
     refreshCallback();
   });
+
+  document.getElementById("btn-search-rearrange-vouchers")?.addEventListener("click", () => {
+    showRearrangeVouchersModal(activeVoucherTab);
+  });
 }
 
-function getAccountNameForLog(accountId, tx) {
-  if ((accountId === "1100" || accountId === "2100") && tx && tx.description) {
-    const contact = state.getContacts().find(c => tx.description.includes(c.name));
-    if (contact) return contact.name;
+function buildVoucherLogCache() {
+  const contactMap = new Map();
+  const contacts = state.getContacts() || [];
+  contacts.forEach(c => {
+    if (!c) return;
+    if (c.id) contactMap.set(c.id, c);
+    if (c.ledgerCode) contactMap.set(c.ledgerCode, c);
+    if (c.code) contactMap.set(c.code, c);
+  });
+
+  const ledgerMap = new Map();
+  const ledgers = state.getLedgers() || [];
+  ledgers.forEach(l => {
+    if (!l) return;
+    if (l.code) ledgerMap.set(l.code, l);
+    if (l.id) ledgerMap.set(l.id, l);
+  });
+
+  return { contactMap, ledgerMap, contactsList: contacts };
+}
+
+function getAccountNameForLog(accountId, tx, cache = null) {
+  if (state.getAccountDisplayName) {
+    const name = state.getAccountDisplayName(accountId, tx);
+    if (name && name !== accountId) return name;
   }
   const baseContactId = accountId.includes("::") ? accountId.split("::")[0] : accountId;
   const site = accountId.includes("::") ? accountId.split("::")[1] : null;
 
-  const ledger = state.getLedgers().find(l => l.code === baseContactId);
-  if (ledger) return site ? `${ledger.name} (${site})` : ledger.name;
+  if (cache) {
+    if ((accountId === "1100" || accountId === "2100") && tx && tx.description) {
+      const desc = tx.description;
+      const contact = cache.contactsList ? cache.contactsList.find(c => c && c.name && desc.includes(c.name)) : null;
+      if (contact) return contact.name;
+    }
+    const contact = cache.contactMap.get(baseContactId);
+    if (contact) return site ? `${contact.name} (${site})` : contact.name;
+    const ledger = cache.ledgerMap.get(baseContactId);
+    if (ledger) return site ? `${ledger.name} (${site})` : ledger.name;
+  } else {
+    if ((accountId === "1100" || accountId === "2100") && tx && tx.description) {
+      const contact = state.getContacts().find(c => c && c.name && tx.description.includes(c.name));
+      if (contact) return contact.name;
+    }
+    const contact = state.getContacts().find(c => c && (c.id === baseContactId || c.ledgerCode === baseContactId || c.code === baseContactId));
+    if (contact) return site ? `${contact.name} (${site})` : contact.name;
+    const ledger = state.getLedgers().find(l => l && (l.code === baseContactId || l.id === baseContactId));
+    if (ledger) return site ? `${ledger.name} (${site})` : ledger.name;
+  }
+
   if (ACCOUNTS[baseContactId]) return site ? `${ACCOUNTS[baseContactId].name} (${site})` : ACCOUNTS[baseContactId].name;
-  const contact = state.getContacts().find(c => c.id === baseContactId);
-  if (contact) return site ? `${contact.name} (${site})` : contact.name;
   return accountId;
 }
 
-function getVoucherTableRowHTML(tx, deleteBtnClass, rowClass = "voucher-log-row") {
+function getVoucherTableRowHTML(tx, deleteBtnClass, rowClass = "voucher-log-row", cache = null) {
   const debits = tx.entries.filter(e => e.debit > 0);
   const credits = tx.entries.filter(e => e.credit > 0);
 
   const debitNames = debits.map(e => {
-    let name = getAccountNameForLog(e.accountId, tx);
+    let name = getAccountNameForLog(e.accountId, tx, cache);
     if (e.siteBranch) name += ` (${e.siteBranch})`;
     return `<strong>${name}</strong>`;
   }).join("<br>");
@@ -154,7 +240,7 @@ function getVoucherTableRowHTML(tx, deleteBtnClass, rowClass = "voucher-log-row"
   const debitAmounts = debits.map(e => `\u20B9${e.debit.toLocaleString("en-US", { minimumFractionDigits: 2 })}`).join("<br>");
 
   const creditNames = credits.map(e => {
-    let name = getAccountNameForLog(e.accountId, tx);
+    let name = getAccountNameForLog(e.accountId, tx, cache);
     if (e.siteBranch) name += ` (${e.siteBranch})`;
     return `<strong>${name}</strong>`;
   }).join("<br>");
@@ -200,9 +286,14 @@ function renderSelectVoucherLauncher(container) {
     <div class="panel" style="max-width: 850px; width: 100%; margin: 0 auto; padding: 2rem; font-family: var(--font-body); color: var(--text-primary); background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: var(--shadow-lg);">
       <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid #1e3b8b; padding-bottom: 10px; margin-bottom: 20px;">
         <h2 style="font-weight: 800; font-size: 1.5rem; color: #1e3b8b; margin: 0;">Voucher Creation Menu</h2>
-        <button class="btn btn-secondary" id="btn-close-launcher" style="background:#cbd5e1; border:1px solid #94a3b8; color:black; font-weight:700;">
-          <i class="fa-solid fa-xmark"></i> Close
-        </button>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-primary" id="btn-launcher-rearrange" style="background:#2563eb; border:1px solid #1d4ed8; color:white; font-weight:700; font-size:0.82rem; display:flex; align-items:center; gap:5px; cursor:pointer;" title="Reset and renumber vouchers in ascending date order">
+            <i class="fa-solid fa-arrow-down-1-9"></i> Reset Voucher Numbers
+          </button>
+          <button class="btn btn-secondary" id="btn-close-launcher" style="background:#cbd5e1; border:1px solid #94a3b8; color:black; font-weight:700;">
+            <i class="fa-solid fa-xmark"></i> Close
+          </button>
+        </div>
       </div>
       
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
@@ -256,30 +347,29 @@ function renderSelectVoucherLauncher(container) {
   `;
 
   document.getElementById("btn-close-launcher").addEventListener("click", () => {
-    window.location.hash = "#home";
+    const activeWin = document.getElementById("active-window");
+    if (activeWin) {
+      activeWin.classList.remove("launcher-mode");
+      activeWin.style.position = "";
+      activeWin.style.left = "";
+      activeWin.style.top = "";
+      activeWin.style.margin = "";
+      activeWin.style.maxWidth = "";
+      activeWin.style.width = "";
+      activeWin.style.height = "";
+    }
+    window.location.hash = "";
   });
 
   document.querySelectorAll(".launcher-card").forEach(card => {
     card.addEventListener("click", () => {
       const type = card.getAttribute("data-launch");
-      if (type === "receipt" || type === "payment" || type === "journal" || type === "contra") {
+      if (type === "receipt" || type === "payment" || type === "journal" || type === "contra" || type === "debit" || type === "credit") {
         activeVoucherTab = type;
         showVoucherLauncher = false;
         showLogs = false;
         showLogsPanel = false;
         renderVouchers(container);
-      } else if (type === "debit") {
-        import("./transactions.js").then(m => {
-          m.setTransactionsActiveTab("purchase-return");
-          window.location.hash = "#transactions";
-          m.showPurchaseReturnModal(document.getElementById("window-content"));
-        });
-      } else if (type === "credit") {
-        import("./transactions.js").then(m => {
-          m.setTransactionsActiveTab("sales-return");
-          window.location.hash = "#transactions";
-          m.showSalesReturnModal(document.getElementById("window-content"));
-        });
       }
     });
   });
@@ -288,55 +378,107 @@ function renderSelectVoucherLauncher(container) {
 export function renderVouchers(container) {
   const activeWin = document.getElementById("active-window");
   if (showVoucherLauncher) {
-    if (activeWin) activeWin.classList.add("launcher-mode");
+    if (activeWin) {
+      activeWin.classList.add("launcher-mode");
+      activeWin.style.maxWidth = "900px";
+      activeWin.style.width = "100%";
+      activeWin.style.position = "";
+      activeWin.style.left = "";
+      activeWin.style.top = "";
+      activeWin.style.margin = "";
+      activeWin.style.height = "";
+    }
     renderSelectVoucherLauncher(container);
     return;
   } else {
-    if (activeWin) activeWin.classList.remove("launcher-mode");
+    if (activeWin) {
+      activeWin.classList.remove("launcher-mode");
+      if (showLogsPanel) {
+        activeWin.style.maxWidth = "100%";
+        activeWin.style.width = "100%";
+        activeWin.style.height = "92%";
+      } else {
+        activeWin.style.maxWidth = "1120px";
+        activeWin.style.width = "100%";
+        activeWin.style.height = "auto";
+      }
+    }
   }
 
   container.innerHTML = `
-    <!-- Sub-tabs Navigation -->
-    <div style="display: flex; gap: 0.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; flex-wrap: wrap; align-items: center;">
-      <button class="btn btn-secondary" id="btn-back-to-launcher" style="background:#cbd5e1; border:1px solid #94a3b8; color:black; margin-right: 10px; font-weight:700;">
-        <i class="fa-solid fa-house"></i> Voucher Menu
-      </button>
-      <button class="btn ${activeVoucherTab === 'contra' ? 'btn-primary' : 'btn-secondary'} vtab-btn" data-vtab="contra">
-        <i class="fa-solid fa-right-left"></i> Contra Voucher
-      </button>
-      <button class="btn ${activeVoucherTab === 'receipt' ? 'btn-primary' : 'btn-secondary'} vtab-btn" data-vtab="receipt">
-        <i class="fa-solid fa-arrow-down-long"></i> Receipt Voucher
-      </button>
-      <button class="btn ${activeVoucherTab === 'payment' ? 'btn-primary' : 'btn-secondary'} vtab-btn" data-vtab="payment">
-        <i class="fa-solid fa-arrow-up-long"></i> Payment Voucher
-      </button>
-      <button class="btn ${activeVoucherTab === 'journal' ? 'btn-primary' : 'btn-secondary'} vtab-btn" data-vtab="journal">
-        <i class="fa-solid fa-book"></i> Journal Entry
-      </button>
-      <button class="btn btn-secondary" id="btn-vouchers-toggle-logs" style="margin-left: auto; background:#cbd5e1; border:1px solid #94a3b8; color:black; font-weight:700;">
-        <i class="fa-solid fa-search"></i> ${showLogsPanel ? "Hide Logs" : "Search & Open Logs"}
-      </button>
-    </div>
-    
-    <div style="display: flex; gap: 20px; margin-top: 1rem; align-items: stretch; height: calc(100vh - 160px); overflow: hidden;">
-      <!-- Left Column: Form Container -->
-      <div id="voucher-form-container" style="${showLogsPanel ? 'flex: 1.1; min-width: 450px;' : 'flex: 1; max-width: 800px; margin: 0 auto;'} overflow-y: auto; height: 100%;"></div>
-      
-      <!-- Right Column: Logs Container -->
-      <div id="voucher-logs-container" style="flex: 1.4; display: ${showLogsPanel ? 'flex' : 'none'}; flex-direction: column; overflow-y: auto; height: 100%;"></div>
+    <div style="display: flex; gap: 15px; align-items: stretch; ${showLogsPanel ? 'height: calc(100vh - 120px);' : 'height: auto;'} overflow: hidden; width: 100%; max-width: 100%; margin: 0;">
+      <!-- Left Main Content Area: Form (and Logs if open) -->
+      <div style="flex: 1; min-width: 0; display: flex; gap: 15px; align-items: stretch; ${showLogsPanel ? 'height: 100%;' : 'height: auto;'}">
+        <!-- Form Container -->
+        <div id="voucher-form-container" class="no-scrollbar" style="${showLogsPanel ? 'flex: 1.1; min-width: 450px; height: 100%; box-sizing: border-box;' : 'flex: 1; width: 100%; max-width: 100%; height: auto;'} overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none;"></div>
+        
+        <!-- Logs Container (Shown when Search & Open Logs is active) -->
+        <div id="voucher-logs-container" style="flex: 1.4; display: ${showLogsPanel ? 'flex' : 'none'}; flex-direction: column; overflow-y: auto; height: 100%; box-sizing: border-box;"></div>
+      </div>
+
+      <!-- Right Vertical Navigation Bar (Marked Buttons Arranged Vertically on Right Side) -->
+      <div style="display: flex; flex-direction: column; gap: 8px; width: 170px; min-width: 170px; background: var(--bg-secondary); padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; height: fit-content; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+        <button class="btn btn-secondary" id="btn-back-to-launcher" style="background:#cbd5e1; border:1px solid #94a3b8; color:black; font-weight:700; text-align:left; padding:8px 10px; width:100%; font-size:0.8rem;">
+          <i class="fa-solid fa-house"></i> Voucher Menu
+        </button>
+        <button class="btn ${activeVoucherTab === 'contra' ? 'btn-primary' : 'btn-secondary'} vtab-btn" data-vtab="contra" style="text-align:left; padding:8px 10px; width:100%; font-size:0.8rem;">
+          <i class="fa-solid fa-right-left"></i> Contra Voucher
+        </button>
+        <button class="btn ${activeVoucherTab === 'receipt' ? 'btn-primary' : 'btn-secondary'} vtab-btn" data-vtab="receipt" style="text-align:left; padding:8px 10px; width:100%; font-size:0.8rem;">
+          <i class="fa-solid fa-arrow-down-long"></i> Receipt Voucher
+        </button>
+        <button class="btn ${activeVoucherTab === 'payment' ? 'btn-primary' : 'btn-secondary'} vtab-btn" data-vtab="payment" style="text-align:left; padding:8px 10px; width:100%; font-size:0.8rem;">
+          <i class="fa-solid fa-arrow-up-long"></i> Payment Voucher
+        </button>
+        <button class="btn ${activeVoucherTab === 'journal' ? 'btn-primary' : 'btn-secondary'} vtab-btn" data-vtab="journal" style="text-align:left; padding:8px 10px; width:100%; font-size:0.8rem;">
+          <i class="fa-solid fa-book"></i> Journal Entry
+        </button>
+        <button class="btn ${activeVoucherTab === 'debit' ? 'btn-primary' : 'btn-secondary'} vtab-btn" data-vtab="debit" style="text-align:left; padding:8px 10px; width:100%; font-size:0.8rem;">
+          <i class="fa-solid fa-file-invoice-dollar"></i> Debit Note
+        </button>
+        <button class="btn ${activeVoucherTab === 'credit' ? 'btn-primary' : 'btn-secondary'} vtab-btn" data-vtab="credit" style="text-align:left; padding:8px 10px; width:100%; font-size:0.8rem;">
+          <i class="fa-solid fa-file-invoice-dollar"></i> Credit Note
+        </button>
+        <div style="border-top: 1px solid var(--border-color); margin: 4px 0;"></div>
+        <button class="btn ${showLogsPanel ? 'btn-primary' : 'btn-secondary'}" id="btn-vouchers-toggle-logs" style="background:${showLogsPanel ? '#1e3b8b' : '#cbd5e1'}; border:1px solid #94a3b8; color:${showLogsPanel ? 'white' : 'black'}; font-weight:700; text-align:left; padding:8px 10px; width:100%; font-size:0.8rem;">
+          <i class="fa-solid fa-search"></i> ${showLogsPanel ? "Hide Logs" : "Search & Open Logs"}
+        </button>
+        <button class="btn btn-secondary" id="btn-rearrange-vouchers" style="background:#2563eb; color:white; font-weight:700; text-align:left; padding:8px 10px; width:100%; font-size:0.8rem; border:1px solid #1d4ed8; margin-top:2px;" title="Reset and renumber vouchers in ascending date order">
+          <i class="fa-solid fa-arrow-down-1-9"></i> Reset Numbers
+        </button>
+      </div>
     </div>
   `;
 
   // Back to launcher button
   document.getElementById("btn-back-to-launcher").addEventListener("click", () => {
     showVoucherLauncher = true;
+    const activeWin = document.getElementById("active-window");
+    if (activeWin) {
+      activeWin.style.position = "";
+      activeWin.style.left = "";
+      activeWin.style.top = "";
+      activeWin.style.margin = "";
+      activeWin.style.height = "";
+    }
     renderVouchers(container);
   });
 
   // Toggle logs layout
   document.getElementById("btn-vouchers-toggle-logs").addEventListener("click", () => {
     showLogsPanel = !showLogsPanel;
+    if (showLogsPanel) {
+      const todayStr = state.getLoginDate() || new Date().toISOString().split("T")[0];
+      searchFromDate = todayStr;
+      searchToDate = todayStr;
+      searchTxt = "";
+    }
     renderVouchers(container);
+  });
+
+  // Reset / Rearrange Vouchers button
+  document.getElementById("btn-rearrange-vouchers")?.addEventListener("click", () => {
+    showRearrangeVouchersModal(activeVoucherTab);
   });
 
   // Bind tab clicks
@@ -344,6 +486,10 @@ export function renderVouchers(container) {
     btn.addEventListener("click", () => {
       activeVoucherTab = btn.getAttribute("data-vtab");
       showLogs = false;
+      const todayStr = state.getLoginDate() || new Date().toISOString().split("T")[0];
+      searchFromDate = todayStr;
+      searchToDate = todayStr;
+      searchTxt = "";
       renderVouchers(container);
     });
   });
@@ -358,13 +504,35 @@ export function renderVouchers(container) {
       renderContraLogsInline(logsEl, state.getTransactions(), formEl, container);
     }
   } else {
-    showUnifiedSplitVoucherModal(formEl, null, activeVoucherTab, true, container);
+    const entryMode = localStorage.getItem("erp_voucher_entry_mode") || "single";
+    if (entryMode === "single" && (activeVoucherTab === "receipt" || activeVoucherTab === "payment")) {
+      showSingleEntryVoucherModal(formEl, null, activeVoucherTab, true, container, () => renderVouchers(container));
+    } else {
+      showUnifiedSplitVoucherModal(formEl, null, activeVoucherTab, true, container, () => renderVouchers(container));
+    }
     if (showLogsPanel && logsEl) {
       renderUnifiedLogsInline(logsEl, state.getTransactions(), activeVoucherTab, formEl, container);
     }
   }
   initTallyDatePickers(container);
 }
+
+window.renderVouchers = renderVouchers;
+
+export function refreshVoucherLogsOnly() {
+  const logsEl = document.getElementById("voucher-logs-container");
+  const formEl = document.getElementById("voucher-form-container");
+  const mainWin = document.getElementById("active-window");
+  if (!logsEl || logsEl.style.display === "none") return;
+
+  if (activeVoucherTab === "contra") {
+    renderContraLogsInline(logsEl, state.getTransactions(), formEl, mainWin);
+  } else {
+    renderUnifiedLogsInline(logsEl, state.getTransactions(), activeVoucherTab, formEl, mainWin);
+  }
+}
+
+window.refreshVoucherLogsOnly = refreshVoucherLogsOnly;
 
 function renderContraLogsInline(container, txs, formContainer, mainContainer) {
   const cashBankIds = new Set(
@@ -385,19 +553,27 @@ function renderContraLogsInline(container, txs, formContainer, mainContainer) {
     return (isContraRef && debitsCashBank && creditsCashBank) || (onlyCashBank && debitsCashBank && creditsCashBank && tx.entries.length === 2);
   });
 
-  if (showLogs) {
-    if (searchFromDate) contras = contras.filter(tx => tx.date >= searchFromDate);
-    if (searchToDate) contras = contras.filter(tx => tx.date <= searchToDate);
-    if (searchTxt) {
-      contras = contras.filter(tx => 
-        tx.id.toLowerCase().includes(searchTxt.toLowerCase()) || 
-        tx.reference.toLowerCase().includes(searchTxt.toLowerCase()) || 
-        tx.description.toLowerCase().includes(searchTxt.toLowerCase())
-      );
-    }
+  if (searchFromDate) contras = contras.filter(tx => tx.date >= searchFromDate);
+  if (searchToDate) contras = contras.filter(tx => tx.date <= searchToDate);
+  if (searchTxt) {
+    const term = searchTxt.toLowerCase();
+    contras = contras.filter(tx => 
+      (tx.id && tx.id.toLowerCase().includes(term)) || 
+      (tx.reference && tx.reference.toLowerCase().includes(term)) || 
+      (tx.description && tx.description.toLowerCase().includes(term))
+    );
   }
 
   contras.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  const logCache = buildVoucherLogCache();
+  const existingTbody = container.querySelector("#contra-logs-tbody");
+  if (existingTbody) {
+    existingTbody.innerHTML = contras.length === 0 ? `
+      <tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No contra vouchers found.</td></tr>
+    ` : contras.map(tx => getVoucherTableRowHTML(tx, "delete-contra-btn", "contra-log-row", logCache)).join("");
+    return;
+  }
 
   container.innerHTML = `
     ${getSearchPanelHTML()}
@@ -416,10 +592,10 @@ function renderContraLogsInline(container, txs, formContainer, mainContainer) {
               <th style="text-align: center;">Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="contra-logs-tbody">
             ${contras.length === 0 ? `
               <tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No contra vouchers found.</td></tr>
-            ` : contras.map(tx => getVoucherTableRowHTML(tx, "delete-contra-btn", "contra-log-row")).join("")}
+            ` : contras.map(tx => getVoucherTableRowHTML(tx, "delete-contra-btn", "contra-log-row", logCache)).join("")}
           </tbody>
         </table>
       </div>
@@ -428,25 +604,32 @@ function renderContraLogsInline(container, txs, formContainer, mainContainer) {
 
   bindSearchEvents(container, () => renderContraLogsInline(container, txs, formContainer, mainContainer));
 
-  container.querySelectorAll(".delete-contra-btn").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const id = btn.getAttribute("data-id");
-      if (checkAdminPassword()) {
-        state.deleteTransaction(id);
-        renderContraLogsInline(container, state.getTransactions(), formContainer, mainContainer);
-        showContraModal(formContainer, null, true, mainContainer);
+  const tbody = container.querySelector("#contra-logs-tbody");
+  if (tbody) {
+    tbody.addEventListener("click", (e) => {
+      const deleteBtn = e.target.closest(".delete-contra-btn");
+      if (deleteBtn) {
+        e.stopPropagation();
+        const id = deleteBtn.getAttribute("data-id");
+        if (checkAdminPassword()) {
+          const ok = state.deleteTransaction(id);
+          if (ok) {
+            renderContraLogsInline(container, state.getTransactions(), formContainer, mainContainer);
+            showContraModal(formContainer, null, true, mainContainer);
+          }
+        }
       }
     });
-  });
 
-  container.querySelectorAll(".contra-log-row").forEach(row => {
-    row.addEventListener("dblclick", () => {
-      const id = row.getAttribute("data-id");
-      const tx = state.getTransactions().find(t => t.id === id);
-      showContraModal(formContainer, tx, true, mainContainer);
+    tbody.addEventListener("dblclick", (e) => {
+      const row = e.target.closest(".contra-log-row");
+      if (row) {
+        const id = row.getAttribute("data-id");
+        const tx = state.getTransactions().find(t => t.id === id);
+        showContraModal(formContainer, tx, true, mainContainer);
+      }
     });
-  });
+  }
 }
 
 function renderUnifiedLogsInline(container, txs, voucherType, formContainer, mainContainer) {
@@ -510,31 +693,45 @@ function renderUnifiedLogsInline(container, txs, voucherType, formContainer, mai
       const creditsCashBank = tx.entries.some(e => cashBankIds.has(e.accountId) && e.credit > 0);
       const debitsNonCashBank = tx.entries.some(e => !cashBankIds.has(e.accountId) && e.debit > 0);
       return isPaymentRef && creditsCashBank && debitsNonCashBank;
+    } else if (voucherType === "debit") {
+      const isDebitRef = refUpper.startsWith("DN-") || refUpper.startsWith("DN") || refLower.includes("debit note") || refLower.includes("dbn-") || (refUpper.startsWith("D") && !refUpper.startsWith("DN-") && /^[D]\d+$/.test(refUpper));
+      return isDebitRef;
+    } else if (voucherType === "credit") {
+      const isCreditRef = refUpper.startsWith("CN-") || refUpper.startsWith("CN") || refLower.includes("credit note") || refLower.includes("crn-") || (refUpper.startsWith("C") && !refUpper.startsWith("CN-") && !refUpper.startsWith("CO-") && /^[C]\d+$/.test(refUpper));
+      return isCreditRef;
     } else {
       // Show ONLY true journal entries (starting with J or containing JV/journal)
       const isJv = (refUpper.startsWith("JV-") || refUpper.startsWith("JV") || refLower.includes("journal") || descLower.includes("journal") || (refUpper.startsWith("J") && /^[J]\d+$/.test(refUpper))) &&
-                   !refUpper.startsWith("RC") && !refUpper.startsWith("PM") && !refUpper.startsWith("CO") && !refUpper.startsWith("PR") && !refUpper.startsWith("SA");
+                   !refUpper.startsWith("RC") && !refUpper.startsWith("PM") && !refUpper.startsWith("CO") && !refUpper.startsWith("PR") && !refUpper.startsWith("SA") && !refUpper.startsWith("DN") && !refUpper.startsWith("CN");
       return isJv;
     }
   });
 
-  if (showLogs) {
-    if (searchFromDate) filteredTxs = filteredTxs.filter(tx => tx.date >= searchFromDate);
-    if (searchToDate) filteredTxs = filteredTxs.filter(tx => tx.date <= searchToDate);
-    if (searchTxt) {
-      filteredTxs = filteredTxs.filter(tx => 
-        tx.id.toLowerCase().includes(searchTxt.toLowerCase()) || 
-        tx.reference.toLowerCase().includes(searchTxt.toLowerCase()) || 
-        tx.description.toLowerCase().includes(searchTxt.toLowerCase())
-      );
-    }
+  if (searchFromDate) filteredTxs = filteredTxs.filter(tx => tx.date >= searchFromDate);
+  if (searchToDate) filteredTxs = filteredTxs.filter(tx => tx.date <= searchToDate);
+  if (searchTxt) {
+    const term = searchTxt.toLowerCase();
+    filteredTxs = filteredTxs.filter(tx => 
+      (tx.id && tx.id.toLowerCase().includes(term)) || 
+      (tx.reference && tx.reference.toLowerCase().includes(term)) || 
+      (tx.description && tx.description.toLowerCase().includes(term))
+    );
   }
 
   filteredTxs.sort((a, b) => new Date(b.date) - new Date(a.date));
 
   const deleteBtnClass = `delete-${voucherType}-btn`;
   const rowClass = `${voucherType}-log-row`;
-  const title = voucherType.charAt(0).toUpperCase() + voucherType.slice(1) + " Logs";
+  const title = (voucherType === "debit" ? "Debit Note" : voucherType === "credit" ? "Credit Note" : (voucherType.charAt(0).toUpperCase() + voucherType.slice(1))) + " Logs";
+  const logCache = buildVoucherLogCache();
+
+  const existingTbody = container.querySelector("#unified-logs-tbody");
+  if (existingTbody) {
+    existingTbody.innerHTML = filteredTxs.length === 0 ? `
+      <tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No logs found.</td></tr>
+    ` : filteredTxs.map(tx => getVoucherTableRowHTML(tx, deleteBtnClass, rowClass, logCache)).join("");
+    return;
+  }
 
   container.innerHTML = `
     ${getSearchPanelHTML()}
@@ -553,10 +750,10 @@ function renderUnifiedLogsInline(container, txs, voucherType, formContainer, mai
               <th style="text-align: center;">Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="unified-logs-tbody">
             ${filteredTxs.length === 0 ? `
               <tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No logs found.</td></tr>
-            ` : filteredTxs.map(tx => getVoucherTableRowHTML(tx, deleteBtnClass, rowClass)).join("")}
+            ` : filteredTxs.map(tx => getVoucherTableRowHTML(tx, deleteBtnClass, rowClass, logCache)).join("")}
           </tbody>
         </table>
       </div>
@@ -565,32 +762,49 @@ function renderUnifiedLogsInline(container, txs, voucherType, formContainer, mai
 
   bindSearchEvents(container, () => renderUnifiedLogsInline(container, txs, voucherType, formContainer, mainContainer));
 
-  container.querySelectorAll(`.${deleteBtnClass}`).forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const id = btn.getAttribute("data-id");
-      if (checkAdminPassword()) {
-        state.deleteTransaction(id);
-        renderUnifiedLogsInline(container, state.getTransactions(), voucherType, formContainer, mainContainer);
-        showUnifiedSplitVoucherModal(formContainer, null, voucherType, true, mainContainer);
+  const tbody = container.querySelector("#unified-logs-tbody");
+  if (tbody) {
+    tbody.addEventListener("click", (e) => {
+      const deleteBtn = e.target.closest(`.${deleteBtnClass}`);
+      if (deleteBtn) {
+        e.stopPropagation();
+        const id = deleteBtn.getAttribute("data-id");
+        if (checkAdminPassword()) {
+          const ok = state.deleteTransaction(id);
+          if (ok) {
+            renderUnifiedLogsInline(container, state.getTransactions(), voucherType, formContainer, mainContainer);
+            const entryMode = localStorage.getItem("erp_voucher_entry_mode") || "single";
+            if (entryMode === "single" && (voucherType === "receipt" || voucherType === "payment")) {
+              showSingleEntryVoucherModal(formContainer, null, voucherType, true, mainContainer, () => renderVouchers(mainContainer));
+            } else {
+              showUnifiedSplitVoucherModal(formContainer, null, voucherType, true, mainContainer, () => renderVouchers(mainContainer));
+            }
+          }
+        }
       }
     });
-  });
 
-  container.querySelectorAll(`.${rowClass}`).forEach(row => {
-    row.addEventListener("dblclick", () => {
-      const id = row.getAttribute("data-id");
-      const tx = state.getTransactions().find(t => t.id === id);
-      showUnifiedSplitVoucherModal(formContainer, tx, voucherType, true, mainContainer);
+    tbody.addEventListener("dblclick", (e) => {
+      const row = e.target.closest(`.${rowClass}`);
+      if (row) {
+        const id = row.getAttribute("data-id");
+        const tx = state.getTransactions().find(t => t.id === id);
+        const entryMode = localStorage.getItem("erp_voucher_entry_mode") || "single";
+        if (entryMode === "single" && (voucherType === "receipt" || voucherType === "payment")) {
+          showSingleEntryVoucherModal(formContainer, tx, voucherType, true, mainContainer, () => renderVouchers(mainContainer));
+        } else {
+          showUnifiedSplitVoucherModal(formContainer, tx, voucherType, true, mainContainer, () => renderVouchers(mainContainer));
+        }
+      }
     });
-  });
+  }
 }
 
 export function showContraModal(container, tx = null, isInline = false, mainContainer = null) {
   const root = isInline ? container : document.getElementById("modal-container-root");
   
   const cashBankLedgers = state.getLedgers().filter(l => l.groupName === "CASH-IN-HAND" || l.groupName === "BANK ACCOUNTS");
-  const defaultFrom = cashBankLedgers.find(l => l.groupName === "BANK ACCOUNTS")?.code || "L015";
+  const defaultFrom = cashBankLedgers.find(l => l.groupName === "BANK ACCOUNTS")?.code || "";
   const defaultTo = cashBankLedgers.find(l => l.groupName === "CASH-IN-HAND")?.code || "L009";
 
   const dateVal = tx ? tx.date : state.getLoginDate();
@@ -610,7 +824,7 @@ export function showContraModal(container, tx = null, isInline = false, mainCont
   const amountVal = tx ? (tx.entries.find(e => e.debit > 0)?.debit || 0) : "";
 
   const formContent = `
-    <form id="contra-form" style="display:flex; flex-direction:column; gap:12px; margin-top:10px;">
+    <form id="contra-form" style="display:flex; flex-direction:column; gap:12px; margin-top:10px; ${showLogsPanel ? 'flex: 1; min-height: 0;' : 'height: 100%;'}">
       <div style="display:grid; grid-template-columns:120px 1fr; align-items:center; gap:8px;">
         <label style="font-weight:bold;">Voucher No:</label>
         <input type="text" id="contra-ref" class="form-control" style="background-color: var(--bg-tertiary); color: var(--text-muted);" value="${refVal}" readonly required>
@@ -640,8 +854,8 @@ export function showContraModal(container, tx = null, isInline = false, mainCont
         <input type="text" id="contra-desc" class="form-control" style="background: var(--bg-tertiary); color: var(--text-primary);" value="${descVal || 'Cash/Bank Transfer'}" required>
       </div>
       
-      <div style="display:flex; justify-content:flex-end; gap:8px; border-top:1px solid var(--border-color); padding-top:10px; margin-top:5px;">
-        <button type="button" class="btn btn-secondary" id="btn-contra-cancel">${isInline ? "Clear/New" : "Cancel"}</button>
+      <div style="display:flex; justify-content:flex-end; gap:8px; border-top:1px solid var(--border-color); padding-top:10px; margin-top:auto;">
+        <button type="button" class="btn btn-secondary" id="btn-contra-cancel">${isInline ? "New" : "Cancel"}</button>
         <button type="submit" class="btn btn-primary" style="background:#1e3b8b; color:white; border:none;">Submit</button>
       </div>
     </form>
@@ -651,7 +865,7 @@ export function showContraModal(container, tx = null, isInline = false, mainCont
 
   if (isInline) {
     root.innerHTML = `
-      <div class="panel" style="padding:15px; color: var(--text-primary); font-size:0.85rem; height: 100%;">
+      <div class="panel" style="padding:15px; color: var(--text-primary); font-size:0.85rem; box-sizing:border-box; ${showLogsPanel ? 'height: 100%; display: flex; flex-direction: column;' : 'height: 100%;'}">
         <div style="font-weight:700; color: var(--text-primary); border-bottom: 2px solid var(--accent-color); padding-bottom: 6px;">
           <div>${tx ? "Edit Contra Voucher" : "Post Contra Voucher"}</div>
         </div>
@@ -683,14 +897,23 @@ export function showContraModal(container, tx = null, isInline = false, mainCont
 
 
 
+  let isSubmittingContra = false;
   document.getElementById("contra-form").addEventListener("submit", (e) => {
     e.preventDefault();
+    if (isSubmittingContra) return;
+
     const fromAcc = document.getElementById("contra-from").value;
     const toAcc = document.getElementById("contra-to").value;
     const amt = parseFloat(document.getElementById("contra-amount").value) || 0;
     const ref = document.getElementById("contra-ref").value;
     const desc = document.getElementById("contra-desc").value;
     const date = document.getElementById("contra-date").value;
+
+    const fyCheck = state.isPreviousFyLocked(date);
+    if (fyCheck.locked) {
+      alert(fyCheck.reason);
+      return;
+    }
 
     if (fromAcc === toAcc) {
       alert("Source and Destination accounts must be different.");
@@ -705,6 +928,8 @@ export function showContraModal(container, tx = null, isInline = false, mainCont
       if (!checkAdminPassword()) return;
       state.deleteTransaction(tx.id);
     }
+
+    isSubmittingContra = true;
 
     try {
       state.addTransaction({
@@ -740,6 +965,8 @@ export function showContraModal(container, tx = null, isInline = false, mainCont
       }
     } catch (err) {
       alert("Error posting contra: " + err.message);
+    } finally {
+      isSubmittingContra = false;
     }
   });
 }
@@ -802,11 +1029,13 @@ export function showUnifiedSplitVoucherModal(container, tx, voucherType, isInlin
   let modalTitle = "Journal Entry";
   if (voucherType === "receipt") modalTitle = "Receipt Voucher Entry";
   if (voucherType === "payment") modalTitle = "Payment Voucher Entry";
+  if (voucherType === "debit") modalTitle = "Debit Note Voucher Entry";
+  if (voucherType === "credit") modalTitle = "Credit Note Voucher Entry";
 
   const formContent = `
-    <div style="display:flex; flex-direction:column; gap:8px; color: var(--text-primary);">
+    <div style="display:flex; flex-direction:column; gap:8px; color: var(--text-primary); ${showLogsPanel ? 'flex:1; min-height:0; overflow:hidden;' : 'height:100%;'}">
       <!-- Top Metadata -->
-      <div style="display:flex; justify-content:space-between; align-items:center; background: var(--bg-tertiary); padding:6px; border:1px solid var(--border-color); border-radius:2px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; background: var(--bg-tertiary); padding:6px; border:1px solid var(--border-color); border-radius:2px; flex-wrap:wrap; gap:6px;">
         <div style="display:flex; align-items:center; gap:6px;">
           <label style="font-weight:bold; color: var(--text-secondary);">Voucher No:</label>
           <input type="text" id="jv-voucherno" class="form-control" style="width:100px; padding:2px; font-size:0.8rem; background-color: var(--bg-secondary); color: var(--text-muted);" value="${refVal}" readonly required>
@@ -815,10 +1044,64 @@ export function showUnifiedSplitVoucherModal(container, tx, voucherType, isInlin
           <label style="font-weight:bold; color: var(--text-secondary);">Date:</label>
           <input type="date" id="jv-date" class="form-control" style="width:150px; padding:2px; font-size:0.8rem; background-color: var(--bg-secondary); color: var(--text-primary);" value="${dateVal}" required>
         </div>
+        ${(voucherType === "receipt" || voucherType === "payment") ? `
+        <div>
+          <button type="button" class="btn btn-secondary" id="btn-split-switch-to-single" style="padding:2px 8px; font-size:0.75rem; font-weight:700; background:#f1f5f9; color:#0f172a; border:1px solid #94a3b8; display:flex; align-items:center; gap:4px; cursor:pointer;" title="Switch to Single Entry Mode (Ctrl+H)">
+            <i class="fa-solid fa-bolt" style="color:#eab308;"></i> Single Entry Mode
+          </button>
+        </div>
+        ` : ''}
+      </div>
+
+      <!-- Floating Entry Modal (Previous Look) -->
+      <div id="jv-input-popup" style="display:none; position:absolute; top:20%; left:15%; right:15%; width:70%; max-width:600px; margin:0 auto; background-color:#cbd5e1; border:2px solid #1e3b8b; padding:15px; color:black; font-family:var(--font-body); font-size:0.85rem; box-shadow:0 8px 30px rgba(0,0,0,0.5); z-index:100001; border-radius:4px;">
+        <div style="background-color:#1e3b8b; color:white; padding:4px 8px; font-weight:bold; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; border-radius:2px;">
+          <span>Entry</span>
+          <button type="button" id="pop-close-x" style="background:none; border:none; color:white; font-size:1.1rem; cursor:pointer; line-height:1;" title="Close popup">&times;</button>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px; color:black;">
+          <div style="display:grid; grid-template-columns:100px 1fr; align-items:center; gap:8px;">
+            <label style="font-weight:bold; color:black;">Debit/Credit:</label>
+            <select id="pop-drcr" class="form-control" style="background-color:white; color:black; width:100px; padding:3px; font-weight:bold;">
+              <option value="Dr">Dr</option>
+              <option value="Cr">Cr</option>
+            </select>
+          </div>
+
+          <div style="display:grid; grid-template-columns:100px 1fr; align-items:center; gap:8px;">
+            <label style="font-weight:bold; color:black;">Account:</label>
+            <div style="display:flex; flex-direction:column; gap:2px; flex-grow:1; position:relative;" id="pop-account-combobox-wrapper">
+              <div style="position:relative; width:100%;">
+                <input type="text" id="pop-account-search" class="form-control" autocomplete="off" spellcheck="false" placeholder="-- Type or Select Account --" style="background-color:white; color:black; padding:4px 24px 4px 8px; font-size:0.82rem; width:100%; border:1px solid #7a96b2; box-sizing:border-box;" required>
+                <span id="pop-account-toggle" style="position:absolute; right:8px; top:50%; transform:translateY(-50%); cursor:pointer; color:#64748b; font-size:0.75rem; user-select:none;" title="Toggle account list">▼</span>
+              </div>
+              <input type="hidden" id="pop-account-code" value="">
+              <div id="pop-account-dropdown" style="display:none; position:absolute; top:100%; left:0; right:0; max-height:220px; background:white; border:1.5px solid #1e3b8b; box-shadow:0 8px 24px rgba(0,0,0,0.35); z-index:100005; border-radius:0 0 4px 4px; overflow-y:auto; margin-top:2px;">
+                <div id="pop-account-list" style="background:white;"></div>
+              </div>
+              <span id="pop-bal-feedback" style="font-size:0.75rem; font-weight:bold; color:#1e40af; margin-top:2px;">Closing Balance: 0.00 Dr</span>
+            </div>
+          </div>
+
+          <!-- Site/Branch Multi Dropdown -->
+          <div id="pop-site-branch-row" style="display:none; grid-template-columns:100px 1fr; align-items:center; gap:8px;">
+            <label id="pop-site-branch-label" style="font-weight:bold; color:black;">Site Name:</label>
+            <select id="pop-site-branch" class="form-control" style="background-color:white; color:black; padding:3px; flex:1; max-width:300px;"></select>
+          </div>
+
+          <div style="display:grid; grid-template-columns:100px 1fr; align-items:center; gap:8px;">
+            <label style="font-weight:bold; color:black;">Amount (₹):</label>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <input type="number" step="0.01" id="pop-amount" class="form-control" style="background-color:white; color:black; width:150px; padding:3px; font-weight:bold;" placeholder="0.00" value="0.00">
+              <button type="button" id="pop-btn-ok" style="background:#cbd5e1; border:1px solid #475569; color:black; padding:4px 18px; font-weight:bold; cursor:pointer; border-radius:3px;">OK</button>
+              <button type="button" id="pop-btn-cancel" style="background:#cbd5e1; border:1px solid #475569; color:black; padding:4px 14px; font-weight:bold; cursor:pointer; border-radius:3px;">Cancel</button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Main Journal Grid Table -->
-      <div style="background-color: var(--bg-secondary); border:1px solid var(--border-color); border-radius:2px; min-height:160px; max-height:200px; overflow-y:auto;">
+      <div class="no-scrollbar" style="background-color: var(--bg-secondary); border:1px solid var(--border-color); border-radius:2px; min-height:100px; flex:1; overflow-y:auto; scrollbar-width: none; -ms-overflow-style: none;">
         <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.8rem; color: var(--text-primary);">
           <thead>
             <tr style="background-color:#1e3b8b; color:white;">
@@ -855,54 +1138,11 @@ export function showUnifiedSplitVoucherModal(container, tx, voucherType, isInlin
 
       <!-- Action Buttons Ribbon -->
       <div style="display:flex; justify-content:flex-end; gap:8px; border-top:1px solid var(--border-color); padding-top:8px;">
-        <button type="button" class="btn btn-secondary" id="btn-jv-add" style="padding:4px 16px; font-weight:bold;">Add</button>
-        <button type="button" class="btn btn-secondary" id="btn-jv-edit" style="padding:4px 16px; font-weight:bold;" disabled>Edit</button>
-        <button type="button" class="btn btn-secondary" id="btn-jv-delete" style="padding:4px 16px; font-weight:bold;" disabled>Delete</button>
-        <button type="button" class="btn btn-primary" id="btn-jv-submit" style="padding:4px 20px; font-weight:bold; background-color:#1e3b8b;" disabled>Submit</button>
-        <button type="button" class="btn btn-secondary" id="btn-jv-close" style="padding:4px 16px; font-weight:bold;">${isInline ? "Clear" : "Close"}</button>
-      </div>
-    </div>
-
-    <!-- Dynamic popup panel for Add/Edit input strip (tan/cream layout) -->
-    <div id="jv-input-popup" style="display:none; position:absolute; top:35%; left:10%; right:10%; background-color:#f5eedc; border:2px solid #a89f8d; border-radius:4px; padding:15px; box-shadow:0 4px 25px rgba(0,0,0,0.5); z-index:100001;">
-      <div style="display:flex; flex-direction:column; gap:10px; color:black;">
-        <div style="display:grid; grid-template-columns:100px 1fr; align-items:center; gap:8px;">
-          <label style="font-weight:bold; color:black;">Debit/Credit:</label>
-          <select id="pop-drcr" class="form-control" style="background-color:white; color:black; width:80px; padding:2px;">
-            <option value="Dr">Dr</option>
-            <option value="Cr">Cr</option>
-          </select>
-        </div>
-
-        <div style="display:grid; grid-template-columns:100px 1fr; align-items:center; gap:8px;">
-          <label style="font-weight:bold; color:black;">Account:</label>
-          <div style="display:flex; flex-direction:column; gap:2px; flex-grow:1; position:relative;" id="pop-account-combobox-wrapper">
-            <div style="position:relative; width:100%;">
-              <input type="text" id="pop-account-search" class="form-control" autocomplete="off" spellcheck="false" placeholder="-- Type or Select Account --" style="background-color:white; color:black; padding:3px 22px 3px 6px; font-size:0.82rem; width:100%; border:1px solid #7a96b2; box-sizing:border-box;" required>
-              <span id="pop-account-toggle" style="position:absolute; right:6px; top:50%; transform:translateY(-50%); cursor:pointer; color:#64748b; font-size:0.7rem; user-select:none; line-height:1;" title="Toggle account list">▼</span>
-            </div>
-            <input type="hidden" id="pop-account-code" value="">
-            <div id="pop-account-dropdown" style="display:none; position:absolute; top:100%; left:0; right:0; max-height:220px; background:white; border:1.5px solid #1e3b8b; box-shadow:0 8px 24px rgba(0,0,0,0.35); z-index:100005; border-radius:0 0 4px 4px; overflow-y:auto; margin-top:2px;">
-              <div id="pop-account-list" style="background:white;"></div>
-            </div>
-            <span id="pop-bal-feedback" style="font-size:0.75rem; font-weight:bold; color:#1e40af; margin-top:2px;">Closing Balance: 0.00 Dr</span>
-          </div>
-        </div>
-
-        <!-- Site/Branch Multi Dropdown -->
-        <div id="pop-site-branch-row" style="display:none; grid-template-columns:100px 1fr; align-items:center; gap:8px;">
-          <label id="pop-site-branch-label" style="font-weight:bold; color:black;">Site Name:</label>
-          <select id="pop-site-branch" class="form-control" style="background-color:white; color:black; padding:2px;"></select>
-        </div>
-
-        <div style="display:grid; grid-template-columns:100px 1fr; align-items:center; gap:8px;">
-          <label style="font-weight:bold; color:black;">Amount:</label>
-          <div style="display:flex; align-items:center; gap:8px;">
-            <input type="number" step="0.01" id="pop-amount" class="form-control" style="background-color:white; color:black; width:150px; padding:2px;" placeholder="0.00" value="0.00">
-            <button type="button" id="pop-btn-ok" style="background:#cbd5e1; border:1px solid #475569; padding:4px 16px; font-weight:bold; cursor:pointer;">OK</button>
-            <button type="button" id="pop-btn-cancel" style="background:#cbd5e1; border:1px solid #475569; padding:4px 16px; font-weight:bold; cursor:pointer;">Cancel</button>
-          </div>
-        </div>
+        <button type="button" class="btn btn-secondary" id="btn-jv-add" style="padding:4px 16px; font-weight:bold;">Transaction</button>
+        <button type="button" class="btn btn-secondary" id="btn-jv-edit" style="padding:4px 16px; font-weight:bold;" disabled>Edit Selected</button>
+        <button type="button" class="btn btn-secondary" id="btn-jv-delete" style="padding:4px 16px; font-weight:bold;" disabled>Delete Selected</button>
+        <button type="button" class="btn btn-primary" id="btn-jv-submit" style="padding:4px 20px; font-weight:bold; background-color:#1e3b8b;" disabled>Submit Voucher</button>
+        <button type="button" class="btn btn-secondary" id="btn-jv-close" style="padding:4px 16px; font-weight:bold;">${isInline ? "New" : "Close"}</button>
       </div>
     </div>
   `;
@@ -917,7 +1157,7 @@ export function showUnifiedSplitVoucherModal(container, tx, voucherType, isInlin
 
   if (isInline) {
     root.innerHTML = `
-      <div class="panel" style="padding:15px; color: var(--text-primary); font-size:0.8rem; position:relative; height: 100%;">
+      <div class="panel no-scrollbar" style="padding:15px; color: var(--text-primary); font-size:0.8rem; position:relative; box-sizing:border-box; ${showLogsPanel ? 'height: 100%; display: flex; flex-direction: column;' : 'height: fit-content;'}">
         <div style="font-weight:700; border-bottom: 2px solid var(--accent-color); padding-bottom: 6px; margin-bottom: 10px; color: var(--text-primary);">
           ${modalTitle}
         </div>
@@ -927,7 +1167,7 @@ export function showUnifiedSplitVoucherModal(container, tx, voucherType, isInlin
   } else {
     root.innerHTML = `
       <div class="modal-overlay active" id="modal-overlay" style="display:flex; justify-content:center; align-items:center; color:black; z-index:9999;">
-        <div class="modal-container modal-lg" style="max-width:900px; background-color:#cbd5e1; color:#0f172a; padding:10px; font-family:var(--font-body); border:2px solid #64748b; font-size:0.8rem; position:relative; z-index:10000;">
+        <div class="modal-container modal-lg" style="max-width:630px; width:70%; background-color:#cbd5e1; color:#0f172a; padding:10px; font-family:var(--font-body); border:2px solid #64748b; font-size:0.8rem; position:relative; z-index:10000;">
           <div style="background-color:#1e3b8b; color:white; padding:4px 10px; font-weight:700; display:flex; justify-content:space-between; align-items:center; border-radius:var(--border-radius-sm) var(--border-radius-sm) 0 0;">
             <div>${modalTitle}</div>
             <button type="button" style="background:none; border:none; color:white; font-size:1.2rem; cursor:pointer;" id="jv-close-btn-header">&times;</button>
@@ -964,6 +1204,15 @@ export function showUnifiedSplitVoucherModal(container, tx, voucherType, isInlin
 
   document.getElementById("btn-jv-close").addEventListener("click", close);
 
+  document.getElementById("btn-split-switch-to-single")?.addEventListener("click", () => {
+    localStorage.setItem("erp_voucher_entry_mode", "single");
+    if (isInline) {
+      showSingleEntryVoucherModal(container, tx, voucherType, true, mainContainer, () => renderVouchers(mainContainer));
+    } else {
+      showSingleEntryVoucherModal(container, tx, voucherType, false, mainContainer, () => renderVouchers(mainContainer));
+    }
+  });
+
   // Update narration, B2B, RCA values dynamically
   const narrInput = document.getElementById("jv-narration");
   narrInput.addEventListener("input", () => { narrationVal = narrInput.value; });
@@ -973,26 +1222,14 @@ export function showUnifiedSplitVoucherModal(container, tx, voucherType, isInlin
   if (rcaInput) rcaInput.addEventListener("change", () => { reverseCharge = rcaInput.value; });
 
   const getAvailableAccounts = () => {
-    const isDr = popDrCr.value === "Dr";
-    let allowedLedgers = [];
-    let allowedContacts = [];
-    if (voucherType === "receipt") {
-      if (isDr) {
-        allowedLedgers = cashBankLedgers;
-      } else {
-        allowedLedgers = otherLedgers;
-        allowedContacts = contacts;
-      }
-    } else if (voucherType === "payment") {
-      if (isDr) {
-        allowedLedgers = otherLedgers;
-        allowedContacts = contacts;
-      } else {
-        allowedLedgers = cashBankLedgers;
-      }
-    } else {
-      allowedLedgers = ledgers;
-      allowedContacts = contacts;
+    let allowedLedgers = ledgers;
+    let allowedContacts = contacts;
+
+    const currentDrCr = popDrCr ? popDrCr.value : "Dr";
+    const hideCashBank = (voucherType === "receipt" && currentDrCr === "Cr") || (voucherType === "payment" && currentDrCr === "Dr");
+
+    if (hideCashBank) {
+      allowedLedgers = allowedLedgers.filter(l => !cashBankCodes.has(l.code) && l.groupName !== "CASH-IN-HAND" && l.groupName !== "BANK ACCOUNTS");
     }
 
     const balances = getBalancesMap();
@@ -1003,15 +1240,15 @@ export function showUnifiedSplitVoucherModal(container, tx, voucherType, isInlin
       const phoneStr = (c.mobile || c.phone) ? ` • 📞 ${c.mobile || c.phone}` : "";
       const gstinStr = c.gstin ? ` • GSTIN: ${c.gstin}` : "";
       const normName = String(c.name || "").trim().toUpperCase();
+      const codeVal = String(c.id || c.ledgerCode || c.code || "");
       if (normName) seenNames.add(normName);
-      if (c.id) seenCodes.add(c.id);
-      if (c.ledgerCode) seenCodes.add(c.ledgerCode);
+      if (codeVal) seenCodes.add(codeVal);
 
       return {
-        code: c.id,
-        name: c.name,
+        code: codeVal,
+        name: c.name || "",
         typeLabel: (c.type || "PARTY").toUpperCase(),
-        subInfo: `${c.id} • ${(c.type || 'PARTY').toUpperCase()}${phoneStr}${gstinStr}`,
+        subInfo: `${codeVal} • ${(c.type || 'PARTY').toUpperCase()}${phoneStr}${gstinStr}`,
         balance: c.balance || 0,
         isContact: true,
         contact: c
@@ -1021,18 +1258,20 @@ export function showUnifiedSplitVoucherModal(container, tx, voucherType, isInlin
     const ledgerItems = allowedLedgers
       .filter(l => {
         const normName = String(l.name || "").trim().toUpperCase();
-        if (seenCodes.has(l.code)) return false;
+        const codeVal = String(l.code || "");
+        if (seenCodes.has(codeVal)) return false;
         if (seenNames.has(normName)) return false;
         return true;
       })
       .map(l => {
-        const balObj = balances ? balances[l.code] : null;
+        const codeVal = String(l.code || "");
+        const balObj = balances ? (balances[codeVal] || balances[l.code]) : null;
         const balVal = balObj ? balObj.balance : (l.openingBalance || 0);
         return {
-          code: l.code,
-          name: l.name,
+          code: codeVal,
+          name: l.name || "",
           typeLabel: l.groupName || "LEDGER",
-          subInfo: `${l.code} • ${l.groupName || 'Ledger'}`,
+          subInfo: `${codeVal} • ${l.groupName || 'Ledger'}`,
           balance: balVal,
           isContact: false
         };
@@ -1073,7 +1312,7 @@ export function showUnifiedSplitVoucherModal(container, tx, voucherType, isInlin
       const balColor = (acc.balance || 0) >= 0 ? "#b45309" : "#15803d";
 
       return `
-        <div class="pop-acc-item" data-index="${idx}" data-code="${acc.code}" data-name="${acc.name.replace(/"/g, '&quot;')}" style="padding:5px 8px; cursor:pointer; user-select:none; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center; background-color:${isSelected ? '#0078d7' : (idx % 2 === 0 ? '#ffffff' : '#f8fafc')}; color:${isSelected ? '#ffffff' : '#0f172a'};">
+        <div class="pop-acc-item" data-index="${idx}" style="padding:5px 8px; cursor:pointer; user-select:none; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center; background-color:${isSelected ? '#0078d7' : (idx % 2 === 0 ? '#ffffff' : '#f8fafc')}; color:${isSelected ? '#ffffff' : '#0f172a'};">
           <div style="display:flex; flex-direction:column; gap:1px; flex:1; min-width:0;">
             <strong style="font-size:0.8rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${acc.name}</strong>
             <span style="font-size:0.68rem; color:${isSelected ? '#e0f2fe' : '#64748b'}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${acc.subInfo}</span>
@@ -1095,10 +1334,18 @@ export function showUnifiedSplitVoucherModal(container, tx, voucherType, isInlin
       const handleSelect = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        const code = item.getAttribute("data-code");
-        const name = item.getAttribute("data-name");
-        selectPopAccount(code, name);
+        const idx = parseInt(item.getAttribute("data-index"));
+        if (!isNaN(idx) && currentFilteredAccounts[idx]) {
+          const acc = currentFilteredAccounts[idx];
+          selectPopAccount(acc.code, acc.name);
+        }
       };
+
+      item.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        handleSelect(e);
+      });
 
       item.addEventListener("click", handleSelect);
       item.addEventListener("dblclick", handleSelect);
@@ -1134,11 +1381,16 @@ export function showUnifiedSplitVoucherModal(container, tx, voucherType, isInlin
     }
   };
 
+  let lastAccountSelectTime = 0;
+  let isSelectingAccount = false;
+
   const selectPopAccount = (code, name, preselectedSite = "") => {
-    popAccountCode.value = code;
-    popAccountSearch.value = name;
+    isSelectingAccount = true;
+    popAccountCode.value = String(code || "");
+    popAccountSearch.value = String(name || "");
     popAccountDropdown.style.display = "none";
     updatePopupBalance(preselectedSite);
+    lastAccountSelectTime = Date.now();
 
     const siteBranchRow = document.getElementById("pop-site-branch-row");
     if (siteBranchRow && siteBranchRow.style.display !== "none") {
@@ -1148,6 +1400,9 @@ export function showUnifiedSplitVoucherModal(container, tx, voucherType, isInlin
       popAmount.focus();
       popAmount.select();
     }
+    setTimeout(() => {
+      isSelectingAccount = false;
+    }, 150);
   };
 
   const openPopAccountDropdown = () => {
@@ -1169,10 +1424,23 @@ export function showUnifiedSplitVoucherModal(container, tx, voucherType, isInlin
   });
 
   popAccountSearch.addEventListener("input", () => {
-    popAccountCode.value = "";
+    if (isSelectingAccount) return;
     activePopAccountIndex = 0;
     renderPopAccountDropdownList(popAccountSearch.value);
     popAccountDropdown.style.display = "block";
+
+    const typed = popAccountSearch.value.trim().toLowerCase();
+    if (!typed) {
+      popAccountCode.value = "";
+      updatePopupBalance();
+    } else {
+      const allList = getAvailableAccounts();
+      const exact = allList.find(a => a.name.toLowerCase() === typed || String(a.code).toLowerCase() === typed);
+      if (exact) {
+        popAccountCode.value = String(exact.code);
+        updatePopupBalance();
+      }
+    }
   });
 
   popAccountToggle.addEventListener("click", (e) => {
@@ -1184,6 +1452,20 @@ export function showUnifiedSplitVoucherModal(container, tx, voucherType, isInlin
       openPopAccountDropdown();
     }
   });
+
+  if (popup) {
+    popup.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        e.stopPropagation();
+        if (popAccountDropdown && popAccountDropdown.style.display === "block") {
+          closePopAccountDropdown();
+        } else {
+          popup.style.display = "none";
+        }
+      }
+    });
+  }
 
   popAccountSearch.addEventListener("keydown", (e) => {
     if (e.key === "ArrowDown") {
@@ -1225,7 +1507,7 @@ export function showUnifiedSplitVoucherModal(container, tx, voucherType, isInlin
         // Try to match typed text
         const query = popAccountSearch.value.trim().toLowerCase();
         const allList = getAvailableAccounts();
-        const matched = allList.find(a => a.name.toLowerCase() === query || a.code.toLowerCase() === query) ||
+        const matched = allList.find(a => a.name.toLowerCase() === query || String(a.code).toLowerCase() === query) ||
                         allList.find(a => a.name.toLowerCase().startsWith(query)) ||
                         allList.find(a => a.name.toLowerCase().includes(query));
         if (matched) {
@@ -1235,7 +1517,11 @@ export function showUnifiedSplitVoucherModal(container, tx, voucherType, isInlin
         }
       }
     } else if (e.key === "Escape") {
-      closePopAccountDropdown();
+      if (popAccountDropdown && popAccountDropdown.style.display === "block") {
+        e.preventDefault();
+        e.stopPropagation();
+        closePopAccountDropdown();
+      }
     } else if (e.key === "Tab") {
       if (popAccountDropdown.style.display === "block" && currentFilteredAccounts.length > 0 && activePopAccountIndex >= 0) {
         const acc = currentFilteredAccounts[activePopAccountIndex];
@@ -1244,22 +1530,26 @@ export function showUnifiedSplitVoucherModal(container, tx, voucherType, isInlin
     }
   });
 
-  const handleOutsideClick = (e) => {
-    if (popAccountDropdown && popAccountDropdown.style.display === "block" && !e.target.closest("#pop-account-combobox-wrapper")) {
-      closePopAccountDropdown();
+  if (window._voucherOutsideClickHandler) {
+    document.removeEventListener("click", window._voucherOutsideClickHandler);
+  }
+  window._voucherOutsideClickHandler = (e) => {
+    const dropdown = document.getElementById("pop-account-dropdown");
+    if (dropdown && dropdown.style.display === "block" && !e.target.closest("#pop-account-combobox-wrapper")) {
+      dropdown.style.display = "none";
     }
   };
-  document.addEventListener("click", handleOutsideClick);
+  document.addEventListener("click", window._voucherOutsideClickHandler);
 
   popDrCr.addEventListener("change", () => {
-    const accounts = getAvailableAccounts();
-    const stillValid = accounts.some(a => a.code === popAccountCode.value);
-    if (!stillValid) {
+    const currentDrCr = popDrCr ? popDrCr.value : "Dr";
+    const hideCashBank = (voucherType === "receipt" && currentDrCr === "Cr") || (voucherType === "payment" && currentDrCr === "Dr");
+    if (hideCashBank && popAccountCode.value && (cashBankCodes.has(popAccountCode.value) || state.getLedgers().some(l => l.code === popAccountCode.value && (l.groupName === "CASH-IN-HAND" || l.groupName === "BANK ACCOUNTS")))) {
       popAccountCode.value = "";
       popAccountSearch.value = "";
-      updatePopupBalance();
+      popBalFeedback.textContent = "Closing Balance: 0.00 Dr";
     }
-    if (popAccountDropdown.style.display === "block") {
+    if (popAccountDropdown && popAccountDropdown.style.display === "block") {
       renderPopAccountDropdownList(popAccountSearch.value);
     }
   });
@@ -1379,11 +1669,11 @@ export function showUnifiedSplitVoucherModal(container, tx, voucherType, isInlin
       const balObj = balances[balanceKey];
       popBalFeedback.innerText = `Closing Balance: \u20B9${Math.abs(balObj.balance).toFixed(2)} ${balObj.balance >= 0 ? 'Dr' : 'Cr'}`;
     } else {
-      const contact = contacts.find(c => c.id === baseContactId);
+      const contact = contacts.find(c => String(c.id) === String(baseContactId) || String(c.ledgerCode) === String(baseContactId));
       if (contact) {
         popBalFeedback.innerText = `Closing Balance: \u20B9${Math.abs(contact.balance || 0).toFixed(2)} ${(contact.balance || 0) >= 0 ? 'Dr' : 'Cr'}`;
       } else {
-        const ledger = ledgers.find(l => l.code === baseContactId);
+        const ledger = ledgers.find(l => String(l.code) === String(baseContactId));
         if (ledger) {
           const bal = ledger.openingBalance || 0;
           popBalFeedback.innerText = `Closing Balance: \u20B9${Math.abs(bal).toFixed(2)} ${bal >= 0 ? 'Dr' : 'Cr'}`;
@@ -1397,12 +1687,12 @@ export function showUnifiedSplitVoucherModal(container, tx, voucherType, isInlin
     const siteBranchLabel = document.getElementById("pop-site-branch-label");
     const siteBranchSelect = document.getElementById("pop-site-branch");
 
-    const ledger = ledgers.find(l => l.code === baseContactId);
+    const ledger = ledgers.find(l => String(l.code) === String(baseContactId));
     let contact = null;
     if (ledger) {
       contact = contacts.find(c => c.name.toLowerCase().trim() === ledger.name.toLowerCase().trim());
     } else {
-      contact = contacts.find(c => c.id === baseContactId);
+      contact = contacts.find(c => String(c.id) === String(baseContactId) || String(c.ledgerCode) === String(baseContactId));
     }
 
     if (contact && contact.siteType === "multiple" && contact.sites && contact.sites.length > 0) {
@@ -1423,8 +1713,8 @@ export function showUnifiedSplitVoucherModal(container, tx, voucherType, isInlin
     popDrCr.value = rowData.drCr;
     
     const baseCode = rowData.accountCode.includes("::") ? rowData.accountCode.split("::")[0] : rowData.accountCode;
-    const ledger = ledgers.find(l => l.code === baseCode);
-    const contact = contacts.find(c => c.id === baseCode);
+    const ledger = ledgers.find(l => String(l.code) === String(baseCode));
+    const contact = contacts.find(c => String(c.id) === String(baseCode) || String(c.ledgerCode) === String(baseCode));
     const dispName = ledger ? ledger.name : (contact ? contact.name : rowData.accountName);
 
     popAccountCode.value = rowData.accountCode;
@@ -1432,24 +1722,33 @@ export function showUnifiedSplitVoucherModal(container, tx, voucherType, isInlin
     popAmount.value = rowData.amount;
     updatePopupBalance(rowData.siteBranch || "");
     popup.style.display = "block";
-    setTimeout(() => {
-      popAccountSearch.focus();
-      popAccountSearch.select();
-    }, 50);
+    popAccountSearch.focus();
+    popAccountSearch.select();
   };
 
-  document.getElementById("btn-jv-add").addEventListener("click", () => {
+  const closePopup = () => {
+    closePopAccountDropdown();
+    if (popup) popup.style.display = "none";
     selectedRowIndex = -1;
-    popDrCr.value = (voucherType === "receipt") ? "Cr" : "Dr";
+  };
+
+  const popCloseX = document.getElementById("pop-close-x");
+  if (popCloseX) popCloseX.addEventListener("click", closePopup);
+
+  const openAddNewRowPopup = (shouldFocus = true) => {
+    selectedRowIndex = -1;
+    popDrCr.value = (voucherType === "receipt" || voucherType === "credit") ? "Cr" : "Dr";
     popAccountCode.value = "";
     popAccountSearch.value = "";
     popAmount.value = "0.00";
     updatePopupBalance();
     popup.style.display = "block";
-    setTimeout(() => {
-      popAccountSearch.focus();
-    }, 50);
-  });
+    if (shouldFocus) {
+      setTimeout(() => popAccountSearch.focus(), 50);
+    }
+  };
+
+  document.getElementById("btn-jv-add").addEventListener("click", () => openAddNewRowPopup(true));
 
   btnEdit.addEventListener("click", () => {
     const targetIdx = selectedRowIndex >= 0 ? selectedRowIndex : 0;
@@ -1466,12 +1765,14 @@ export function showUnifiedSplitVoucherModal(container, tx, voucherType, isInlin
     }
   });
 
-  document.getElementById("pop-btn-cancel").addEventListener("click", () => {
-    closePopAccountDropdown();
-    popup.style.display = "none";
-  });
+  document.getElementById("pop-btn-cancel").addEventListener("click", closePopup);
 
+  let isProcessingPopOk = false;
   document.getElementById("pop-btn-ok").addEventListener("click", () => {
+    if (isProcessingPopOk) return;
+    isProcessingPopOk = true;
+    setTimeout(() => { isProcessingPopOk = false; }, 300);
+
     const drCr = popDrCr.value;
     let rawCode = popAccountCode.value;
     const amt = parseFloat(popAmount.value) || 0;
@@ -1479,11 +1780,11 @@ export function showUnifiedSplitVoucherModal(container, tx, voucherType, isInlin
     if (!rawCode && popAccountSearch.value.trim()) {
       const typed = popAccountSearch.value.trim().toLowerCase();
       const accounts = getAvailableAccounts();
-      const exact = accounts.find(a => a.name.toLowerCase() === typed || a.code.toLowerCase() === typed);
+      const exact = accounts.find(a => a.name.toLowerCase() === typed || String(a.code).toLowerCase() === typed);
       const partial = exact || accounts.find(a => a.name.toLowerCase().startsWith(typed)) || accounts.find(a => a.name.toLowerCase().includes(typed));
       if (partial) {
-        rawCode = partial.code;
-        popAccountCode.value = partial.code;
+        rawCode = String(partial.code);
+        popAccountCode.value = String(partial.code);
         popAccountSearch.value = partial.name;
         updatePopupBalance();
       }
@@ -1504,9 +1805,9 @@ export function showUnifiedSplitVoucherModal(container, tx, voucherType, isInlin
     let baseContactId = rawCode.includes("::") ? rawCode.split("::")[0] : rawCode;
     let siteBranchVal = rawCode.includes("::") ? rawCode.split("::")[1] : "";
 
-    const ledger = ledgers.find(l => l.code === baseContactId);
+    const ledger = ledgers.find(l => String(l.code) === String(baseContactId));
     let name = baseContactId;
-    let contact = contacts.find(c => c.id === baseContactId);
+    let contact = contacts.find(c => String(c.id) === String(baseContactId) || String(c.ledgerCode) === String(baseContactId));
 
     const siteBranchRow = document.getElementById("pop-site-branch-row");
     if (siteBranchRow && siteBranchRow.style.display !== "none") {
@@ -1534,27 +1835,39 @@ export function showUnifiedSplitVoucherModal(container, tx, voucherType, isInlin
     }
 
     closePopAccountDropdown();
-    popup.style.display = "none";
     selectedRowIndex = -1;
     updateGrid();
 
-    let nextTotalDebit = 0;
-    let nextTotalCredit = 0;
+    let totalDebit = 0;
+    let totalCredit = 0;
     journalRows.forEach(r => {
-      if (r.drCr === "Dr") nextTotalDebit += r.amount;
-      else nextTotalCredit += r.amount;
+      if (r.drCr === "Dr") totalDebit += r.amount;
+      else totalCredit += r.amount;
     });
 
-    const diffVal = Math.abs(nextTotalDebit - nextTotalCredit);
+    const diffVal = Math.abs(totalDebit - totalCredit);
     if (diffVal > 0.009) {
+      // Auto pop-up Entry Row layout until both sides tally
       selectedRowIndex = -1;
-      popDrCr.value = nextTotalDebit > nextTotalCredit ? "Cr" : "Dr";
+      popDrCr.value = totalDebit > totalCredit ? "Cr" : "Dr";
       popAccountCode.value = "";
       popAccountSearch.value = "";
       popAmount.value = diffVal.toFixed(2);
       updatePopupBalance();
       popup.style.display = "block";
-      setTimeout(() => popAccountSearch.focus(), 50);
+      setTimeout(() => {
+        popAccountSearch.focus();
+        openPopAccountDropdown();
+      }, 50);
+    } else {
+      // Tallied! Close popup and focus Submit Voucher button
+      popAccountCode.value = "";
+      popAccountSearch.value = "";
+      popAmount.value = "0.00";
+      popup.style.display = "none";
+      if (!btnSubmit.disabled) {
+        btnSubmit.focus();
+      }
     }
   });
 
@@ -1577,6 +1890,9 @@ export function showUnifiedSplitVoucherModal(container, tx, voucherType, isInlin
   popAmount.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
+      if (Date.now() - lastAccountSelectTime < 300) {
+        return;
+      }
       document.getElementById("pop-btn-ok").click();
     }
   });
@@ -1721,7 +2037,19 @@ export function showUnifiedSplitVoucherModal(container, tx, voucherType, isInlin
     }
   });
 
-  btnSubmit.addEventListener("click", () => {
+  let isSubmittingVoucher = false;
+
+  btnSubmit.addEventListener("click", async () => {
+    if (isSubmittingVoucher) return;
+
+    const jvDateEl = document.getElementById("jv-date");
+    const dateVal = jvDateEl ? jvDateEl.value : "";
+    const fyCheck = state.isPreviousFyLocked(dateVal);
+    if (fyCheck.locked) {
+      alert(fyCheck.reason);
+      return;
+    }
+
     let totalDebit = 0;
     let totalCredit = 0;
     journalRows.forEach(r => {
@@ -1734,27 +2062,56 @@ export function showUnifiedSplitVoucherModal(container, tx, voucherType, isInlin
       if (!checkAdminPassword()) {
         return;
       }
-      state.deleteTransaction(tx.id);
     }
 
-    const entries = journalRows.map(row => ({
-      accountId: row.accountCode,
-      debit: row.drCr === "Dr" ? row.amount : 0,
-      credit: row.drCr === "Cr" ? row.amount : 0,
-      siteBranch: row.siteBranch || ""
-    }));
-
-    let saveRef = document.getElementById("jv-voucherno").value;
-    let saveDesc = narrationVal || "";
+    isSubmittingVoucher = true;
+    btnSubmit.disabled = true;
+    btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Submitting...`;
 
     try {
-      state.addTransaction({
+      if (tx) {
+        const fyCheckOld = state.isPreviousFyLocked(tx.date);
+        if (fyCheckOld.locked) {
+          alert(fyCheckOld.reason);
+          isSubmittingVoucher = false;
+          btnSubmit.disabled = false;
+          btnSubmit.innerHTML = `<i class="fa-solid fa-check"></i> ${tx ? "Update Voucher" : "Save Voucher"}`;
+          return;
+        }
+        const delOk = state.deleteTransaction(tx.id);
+        if (!delOk) {
+          isSubmittingVoucher = false;
+          btnSubmit.disabled = false;
+          btnSubmit.innerHTML = `<i class="fa-solid fa-check"></i> ${tx ? "Update Voucher" : "Save Voucher"}`;
+          return;
+        }
+      }
+
+      const entries = journalRows.map(row => ({
+        accountId: row.accountCode,
+        debit: row.drCr === "Dr" ? row.amount : 0,
+        credit: row.drCr === "Cr" ? row.amount : 0,
+        siteBranch: row.siteBranch || ""
+      }));
+
+      let saveRef = document.getElementById("jv-voucherno").value;
+      let saveDesc = narrationVal || "";
+
+      const addOk = state.addTransaction({
         id: tx ? tx.id : undefined,
         date: document.getElementById("jv-date").value,
         reference: saveRef,
         description: saveDesc,
         entries: entries
       });
+
+      if (!addOk) {
+        isSubmittingVoucher = false;
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = `<i class="fa-solid fa-check"></i> ${tx ? "Update Voucher" : "Save Voucher"}`;
+        return;
+      }
+
       invalidateReportCache();
       alert(tx ? "Voucher updated successfully." : "Voucher posted successfully.");
       
@@ -1779,8 +2136,17 @@ export function showUnifiedSplitVoucherModal(container, tx, voucherType, isInlin
       }
     } catch (err) {
       alert("Error posting voucher: " + err.message);
+    } finally {
+      isSubmittingVoucher = false;
+      if (btnSubmit) {
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = `Submit Voucher`;
+      }
     }
   });
 
   updateGrid();
 }
+
+
+

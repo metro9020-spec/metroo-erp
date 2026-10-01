@@ -23,7 +23,7 @@ export function showClearDatabaseModal() {
         <!-- Header ribbon -->
         <div style="background: linear-gradient(180deg, #991b1b 0%, #dc2626 100%); color:white; padding:8px 14px; font-weight:700; display:flex; justify-content:space-between; align-items:center; border-radius: 4px 4px 0 0; border-bottom: 1px solid #7f1d1d;">
           <div style="display:flex; align-items:center; gap:8px; font-size:1rem;">
-            <i class="fa-solid fa-trash-can"></i> CLEAR DATABASE & DATA PURGE - ${companyName}
+            <i class="fa-solid fa-trash-can"></i> CLEAR DATABASE & DATA PURGE - ${companyName} (Company ID: ${activeCompanyId})
           </div>
           <button type="button" style="background:none; border:none; color:white; font-size:1.3rem; cursor:pointer;" id="clear-db-close-header">&times;</button>
         </div>
@@ -211,7 +211,7 @@ export function showClearDatabaseModal() {
   });
 
   // Form submit handler
-  document.getElementById("clear-db-form").addEventListener("submit", (e) => {
+  document.getElementById("clear-db-form").addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const isDeleteFyChecked = deleteFyCb && deleteFyCb.checked;
@@ -258,7 +258,7 @@ export function showClearDatabaseModal() {
       }
 
       if (isDeleteFyChecked && selectedFyId) {
-        const fyRes = state.deleteFinancialYear(activeCompanyId, selectedFyId);
+        const fyRes = await state.deleteFinancialYear(activeCompanyId, selectedFyId);
         if (!fyRes.success) {
           alert(`Failed to delete Financial Year: ${fyRes.message}`);
           return;

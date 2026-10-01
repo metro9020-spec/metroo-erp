@@ -154,37 +154,28 @@ function formatGroupDisplay(item, groupByMode, materials) {
 // Helper to load persisted selected product IDs
 function loadPersistedSelectedProductIds() {
   const activeId = state.getActiveCompanyId ? state.getActiveCompanyId() : "1";
-  let savedIds = [];
+  let savedIds = null;
   
   // 1. From state
   if (typeof state.getHeadloaderProductIds === "function") {
-    savedIds = state.getHeadloaderProductIds() || [];
+    savedIds = state.getHeadloaderProductIds();
   }
   
   // 2. Fallback from localStorage
-  if ((!savedIds || savedIds.length === 0) && typeof localStorage !== "undefined") {
+  if ((!savedIds || !Array.isArray(savedIds)) && typeof localStorage !== "undefined") {
     try {
       const ls = localStorage.getItem(`erp_headloader_products_${activeId}`);
-      if (ls) savedIds = JSON.parse(ls) || [];
+      if (ls !== null && ls !== undefined) {
+        const parsed = JSON.parse(ls);
+        if (Array.isArray(parsed)) savedIds = parsed;
+      }
     } catch (e) {}
   }
 
-  hlSelectedProductIds = new Set(savedIds || []);
+  hlSelectedProductIds = new Set(Array.isArray(savedIds) ? savedIds : []);
 
-  // 3. Also auto-include any materials that already have rates configured
-  const materials = state.getMaterials() || [];
-  materials.forEach(m => {
-    const hasRate = (parseFloat(m.loadingCharge) > 0) || 
-                    (parseFloat(m.unloadingCharge) > 0) || 
-                    (m.loadingChargeEnabled === true) || 
-                    (m.unloadingChargeEnabled === true);
-    if (hasRate) {
-      hlSelectedProductIds.add(m.id);
-    }
-  });
-
-  // Sync back to state to keep it permanent
-  if (typeof state.setHeadloaderProductIds === "function" && hlSelectedProductIds.size > 0) {
+  // Sync back to state
+  if (typeof state.setHeadloaderProductIds === "function") {
     state.setHeadloaderProductIds(Array.from(hlSelectedProductIds));
   }
 }
@@ -388,7 +379,7 @@ export function renderHeadloaderReport(container) {
           } else {
             unloadingRate = (mat.unloadingCharge !== undefined && mat.unloadingCharge !== null) 
               ? parseFloat(mat.unloadingCharge) 
-              : (parseFloat(mat.loadingCharge) || 0);
+              : 0;
           }
 
           const qty = parseFloat(item.quantity) || 0;
@@ -1407,6 +1398,7 @@ export function showManageHeadloaderTypesModal(onUpdatedCallback = null) {
 // (Features Typable Search + Dropdown with "ALL" Code/Model option + Dynamic Type Columns)
 // -------------------------------------------------------------
 export function showSelectAndSetChargesLayout(onSavedCallback = null) {
+  loadPersistedSelectedProductIds();
   const root = document.getElementById("modal-container-root");
   const materials = state.getMaterials();
 
@@ -1776,7 +1768,7 @@ export function showSelectAndSetChargesLayout(onSavedCallback = null) {
       if (targetType !== "__ALL_TYPES__" && sample.unloadingChargesByType && sample.unloadingChargesByType[targetType] !== undefined) {
         unVal = parseFloat(sample.unloadingChargesByType[targetType]) || 0;
       } else {
-        unVal = (sample.unloadingCharge !== undefined && sample.unloadingCharge !== null) ? parseFloat(sample.unloadingCharge) : (parseFloat(sample.loadingCharge) || 0);
+        unVal = (sample.unloadingCharge !== undefined && sample.unloadingCharge !== null) ? parseFloat(sample.unloadingCharge) : 0;
       }
       if (targetType !== "__ALL_TYPES__" && sample.loadingChargesByType && sample.loadingChargesByType[targetType] !== undefined) {
         ldVal = parseFloat(sample.loadingChargesByType[targetType]) || 0;
@@ -1828,7 +1820,7 @@ export function showSelectAndSetChargesLayout(onSavedCallback = null) {
         const targetType = targetTypeSelect ? targetTypeSelect.value : "__ALL_TYPES__";
         let unVal = (targetType !== "__ALL_TYPES__" && mat.unloadingChargesByType && mat.unloadingChargesByType[targetType] !== undefined)
           ? parseFloat(mat.unloadingChargesByType[targetType]) || 0
-          : (parseFloat(mat.unloadingCharge) || parseFloat(mat.loadingCharge) || 0);
+          : (parseFloat(mat.unloadingCharge) || 0);
         let ldVal = (targetType !== "__ALL_TYPES__" && mat.loadingChargesByType && mat.loadingChargesByType[targetType] !== undefined)
           ? parseFloat(mat.loadingChargesByType[targetType]) || 0
           : (parseFloat(mat.loadingCharge) || 0);
@@ -1952,7 +1944,7 @@ export function showSelectAndSetChargesLayout(onSavedCallback = null) {
         if (m.unloadingChargesByType && m.unloadingChargesByType[t.id] !== undefined && m.unloadingChargesByType[t.id] !== null && m.unloadingChargesByType[t.id] !== '') {
           unVal = parseFloat(m.unloadingChargesByType[t.id]) || 0;
         } else if (t.id === 'std' || t.isDefault) {
-          unVal = (m.unloadingCharge !== undefined && m.unloadingCharge !== null) ? parseFloat(m.unloadingCharge) : (parseFloat(m.loadingCharge) || 0);
+          unVal = (m.unloadingCharge !== undefined && m.unloadingCharge !== null) ? parseFloat(m.unloadingCharge) : 0;
         }
 
         let ldVal = 0;
@@ -2018,10 +2010,23 @@ export function showSelectAndSetChargesLayout(onSavedCallback = null) {
     tbody.querySelectorAll(".hl-btn-remove-prod").forEach(btn => {
       btn.addEventListener("click", () => {
         const matId = btn.getAttribute("data-matid");
+        const mat = materials.find(m => m.id === matId);
+        // FIRST: Make rate column zero for all types & standard charges
+        if (mat) {
+          mat.loadingCharge = 0;
+          mat.unloadingCharge = 0;
+          mat.loadingChargeEnabled = false;
+          mat.unloadingChargeEnabled = false;
+          mat.loadingChargesByType = {};
+          mat.unloadingChargesByType = {};
+        }
+        // THEN: Delete it from the list
         hlSelectedProductIds.delete(matId);
+
         if (typeof state.setHeadloaderProductIds === "function") {
           state.setHeadloaderProductIds(Array.from(hlSelectedProductIds));
         }
+        state.saveState();
         renderApplicableTable();
       });
     });
@@ -2080,7 +2085,10 @@ export function showSelectAndSetChargesLayout(onSavedCallback = null) {
       return;
     }
 
-    const matched = materials.filter(m => m.name && (m.name.toLowerCase() === typedName.toLowerCase() || m.name.toLowerCase().includes(typedName.toLowerCase())));
+    const exactMatches = materials.filter(m => m.name && m.name.trim().toLowerCase() === typedName.trim().toLowerCase());
+    const matched = exactMatches.length > 0
+      ? exactMatches
+      : materials.filter(m => m.name && m.name.toLowerCase().includes(typedName.toLowerCase()));
     if (matched.length === 0) {
       alert(`No product found in master matching "${typedName}". Please check the product name.`);
       return;
@@ -2158,6 +2166,15 @@ export function showSelectAndSetChargesLayout(onSavedCallback = null) {
   // Handle Clear All
   document.getElementById("btn-hl-modal-clear-all").addEventListener("click", () => {
     if (confirm("Clear all products from applicable list?")) {
+      const allMats = state.getMaterials() || [];
+      allMats.forEach(m => {
+        m.loadingCharge = 0;
+        m.unloadingCharge = 0;
+        m.loadingChargeEnabled = false;
+        m.unloadingChargeEnabled = false;
+        m.loadingChargesByType = {};
+        m.unloadingChargesByType = {};
+      });
       hlSelectedProductIds.clear();
       if (typeof state.setHeadloaderProductIds === "function") {
         state.setHeadloaderProductIds([]);
@@ -2178,7 +2195,8 @@ export function showSelectAndSetChargesLayout(onSavedCallback = null) {
       if (mat) {
         mat.unloadingChargesByType = mat.unloadingChargesByType || {};
         mat.unloadingChargesByType[typeId] = unVal;
-        if (typeId === "std") {
+        const typeObj = types.find(t => t.id === typeId);
+        if (typeId === "std" || typeId === "Standard" || (typeObj && typeObj.isDefault)) {
           mat.unloadingCharge = unVal;
           mat.unloadingChargeEnabled = unVal > 0;
         }
@@ -2193,10 +2211,23 @@ export function showSelectAndSetChargesLayout(onSavedCallback = null) {
       if (mat) {
         mat.loadingChargesByType = mat.loadingChargesByType || {};
         mat.loadingChargesByType[typeId] = ldVal;
-        if (typeId === "std") {
+        const typeObj = types.find(t => t.id === typeId);
+        if (typeId === "std" || typeId === "Standard" || (typeObj && typeObj.isDefault)) {
           mat.loadingCharge = ldVal;
           mat.loadingChargeEnabled = ldVal > 0;
         }
+      }
+    });
+
+    // Reset charges for any materials that are NOT in hlSelectedProductIds
+    materials.forEach(mat => {
+      if (!hlSelectedProductIds.has(mat.id)) {
+        mat.loadingCharge = 0;
+        mat.unloadingCharge = 0;
+        mat.loadingChargeEnabled = false;
+        mat.unloadingChargeEnabled = false;
+        mat.loadingChargesByType = {};
+        mat.unloadingChargesByType = {};
       }
     });
 
@@ -2205,6 +2236,7 @@ export function showSelectAndSetChargesLayout(onSavedCallback = null) {
     }
     state.saveState();
     closeModal();
+    alert(`Headloader product rates and selections updated successfully! (${hlSelectedProductIds.size} products configured)`);
     if (onSavedCallback) onSavedCallback();
   });
 
@@ -2508,7 +2540,7 @@ function getCalculatedDataForPrint() {
         if (mat.unloadingChargesByType && mat.unloadingChargesByType[hType] !== undefined && mat.unloadingChargesByType[hType] !== null && mat.unloadingChargesByType[hType] !== "") {
           unRate = parseFloat(mat.unloadingChargesByType[hType]) || 0;
         } else {
-          unRate = (mat.unloadingCharge !== undefined && mat.unloadingCharge !== null) ? parseFloat(mat.unloadingCharge) : (parseFloat(mat.loadingCharge) || 0);
+          unRate = (mat.unloadingCharge !== undefined && mat.unloadingCharge !== null) ? parseFloat(mat.unloadingCharge) : 0;
         }
         
         const qty = parseFloat(item.quantity) || 0;

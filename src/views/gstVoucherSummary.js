@@ -32,6 +32,7 @@ export function showGstVoucherSummaryModal() {
 
     const invoiceKeys = new Set();
     invoices.forEach(inv => {
+      if (!inv || inv.isCancelled || inv.isCanceled || inv.status === "CANCELLED" || inv.status === "cancelled") return;
       if (inv.id) invoiceKeys.add(String(inv.id).toUpperCase());
       if (inv.voucherNo) invoiceKeys.add(String(inv.voucherNo).toUpperCase());
       if (inv.refNo) invoiceKeys.add(String(inv.refNo).toUpperCase());
@@ -41,6 +42,7 @@ export function showGstVoucherSummaryModal() {
 
     const purchaseKeys = new Set();
     purchases.forEach(pur => {
+      if (!pur || pur.isCancelled || pur.isCanceled || pur.status === "CANCELLED" || pur.status === "cancelled") return;
       if (pur.id) purchaseKeys.add(String(pur.id).toUpperCase());
       if (pur.voucherNo) purchaseKeys.add(String(pur.voucherNo).toUpperCase());
       if (pur.refNo) purchaseKeys.add(String(pur.refNo).toUpperCase());
@@ -50,6 +52,7 @@ export function showGstVoucherSummaryModal() {
 
     const salesReturnKeys = new Set();
     salesReturns.forEach(sr => {
+      if (!sr || sr.isCancelled || sr.isCanceled || sr.status === "CANCELLED" || sr.status === "cancelled") return;
       if (sr.id) salesReturnKeys.add(String(sr.id).toUpperCase());
       if (sr.voucherNo) salesReturnKeys.add(String(sr.voucherNo).toUpperCase());
       if (sr.refNo) salesReturnKeys.add(String(sr.refNo).toUpperCase());
@@ -57,6 +60,7 @@ export function showGstVoucherSummaryModal() {
 
     const purchaseReturnKeys = new Set();
     purchaseReturns.forEach(pr => {
+      if (!pr || pr.isCancelled || pr.isCanceled || pr.status === "CANCELLED" || pr.status === "cancelled") return;
       if (pr.id) purchaseReturnKeys.add(String(pr.id).toUpperCase());
       if (pr.voucherNo) purchaseReturnKeys.add(String(pr.voucherNo).toUpperCase());
       if (pr.refNo) purchaseReturnKeys.add(String(pr.refNo).toUpperCase());
@@ -193,12 +197,21 @@ export function showGstVoucherSummaryModal() {
         netAmt = taxableVal + gstAmt + cessAmt;
 
         if (mainEntry) {
-          const mainLedger = ledgers.find(l => 
-            String(l.code).toUpperCase() === String(mainEntry.accountId).toUpperCase() || 
-            String(l.id).toUpperCase() === String(mainEntry.accountId).toUpperCase() || 
-            String(l.name).toUpperCase() === String(mainEntry.accountId).toUpperCase()
-          );
-          particularsName = mainLedger ? mainLedger.name.toUpperCase() : String(mainEntry.accountId).toUpperCase();
+          if (state.getAccountDisplayName) {
+            particularsName = state.getAccountDisplayName(mainEntry.accountId, tx).toUpperCase();
+          } else {
+            const mainLedger = ledgers.find(l => 
+              String(l.code).toUpperCase() === String(mainEntry.accountId).toUpperCase() || 
+              String(l.id).toUpperCase() === String(mainEntry.accountId).toUpperCase() || 
+              String(l.name).toUpperCase() === String(mainEntry.accountId).toUpperCase()
+            );
+            const mainContact = state.getContacts ? state.getContacts().find(c =>
+              String(c.id).toUpperCase() === String(mainEntry.accountId).toUpperCase() ||
+              String(c.ledgerCode).toUpperCase() === String(mainEntry.accountId).toUpperCase() ||
+              String(c.name).toUpperCase() === String(mainEntry.accountId).toUpperCase()
+            ) : null;
+            particularsName = mainContact ? mainContact.name.toUpperCase() : (mainLedger ? mainLedger.name.toUpperCase() : String(mainEntry.accountId).toUpperCase());
+          }
         } else {
           particularsName = tx.description || "Offset Entry";
         }

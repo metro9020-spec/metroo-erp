@@ -3,7 +3,7 @@ import { state, ACCOUNTS, parseDateSafely } from "../state.js";
 import { formatDate } from "../utils/dateUtils.js";
 import { renderTallyDatePickerHtml, initTallyDatePickers } from "../utils/datePicker.js";
 import { getValidGstRate } from "../utils/gstValidator.js";
-import { bringToFront } from "../utils/draggable.js";
+import { bringToFront, makeDraggable } from "../utils/draggable.js";
 
 let activeReportTab = "pl"; // 'pl', 'bs', 'tax', 'parties', 'ledger'
 let lastSelectedPartyTab = null;
@@ -76,7 +76,7 @@ let partySortField = "name"; // 'name', 'creditPeriod', 'opBalance', 'debit', 'c
 let partySortOrder = "asc"; // 'asc', 'desc'
 
 // Individual Ledger Tab States
-let bsDetailed = false;
+let bsDetailed = true;
 let bsSubGroups = false;
 let groupDetailed = false;
 let avoidNonTransaction = false;
@@ -94,6 +94,12 @@ let ledgerEmployeeFilter = "All";
 let plDetailed = false;
 let ledgerFromDate = "2026-04-01";
 let ledgerToDate = new Date().toISOString().split("T")[0];
+
+// Trial Balance Tab States
+let tbSortField = "default"; // 'default', 'name', 'group', 'debit', 'credit', 'netBalance'
+let tbSortOrder = "asc"; // 'asc', 'desc'
+let tbSearchQuery = "";
+
 
 
 export function setupLedgerCombobox(parentEl, onSelect) {
@@ -127,18 +133,23 @@ export function setupLedgerCombobox(parentEl, onSelect) {
     }
   };
 
+  let activeItem = container.querySelector(".il-ledger-item.active");
+
   const highlightItem = (targetItem, scrollMode = "nearest") => {
-    if (!targetItem) return;
-    items.forEach(i => {
-      i.classList.remove("active");
-      i.style.background = "#fff";
-      i.style.color = "#000";
-      i.style.fontWeight = "normal";
-    });
+    if (!targetItem || targetItem === activeItem) return;
+
+    if (activeItem) {
+      activeItem.classList.remove("active");
+      activeItem.style.background = "#fff";
+      activeItem.style.color = "#000";
+      activeItem.style.fontWeight = "normal";
+    }
+
     targetItem.classList.add("active");
     targetItem.style.background = "#0066cc";
     targetItem.style.color = "#fff";
     targetItem.style.fontWeight = "bold";
+    activeItem = targetItem;
 
     if (scrollMode === "top") {
       container.scrollTop = targetItem.offsetTop - container.offsetTop;
@@ -273,12 +284,16 @@ export function setupLedgerCombobox(parentEl, onSelect) {
     });
   });
 
-  // Global outside click closer
+  // Global outside click closer (cleanup previous listener to prevent leaks)
+  if (parentEl._docClickHandler) {
+    document.removeEventListener("click", parentEl._docClickHandler);
+  }
   const docClickHandler = (e) => {
     if (!parentEl.contains(e.target)) {
       hidePopup();
     }
   };
+  parentEl._docClickHandler = docClickHandler;
   document.addEventListener("click", docClickHandler);
 }
 
@@ -403,6 +418,584 @@ function renderReportError(container, error) {
   console.error("Report render error:", error);
 }
 
+// ── Excel Export Helpers for Financial Statements (P&L, BS, TB) ─────────────
+export function downloadExcelFile(htmlContent, fileName) {
+  const fullHtml = `<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<!--[if gte mso 9]>
+<xml>
+ <x:ExcelWorkbook>
+  <x:ExcelWorksheets>
+   <x:ExcelWorksheet>
+    <x:Name>Report</x:Name>
+    <x:WorksheetOptions>
+     <x:DisplayGridlines/>
+    </x:WorksheetOptions>
+   </x:ExcelWorksheet>
+  </x:ExcelWorksheets>
+ </x:ExcelWorkbook>
+</xml>
+<![endif]-->
+<style>
+  body { font-family: Calibri, Tahoma, Arial, sans-serif; font-size: 11pt; }
+  table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+  th, td { border: 1px solid #cbd5e1; padding: 6px 10px; vertical-align: top; font-size: 10pt; }
+  th { background-color: #1e3a8a; color: #ffffff; font-weight: bold; text-align: center; }
+  .section-hdr { background-color: #e2e8f0; font-weight: bold; color: #1e293b; font-size: 11pt; }
+  .parent-row { font-weight: bold; background-color: #f8fafc; color: #0f172a; }
+  .subgroup-row { font-weight: bold; font-style: italic; background-color: #f1f5f9; color: #1e293b; }
+  .child-row { color: #334155; }
+  .total-row { background-color: #cbd5e1; font-weight: bold; border-top: 2px solid #475569; border-bottom: 2px solid #475569; font-size: 11pt; }
+  .net-profit { background-color: #dcfce7; font-weight: bold; color: #15803d; }
+  .net-loss { background-color: #fee2e2; font-weight: bold; color: #b91c1c; }
+  .num { text-align: right; mso-number-format: "\\#\\,\\#\\#0\\.00"; }
+  .txt { text-align: left; mso-number-format: "\\@"; }
+  .title { font-size: 16pt; font-weight: bold; text-align: center; color: #1e3a8a; }
+  .subtitle { font-size: 11pt; text-align: center; color: #475569; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+${htmlContent}
+</body>
+</html>`;
+
+  const blob = new Blob(['\ufeff' + fullHtml], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  link.setAttribute('download', fileName);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+export function exportProfitLossToExcel() {
+  const pl = state.getProfitLoss(reportStartDate, reportEndDate);
+  const company = state.getCompanyInfo ? state.getCompanyInfo() : {};
+  const compName = company.name || "COMPANY";
+  const periodText = (reportStartDate || reportEndDate)
+    ? `${reportStartDate || 'Opening'} to ${reportEndDate || 'Latest'}`
+    : 'All-Time Cumulative';
+
+  const gp = pl.grossProfit || 0;
+  const np = pl.netProfit || 0;
+
+  // Trading Debits
+  const tradingDebits = [
+    { label: "Opening Stock", amount: pl.openingStock }
+  ];
+  if (plDetailed && pl.purchaseDetails && pl.purchaseDetails.length > 0) {
+    tradingDebits.push({ label: "PURCHASE ACCOUNT", amount: pl.purchase, isParent: true });
+    pl.purchaseDetails.forEach(d => {
+      tradingDebits.push({ label: d.name, amount: d.amount, isChild: true });
+    });
+  } else {
+    tradingDebits.push({ label: "PURCHASE ACCOUNT", amount: pl.purchase, isParent: true });
+  }
+  if (gp >= 0) {
+    tradingDebits.push({ label: "Gross Profit c/o", amount: gp, isProfit: true });
+  }
+  const tradingDebitTotal = pl.openingStock + pl.purchase + (gp >= 0 ? gp : 0);
+
+  // Trading Credits
+  const tradingCredits = [];
+  if (plDetailed && pl.salesDetails && pl.salesDetails.length > 0) {
+    tradingCredits.push({ label: "SALES ACCOUNT", amount: pl.sales, isParent: true });
+    pl.salesDetails.forEach(d => {
+      tradingCredits.push({ label: d.name, amount: d.amount, isChild: true });
+    });
+  } else {
+    tradingCredits.push({ label: "SALES ACCOUNT", amount: pl.sales, isParent: true });
+  }
+  tradingCredits.push({ label: "Closing Stock", amount: pl.closingStock });
+  if (gp < 0) {
+    tradingCredits.push({ label: "Gross Loss c/o", amount: Math.abs(gp), isLoss: true });
+  }
+  const tradingCreditTotal = pl.sales + pl.closingStock + (gp < 0 ? Math.abs(gp) : 0);
+
+  // P&L Debits
+  const plDebits = [];
+  if (gp < 0) {
+    plDebits.push({ label: "Gross Loss b/d", amount: Math.abs(gp), isLoss: true });
+  }
+  const indirectExpensesTotal = pl.otherExpenses.reduce((sum, e) => sum + e.amount, 0);
+  if (plDetailed) {
+    const expensesByGroup = {};
+    pl.otherExpenses.forEach(e => {
+      const g = e.groupName || "INDIRECT EXPENSES";
+      if (!expensesByGroup[g]) expensesByGroup[g] = [];
+      expensesByGroup[g].push(e);
+    });
+    Object.keys(expensesByGroup).forEach(g => {
+      const gTotal = expensesByGroup[g].reduce((sum, e) => sum + e.amount, 0);
+      plDebits.push({ label: g, amount: gTotal, isParent: true });
+      expensesByGroup[g].forEach(e => {
+        plDebits.push({ label: e.name, amount: e.amount, isChild: true });
+      });
+    });
+  } else {
+    plDebits.push({ label: "Indirect Expenses", amount: indirectExpensesTotal, isParent: true });
+  }
+  if (np >= 0) {
+    plDebits.push({ label: "Net Profit", amount: np, isProfit: true });
+  }
+  const plDebitTotal = (gp < 0 ? Math.abs(gp) : 0) + indirectExpensesTotal + (np >= 0 ? np : 0);
+
+  // P&L Credits
+  const plCredits = [];
+  if (gp >= 0) {
+    plCredits.push({ label: "Gross Profit b/d", amount: gp, isProfit: true });
+  }
+  const indirectIncomesTotal = pl.otherIncomes.reduce((sum, i) => sum + i.amount, 0);
+  if (plDetailed) {
+    const incomesByGroup = {};
+    pl.otherIncomes.forEach(i => {
+      const g = i.groupName || "INDIRECT INCOME";
+      if (!incomesByGroup[g]) incomesByGroup[g] = [];
+      incomesByGroup[g].push(i);
+    });
+    Object.keys(incomesByGroup).forEach(g => {
+      const gTotal = incomesByGroup[g].reduce((sum, i) => sum + i.amount, 0);
+      plCredits.push({ label: g, amount: gTotal, isParent: true });
+      incomesByGroup[g].forEach(i => {
+        plCredits.push({ label: i.name, amount: i.amount, isChild: true });
+      });
+    });
+  } else {
+    if (indirectIncomesTotal > 0) {
+      plCredits.push({ label: "Indirect Income", amount: indirectIncomesTotal, isParent: true });
+    }
+  }
+  if (np < 0) {
+    plCredits.push({ label: "Net Loss", amount: Math.abs(np), isLoss: true });
+  }
+  const plCreditTotal = (gp >= 0 ? gp : 0) + indirectIncomesTotal + (np < 0 ? Math.abs(np) : 0);
+
+  const maxTradingRows = Math.max(tradingDebits.length, tradingCredits.length);
+  let tradingBodyHtml = '';
+  for (let i = 0; i < maxTradingRows; i++) {
+    const d = tradingDebits[i];
+    const c = tradingCredits[i];
+    tradingBodyHtml += `<tr>
+      <td class="${d ? (d.isParent ? 'parent-row' : (d.isChild ? 'child-row' : 'txt')) : 'txt'}">${d ? (d.isChild ? '&nbsp;&nbsp;&nbsp;&nbsp;' + d.label : d.label) : ''}</td>
+      <td class="num">${d ? (d.amount < 0 ? '-' + Math.abs(d.amount).toFixed(2) : d.amount.toFixed(2)) : ''}</td>
+      <td class="${c ? (c.isParent ? 'parent-row' : (c.isChild ? 'child-row' : 'txt')) : 'txt'}">${c ? (c.isChild ? '&nbsp;&nbsp;&nbsp;&nbsp;' + c.label : c.label) : ''}</td>
+      <td class="num">${c ? (c.amount < 0 ? '-' + Math.abs(c.amount).toFixed(2) : c.amount.toFixed(2)) : ''}</td>
+    </tr>`;
+  }
+
+  const maxPlRows = Math.max(plDebits.length, plCredits.length);
+  let plBodyHtml = '';
+  for (let i = 0; i < maxPlRows; i++) {
+    const d = plDebits[i];
+    const c = plCredits[i];
+    plBodyHtml += `<tr>
+      <td class="${d ? (d.isProfit ? 'net-profit' : (d.isLoss ? 'net-loss' : (d.isParent ? 'parent-row' : (d.isChild ? 'child-row' : 'txt')))) : 'txt'}">${d ? (d.isChild ? '&nbsp;&nbsp;&nbsp;&nbsp;' + d.label : d.label) : ''}</td>
+      <td class="num ${d && d.isProfit ? 'net-profit' : (d && d.isLoss ? 'net-loss' : '')}">${d ? (d.amount < 0 ? '-' + Math.abs(d.amount).toFixed(2) : d.amount.toFixed(2)) : ''}</td>
+      <td class="${c ? (c.isProfit ? 'net-profit' : (c.isLoss ? 'net-loss' : (c.isParent ? 'parent-row' : (c.isChild ? 'child-row' : 'txt')))) : 'txt'}">${c ? (c.isChild ? '&nbsp;&nbsp;&nbsp;&nbsp;' + c.label : c.label) : ''}</td>
+      <td class="num ${c && c.isProfit ? 'net-profit' : (c && c.isLoss ? 'net-loss' : '')}">${c ? (c.amount < 0 ? '-' + Math.abs(c.amount).toFixed(2) : c.amount.toFixed(2)) : ''}</td>
+    </tr>`;
+  }
+
+  const htmlContent = `
+    <div class="title">${compName}</div>
+    <div class="subtitle">TRADING AND PROFIT & LOSS ACCOUNT<br>Period: ${periodText}</div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:35%;">Expenses / Debits</th>
+          <th style="width:15%;">Amount (₹)</th>
+          <th style="width:35%;">Incomes / Credits</th>
+          <th style="width:15%;">Amount (₹)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="section-hdr"><td colspan="4">TRADING ACCOUNT</td></tr>
+        ${tradingBodyHtml}
+        <tr class="total-row">
+          <td>TRADING TOTAL</td>
+          <td class="num">${tradingDebitTotal.toFixed(2)}</td>
+          <td>TRADING TOTAL</td>
+          <td class="num">${tradingCreditTotal.toFixed(2)}</td>
+        </tr>
+        <tr class="section-hdr"><td colspan="4">PROFIT & LOSS ACCOUNT</td></tr>
+        ${plBodyHtml}
+        <tr class="total-row">
+          <td>PROFIT & LOSS TOTAL</td>
+          <td class="num">${plDebitTotal.toFixed(2)}</td>
+          <td>PROFIT & LOSS TOTAL</td>
+          <td class="num">${plCreditTotal.toFixed(2)}</td>
+        </tr>
+      </tbody>
+    </table>
+  `;
+
+  const safeCompName = compName.replace(/[^a-zA-Z0-9]/g, '_');
+  const fileName = `Profit_Loss_${safeCompName}_${(reportStartDate || 'Opening')}_to_${(reportEndDate || 'Latest')}.xls`;
+  downloadExcelFile(htmlContent, fileName);
+}
+
+export function exportBalanceSheetToExcel(isOpening = false) {
+  const bs = isOpening ? state.getOpeningBalanceSheet() : state.getBalanceSheet(reportStartDate, reportEndDate);
+  const company = state.getCompanyInfo ? state.getCompanyInfo() : {};
+  const compName = company.name || "COMPANY";
+  const dateText = isOpening
+    ? "Opening Balances Statement"
+    : ("As on: " + (reportEndDate || new Date().toISOString().split('T')[0]));
+
+  const mapControlAccountGroup = (name, group, isAssetSide = false) => {
+    const nUpper = String(name || "").toUpperCase();
+    const gUpper = String(group || "").toUpperCase();
+    if (nUpper.includes("SUNDRY CREDITORS")) return "Sundry Creditors (Accounts Payable)";
+    if (nUpper.includes("SUNDRY DEBTORS")) return "Sundry Debtors (Accounts Receivable)";
+    if (nUpper.includes("STOCK ON HAND")) return "Stock-in-Hand";
+    if (nUpper.includes("CASH IN HAND") || gUpper.includes("CASH")) return "Cash-in-Hand";
+    if (nUpper.includes("BANK CURRENT ACCOUNT") || gUpper.includes("BANK")) return "Bank Accounts";
+    if (nUpper === "DUTIES & TAXES" || nUpper === "DUTIES AND TAXES" || nUpper === "GST/VAT PAYABLE" || nUpper === "DUTIES & TAXES (TAX PAYABLE)" || nUpper === "DUTIES & TAXES (INPUT TAX CREDIT / ITC)") {
+      return isAssetSide ? "Duties & Taxes (Input Tax Credit / ITC)" : "Duties & Taxes (Tax Payable)";
+    }
+    return null;
+  };
+
+  const flattenSideDetails = (details, mainGroupName) => {
+    const list = [];
+    if (!bsDetailed) return list;
+
+    const isAssetSide = String(mainGroupName || "").toUpperCase().includes("ASSET");
+    const grouped = {};
+    const directLedgers = [];
+
+    details.forEach(d => {
+      let g = (d.group || "").trim();
+      let isControlAccount = false;
+      const ctrlGroup = mapControlAccountGroup(d.name, d.group, isAssetSide);
+      if (ctrlGroup) {
+        g = ctrlGroup;
+        isControlAccount = true;
+      }
+      const gUpper = g.toUpperCase();
+      const mainUpper = mainGroupName.toUpperCase();
+
+      if (!g || gUpper === mainUpper || gUpper === "OTHER") {
+        directLedgers.push(d);
+      } else {
+        if (!grouped[g]) grouped[g] = { total: 0, items: [] };
+        const isSummaryControlLine = d.name.includes("Sundry Creditors") || d.name.includes("Sundry Debtors") || d.name.includes("Stock on Hand") || d.name.includes("Duties & Taxes") || d.name.includes("GST/VAT Payable") || d.name.includes("Tax Credit");
+        if (!isControlAccount || !isSummaryControlLine) {
+          grouped[g].items.push(d);
+        }
+        grouped[g].total += d.balance;
+      }
+    });
+
+    for (const [subGroupName, data] of Object.entries(grouped)) {
+      list.push({ label: subGroupName, amount: data.total, isSubGroup: true });
+      if (bsSubGroups) {
+        data.items.forEach(d => {
+          list.push({ label: d.name, amount: d.balance, isChild: true });
+        });
+      }
+    }
+
+    directLedgers.forEach(d => {
+      list.push({ label: d.name, amount: d.balance, isChild: true });
+    });
+
+    return list;
+  };
+
+  const liabilitiesRows = [];
+  liabilitiesRows.push({ label: "CAPITAL ACCOUNT", amount: bs.capital.total, isParent: true });
+  liabilitiesRows.push(...flattenSideDetails(bs.capital.details, "CAPITAL ACCOUNT"));
+
+  liabilitiesRows.push({ label: "RESERVES & SURPLUS", amount: bs.reserves.total, isParent: true });
+  liabilitiesRows.push(...flattenSideDetails(bs.reserves.details, "RESERVES & SURPLUS"));
+
+  liabilitiesRows.push({ label: "CURRENT LIABILITIES", amount: bs.currentLiabilities.total, isParent: true });
+  liabilitiesRows.push(...flattenSideDetails(bs.currentLiabilities.details, "CURRENT LIABILITIES"));
+
+  if (bs.profitAndLoss.type === "profit") {
+    liabilitiesRows.push({ label: "Profit & Loss A/c (Net Profit)", amount: bs.profitAndLoss.amount, isProfit: true });
+  }
+
+  const assetsRows = [];
+  assetsRows.push({ label: "FIXED ASSETS", amount: bs.fixedAssets.total, isParent: true });
+  assetsRows.push(...flattenSideDetails(bs.fixedAssets.details, "FIXED ASSETS"));
+
+  assetsRows.push({ label: "INVESTMENTS", amount: bs.investments.total, isParent: true });
+  assetsRows.push(...flattenSideDetails(bs.investments.details, "INVESTMENTS"));
+
+  assetsRows.push({ label: "CURRENT ASSETS", amount: bs.currentAssets.total, isParent: true });
+  assetsRows.push(...flattenSideDetails(bs.currentAssets.details, "CURRENT ASSETS"));
+
+  if (bs.profitAndLoss.type === "loss") {
+    assetsRows.push({ label: "Profit & Loss A/c (Net Loss)", amount: bs.profitAndLoss.amount, isLoss: true });
+  }
+
+  const maxRows = Math.max(liabilitiesRows.length, assetsRows.length);
+  let bodyHtml = '';
+  for (let i = 0; i < maxRows; i++) {
+    const l = liabilitiesRows[i];
+    const a = assetsRows[i];
+    bodyHtml += `<tr>
+      <td class="${l ? (l.isProfit ? 'net-profit' : (l.isParent ? 'parent-row' : (l.isSubGroup ? 'subgroup-row' : (l.isChild ? 'child-row' : 'txt')))) : 'txt'}">${l ? (l.isChild ? '&nbsp;&nbsp;&nbsp;&nbsp;' + l.label : (l.isSubGroup ? '&nbsp;&nbsp;' + l.label : l.label)) : ''}</td>
+      <td class="num ${l && l.isProfit ? 'net-profit' : ''}">${l ? l.amount.toFixed(2) : ''}</td>
+      <td class="${a ? (a.isLoss ? 'net-loss' : (a.isParent ? 'parent-row' : (a.isSubGroup ? 'subgroup-row' : (a.isChild ? 'child-row' : 'txt')))) : 'txt'}">${a ? (a.isChild ? '&nbsp;&nbsp;&nbsp;&nbsp;' + a.label : (a.isSubGroup ? '&nbsp;&nbsp;' + a.label : a.label)) : ''}</td>
+      <td class="num ${a && a.isLoss ? 'net-loss' : ''}">${a ? a.amount.toFixed(2) : ''}</td>
+    </tr>`;
+  }
+
+  const htmlContent = `
+    <div class="title">${compName}</div>
+    <div class="subtitle">${isOpening ? 'OPENING BALANCE SHEET' : 'BALANCE SHEET'}<br>${dateText}</div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:35%;">Capital & Liabilities</th>
+          <th style="width:15%;">Amount (₹)</th>
+          <th style="width:35%;">Property & Assets</th>
+          <th style="width:15%;">Amount (₹)</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${bodyHtml}
+        <tr class="total-row">
+          <td>TOTAL LIABILITIES</td>
+          <td class="num">${bs.totalLiabilities.toFixed(2)}</td>
+          <td>TOTAL ASSETS</td>
+          <td class="num">${bs.totalAssets.toFixed(2)}</td>
+        </tr>
+      </tbody>
+    </table>
+  `;
+
+  const safeCompName = compName.replace(/[^a-zA-Z0-9]/g, '_');
+  const fileName = `${isOpening ? 'Opening_' : ''}Balance_Sheet_${safeCompName}_${(reportEndDate || new Date().toISOString().split('T')[0])}.xls`;
+  downloadExcelFile(htmlContent, fileName);
+}
+
+export function getTrialBalanceData() {
+  const balances = state.getAccountBalances();
+  const ledgers = state.getLedgers();
+  const contacts = state.getContacts();
+
+  const rawRows = [];
+
+  // 1. SUNDRY DEBTORS (Grouped)
+  let debtorsBal = balances["1100"] ? balances["1100"].balance : 0;
+  if (debtorsBal === 0) {
+    contacts.forEach(c => {
+      const isCreditor = c.type === "supplier" || c.listInVendorList || c.groupName === "SUNDRY CREDITORS";
+      if (!isCreditor) {
+        if (c.siteType === "multiple") {
+          (c.sites || []).forEach(site => {
+            const key = `${c.id}::${site}`;
+            const balData = balances[key];
+            if (balData) debtorsBal += (balData.balance || 0);
+          });
+        } else {
+          const balData = balances[c.id];
+          if (balData) debtorsBal += (balData.balance || 0);
+        }
+      }
+    });
+  }
+  if (debtorsBal !== 0) {
+    rawRows.push({ name: "SUNDRY DEBTORS", group: "Account Group", balance: debtorsBal, isGroup: true, defaultIndex: 1 });
+  }
+
+  // 2. SUNDRY CREDITORS (Grouped)
+  let creditorsBal = balances["2100"] ? balances["2100"].balance : 0;
+  if (creditorsBal === 0) {
+    contacts.forEach(c => {
+      const isCreditor = c.type === "supplier" || c.listInVendorList || c.groupName === "SUNDRY CREDITORS";
+      if (isCreditor) {
+        if (c.siteType === "multiple") {
+          (c.sites || []).forEach(site => {
+            const key = `${c.id}::${site}`;
+            const balData = balances[key];
+            if (balData) creditorsBal += (balData.balance || 0);
+          });
+        } else {
+          const balData = balances[c.id];
+          if (balData) creditorsBal += (balData.balance || 0);
+        }
+      }
+    });
+  }
+  if (creditorsBal !== 0) {
+    rawRows.push({ name: "SUNDRY CREDITORS", group: "Account Group", balance: creditorsBal, isGroup: true, defaultIndex: 2 });
+  }
+
+  // 3. Individual Ledgers (non-contact)
+  let idx = 3;
+  ledgers.forEach(l => {
+    const balData = balances[l.code];
+    const bal = balData ? balData.balance : 0;
+    if (bal !== 0) {
+      if (l.code === "1200" || l.code === "5100" || l.name === "Stock-in-Hand" || l.name === "Cost of Goods Sold (COGS)" || String(l.name || "").includes("COGS")) {
+        return;
+      }
+      const parentCust = contacts.find(c => 
+        (l.parentCustomerId && c.id === l.parentCustomerId) || 
+        c.id === l.code || 
+        (c.ledgerCode && c.ledgerCode === l.code) || 
+        (c.name && l.name && String(c.name).trim().toUpperCase() === String(l.name).trim().toUpperCase()) ||
+        String(c.name || '').trim().toUpperCase() === String(l.groupName || '').trim().toUpperCase()
+      );
+      if (parentCust || l.groupName === "SUNDRY DEBTORS" || l.groupName === "SUNDRY CREDITORS") {
+        return;
+      }
+      rawRows.push({ name: l.name, group: l.groupName || "Ledger Account", balance: bal, code: l.code, isGroup: false, defaultIndex: idx++ });
+    }
+  });
+
+  // 4. System & Core Accounts
+  const EXCLUDED_TB_ACCOUNTS = new Set(["1100", "2100", "1200", "5100"]);
+  Object.entries(ACCOUNTS).forEach(([code, meta]) => {
+    if (EXCLUDED_TB_ACCOUNTS.has(code)) return;
+    const coreBal = balances[code] ? balances[code].balance : 0;
+    if (coreBal !== 0) {
+      const isAlreadyCaptured = rawRows.some(r => r.code === code);
+      if (!isAlreadyCaptured) {
+        rawRows.push({ name: meta.name, group: meta.type ? meta.type.toUpperCase() : "SYSTEM ACCOUNT", balance: coreBal, code: code, isGroup: false, defaultIndex: idx++ });
+      }
+    }
+  });
+
+  // 5. Opening Stock
+  const openingStockVal = state.getOpeningStockValuation ? state.getOpeningStockValuation() : 0;
+  if (openingStockVal !== 0) {
+    rawRows.push({ name: "Stock on Hand (Opening)", group: "CURRENT ASSETS", balance: openingStockVal, isGroup: false, isStock: true, defaultIndex: idx++ });
+  }
+
+  // Filter rows if tbSearchQuery is set
+  let filteredRows = rawRows;
+  if (tbSearchQuery && tbSearchQuery.trim() !== "") {
+    const q = tbSearchQuery.trim().toLowerCase();
+    filteredRows = rawRows.filter(r => 
+      String(r.name || "").toLowerCase().includes(q) || 
+      String(r.group || "").toLowerCase().includes(q) ||
+      (r.code && String(r.code).toLowerCase().includes(q))
+    );
+  }
+
+  // Sort rows
+  const sortedRows = [...filteredRows].sort((a, b) => {
+    let cmp = 0;
+    const debitA = a.balance > 0 ? a.balance : 0;
+    const debitB = b.balance > 0 ? b.balance : 0;
+    const creditA = a.balance < 0 ? -a.balance : 0;
+    const creditB = b.balance < 0 ? -b.balance : 0;
+
+    switch (tbSortField) {
+      case "name":
+        cmp = String(a.name || "").localeCompare(String(b.name || ""), undefined, { sensitivity: "base", numeric: true });
+        break;
+      case "group":
+        cmp = String(a.group || "").localeCompare(String(b.group || ""), undefined, { sensitivity: "base", numeric: true });
+        if (cmp === 0) {
+          cmp = String(a.name || "").localeCompare(String(b.name || ""), undefined, { sensitivity: "base", numeric: true });
+        }
+        break;
+      case "debit":
+        cmp = debitA - debitB;
+        if (cmp === 0) {
+          cmp = String(a.name || "").localeCompare(String(b.name || ""), undefined, { sensitivity: "base" });
+        }
+        break;
+      case "credit":
+        cmp = creditA - creditB;
+        if (cmp === 0) {
+          cmp = String(a.name || "").localeCompare(String(b.name || ""), undefined, { sensitivity: "base" });
+        }
+        break;
+      case "netBalance":
+      case "balance":
+        cmp = a.balance - b.balance;
+        if (cmp === 0) {
+          cmp = String(a.name || "").localeCompare(String(b.name || ""), undefined, { sensitivity: "base" });
+        }
+        break;
+      case "default":
+      default:
+        cmp = (a.defaultIndex || 0) - (b.defaultIndex || 0);
+        break;
+    }
+
+    return tbSortOrder === "desc" ? -cmp : cmp;
+  });
+
+  return {
+    allRowsCount: rawRows.length,
+    filteredRowsCount: filteredRows.length,
+    rows: sortedRows
+  };
+}
+
+export function exportTrialBalanceToExcel() {
+  const company = state.getCompanyInfo ? state.getCompanyInfo() : {};
+  const compName = company.name || "COMPANY";
+  const dateText = `As of ${new Date().toISOString().split("T")[0]}`;
+  const { rows } = getTrialBalanceData();
+
+  let totalDebit = 0;
+  let totalCredit = 0;
+
+  let bodyHtml = '';
+  rows.forEach(r => {
+    let debit = 0;
+    let credit = 0;
+    if (r.balance > 0) {
+      debit = r.balance;
+      totalDebit += debit;
+    } else if (r.balance < 0) {
+      credit = -r.balance;
+      totalCredit += credit;
+    } else {
+      return;
+    }
+
+    bodyHtml += `<tr>
+      <td class="${r.isGroup ? 'parent-row' : 'txt'}">${r.name}</td>
+      <td class="txt">${r.group || 'Ledger Account'}</td>
+      <td class="num">${debit > 0 ? debit.toFixed(2) : ''}</td>
+      <td class="num">${credit > 0 ? credit.toFixed(2) : ''}</td>
+    </tr>`;
+  });
+
+  const htmlContent = `
+    <div class="title">${compName}</div>
+    <div class="subtitle">TRIAL BALANCE SUMMARY<br>${dateText}</div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:40%;">Particulars / Ledger Account</th>
+          <th style="width:30%;">Group / Type</th>
+          <th style="width:15%;">Debit Balance (₹)</th>
+          <th style="width:15%;">Credit Balance (₹)</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${bodyHtml || '<tr><td colspan="4" style="text-align:center;">All account balances are zero.</td></tr>'}
+        <tr class="total-row">
+          <td colspan="2">TOTALS</td>
+          <td class="num">${totalDebit.toFixed(2)}</td>
+          <td class="num">${totalCredit.toFixed(2)}</td>
+        </tr>
+      </tbody>
+    </table>
+  `;
+
+  const safeCompName = compName.replace(/[^a-zA-Z0-9]/g, '_');
+  const fileName = `Trial_Balance_${safeCompName}_${new Date().toISOString().split("T")[0]}.xls`;
+  downloadExcelFile(htmlContent, fileName);
+}
+
 export function renderProfitLossReport(container) {
   try {
     activeReportTab = "pl";
@@ -425,17 +1018,15 @@ export function renderProfitLossReport(container) {
         <div style="display: flex; gap: 6px;">
           <button class="btn" id="btn-apply-report-dates" style="padding: 2px 12px; background: #e2e2e2; border: 1px solid #707070; border-radius: 2px; color: #000; font-weight: bold; cursor: pointer; font-size: 12px; height: auto; min-width: auto; line-height: normal;">View</button>
           <button class="btn" id="btn-reset-report-dates" style="padding: 2px 12px; background: #e2e2e2; border: 1px solid #707070; border-radius: 2px; color: #000; font-weight: bold; cursor: pointer; font-size: 12px; height: auto; min-width: auto; line-height: normal;">Clear</button>
+          <button class="btn" id="btn-pl-excel" style="padding: 2px 12px; background: #107c41; border: 1px solid #0b5c30; border-radius: 2px; color: #fff; font-weight: bold; cursor: pointer; font-size: 12px; height: auto; min-width: auto; line-height: normal; display: inline-flex; align-items: center; gap: 4px;" title="Export Profit & Loss Statement to Excel"><i class="fa-solid fa-file-excel"></i> Excel Export</button>
         </div>
       </div>
-      <div id="report-view-content" style="flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; overflow: hidden;">
+      <div id="report-view-content" style="flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; overflow-y: auto; overflow-x: auto;">
         ${renderProfitLossHtml(pl)}
       </div>
     `;
 
     initTallyDatePickers(container);
-
-
-
 
     const btnApply = document.getElementById("btn-apply-report-dates");
     if (btnApply) {
@@ -443,6 +1034,13 @@ export function renderProfitLossReport(container) {
         reportStartDate = document.getElementById("rep-start-date").value;
         reportEndDate = document.getElementById("rep-end-date").value;
         renderProfitLossReport(container);
+      });
+    }
+
+    const btnPlExcel = document.getElementById("btn-pl-excel");
+    if (btnPlExcel) {
+      btnPlExcel.addEventListener("click", () => {
+        exportProfitLossToExcel();
       });
     }
 
@@ -578,19 +1176,18 @@ export function renderBalanceSheetReport(container) {
             <input type="checkbox" id="bs-chk-opening"> Opening Balance Sheet
           </label>
           <div style="display: flex; align-items: center; gap: 5px; margin-left: 10px;">
-            <span>From:</span>
-            ${renderTallyDatePickerHtml({ id: "bs-start-date", value: reportStartDate || "2026-04-01", style: "height:26px; padding:2px 6px; font-size:0.8rem; border:1px solid #7f9db9; border-radius:3px;", width: "130px" })}
-            <span>To:</span>
+            <span style="font-weight: 600; color: #000;">As on Date:</span>
             ${renderTallyDatePickerHtml({ id: "bs-end-date", value: reportEndDate || new Date().toISOString().split('T')[0], style: "height:26px; padding:2px 6px; font-size:0.8rem; border:1px solid #7f9db9; border-radius:3px;", width: "130px" })}
           </div>
         </div>
         <div style="display: flex; gap: 6px;">
           <button class="btn" id="btn-bs-view" style="padding: 2px 12px; background: #e2e2e2; border: 1px solid #707070; border-radius: 2px; color: #000; font-weight: bold; cursor: pointer; font-size: 12px; height: auto; min-width: auto; line-height: normal;">View</button>
+          <button class="btn" id="btn-bs-excel" style="padding: 2px 12px; background: #107c41; border: 1px solid #0b5c30; border-radius: 2px; color: #fff; font-weight: bold; cursor: pointer; font-size: 12px; height: auto; min-width: auto; line-height: normal; display: inline-flex; align-items: center; gap: 4px;" title="Export Balance Sheet to Excel"><i class="fa-solid fa-file-excel"></i> Excel Export</button>
           <button class="btn" id="btn-bs-print" style="padding: 2px 12px; background: #e2e2e2; border: 1px solid #707070; border-radius: 2px; color: #000; font-weight: bold; cursor: pointer; font-size: 12px; height: auto; min-width: auto; line-height: normal;">Print</button>
           <button class="btn" id="btn-bs-close" style="padding: 2px 12px; background: #e2e2e2; border: 1px solid #707070; border-radius: 2px; color: #000; font-weight: bold; cursor: pointer; font-size: 12px; height: auto; min-width: auto; line-height: normal;">Close</button>
         </div>
       </div>
-      <div id="report-view-content" style="flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; overflow: hidden;">
+      <div id="report-view-content" style="flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; overflow-y: auto; overflow-x: auto;">
         ${renderBalanceSheetHtml(bs)}
       </div>
     `;
@@ -625,28 +1222,29 @@ export function renderBalanceSheetReport(container) {
     const btnBsView = document.getElementById("btn-bs-view");
     if (btnBsView) {
       btnBsView.addEventListener("click", () => {
-        reportStartDate = document.getElementById("bs-start-date").value;
-        reportEndDate = document.getElementById("bs-end-date").value;
+        const bsEndDateEl = document.getElementById("bs-end-date");
+        if (bsEndDateEl) reportEndDate = bsEndDateEl.value;
         renderBalanceSheetReport(container);
       });
     }
 
-    const bsStartDateEl = document.getElementById("bs-start-date");
+    const btnBsExcel = document.getElementById("btn-bs-excel");
+    if (btnBsExcel) {
+      btnBsExcel.addEventListener("click", () => {
+        exportBalanceSheetToExcel(false);
+      });
+    }
+
     const bsEndDateEl = document.getElementById("bs-end-date");
     const handleBsDateChange = () => {
-      const sVal = bsStartDateEl ? bsStartDateEl.value : "";
       const eVal = bsEndDateEl ? bsEndDateEl.value : "";
-      if (sVal !== reportStartDate || eVal !== reportEndDate) {
-        reportStartDate = sVal;
+      if (eVal !== reportEndDate) {
         reportEndDate = eVal;
-        if ((!reportStartDate || reportStartDate.length === 10) && (!reportEndDate || reportEndDate.length === 10)) {
+        if (!reportEndDate || reportEndDate.length === 10) {
           renderBalanceSheetReport(container);
         }
       }
     };
-    if (bsStartDateEl) {
-      bsStartDateEl.addEventListener("change", handleBsDateChange);
-    }
     if (bsEndDateEl) {
       bsEndDateEl.addEventListener("change", handleBsDateChange);
     }
@@ -667,6 +1265,15 @@ export function renderBalanceSheetReport(container) {
         } else {
           window.location.hash = "";
         }
+      });
+    }
+
+    const btnAuditErr = container.querySelector("#btn-bs-audit-err");
+    if (btnAuditErr) {
+      btnAuditErr.addEventListener("click", () => {
+        import("./missingDoubleEntryModal.js").then(m => {
+          m.openMissingDoubleEntryModal();
+        });
       });
     }
 
@@ -741,11 +1348,12 @@ export function renderOpeningBalanceSheetReport(container) {
           </label>
         </div>
         <div style="display: flex; gap: 6px;">
+          <button class="btn" id="btn-obs-excel" style="padding: 2px 12px; background: #107c41; border: 1px solid #0b5c30; border-radius: 2px; color: #fff; font-weight: bold; cursor: pointer; font-size: 12px; height: auto; min-width: auto; line-height: normal; display: inline-flex; align-items: center; gap: 4px;" title="Export Opening Balance Sheet to Excel"><i class="fa-solid fa-file-excel"></i> Excel Export</button>
           <button class="btn" id="btn-obs-print" style="padding: 2px 12px; background: #e2e2e2; border: 1px solid #707070; border-radius: 2px; color: #000; font-weight: bold; cursor: pointer; font-size: 12px; height: auto; min-width: auto; line-height: normal;">Print</button>
           <button class="btn" id="btn-obs-close" style="padding: 2px 12px; background: #e2e2e2; border: 1px solid #707070; border-radius: 2px; color: #000; font-weight: bold; cursor: pointer; font-size: 12px; height: auto; min-width: auto; line-height: normal;">Close</button>
         </div>
       </div>
-      <div id="report-view-content" style="flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; overflow: hidden;">
+      <div id="report-view-content" style="flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; overflow-y: auto; overflow-x: auto;">
         ${renderBalanceSheetHtml(bs)}
       </div>
     `;
@@ -765,6 +1373,13 @@ export function renderOpeningBalanceSheetReport(container) {
           activeReportTab = "bs";
           renderBalanceSheetReport(container);
         }
+      });
+    }
+
+    const btnObsExcel = document.getElementById("btn-obs-excel");
+    if (btnObsExcel) {
+      btnObsExcel.addEventListener("click", () => {
+        exportBalanceSheetToExcel(true);
       });
     }
 
@@ -827,13 +1442,115 @@ export function renderTrialBalanceReport(container) {
     prepareReportContainer(container);
 
     container.innerHTML = `
+      <div class="no-print" style="display: flex; align-items: center; justify-content: space-between; background-color: #cfd8e7; padding: 6px 12px; border: 1px solid #a5c3e5; font-family: Tahoma, sans-serif; font-size: 13px; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span style="font-weight: bold; color: #1e3a8a;"><i class="fa-solid fa-list-check" style="margin-right: 5px;"></i> Trial Balance Summary</span>
+          <span style="color: #334155; font-size: 12px;">As of: <strong>${new Date().toLocaleDateString('en-IN')}</strong></span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 4px;">
+            <i class="fa-solid fa-magnifying-glass" style="color: #475569; font-size: 11px;"></i>
+            <input type="text" id="tb-search-input" placeholder="Search account/group..." value="${tbSearchQuery}" style="height: 26px; padding: 2px 8px; border: 1px solid #7f9db9; border-radius: 3px; font-size: 11px; width: 170px; background: #fff;">
+          </div>
+          <div style="display: flex; align-items: center; gap: 4px;">
+            <span style="font-weight: bold; font-size: 11px; color: #334155;">Sort:</span>
+            <select id="tb-sort-select" style="height: 26px; padding: 2px 6px; border: 1px solid #7f9db9; border-radius: 3px; font-size: 11px; background: #fff; cursor: pointer;">
+              <option value="default|asc" ${tbSortField === 'default' ? 'selected' : ''}>Default Account Order</option>
+              <option value="name|asc" ${tbSortField === 'name' && tbSortOrder === 'asc' ? 'selected' : ''}>Particulars (A → Z)</option>
+              <option value="name|desc" ${tbSortField === 'name' && tbSortOrder === 'desc' ? 'selected' : ''}>Particulars (Z → A)</option>
+              <option value="group|asc" ${tbSortField === 'group' && tbSortOrder === 'asc' ? 'selected' : ''}>Group Name (A → Z)</option>
+              <option value="group|desc" ${tbSortField === 'group' && tbSortOrder === 'desc' ? 'selected' : ''}>Group Name (Z → A)</option>
+              <option value="debit|desc" ${tbSortField === 'debit' && tbSortOrder === 'desc' ? 'selected' : ''}>Highest Debit Balance</option>
+              <option value="debit|asc" ${tbSortField === 'debit' && tbSortOrder === 'asc' ? 'selected' : ''}>Lowest Debit Balance</option>
+              <option value="credit|desc" ${tbSortField === 'credit' && tbSortOrder === 'desc' ? 'selected' : ''}>Highest Credit Balance</option>
+              <option value="credit|asc" ${tbSortField === 'credit' && tbSortOrder === 'asc' ? 'selected' : ''}>Lowest Credit Balance</option>
+              <option value="netBalance|desc" ${tbSortField === 'netBalance' && tbSortOrder === 'desc' ? 'selected' : ''}>Highest Net Balance (Dr → Cr)</option>
+              <option value="netBalance|asc" ${tbSortField === 'netBalance' && tbSortOrder === 'asc' ? 'selected' : ''}>Lowest Net Balance (Cr → Dr)</option>
+            </select>
+          </div>
+          ${(tbSortField !== 'default' || tbSearchQuery !== '') ? `
+            <button class="btn" id="btn-tb-reset" style="padding: 2px 8px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 2px; color: #334155; font-size: 11px; font-weight: bold; cursor: pointer; height: 26px;" title="Reset Sorting and Search Filters"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+          ` : ''}
+        </div>
+
+        <div style="display: flex; gap: 6px;">
+          <button class="btn" id="btn-tb-excel" style="padding: 2px 12px; background: #107c41; border: 1px solid #0b5c30; border-radius: 2px; color: #fff; font-weight: bold; cursor: pointer; font-size: 12px; height: auto; min-width: auto; line-height: normal; display: inline-flex; align-items: center; gap: 4px;" title="Export Trial Balance to Excel"><i class="fa-solid fa-file-excel"></i> Excel Export</button>
+          <button class="btn" id="btn-tb-print" style="padding: 2px 12px; background: #e2e2e2; border: 1px solid #707070; border-radius: 2px; color: #000; font-weight: bold; cursor: pointer; font-size: 12px; height: auto; min-width: auto; line-height: normal;">Print</button>
+        </div>
+      </div>
       <div id="report-view-content" style="flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; overflow-y: auto; overflow-x: auto;">
         ${renderTrialBalanceHtml()}
       </div>
     `;
 
+    const refreshTableOnly = () => {
+      const contentEl = container.querySelector("#report-view-content");
+      if (contentEl) {
+        contentEl.innerHTML = renderTrialBalanceHtml();
+      }
+    };
+
+    const btnTbExcel = container.querySelector("#btn-tb-excel");
+    if (btnTbExcel) {
+      btnTbExcel.addEventListener("click", () => {
+        exportTrialBalanceToExcel();
+      });
+    }
+
+    const btnTbPrint = container.querySelector("#btn-tb-print");
+    if (btnTbPrint) {
+      btnTbPrint.addEventListener("click", () => {
+        window.print();
+      });
+    }
+
+    const tbSearchInput = container.querySelector("#tb-search-input");
+    if (tbSearchInput) {
+      tbSearchInput.addEventListener("input", (e) => {
+        tbSearchQuery = e.target.value;
+        refreshTableOnly();
+      });
+    }
+
+    const tbSortSelect = container.querySelector("#tb-sort-select");
+    if (tbSortSelect) {
+      tbSortSelect.addEventListener("change", (e) => {
+        const [field, order] = e.target.value.split("|");
+        tbSortField = field;
+        tbSortOrder = order || "asc";
+        renderTrialBalanceReport(container);
+      });
+    }
+
+    const btnTbReset = container.querySelector("#btn-tb-reset");
+    if (btnTbReset) {
+      btnTbReset.addEventListener("click", () => {
+        tbSortField = "default";
+        tbSortOrder = "asc";
+        tbSearchQuery = "";
+        renderTrialBalanceReport(container);
+      });
+    }
+
     const tbTableContainer = container.querySelector("#report-view-content");
     if (tbTableContainer) {
+      tbTableContainer.addEventListener("click", (e) => {
+        const th = e.target.closest(".tb-sortable-th");
+        if (!th) return;
+        const col = th.getAttribute("data-col");
+        if (!col) return;
+
+        if (tbSortField === col) {
+          tbSortOrder = tbSortOrder === "asc" ? "desc" : "asc";
+        } else {
+          tbSortField = col;
+          tbSortOrder = (col === "debit" || col === "credit") ? "desc" : "asc";
+        }
+
+        renderTrialBalanceReport(container);
+      });
+
       tbTableContainer.addEventListener("dblclick", (e) => {
         const row = e.target.closest(".tb-clickable-row");
         if (!row) return;
@@ -881,7 +1598,7 @@ export function renderTaxSummaryReport(container) {
     prepareReportContainer(container);
 
     container.innerHTML = `
-      <div id="report-view-content" style="flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; overflow: hidden;">
+      <div id="report-view-content" style="flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; overflow-y: auto; overflow-x: auto;">
         ${renderTaxSummaryHtml()}
       </div>
     `;
@@ -936,18 +1653,151 @@ export function renderTaxSummaryReport(container) {
   }
 }
 
+export function setupLedgerTableKeyboardAndScroll(scopeEl, onRefresh) {
+  const tableContainer = scopeEl.querySelector("#il-ledger-table-container") || scopeEl.querySelector("#il-ledger-table")?.parentElement;
+  if (!tableContainer) return;
+
+  tableContainer.setAttribute("tabindex", "0");
+
+  const rows = Array.from(scopeEl.querySelectorAll(".ledger-row-clickable"));
+  if (rows.length === 0) return;
+
+  rows.forEach((r, idx) => {
+    r.dataset.rowIndex = idx;
+    r.setAttribute("tabindex", "0");
+  });
+
+  let currentActiveRow = scopeEl.querySelector(".ledger-row-clickable.active-selected-row");
+
+  const highlightAndScrollToRow = (targetRow) => {
+    if (!targetRow || targetRow === currentActiveRow) return;
+
+    if (currentActiveRow) {
+      currentActiveRow.classList.remove("active-selected-row");
+      currentActiveRow.style.backgroundColor = "";
+      const prevLink = currentActiveRow.querySelector(".ledger-particular-link");
+      if (prevLink) prevLink.style.color = "#1e3b8b";
+    }
+
+    targetRow.classList.add("active-selected-row");
+    targetRow.style.backgroundColor = "#dbeafe";
+    const pLink = targetRow.querySelector(".ledger-particular-link");
+    if (pLink) pLink.style.color = "#1d4ed8";
+    currentActiveRow = targetRow;
+
+    try {
+      targetRow.focus({ preventScroll: true });
+    } catch (e) {}
+
+    targetRow.scrollIntoView({ block: "nearest" });
+  };
+
+  tableContainer.addEventListener("click", (e) => {
+    const row = e.target.closest(".ledger-row-clickable");
+    if (row) {
+      highlightAndScrollToRow(row);
+    }
+  });
+
+  tableContainer.addEventListener("dblclick", (e) => {
+    const row = e.target.closest(".ledger-row-clickable");
+    if (row) {
+      highlightAndScrollToRow(row);
+      const txId = row.getAttribute("data-tx-id");
+      if (txId) {
+        openVoucherOrInvoice(txId, scopeEl, () => {
+          if (onRefresh) onRefresh();
+        });
+      }
+    }
+  });
+
+  tableContainer.addEventListener("keydown", (e) => {
+    if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT" || e.target.tagName === "TEXTAREA") return;
+
+    const row = e.target.closest(".ledger-row-clickable") || currentActiveRow;
+    let idx = row ? parseInt(row.dataset.rowIndex, 10) : -1;
+    if (isNaN(idx)) idx = -1;
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      e.stopPropagation();
+      const nextIdx = idx >= 0 && idx < rows.length - 1 ? idx + 1 : 0;
+      highlightAndScrollToRow(rows[nextIdx]);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      e.stopPropagation();
+      const prevIdx = idx > 0 ? idx - 1 : rows.length - 1;
+      highlightAndScrollToRow(rows[prevIdx]);
+    } else if (e.key === "PageDown") {
+      e.preventDefault();
+      e.stopPropagation();
+      const nextIdx = Math.min((idx >= 0 ? idx : 0) + 10, rows.length - 1);
+      if (rows[nextIdx]) highlightAndScrollToRow(rows[nextIdx]);
+    } else if (e.key === "PageUp") {
+      e.preventDefault();
+      e.stopPropagation();
+      const prevIdx = Math.max((idx >= 0 ? idx : 0) - 10, 0);
+      if (rows[prevIdx]) highlightAndScrollToRow(rows[prevIdx]);
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      e.stopPropagation();
+      if (rows.length > 0) highlightAndScrollToRow(rows[0]);
+    } else if (e.key === "End") {
+      e.preventDefault();
+      e.stopPropagation();
+      if (rows.length > 0) highlightAndScrollToRow(rows[rows.length - 1]);
+    } else if (e.key === "Enter") {
+      if (row) {
+        e.preventDefault();
+        e.stopPropagation();
+        const txId = row.getAttribute("data-tx-id");
+        if (txId) {
+          openVoucherOrInvoice(txId, scopeEl, () => {
+            if (onRefresh) onRefresh();
+          });
+        }
+      }
+    }
+  });
+}
+
 export function renderIndividualLedgerReport(container) {
   try {
     activeReportTab = "ledger";
     prepareReportContainer(container);
 
+    const titleTextEl = document.getElementById("window-title-text");
+    if (titleTextEl) {
+      titleTextEl.textContent = "INDIVIDUAL LEDGER STATEMENT";
+    }
+
+    const activeEl = document.activeElement;
+    const activeId = activeEl && activeEl.id ? activeEl.id : null;
+    let activeSelStart = 0;
+    let activeSelEnd = 0;
+    if (activeEl && typeof activeEl.selectionStart === "number") {
+      activeSelStart = activeEl.selectionStart;
+      activeSelEnd = activeEl.selectionEnd;
+    }
+
     container.innerHTML = `
-      <div id="report-view-content" style="flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; overflow: hidden;">
+      <div id="report-view-content" style="flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; overflow-y: auto; overflow-x: auto;">
         ${renderIndividualLedgerHtml()}
       </div>
     `;
 
     initTallyDatePickers(container);
+
+    if (activeId && (activeId === "il-from-date" || activeId === "il-to-date")) {
+      const restored = container.querySelector(`#${activeId}`);
+      if (restored) {
+        restored.focus();
+        try {
+          restored.setSelectionRange(activeSelStart, activeSelEnd);
+        } catch (e) {}
+      }
+    }
 
 
 
@@ -1114,36 +1964,7 @@ export function renderIndividualLedgerReport(container) {
       });
     }
 
-    document.querySelectorAll(".ledger-row-clickable").forEach(row => {
-      row.addEventListener("click", () => {
-        document.querySelectorAll(".ledger-row-clickable").forEach(r => {
-          r.classList.remove("active-selected-row");
-          r.style.backgroundColor = "";
-          const pLink = r.querySelector(".ledger-particular-link");
-          if (pLink) pLink.style.color = "#1e3b8b";
-        });
-        row.classList.add("active-selected-row");
-        row.style.backgroundColor = "#dbeafe";
-        const pLink = row.querySelector(".ledger-particular-link");
-        if (pLink) pLink.style.color = "#1d4ed8";
-      });
-
-      row.addEventListener("dblclick", () => {
-        document.querySelectorAll(".ledger-row-clickable").forEach(r => {
-          r.classList.remove("active-selected-row");
-          r.style.backgroundColor = "";
-          const pLink = r.querySelector(".ledger-particular-link");
-          if (pLink) pLink.style.color = "#1e3b8b";
-        });
-        row.classList.add("active-selected-row");
-        row.style.backgroundColor = "#dbeafe";
-        const pLink = row.querySelector(".ledger-particular-link");
-        if (pLink) pLink.style.color = "#1d4ed8";
-
-        const txId = row.getAttribute("data-tx-id");
-        openVoucherOrInvoice(txId, container, () => renderIndividualLedgerReport(container));
-      });
-    });
+    setupLedgerTableKeyboardAndScroll(container, () => renderIndividualLedgerReport(container));
   } catch (error) {
     renderReportError(container, error);
   }
@@ -1244,11 +2065,18 @@ export function renderGroupSummaryReport(container) {
     const gsSummaryTable = document.getElementById("gs-summary-table");
     if (gsSummaryTable) {
       gsSummaryTable.addEventListener("dblclick", (e) => {
-        const row = e.target.closest("tr[data-account-id], tr[data-party-tab]");
+        const row = e.target.closest("tr[data-account-id], tr[data-party-tab], tr[data-group-name]");
         if (!row) return;
 
         const partyTab = row.getAttribute("data-party-tab");
         const accountId = row.getAttribute("data-account-id");
+        const groupName = row.getAttribute("data-group-name");
+
+        if (groupName) {
+          selectedGroupName = groupName;
+          renderGroupSummaryReport(container);
+          return;
+        }
 
         if (partyTab) {
           activePartySubTab = partyTab;
@@ -1258,9 +2086,20 @@ export function renderGroupSummaryReport(container) {
         }
 
         if (accountId) {
-          selectedIndividualLedgerId = accountId;
-          activeReportTab = "ledger";
-          renderIndividualLedgerReport(container);
+          const fromVal = document.getElementById("gs-from-date")?.value || reportStartDate || (state.getActiveFinancialYearStartDate ? state.getActiveFinancialYearStartDate() : "2026-04-01");
+          const toVal = document.getElementById("gs-to-date")?.value || reportEndDate || new Date().toISOString().split("T")[0];
+          if (accountId === "1200") {
+            import("./inventory.js").then(m => {
+              m.showDetailedStockRegisterModal();
+            });
+          } else {
+            selectedIndividualLedgerId = accountId;
+            activeReportTab = "ledger";
+            ledgerFromDate = fromVal;
+            ledgerToDate = toVal;
+            renderIndividualLedgerReport(container);
+            showIndividualLedgerModal(accountId, fromVal, toVal);
+          }
         }
       });
     }
@@ -1278,7 +2117,7 @@ export function renderPartiesReportView(container, subTab) {
     prepareReportContainer(container);
 
     container.innerHTML = `
-      <div id="report-view-content" style="flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; overflow: hidden;">
+      <div id="report-view-content" style="flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; overflow-y: auto; overflow-x: auto;">
         ${renderPartiesReportHtml()}
       </div>
     `;
@@ -1689,107 +2528,22 @@ function renderActiveReport(pl, bs, tax) {
   }
 }
 
+function getTbSortIcon(col) {
+  if (tbSortField === col) {
+    return tbSortOrder === 'asc' 
+      ? '<span style="font-size: 11px; color: var(--accent-color, #1e88e5); margin-left: 4px;">▲</span>' 
+      : '<span style="font-size: 11px; color: var(--accent-color, #1e88e5); margin-left: 4px;">▼</span>';
+  }
+  return '<span style="font-size: 10px; color: #94a3b8; margin-left: 4px; opacity: 0.6;">↕</span>';
+}
+
 function renderTrialBalanceHtml() {
-  const balances = state.getAccountBalances();
-  const ledgers = state.getLedgers();
-  const contacts = state.getContacts();
-
-  const tbRows = [];
-
-  // 1. SUNDRY DEBTORS (Grouped)
-  let debtorsBal = balances["1100"] ? balances["1100"].balance : 0;
-  if (debtorsBal === 0) {
-    contacts.forEach(c => {
-      const isCreditor = c.type === "supplier" || c.listInVendorList || c.groupName === "SUNDRY CREDITORS";
-      if (!isCreditor) {
-        if (c.siteType === "multiple") {
-          (c.sites || []).forEach(site => {
-            const key = `${c.id}::${site}`;
-            const balData = balances[key];
-            if (balData) debtorsBal += (balData.balance || 0);
-          });
-        } else {
-          const balData = balances[c.id];
-          if (balData) debtorsBal += (balData.balance || 0);
-        }
-      }
-    });
-  }
-  if (debtorsBal !== 0) {
-    tbRows.push({ name: "SUNDRY DEBTORS", group: "Account Group", balance: debtorsBal, isGroup: true });
-  }
-
-  // 2. SUNDRY CREDITORS (Grouped)
-  let creditorsBal = balances["2100"] ? balances["2100"].balance : 0;
-  if (creditorsBal === 0) {
-    contacts.forEach(c => {
-      const isCreditor = c.type === "supplier" || c.listInVendorList || c.groupName === "SUNDRY CREDITORS";
-      if (isCreditor) {
-        if (c.siteType === "multiple") {
-          (c.sites || []).forEach(site => {
-            const key = `${c.id}::${site}`;
-            const balData = balances[key];
-            if (balData) creditorsBal += (balData.balance || 0);
-          });
-        } else {
-          const balData = balances[c.id];
-          if (balData) creditorsBal += (balData.balance || 0);
-        }
-      }
-    });
-  }
-  if (creditorsBal !== 0) {
-    tbRows.push({ name: "SUNDRY CREDITORS", group: "Account Group", balance: creditorsBal, isGroup: true });
-  }
-
-  // 3. Individual Ledgers (non-contact)
-  ledgers.forEach(l => {
-    const balData = balances[l.code];
-    const bal = balData ? balData.balance : 0;
-    if (bal !== 0) {
-      const parentCust = contacts.find(c => 
-        (l.parentCustomerId && c.id === l.parentCustomerId) || 
-        c.id === l.code || 
-        (c.ledgerCode && c.ledgerCode === l.code) || 
-        (c.name && l.name && String(c.name).trim().toUpperCase() === String(l.name).trim().toUpperCase()) ||
-        String(c.name || '').trim().toUpperCase() === String(l.groupName || '').trim().toUpperCase()
-      );
-      if (parentCust || l.groupName === "SUNDRY DEBTORS" || l.groupName === "SUNDRY CREDITORS") {
-        return; // Handled under SUNDRY DEBTORS / SUNDRY CREDITORS
-      }
-      tbRows.push({ name: l.name, group: l.groupName || "Ledger Account", balance: bal, code: l.code, isGroup: false });
-    }
-  });
-
-  // 4. Core Accounts without custom ledgers
-  const CORE_DESCRIPTIONS = {
-    "1010": { name: "Cash in Hand", group: "CASH-IN-HAND" },
-    "1020": { name: "Bank Current Account", group: "BANK ACCOUNTS" },
-    "2200": { name: "GST/VAT Payable", group: "DUTIES & TAXES" },
-    "3100": { name: "Capital Account", group: "CAPITAL ACCOUNT" },
-    "4100": { name: "Sales Account", group: "SALES ACCOUNT" }
-  };
-
-  Object.entries(CORE_DESCRIPTIONS).forEach(([code, meta]) => {
-    const coreBal = balances[code] ? balances[code].balance : 0;
-    if (coreBal !== 0) {
-      const isAlreadyCaptured = tbRows.some(r => r.code === code);
-      if (!isAlreadyCaptured) {
-        tbRows.push({ name: meta.name, group: meta.group, balance: coreBal, code: code, isGroup: false });
-      }
-    }
-  });
-
-  // 5. Opening Stock
-  const openingStockVal = state.getOpeningStockValuation ? state.getOpeningStockValuation() : 0;
-  if (openingStockVal !== 0) {
-    tbRows.push({ name: "Stock on Hand (Opening)", group: "CURRENT ASSETS", balance: openingStockVal, isGroup: false, isStock: true });
-  }
+  const { allRowsCount, filteredRowsCount, rows } = getTrialBalanceData();
 
   let totalDebit = 0;
   let totalCredit = 0;
 
-  const rowsHtml = tbRows.map(r => {
+  const rowsHtml = rows.map(r => {
     let debit = 0;
     let credit = 0;
     if (r.balance > 0) {
@@ -1815,6 +2569,13 @@ function renderTrialBalanceHtml() {
     `;
   }).filter(Boolean).join("");
 
+  const activeSortLabel = tbSortField === "default" ? "Default Account Order" : 
+    (tbSortField === "name" ? `Particulars (${tbSortOrder === 'asc' ? 'A → Z' : 'Z → A'})` :
+    (tbSortField === "group" ? `Group Name (${tbSortOrder === 'asc' ? 'A → Z' : 'Z → A'})` :
+    (tbSortField === "debit" ? `Debit Balance (${tbSortOrder === 'desc' ? 'Highest First' : 'Lowest First'})` :
+    (tbSortField === "credit" ? `Credit Balance (${tbSortOrder === 'desc' ? 'Highest First' : 'Lowest First'})` :
+    `Net Balance (${tbSortOrder === 'desc' ? 'Highest First' : 'Lowest First'})`))));
+
   return `
     <div class="panel" style="overflow-y: auto; flex: 1 1 auto; max-height: 100%;">
       <!-- Official Company Letterhead Header for Print View -->
@@ -1823,25 +2584,37 @@ function renderTrialBalanceHtml() {
         "As on: <strong>" + new Date().toLocaleDateString('en-IN') + "</strong>"
       )}
 
-      <div class="no-print" style="text-align: center; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.8rem;">
+      <div class="no-print" style="text-align: center; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.8rem;">
         <h3 style="font-size: 1.5rem; font-family: var(--font-heading); color: var(--accent-color);">Trial Balance Summary</h3>
-        <p style="font-size: 0.8rem; color: var(--text-secondary);">As of: ${new Date().toISOString().split("T")[0]}</p>
+        <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 4px;">As of: ${new Date().toISOString().split("T")[0]}</p>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 0.75rem; color: #475569;">
+          <span>Sorted by: <strong>${activeSortLabel}</strong></span>
+          ${tbSearchQuery ? `<span style="background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 12px; font-weight: 600;">Filter: "${tbSearchQuery}" (${filteredRowsCount} of ${allRowsCount} rows)</span>` : ''}
+        </div>
       </div>
 
       <div style="overflow-x: auto; overflow-y: auto;">
         <table style="width: 100%; border-collapse: collapse; font-size: 0.8rem; color: var(--text-primary);">
           <thead>
             <tr style="background-color: var(--card-bg); border-bottom: 2px solid var(--border-color); font-weight: bold;">
-              <th style="padding: 8px 12px; text-align: left; color: var(--text-primary);">Particulars / Ledger Account</th>
-              <th style="padding: 8px 12px; text-align: left; color: var(--text-primary);">Group / Type</th>
-              <th style="padding: 8px 12px; text-align: right; width: 150px; color: var(--text-primary);">Debit Balance</th>
-              <th style="padding: 8px 12px; text-align: right; width: 150px; color: var(--text-primary);">Credit Balance</th>
+              <th class="tb-sortable-th" data-col="name" style="padding: 8px 12px; text-align: left; color: var(--text-primary); cursor: pointer; user-select: none;" title="Click to sort by Particulars / Ledger Account">
+                Particulars / Ledger Account ${getTbSortIcon('name')}
+              </th>
+              <th class="tb-sortable-th" data-col="group" style="padding: 8px 12px; text-align: left; color: var(--text-primary); cursor: pointer; user-select: none;" title="Click to sort by Group / Type">
+                Group / Type ${getTbSortIcon('group')}
+              </th>
+              <th class="tb-sortable-th" data-col="debit" style="padding: 8px 12px; text-align: right; width: 170px; color: var(--text-primary); cursor: pointer; user-select: none;" title="Click to sort by Debit Balance">
+                Debit Balance ${getTbSortIcon('debit')}
+              </th>
+              <th class="tb-sortable-th" data-col="credit" style="padding: 8px 12px; text-align: right; width: 170px; color: var(--text-primary); cursor: pointer; user-select: none;" title="Click to sort by Credit Balance">
+                Credit Balance ${getTbSortIcon('credit')}
+              </th>
             </tr>
           </thead>
           <tbody>
-            ${rowsHtml || `<tr><td colspan="4" style="text-align:center; padding: 20px; color: var(--text-secondary);">All account balances are zero.</td></tr>`}
+            ${rowsHtml || `<tr><td colspan="4" style="text-align:center; padding: 20px; color: var(--text-secondary);">${tbSearchQuery ? 'No accounts matched your search query.' : 'All account balances are zero.'}</td></tr>`}
             <tr style="border-top: 2px solid var(--border-color); background-color: var(--card-bg); font-weight: bold; font-size: 0.85rem;">
-              <td colspan="2" style="padding: 10px 12px; text-align: left; color: var(--text-primary);">TOTALS</td>
+              <td colspan="2" style="padding: 10px 12px; text-align: left; color: var(--text-primary);">TOTALS ${tbSearchQuery ? '(Filtered)' : ''}</td>
               <td style="padding: 10px 12px; text-align: right; color: var(--accent-color);">\u20B9${totalDebit.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
               <td style="padding: 10px 12px; text-align: right; color: var(--accent-color);">\u20B9${totalCredit.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
             </tr>
@@ -1989,7 +2762,7 @@ function renderProfitLossHtml(pl) {
                   ${tradingDebitRows.map(r => `
                     <tr class="pl-clickable-particular" data-type="trading-debit" data-label="${r.label.replace(/"/g, '&quot;')}" data-is-child="${r.isChild ? 'true' : 'false'}" data-is-parent="${r.isParent ? 'true' : 'false'}" data-code="${r.code || ''}" style="border-bottom: 1px solid #e2e2e2; display: table-row; cursor: pointer; ${r.isProfit ? 'font-weight: bold; color: #000;' : ''} ${r.isParent ? 'font-weight: bold;' : ''}">
                       <td style="padding: 5px 8px; border-right: 1px solid #e2e2e2; ${r.isChild ? 'padding-left: 20px; font-style: italic; color: #475569;' : ''}">${r.label}</td>
-                      <td style="padding: 5px 8px; text-align: right; ${r.isChild ? 'font-style: italic; color: #475569;' : ''}">\u20B9${r.amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                      <td style="padding: 5px 8px; text-align: right; ${r.isChild ? 'font-style: italic; color: #475569;' : ''}">${r.amount < 0 ? '-\u20B9' + Math.abs(r.amount).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '\u20B9' + r.amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                     </tr>
                   `).join("")}
                 </tbody>
@@ -2015,7 +2788,7 @@ function renderProfitLossHtml(pl) {
                   ${plDebitRows.map(r => `
                     <tr class="pl-clickable-particular" data-type="pl-debit" data-label="${r.label.replace(/"/g, '&quot;')}" data-is-child="${r.isChild ? 'true' : 'false'}" data-is-parent="${r.isParent ? 'true' : 'false'}" data-code="${r.code || ''}" style="border-bottom: 1px solid #e2e2e2; display: table-row; cursor: pointer; ${r.isProfit ? 'font-weight: bold; background-color: #f0fdf4; color: #15803d;' : ''} ${r.isParent ? 'font-weight: bold;' : ''}">
                       <td style="padding: 5px 8px; border-right: 1px solid #e2e2e2; ${r.isChild ? 'padding-left: 20px; font-style: italic; color: #475569;' : ''}">${r.label}</td>
-                      <td style="padding: 5px 8px; text-align: right; ${r.isChild ? 'font-style: italic; color: #475569;' : ''}">\u20B9${r.amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                      <td style="padding: 5px 8px; text-align: right; ${r.isChild ? 'font-style: italic; color: #475569;' : ''}">${r.amount < 0 ? '-\u20B9' + Math.abs(r.amount).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '\u20B9' + r.amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                     </tr>
                   `).join("")}
                 </tbody>
@@ -2046,7 +2819,7 @@ function renderProfitLossHtml(pl) {
                   ${tradingCreditRows.map(r => `
                     <tr class="pl-clickable-particular" data-type="trading-credit" data-label="${r.label.replace(/"/g, '&quot;')}" data-is-child="${r.isChild ? 'true' : 'false'}" data-is-parent="${r.isParent ? 'true' : 'false'}" data-code="${r.code || ''}" style="border-bottom: 1px solid #e2e2e2; display: table-row; cursor: pointer; ${r.isLoss ? 'font-weight: bold; color: #000;' : ''} ${r.isParent ? 'font-weight: bold;' : ''}">
                       <td style="padding: 5px 8px; border-right: 1px solid #e2e2e2; ${r.isChild ? 'padding-left: 20px; font-style: italic; color: #475569;' : ''}">${r.label}</td>
-                      <td style="padding: 5px 8px; text-align: right; ${r.isChild ? 'font-style: italic; color: #475569;' : ''}">\u20B9${r.amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                      <td style="padding: 5px 8px; text-align: right; ${r.isChild ? 'font-style: italic; color: #475569;' : ''}">${r.amount < 0 ? '-\u20B9' + Math.abs(r.amount).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '\u20B9' + r.amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                     </tr>
                   `).join("")}
                 </tbody>
@@ -2072,7 +2845,7 @@ function renderProfitLossHtml(pl) {
                   ${plCreditRows.map(r => `
                     <tr class="pl-clickable-particular" data-type="pl-credit" data-label="${r.label.replace(/"/g, '&quot;')}" data-is-child="${r.isChild ? 'true' : 'false'}" data-is-parent="${r.isParent ? 'true' : 'false'}" data-code="${r.code || ''}" style="border-bottom: 1px solid #e2e2e2; display: table-row; cursor: pointer; ${r.isLoss ? 'font-weight: bold; background-color: #fef2f2; color: #b91c1c;' : ''} ${r.isParent ? 'font-weight: bold;' : ''}">
                       <td style="padding: 5px 8px; border-right: 1px solid #e2e2e2; ${r.isChild ? 'padding-left: 20px; font-style: italic; color: #475569;' : ''}">${r.label}</td>
-                      <td style="padding: 5px 8px; text-align: right; ${r.isChild ? 'font-style: italic; color: #475569;' : ''}">\u20B9${r.amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                      <td style="padding: 5px 8px; text-align: right; ${r.isChild ? 'font-style: italic; color: #475569;' : ''}">${r.amount < 0 ? '-\u20B9' + Math.abs(r.amount).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '\u20B9' + r.amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                     </tr>
                   `).join("")}
                 </tbody>
@@ -2096,23 +2869,31 @@ function renderBalanceSheetHtml(bs) {
     if (!bsDetailed) return '';
     let html = '';
     
-    const mapControlAccountGroup = (name) => {
-      if (name.includes("Sundry Creditors")) return "Sundry Creditors (Accounts Payable)";
-      if (name.includes("GST/VAT Payable")) return "Duties & Taxes";
-      if (name.includes("Cash in Hand")) return "Cash-in-Hand";
-      if (name.includes("Bank Current Account")) return "Bank Accounts";
-      if (name.includes("Sundry Debtors")) return "Sundry Debtors (Accounts Receivable)";
-      if (name.includes("Stock on Hand")) return "Stock-in-Hand";
+    const isAssetSide = String(mainGroupName || "").toUpperCase().includes("ASSET");
+
+    const mapControlAccountGroup = (name, group) => {
+      const nUpper = String(name || "").toUpperCase();
+      const gUpper = String(group || "").toUpperCase();
+
+      if (nUpper.includes("SUNDRY CREDITORS")) return "Sundry Creditors (Accounts Payable)";
+      if (nUpper.includes("SUNDRY DEBTORS")) return "Sundry Debtors (Accounts Receivable)";
+      if (nUpper.includes("STOCK ON HAND")) return "Stock-in-Hand";
+      if (nUpper.includes("CASH IN HAND") || gUpper.includes("CASH")) return "Cash-in-Hand";
+      if (nUpper.includes("BANK CURRENT ACCOUNT") || gUpper.includes("BANK")) return "Bank Accounts";
+
+      if (nUpper === "DUTIES & TAXES" || nUpper === "DUTIES AND TAXES" || nUpper === "GST/VAT PAYABLE" || nUpper === "DUTIES & TAXES (TAX PAYABLE)" || nUpper === "DUTIES & TAXES (INPUT TAX CREDIT / ITC)") {
+        return isAssetSide ? "Duties & Taxes (Input Tax Credit / ITC)" : "Duties & Taxes (Tax Payable)";
+      }
       return null;
     };
 
     const grouped = {};
     const directLedgers = [];
     
-    details.forEach(d => {
+    (details || []).forEach(d => {
       let g = (d.group || "").trim();
       let isControlAccount = false;
-      const ctrlGroup = mapControlAccountGroup(d.name);
+      const ctrlGroup = mapControlAccountGroup(d.name, d.group);
       if (ctrlGroup) {
          g = ctrlGroup;
          isControlAccount = true;
@@ -2125,7 +2906,8 @@ function renderBalanceSheetHtml(bs) {
          directLedgers.push(d);
       } else {
          if (!grouped[g]) grouped[g] = { total: 0, items: [], controlTotal: 0 };
-         if (isControlAccount) {
+         const isSummaryControlLine = d.name.includes("Sundry Creditors") || d.name.includes("Sundry Debtors") || d.name.includes("Stock on Hand") || d.name.includes("Duties & Taxes") || d.name.includes("GST/VAT Payable") || d.name.includes("Tax Credit");
+         if (isControlAccount && isSummaryControlLine) {
             grouped[g].controlTotal += d.balance;
          } else {
             grouped[g].items.push(d);
@@ -2165,8 +2947,34 @@ function renderBalanceSheetHtml(bs) {
     return html;
   };
 
+  const inBalance = bs.inBalance !== false && Math.abs(bs.difference || 0) < 0.05;
+  const rawDiffAmt = Math.abs(bs.difference || bs.rawDiff || 0);
+
+  const auditBannerHtml = inBalance ? `
+    <div class="no-print" style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 4px; padding: 8px 14px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: #166534; font-family: Tahoma, sans-serif;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <i class="fa-solid fa-circle-check" style="font-size: 16px; color: #16a34a;"></i>
+        <span><strong>True & Fair Statement:</strong> Double Entry Books are in Perfect Agreement. All Assets equal Liabilities + Capital.</span>
+      </div>
+      <span style="font-size: 11px; background: #dcfce7; padding: 3px 10px; border-radius: 12px; font-weight: bold; color: #15803d; border: 1px solid #86efac;">Reconciled 100%</span>
+    </div>
+  ` : `
+    <div class="no-print" style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 4px; padding: 8px 14px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: #9f1239; font-family: Tahoma, sans-serif;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <i class="fa-solid fa-triangle-exclamation" style="font-size: 16px; color: #e11d48;"></i>
+        <span><strong>Double Entry Imbalance Warning:</strong> Unreconciled Trial Balance difference of <strong>₹${rawDiffAmt.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong> found!</span>
+      </div>
+      <button id="btn-bs-audit-err" style="background: #be123c; color: white; border: none; border-radius: 3px; padding: 4px 12px; font-size: 12px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+        <i class="fa-solid fa-magnifying-glass"></i> Audit Double Entry Errors
+      </button>
+    </div>
+  `;
+
   return `
     <div class="panel" style="padding: 0; background: none; box-shadow: none; border: none; font-family: Tahoma, sans-serif;">
+      <!-- True & Fair Audit Banner -->
+      ${auditBannerHtml}
+
       <!-- Official Company Letterhead Header for Print View -->
       ${renderPrintHeaderHtml(
         bs.isOpening ? "OPENING BALANCE SHEET" : "BALANCE SHEET",
@@ -2179,39 +2987,48 @@ function renderBalanceSheetHtml(bs) {
           <div style="flex-grow: 1; padding-bottom: 20px;">
             <table style="width: 100%; border-collapse: collapse;">
               <thead>
-                <tr style="border-bottom: 1.5px solid #000; font-weight: bold; background-color: #e2e2e2; font-size: 13px; height: 26px;">
-                  <th style="padding: 4px 8px; text-align: left; border-right: 1px solid #707070; font-weight: bold; color: #000; text-decoration: underline;">Liabilities</th>
-                  <th style="padding: 4px 8px; text-align: right; width: 140px; font-weight: bold; color: #000; text-decoration: underline;">Amount</th>
+                <tr style="border-bottom: 1.5px solid #000; font-weight: bold; background: linear-gradient(to right, #1e3b8b, #2563eb); color: #fff; font-size: 13px; height: 28px;">
+                  <th style="padding: 5px 8px; text-align: left; border-right: 1px solid #3b82f6; font-weight: bold; color: #fff;">Capital & Liabilities</th>
+                  <th style="padding: 5px 8px; text-align: right; width: 140px; font-weight: bold; color: #fff;">Amount (₹)</th>
                 </tr>
               </thead>
               <tbody>
                 <!-- CAPITAL ACCOUNT -->
-                <tr class="bs-clickable-row" data-type="group" data-name="CAPITAL ACCOUNT" style="font-weight: bold; border-bottom: 1px solid #ccc; cursor: pointer;" title="Double-click to view group details">
-                  <td style="padding: 6px 8px; border-right: 1px solid #707070; text-transform: uppercase;">CAPITAL ACCOUNT</td>
-                  <td style="padding: 6px 8px; text-align: right;">${bs.liabilities.capitalVal.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                <tr class="bs-clickable-row" data-type="group" data-name="CAPITAL ACCOUNT" style="font-weight: bold; border-bottom: 1px solid #ccc; background-color: #f8fafc; cursor: pointer;" title="Double-click to view group details">
+                  <td style="padding: 6px 8px; border-right: 1px solid #707070; text-transform: uppercase; color: #1e3a8a;">CAPITAL ACCOUNT</td>
+                  <td style="padding: 6px 8px; text-align: right; color: #1e3a8a;">${(bs.liabilities.capitalVal || (bs.capital ? bs.capital.total : 0)).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                 </tr>
-                ${renderDetailsList(bs.liabilities.capitalDetails, "CAPITAL ACCOUNT")}
+                ${renderDetailsList(bs.liabilities.capitalDetails || (bs.capital ? bs.capital.details : []), "CAPITAL ACCOUNT")}
+
+                <!-- LONG-TERM LIABILITIES -->
+                ${(bs.liabilities.longTermLiabilitiesVal > 0 || (bs.longTermLiabilities && bs.longTermLiabilities.total > 0)) ? `
+                <tr class="bs-clickable-row" data-type="group" data-name="LONG TERM LIABILITIES" style="font-weight: bold; border-bottom: 1px solid #ccc; background-color: #f8fafc; cursor: pointer;" title="Double-click to view group details">
+                  <td style="padding: 6px 8px; border-right: 1px solid #707070; text-transform: uppercase; color: #1e3a8a;">LOANS & LONG-TERM LIABILITIES</td>
+                  <td style="padding: 6px 8px; text-align: right; color: #1e3a8a;">${(bs.liabilities.longTermLiabilitiesVal || bs.longTermLiabilities.total).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                </tr>
+                ${renderDetailsList(bs.liabilities.longTermLiabilitiesDetails || bs.longTermLiabilities.details, "LONG TERM LIABILITIES")}
+                ` : ''}
 
                 <!-- CURRENT LIABILITIES -->
-                <tr class="bs-clickable-row" data-type="group" data-name="CURRENT LIABILITIES" style="font-weight: bold; border-bottom: 1px solid #ccc; cursor: pointer;" title="Double-click to view group details">
-                  <td style="padding: 6px 8px; border-right: 1px solid #707070; text-transform: uppercase;">CURRENT LIABILITIES</td>
-                  <td style="padding: 6px 8px; text-align: right;">${bs.liabilities.currentLiabilitiesVal.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                <tr class="bs-clickable-row" data-type="group" data-name="CURRENT LIABILITIES" style="font-weight: bold; border-bottom: 1px solid #ccc; background-color: #f8fafc; cursor: pointer;" title="Double-click to view group details">
+                  <td style="padding: 6px 8px; border-right: 1px solid #707070; text-transform: uppercase; color: #1e3a8a;">CURRENT LIABILITIES</td>
+                  <td style="padding: 6px 8px; text-align: right; color: #1e3a8a;">${(bs.liabilities.currentLiabilitiesVal || (bs.currentLiabilities ? bs.currentLiabilities.total : 0)).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                 </tr>
-                ${renderDetailsList(bs.liabilities.currentLiabilitiesDetails, "CURRENT LIABILITIES")}
+                ${renderDetailsList(bs.liabilities.currentLiabilitiesDetails || (bs.currentLiabilities ? bs.currentLiabilities.details : []), "CURRENT LIABILITIES")}
 
-                <!-- Difference due to opening balance -->
+                <!-- Difference due to opening balance / double entry imbalance -->
                 ${bs.liabilities.diffLiab > 0 ? `
-                  <tr style="border-bottom: 1px solid #ccc;">
-                    <td style="padding: 6px 8px; border-right: 1px solid #707070;">Difference due to opening balance</td>
+                  <tr style="border-bottom: 1px solid #ccc; background-color: #fef2f2; font-weight: bold; color: #991b1b;">
+                    <td style="padding: 6px 8px; border-right: 1px solid #707070;">Unreconciled Difference in Trial Balance</td>
                     <td style="padding: 6px 8px; text-align: right;">${bs.liabilities.diffLiab.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                   </tr>
                 ` : ''}
 
                 <!-- Profit & Loss A/c. -->
                 ${!bs.isOpening ? `
-                <tr class="bs-clickable-row" data-type="pl-link" data-name="Profit & Loss A/c." style="font-weight: bold; border-bottom: 1px solid #ccc; margin-top: 10px; display: table-row; cursor: pointer;" title="Double-click to open Profit & Loss statement">
-                  <td style="padding: 6px 8px; border-right: 1px solid #707070;">Profit & Loss A/c.</td>
-                  <td style="padding: 6px 8px; text-align: right;">${bs.liabilities.retainedEarnings.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                <tr class="bs-clickable-row" data-type="pl-link" data-name="Profit & Loss A/c." style="font-weight: bold; border-bottom: 1px solid #ccc; background-color: #f0fdf4; cursor: pointer;" title="Double-click to open Profit & Loss statement">
+                  <td style="padding: 6px 8px; border-right: 1px solid #707070; color: #166534;"><i class="fa-solid fa-chart-line" style="margin-right: 4px;"></i> Profit & Loss A/c. (Net Profit)</td>
+                  <td style="padding: 6px 8px; text-align: right; color: #166534;">${(bs.liabilities.retainedEarnings || (bs.profitAndLoss ? bs.profitAndLoss.amount : 0)).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                 </tr>
                 ` : ''}
               </tbody>
@@ -2219,10 +3036,10 @@ function renderBalanceSheetHtml(bs) {
           </div>
           
           <!-- Totals Liability -->
-          <div style="border-top: 1.5px solid #000; padding: 6px 8px; display: flex; justify-content: space-between; font-weight: bold; background-color: #fff; font-size: 14px; align-items: center;">
-            <span>Total:</span>
+          <div style="border-top: 2px solid #1e3a8a; padding: 6px 8px; display: flex; justify-content: space-between; font-weight: bold; background-color: #f1f5f9; font-size: 14px; align-items: center; color: #0f172a;">
+            <span>TOTAL LIABILITIES & CAPITAL:</span>
             <div style="text-align: right; min-width: 140px;">
-              <span style="border-bottom: 3px double #000; padding-bottom: 2px; padding-right: 4px; display: inline-block;">${bs.liabilities.total.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              <span style="border-bottom: 3px double #0f172a; padding-bottom: 2px; padding-right: 4px; display: inline-block;">₹ ${bs.liabilities.total.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             </div>
           </div>
         </div>
@@ -2232,30 +3049,39 @@ function renderBalanceSheetHtml(bs) {
           <div style="flex-grow: 1; padding-bottom: 20px;">
             <table style="width: 100%; border-collapse: collapse;">
               <thead>
-                <tr style="border-bottom: 1.5px solid #000; font-weight: bold; background-color: #e2e2e2; font-size: 13px; height: 26px;">
-                  <th style="padding: 4px 8px; text-align: left; border-right: 1px solid #707070; font-weight: bold; color: #000; text-decoration: underline;">Assets</th>
-                  <th style="padding: 4px 8px; text-align: right; width: 140px; font-weight: bold; color: #000; text-decoration: underline;">Amount</th>
+                <tr style="border-bottom: 1.5px solid #000; font-weight: bold; background: linear-gradient(to right, #1e3b8b, #2563eb); color: #fff; font-size: 13px; height: 28px;">
+                  <th style="padding: 5px 8px; text-align: left; border-right: 1px solid #3b82f6; font-weight: bold; color: #fff;">Property & Assets</th>
+                  <th style="padding: 5px 8px; text-align: right; width: 140px; font-weight: bold; color: #fff;">Amount (₹)</th>
                 </tr>
               </thead>
               <tbody>
                 <!-- FIXED ASSETS -->
-                <tr class="bs-clickable-row" data-type="group" data-name="FIXED ASSETS" style="font-weight: bold; border-bottom: 1px solid #ccc; cursor: pointer;" title="Double-click to view group details">
-                  <td style="padding: 6px 8px; border-right: 1px solid #707070; text-transform: uppercase;">FIXED ASSETS</td>
-                  <td style="padding: 6px 8px; text-align: right;">${bs.assets.fixedAssetsVal.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                <tr class="bs-clickable-row" data-type="group" data-name="FIXED ASSETS" style="font-weight: bold; border-bottom: 1px solid #ccc; background-color: #f8fafc; cursor: pointer;" title="Double-click to view group details">
+                  <td style="padding: 6px 8px; border-right: 1px solid #707070; text-transform: uppercase; color: #1e3a8a;">FIXED ASSETS</td>
+                  <td style="padding: 6px 8px; text-align: right; color: #1e3a8a;">${(bs.assets.fixedAssetsVal || (bs.fixedAssets ? bs.fixedAssets.total : 0)).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                 </tr>
-                ${renderDetailsList(bs.assets.fixedAssetsDetails, "FIXED ASSETS")}
+                ${renderDetailsList(bs.assets.fixedAssetsDetails || (bs.fixedAssets ? bs.fixedAssets.details : []), "FIXED ASSETS")}
+
+                <!-- INVESTMENTS -->
+                ${(bs.assets.investmentsVal > 0 || (bs.investments && bs.investments.total > 0)) ? `
+                <tr class="bs-clickable-row" data-type="group" data-name="INVESTMENTS" style="font-weight: bold; border-bottom: 1px solid #ccc; background-color: #f8fafc; cursor: pointer;" title="Double-click to view group details">
+                  <td style="padding: 6px 8px; border-right: 1px solid #707070; text-transform: uppercase; color: #1e3a8a;">INVESTMENTS & DEPOSITS</td>
+                  <td style="padding: 6px 8px; text-align: right; color: #1e3a8a;">${(bs.assets.investmentsVal || bs.investments.total).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                </tr>
+                ${renderDetailsList(bs.assets.investmentsDetails || bs.investments.details, "INVESTMENTS")}
+                ` : ''}
 
                 <!-- CURRENT ASSETS -->
-                <tr class="bs-clickable-row" data-type="group" data-name="CURRENT ASSETS" style="font-weight: bold; border-bottom: 1px solid #ccc; cursor: pointer;" title="Double-click to view group details">
-                  <td style="padding: 6px 8px; border-right: 1px solid #707070; text-transform: uppercase;">CURRENT ASSETS</td>
-                  <td style="padding: 6px 8px; text-align: right;">${bs.assets.currentAssetsVal.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                <tr class="bs-clickable-row" data-type="group" data-name="CURRENT ASSETS" style="font-weight: bold; border-bottom: 1px solid #ccc; background-color: #f8fafc; cursor: pointer;" title="Double-click to view group details">
+                  <td style="padding: 6px 8px; border-right: 1px solid #707070; text-transform: uppercase; color: #1e3a8a;">CURRENT ASSETS</td>
+                  <td style="padding: 6px 8px; text-align: right; color: #1e3a8a;">${(bs.assets.currentAssetsVal || (bs.currentAssets ? bs.currentAssets.total : 0)).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                 </tr>
-                ${renderDetailsList(bs.assets.currentAssetsDetails, "CURRENT ASSETS")}
+                ${renderDetailsList(bs.assets.currentAssetsDetails || (bs.currentAssets ? bs.currentAssets.details : []), "CURRENT ASSETS")}
                 
-                <!-- Difference due to opening balance -->
+                <!-- Difference due to opening balance / double entry imbalance -->
                 ${bs.assets.diffAsset > 0 ? `
-                  <tr style="border-bottom: 1px solid #ccc;">
-                    <td style="padding: 6px 8px; border-right: 1px solid #707070;">Difference due to opening balance</td>
+                  <tr style="border-bottom: 1px solid #ccc; background-color: #fef2f2; font-weight: bold; color: #991b1b;">
+                    <td style="padding: 6px 8px; border-right: 1px solid #707070;">Unreconciled Difference in Trial Balance</td>
                     <td style="padding: 6px 8px; text-align: right;">${bs.assets.diffAsset.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                   </tr>
                 ` : ''}
@@ -2264,10 +3090,10 @@ function renderBalanceSheetHtml(bs) {
           </div>
           
           <!-- Totals Assets -->
-          <div style="border-top: 1.5px solid #000; padding: 6px 8px; display: flex; justify-content: space-between; font-weight: bold; background-color: #fff; font-size: 14px; align-items: center;">
-            <span>Total:</span>
+          <div style="border-top: 2px solid #1e3a8a; padding: 6px 8px; display: flex; justify-content: space-between; font-weight: bold; background-color: #f1f5f9; font-size: 14px; align-items: center; color: #0f172a;">
+            <span>TOTAL ASSETS:</span>
             <div style="text-align: right; min-width: 140px;">
-              <span style="border-bottom: 3px double #000; padding-bottom: 2px; padding-right: 4px; display: inline-block;">${bs.assets.total.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              <span style="border-bottom: 3px double #0f172a; padding-bottom: 2px; padding-right: 4px; display: inline-block;">₹ ${bs.assets.total.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             </div>
           </div>
         </div>
@@ -2504,7 +3330,7 @@ function renderGroupSummaryHtml() {
   const groups = state.getAccountGroups ? state.getAccountGroups() : [];
   const groupNames = Array.from(new Set(groups.map(g => g.name))).sort();
 
-  const fromDate = reportStartDate || "2026-04-01";
+  const fromDate = reportStartDate || (state.getActiveFinancialYearStartDate ? state.getActiveFinancialYearStartDate() : "2026-04-01");
   const toDate = reportEndDate || new Date().toISOString().split("T")[0];
 
   const items = state.getGroupSummary(selectedGroupName, fromDate, toDate);
@@ -2528,8 +3354,7 @@ function renderGroupSummaryHtml() {
   if (groupDetailed) {
     // Detail mode: show every individual account as a separate row
     items.forEach(item => {
-      if (Math.abs(item.closing) < 0.001) return;
-      if (avoidNonTransaction && item.debit === 0 && item.credit === 0) return;
+      if (avoidNonTransaction && item.debit === 0 && item.credit === 0 && Math.abs(item.opening) < 0.001) return;
       totalOp += item.opening;
       totalDr += item.debit;
       totalCr += item.credit;
@@ -2545,34 +3370,77 @@ function renderGroupSummaryHtml() {
       `;
     });
   } else {
-    // Summary mode: group contacts under their sub-group name, show named ledgers individually
-    // Step 1: separate contact accounts from named ledgers
-    const contactGroupTotals = {};   // groupName -> { opening, debit, credit, closing }
+    // Summary mode: group sub-groups and contacts under their sub-group name, show direct ledgers individually
+    const subGroupTotals = {};      // groupName -> { opening, debit, credit, closing }
     const namedLedgerRows = [];      // individual ledger rows
 
+    const selGroupUpper = String(selectedGroupName || "").trim().toUpperCase();
+    const isSalesSelGroup = selGroupUpper === "SALES ACCOUNTS" || selGroupUpper === "SALES ACCOUNT" || selGroupUpper === "SALES";
+    const isPurSelGroup = selGroupUpper === "PURCHASE ACCOUNTS" || selGroupUpper === "PURCHASE ACCOUNT" || selGroupUpper === "PURCHASE";
+
+    const registeredGroups = state.getAccountGroups ? state.getAccountGroups() : [];
+    const validChildGroups = new Set();
+    if (registeredGroups) {
+      registeredGroups.forEach(g => {
+        if (g && g.under && String(g.under).trim().toUpperCase() === selGroupUpper) {
+          validChildGroups.add(String(g.name).trim().toUpperCase());
+        }
+      });
+    }
+
     items.forEach(item => {
+      const itemGn = String(item.groupName || "").trim().toUpperCase();
+      const isSalesAcc = isSalesSelGroup && (state.isSalesAccount ? state.isSalesAccount(item.accountId) : false);
+      const isPurAcc = isPurSelGroup && (state.isPurchaseAccount ? state.isPurchaseAccount(item.accountId) : false);
+
+      const isSameAsSelected = itemGn === selGroupUpper ||
+        (isSalesSelGroup && (itemGn === "SALES ACCOUNT" || itemGn === "SALES ACCOUNTS" || itemGn === "SALES" || isSalesAcc)) ||
+        (isPurSelGroup && (itemGn === "PURCHASE ACCOUNT" || itemGn === "PURCHASE ACCOUNTS" || itemGn === "PURCHASE" || isPurAcc));
+
       const isContact = item.accountId && !STATIC_IDS.includes(item.accountId) &&
         (item.accountId.includes("::") ||
           (state.contacts && state.contacts.some(c => c.id === item.accountId)));
 
-      if (isContact && selectedGroupName.toUpperCase() !== "SUNDRY CREDITORS" && selectedGroupName.toUpperCase() !== "SUNDRY DEBTORS") {
-        // Aggregate contacts by their group name (e.g. SUNDRY DEBTORS, SUNDRY CREDITORS)
-        const gn = item.groupName;
-        if (!contactGroupTotals[gn]) contactGroupTotals[gn] = { opening: 0, debit: 0, credit: 0, closing: 0 };
-        contactGroupTotals[gn].opening += item.opening;
-        contactGroupTotals[gn].debit   += item.debit;
-        contactGroupTotals[gn].credit  += item.credit;
-        contactGroupTotals[gn].closing += item.closing;
+      const isSubGroup = !isSameAsSelected && (validChildGroups.has(itemGn) || (isContact && selGroupUpper !== "SUNDRY CREDITORS" && selGroupUpper !== "SUNDRY DEBTORS"));
+
+      if (isSubGroup) {
+        const groupKey = item.groupName || "OTHER";
+        if (!subGroupTotals[groupKey]) subGroupTotals[groupKey] = { opening: 0, debit: 0, credit: 0, closing: 0 };
+        subGroupTotals[groupKey].opening += item.opening;
+        subGroupTotals[groupKey].debit   += item.debit;
+        subGroupTotals[groupKey].credit  += item.credit;
+        subGroupTotals[groupKey].closing += item.closing;
       } else {
-        // Named static accounts and dynamic ledgers — show individually
+        // Direct ledgers belonging to selectedGroupName
         namedLedgerRows.push(item);
       }
     });
 
-    // Output named ledger rows first
+    // Output aggregated sub-group rows first (ONLY if they have non-zero activity or opening balance)
+    Object.entries(subGroupTotals).forEach(([gn, g]) => {
+      if (g.debit === 0 && g.credit === 0 && Math.abs(g.opening) < 0.001) return;
+      totalOp += g.opening;
+      totalDr += g.debit;
+      totalCr += g.credit;
+      totalCl += g.closing;
+      
+      const isContactGroup = (gn === "SUNDRY CREDITORS" || gn === "SUNDRY DEBTORS");
+      const attr = isContactGroup ? `data-party-tab="${gn === "SUNDRY CREDITORS" ? "creditors" : "debtors"}"` : `data-group-name="${gn}"`;
+      
+      rows += `
+        <tr ${attr} title="Double-click to open ${gn} Group Summary" style="border-bottom: 1px solid #d0d0d0; font-size: 12px; cursor: pointer; background-color: #f8fafc;">
+          <td style="padding: 5px 8px; border-right: 1px solid #bbb; font-weight: bold; color: #1e3a8a;">📁 ${gn}</td>
+          <td style="padding: 5px 8px; text-align: right; border-right: 1px solid #bbb; white-space: nowrap;">${fmt(g.opening)}</td>
+          <td style="padding: 5px 8px; text-align: right; border-right: 1px solid #bbb;">${g.debit.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+          <td style="padding: 5px 8px; text-align: right; border-right: 1px solid #bbb;">${g.credit.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+          <td style="padding: 5px 8px; text-align: right; white-space: nowrap; font-weight: bold;">${fmt(g.closing)}</td>
+        </tr>
+      `;
+    });
+
+    // Output direct named ledger rows next
     namedLedgerRows.forEach(item => {
-      if (Math.abs(item.closing) < 0.001) return;
-      if (avoidNonTransaction && item.debit === 0 && item.credit === 0) return;
+      if (avoidNonTransaction && item.debit === 0 && item.credit === 0 && Math.abs(item.opening) < 0.001) return;
       totalOp += item.opening;
       totalDr += item.debit;
       totalCr += item.credit;
@@ -2584,26 +3452,6 @@ function renderGroupSummaryHtml() {
           <td style="padding: 5px 8px; text-align: right; border-right: 1px solid #bbb;">${item.debit.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
           <td style="padding: 5px 8px; text-align: right; border-right: 1px solid #bbb;">${item.credit.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
           <td style="padding: 5px 8px; text-align: right; white-space: nowrap;">${fmt(item.closing)}</td>
-        </tr>
-      `;
-    });
-
-    // Output aggregated contact group rows (e.g. SUNDRY DEBTORS total)
-    Object.entries(contactGroupTotals).forEach(([gn, g]) => {
-      if (Math.abs(g.closing) < 0.001) return;
-      if (avoidNonTransaction && g.debit === 0 && g.credit === 0) return;
-      totalOp += g.opening;
-      totalDr += g.debit;
-      totalCr += g.credit;
-      totalCl += g.closing;
-      const partyTab = gn === "SUNDRY CREDITORS" ? "creditors" : "debtors";
-      rows += `
-        <tr data-party-tab="${partyTab}" title="Double-click to open ${gn} report" style="border-bottom: 1px solid #d0d0d0; font-size: 12px; cursor: pointer;">
-          <td style="padding: 5px 8px; border-right: 1px solid #bbb; font-weight: bold;">${gn}</td>
-          <td style="padding: 5px 8px; text-align: right; border-right: 1px solid #bbb; white-space: nowrap;">${fmt(g.opening)}</td>
-          <td style="padding: 5px 8px; text-align: right; border-right: 1px solid #bbb;">${g.debit.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-          <td style="padding: 5px 8px; text-align: right; border-right: 1px solid #bbb;">${g.credit.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-          <td style="padding: 5px 8px; text-align: right; white-space: nowrap;">${fmt(g.closing)}</td>
         </tr>
       `;
     });
@@ -2729,14 +3577,14 @@ export function buildReportContext(forceRefresh = false) {
 
   const salesRetByRef = new Map();
   (state.getSalesReturns() || []).forEach(sr => {
-    if (!sr) return;
+    if (!sr || sr.isCancelled || sr.isCanceled || sr.status === "CANCELLED" || sr.status === "cancelled") return;
     if (sr.id) salesRetByRef.set(String(sr.id).trim(), sr);
     if (sr.voucherNo) salesRetByRef.set(String(sr.voucherNo).trim(), sr);
   });
 
   const purRetByRef = new Map();
   (state.getPurchaseReturns() || []).forEach(pr => {
-    if (!pr) return;
+    if (!pr || pr.isCancelled || pr.isCanceled || pr.status === "CANCELLED" || pr.status === "cancelled") return;
     if (pr.id) purRetByRef.set(String(pr.id).trim(), pr);
     if (pr.voucherNo) purRetByRef.set(String(pr.voucherNo).trim(), pr);
   });
@@ -2827,14 +3675,23 @@ export function buildReportContext(forceRefresh = false) {
 
   const contactsByCanonicalId = new Map();
   (state.getContacts() || []).forEach(c => {
+    if (!c) return;
     const cid = state.getCanonicalAccountId(c.id);
     if (cid) contactsByCanonicalId.set(cid, c);
+    if (c.id) contactsByCanonicalId.set(c.id, c);
+    if (c.ledgerCode) contactsByCanonicalId.set(c.ledgerCode, c);
+    if (c.code) contactsByCanonicalId.set(c.code, c);
+    if (c.tradeasyLedgerId) contactsByCanonicalId.set(String(c.tradeasyLedgerId), c);
   });
 
   const ledgersByCanonicalCode = new Map();
   (state.getLedgers() || []).forEach(l => {
+    if (!l) return;
     const lid = state.getCanonicalAccountId(l.code);
     if (lid) ledgersByCanonicalCode.set(lid, l);
+    if (l.code) ledgersByCanonicalCode.set(l.code, l);
+    if (l.id) ledgersByCanonicalCode.set(l.id, l);
+    if (l.tradeasyId) ledgersByCanonicalCode.set(String(l.tradeasyId), l);
   });
 
   cachedReportContext = {
@@ -3536,13 +4393,16 @@ export function getAllIndividualLedgerAccounts() {
   const contacts = state.getContacts() || [];
 
   const allAccounts = [];
+  const seenIds = new Set();
   const seenNames = new Set();
 
   // 1. Add Contacts first (Customers & Vendors) so they retain contact metadata and IDs
   contacts.forEach(c => {
+    const cId = c.id;
     const normName = String(c.name || "").trim().toUpperCase();
-    if (normName && !seenNames.has(normName)) {
-      seenNames.add(normName);
+    if (cId && !seenIds.has(cId)) {
+      seenIds.add(cId);
+      if (normName) seenNames.add(normName);
       allAccounts.push({
         id: c.id,
         name: c.name,
@@ -3552,11 +4412,11 @@ export function getAllIndividualLedgerAccounts() {
     }
     if (c.siteType === "multiple" && Array.isArray(c.sites) && c.sites.length > 0) {
       c.sites.forEach(site => {
-        const siteKey = `${normName} - ${String(site).trim().toUpperCase()}`;
-        if (!seenNames.has(siteKey)) {
-          seenNames.add(siteKey);
+        const siteId = `${c.id}::${site}`;
+        if (!seenIds.has(siteId)) {
+          seenIds.add(siteId);
           allAccounts.push({
-            id: `${c.id}::${site}`,
+            id: siteId,
             name: `${c.name} - ${site}`,
             type: c.type || "customer",
             ledgerCode: c.ledgerCode || null
@@ -3566,31 +4426,24 @@ export function getAllIndividualLedgerAccounts() {
     }
   });
 
-  // 2. Add General Ledgers (excluding those that are already added as customers/vendors)
+  // 2. Add General Ledgers
   ledgers.forEach(l => {
-    const normName = String(l.name || "").trim().toUpperCase();
-    if (normName && !seenNames.has(normName)) {
-      seenNames.add(normName);
+    const lCode = l.code || l.id;
+    if (lCode && !seenIds.has(lCode)) {
+      seenIds.add(lCode);
       allAccounts.push({
-        id: l.code,
-        name: l.name,
+        id: lCode,
+        name: l.name || lCode,
         type: "ledger",
-        ledgerCode: l.code
+        ledgerCode: l.code || l.id
       });
     }
   });
 
   // 3. Add Core System ACCOUNTS if not already in list
-  const hasCustomCash = ledgers.some(l => l.groupName === "CASH-IN-HAND" || String(l.name || "").toUpperCase() === "CASH");
-  const INTERNAL_SYSTEM_ACCOUNTS = new Set(["1100", "2100", "1200", "5100", "4110", "5110", "4300", "5500"]);
-  if (hasCustomCash) {
-    INTERNAL_SYSTEM_ACCOUNTS.add("1010");
-  }
-
   for (const [code, acc] of Object.entries(ACCOUNTS)) {
-    const normName = String(acc.name || "").trim().toUpperCase();
-    if (!seenNames.has(normName) && !INTERNAL_SYSTEM_ACCOUNTS.has(code)) {
-      seenNames.add(normName);
+    if (!seenIds.has(code)) {
+      seenIds.add(code);
       allAccounts.push({ id: code, name: acc.name.toUpperCase(), type: "ledger", ledgerCode: code });
     }
   }
@@ -3600,39 +4453,49 @@ export function getAllIndividualLedgerAccounts() {
 }
 
 export function resolveIndividualLedgerAccount(id, allAccounts) {
-  if (!Array.isArray(allAccounts) || allAccounts.length === 0) return null;
-  if (!id) return allAccounts[0];
+  if (!id) {
+    return (Array.isArray(allAccounts) && allAccounts.length > 0) ? allAccounts[0] : null;
+  }
 
-  // 1. Direct match by id or ledgerCode
-  let matched = allAccounts.find(a => a.id === id || (a.ledgerCode && a.ledgerCode === id));
-  if (matched) return matched;
+  if (Array.isArray(allAccounts) && allAccounts.length > 0) {
+    // 1. Direct match by id or ledgerCode
+    let matched = allAccounts.find(a => a.id === id || (a.ledgerCode && a.ledgerCode === id));
+    if (matched) return matched;
 
-  // 2. Canonical account ID match
-  const canonicalId = state.getCanonicalAccountId ? state.getCanonicalAccountId(id) : null;
-  if (canonicalId) {
-    matched = allAccounts.find(a => a.id === canonicalId || (a.ledgerCode && a.ledgerCode === canonicalId));
+    // 2. Canonical account ID match
+    const canonicalId = state.getCanonicalAccountId ? state.getCanonicalAccountId(id) : null;
+    if (canonicalId) {
+      matched = allAccounts.find(a => a.id === canonicalId || (a.ledgerCode && a.ledgerCode === canonicalId));
+      if (matched) return matched;
+    }
+
+    // 3. Match contact by ledgerCode or id or name
+    const contacts = state.getContacts ? (state.getContacts() || []) : [];
+    const contactByCode = contacts.find(c => c && (c.ledgerCode === id || c.id === id || (state.getCanonicalAccountId && state.getCanonicalAccountId(c.id) === canonicalId)));
+    if (contactByCode) {
+      const normName = String(contactByCode.name || "").trim().toUpperCase();
+      matched = allAccounts.find(a => a.id === contactByCode.id || a.ledgerCode === contactByCode.ledgerCode || (a.name || "").trim().toUpperCase() === normName);
+      if (matched) return matched;
+    }
+
+    // 4. Match ledger by code or name
+    const ledgers = state.getLedgers ? (state.getLedgers() || []) : [];
+    const ledgerByCode = ledgers.find(l => l && (l.code === id || (state.getCanonicalAccountId && state.getCanonicalAccountId(l.code) === canonicalId)));
+    if (ledgerByCode) {
+      const normName = String(ledgerByCode.name || "").trim().toUpperCase();
+      matched = allAccounts.find(a => a.id === ledgerByCode.code || a.ledgerCode === ledgerByCode.code || (a.name || "").trim().toUpperCase() === normName);
+      if (matched) return matched;
+    }
+
+    // 5. Match by name directly
+    const idUpper = String(id).trim().toUpperCase();
+    matched = allAccounts.find(a => (a.name || "").trim().toUpperCase() === idUpper);
     if (matched) return matched;
   }
 
-  // 3. Match contact by ledgerCode or id or name
-  const contacts = state.getContacts ? (state.getContacts() || []) : [];
-  const contactByCode = contacts.find(c => c && (c.ledgerCode === id || c.id === id || (state.getCanonicalAccountId && state.getCanonicalAccountId(c.id) === state.getCanonicalAccountId(id))));
-  if (contactByCode) {
-    const normName = String(contactByCode.name || "").trim().toUpperCase();
-    matched = allAccounts.find(a => a.id === contactByCode.id || a.ledgerCode === contactByCode.ledgerCode || (a.name || "").trim().toUpperCase() === normName);
-    if (matched) return matched;
-  }
-
-  // 4. Match ledger by code or name
-  const ledgers = state.getLedgers ? (state.getLedgers() || []) : [];
-  const ledgerByCode = ledgers.find(l => l && (l.code === id || (state.getCanonicalAccountId && state.getCanonicalAccountId(l.code) === state.getCanonicalAccountId(id))));
-  if (ledgerByCode) {
-    const normName = String(ledgerByCode.name || "").trim().toUpperCase();
-    matched = allAccounts.find(a => a.id === ledgerByCode.code || a.ledgerCode === ledgerByCode.code || (a.name || "").trim().toUpperCase() === normName);
-    if (matched) return matched;
-  }
-
-  return allAccounts[0];
+  // Synthesize account metadata instead of wrongly jumping to first unrelated account
+  const accName = state.getAccountName ? state.getAccountName(id) : id;
+  return { id: id, name: accName || id, type: "ledger", ledgerCode: id };
 }
 
 function renderIndividualLedgerHtml() {
@@ -3729,7 +4592,7 @@ function renderIndividualLedgerHtml() {
       const creditText = e.credit > 0 ? `₹${e.credit.toFixed(2)}` : "";
       const balanceText = `₹${e.balance.toFixed(2)} ${e.balanceSuffix}`;
       return `
-        <tr class="ledger-row-clickable" data-tx-id="${e.txId}" style="border-bottom: 1px dashed #cbd5e1; cursor: pointer;" title="Double click to edit entry">
+        <tr class="ledger-row-clickable" data-tx-id="${e.txId}" tabindex="0" style="border-bottom: 1px dashed #cbd5e1; cursor: pointer; outline: none;" title="Click to select, Arrow keys to navigate, Double click or Enter to edit entry">
           <td style="padding: 6px; border-right: 1px solid #a5c3e5; vertical-align: top;">${formatDateDisplay(e.date)}</td>
           <td style="padding: 6px; border-right: 1px solid #a5c3e5; vertical-align: top; font-weight: 500;">${e.vNo}</td>
           <td style="padding: 6px; border-right: 1px solid #a5c3e5; vertical-align: top;">
@@ -3764,10 +4627,7 @@ function renderIndividualLedgerHtml() {
         "Period: <strong>" + formatDateDisplay(ledgerFromDate) + " to " + formatDateDisplay(ledgerToDate) + "</strong>"
       )}
 
-      <!-- Title Bar -->
-      <div class="no-print" style="background: linear-gradient(to right, #1e3b8b, #3b82f6); color: white; padding: 6px 12px; font-weight: bold; border-radius: 3px; font-size: 14px; flex-shrink: 0;">
-        LEDGER
-      </div>
+
 
       <!-- Classic ERP Input ribbon panel -->
       <div class="no-print" style="background: #cfd8e7; padding: 12px; border: 1px solid #a5c3e5; display: grid; grid-template-columns: 2fr 1fr 1.5fr; gap: 15px; flex-shrink: 0;">
@@ -3872,7 +4732,7 @@ function renderIndividualLedgerHtml() {
       </div>
 
       <!-- Results Grid Table -->
-      <div class="no-print-border" style="background: white; border: 1px solid #a5c3e5; flex: 1 1 auto; min-height: 350px; overflow-y: auto;">
+      <div class="no-print-border" id="il-ledger-table-container" tabindex="0" style="background: white; border: 1px solid #a5c3e5; flex: 1 1 0; min-height: 0; overflow-y: auto; overflow-x: auto; outline: none;">
         <table id="il-ledger-table" style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; color: black;">
           <thead style="position: sticky; top: 0; z-index: 10; background: #e4edf8; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
             <tr style="background: #e4edf8; border-bottom: 1.5px solid #a5c3e5; font-weight: bold;">
@@ -3931,7 +4791,7 @@ function renderIndividualLedgerHtml() {
 
 export function getLedgerEntries(ledgerId, fromDate, toDate, voucherTypeFilter, employeeFilter, context = null) {
   if (!context) {
-    context = buildReportContext(true);
+    context = buildReportContext(false);
   }
   const activeFyStartDate = state.getActiveFinancialYearStartDate();
   if (activeFyStartDate) {
@@ -3966,6 +4826,26 @@ export function getLedgerEntries(ledgerId, fromDate, toDate, voucherTypeFilter, 
       code: baseId,
       name: acc.name,
       balanceType: acc.type === "asset" || acc.type === "expense" ? "Debit" : "Credit",
+      openingBalance: 0
+    };
+  }
+
+  if (!contact && !ledger) {
+    const accName = state.getAccountName ? state.getAccountName(baseId) : baseId;
+    const isSalesL = state.isSalesAccount ? state.isSalesAccount(baseId) : false;
+    const isPurL = state.isPurchaseAccount ? state.isPurchaseAccount(baseId) : false;
+    let isDebitType = true;
+    if (isSalesL) {
+      isDebitType = false;
+    } else if (isPurL) {
+      isDebitType = true;
+    } else {
+      isDebitType = true;
+    }
+    ledger = {
+      code: baseId,
+      name: accName || baseId,
+      balanceType: isDebitType ? "Debit" : "Credit",
       openingBalance: 0
     };
   }
@@ -4005,12 +4885,12 @@ export function getLedgerEntries(ledgerId, fromDate, toDate, voucherTypeFilter, 
       rawOp = parseFloat(contact.openingBalance) || 0;
     }
 
-    opBalance = (cBType === balanceType) ? Math.abs(rawOp) : -Math.abs(rawOp);
+    opBalance = (cBType === "Debit") ? Math.abs(rawOp) : -Math.abs(rawOp);
 
     if (!siteName && childLedgers.length > 0) {
       childLedgers.forEach(l => {
         const lRaw = parseFloat(l.openingBalance) || 0;
-        if (l.balanceType === balanceType) {
+        if (l.balanceType === "Debit") {
           opBalance += Math.abs(lRaw);
         } else {
           opBalance -= Math.abs(lRaw);
@@ -4018,18 +4898,28 @@ export function getLedgerEntries(ledgerId, fromDate, toDate, voucherTypeFilter, 
       });
     }
   } else if (ledger) {
-    balanceType = ledger.balanceType || "Debit";
-    opBalance = parseFloat(ledger.openingBalance) || 0;
+    const isSalesL = state.isSalesAccount ? state.isSalesAccount(ledger.code, ledger) : false;
+    const isPurL = state.isPurchaseAccount ? state.isPurchaseAccount(ledger.code, ledger) : false;
+    if (isSalesL) {
+      balanceType = ledger.balanceType || "Credit";
+    } else if (isPurL) {
+      balanceType = ledger.balanceType || "Debit";
+    } else {
+      balanceType = ledger.balanceType || "Debit";
+    }
+    const rawOp = parseFloat(ledger.openingBalance) || 0;
+    const isOpDebit = (ledger.balanceType ? ledger.balanceType === "Debit" : balanceType === "Debit");
+    opBalance = isOpDebit ? Math.abs(rawOp) : -Math.abs(rawOp);
   }
 
-  let startBal = balanceType === "Debit" ? opBalance : -opBalance;
+  let startBal = (contact || ledger) ? opBalance : 0;
 
   const startLimit = fromDate ? parseDateSafely(fromDate) : null;
   const endLimit = toDate ? parseDateSafely(toDate) : null;
   if (startLimit) startLimit.setHours(0, 0, 0, 0);
   if (endLimit) endLimit.setHours(23, 59, 59, 999);
 
-  const entriesList = [];
+  let entriesList = [];
   const seenTxIds = new Set();
   const seenVoucherSignatures = new Set();
 
@@ -4060,7 +4950,7 @@ export function getLedgerEntries(ledgerId, fromDate, toDate, voucherTypeFilter, 
   const salesReturnsByRef = context?.salesReturnsByRef || (() => {
     const map = new Map();
     (state.getSalesReturns() || []).forEach(sr => {
-      if (!sr) return;
+      if (!sr || sr.isCancelled || sr.isCanceled || sr.status === "CANCELLED" || sr.status === "cancelled") return;
       if (sr.id) map.set(sr.id, sr);
       if (sr.voucherNo) map.set(sr.voucherNo, sr);
     });
@@ -4070,7 +4960,7 @@ export function getLedgerEntries(ledgerId, fromDate, toDate, voucherTypeFilter, 
   const purchaseReturnsByRef = context?.purchaseReturnsByRef || (() => {
     const map = new Map();
     (state.getPurchaseReturns() || []).forEach(pr => {
-      if (!pr) return;
+      if (!pr || pr.isCancelled || pr.isCanceled || pr.status === "CANCELLED" || pr.status === "cancelled") return;
       if (pr.id) map.set(pr.id, pr);
       if (pr.voucherNo) map.set(pr.voucherNo, pr);
     });
@@ -4080,8 +4970,13 @@ export function getLedgerEntries(ledgerId, fromDate, toDate, voucherTypeFilter, 
   const contactsByCanonicalId = context?.contactsByCanonicalId || (() => {
     const map = new Map();
     contacts.forEach(c => {
+      if (!c) return;
       const cid = state.getCanonicalAccountId(c.id);
       if (cid) map.set(cid, c);
+      if (c.id) map.set(c.id, c);
+      if (c.ledgerCode) map.set(c.ledgerCode, c);
+      if (c.code) map.set(c.code, c);
+      if (c.tradeasyLedgerId) map.set(String(c.tradeasyLedgerId), c);
     });
     return map;
   })();
@@ -4089,8 +4984,12 @@ export function getLedgerEntries(ledgerId, fromDate, toDate, voucherTypeFilter, 
   const ledgersByCanonicalCode = context?.ledgersByCanonicalCode || (() => {
     const map = new Map();
     ledgers.forEach(l => {
+      if (!l) return;
       const lid = state.getCanonicalAccountId(l.code);
       if (lid) map.set(lid, l);
+      if (l.code) map.set(l.code, l);
+      if (l.id) map.set(l.id, l);
+      if (l.tradeasyId) map.set(String(l.tradeasyId), l);
     });
     return map;
   })();
@@ -4188,7 +5087,8 @@ export function getLedgerEntries(ledgerId, fromDate, toDate, voucherTypeFilter, 
   }
 
   transactionsToScan.forEach(tx => {
-    if (!tx || !tx.id || seenTxIds.has(tx.id)) return;
+    if (!tx || !tx.id || seenTxIds.has(tx.id) || state.isTransactionForCancelledDoc(tx)) return;
+    seenTxIds.add(tx.id);
     const txRef = (tx.reference || "").trim();
     const globalMatchedInv = invoicesByRef.get(txRef);
     const globalMatchedPur = purchasesByRef.get(txRef);
@@ -4312,12 +5212,11 @@ export function getLedgerEntries(ledgerId, fromDate, toDate, voucherTypeFilter, 
           const descLower = (tx.description || "").toLowerCase();
           const refLower = (tx.reference || "").toLowerCase();
           const contactNameLower = (contact.name || "").trim().toLowerCase();
-          const contactIdLower = (contact.id || "").trim().toLowerCase();
-          const contactCodeLower = (contact.ledgerCode || "").trim().toLowerCase();
 
-          const nameMatch = (contactNameLower && (descLower.includes(contactNameLower) || refLower.includes(contactNameLower))) ||
-                            (contactIdLower && (descLower.includes(contactIdLower) || refLower.includes(contactIdLower))) ||
-                            (contactCodeLower && (descLower.includes(contactCodeLower) || refLower.includes(contactCodeLower)));
+          // Safely match party name only if contactNameLower is valid and at least 3 characters
+          // Avoid loose substring matches on numeric contact IDs (e.g. "1", "2") that match arbitrary voucher numbers
+          const nameMatch = contactNameLower.length >= 3 &&
+                            (descLower.includes(contactNameLower) || refLower.includes(contactNameLower));
 
           if (nameMatch) {
             targetEntry = tx.entries.find(e => {
@@ -4333,9 +5232,8 @@ export function getLedgerEntries(ledgerId, fromDate, toDate, voucherTypeFilter, 
         }
       }
     } else if (ledger) {
-      
-      const isSalesL = String(ledger.code).toUpperCase() === "4100" || String(ledger.code).toUpperCase() === "L022" || String(ledger.code).toUpperCase() === "L024" || String(ledger.code).toUpperCase() === "L025" || (ledger.groupName && (ledger.groupName.toUpperCase() === "SALES ACCOUNTS" || ledger.groupName.toUpperCase() === "SALES ACCOUNT"));
-      const isPurL = String(ledger.code).toUpperCase() === "1200" || String(ledger.code).toUpperCase() === "L018" || String(ledger.code).toUpperCase() === "L020" || String(ledger.code).toUpperCase() === "L021" || (ledger.groupName && (ledger.groupName.toUpperCase() === "PURCHASE ACCOUNTS" || ledger.groupName.toUpperCase() === "PURCHASE ACCOUNT"));
+      const isSalesL = state.isSalesAccount ? state.isSalesAccount(ledger.code, ledger) : false;
+      const isPurL = state.isPurchaseAccount ? state.isPurchaseAccount(ledger.code, ledger) : false;
       const isCashL = String(ledger.code).toUpperCase() === "1010" || String(ledger.code).toUpperCase() === "L0001" || String(ledger.groupName || "").toUpperCase() === "CASH-IN-HAND" || String(ledger.name || "").toUpperCase() === "CASH";
       const isBankL = String(ledger.code).toUpperCase() === "1020" || String(ledger.groupName || "").toUpperCase() === "BANK ACCOUNTS" || (ledger.name && String(ledger.name).toUpperCase().includes("BANK"));
       
@@ -4364,266 +5262,272 @@ export function getLedgerEntries(ledgerId, fromDate, toDate, voucherTypeFilter, 
         (ledgerCodeUpper === "28" && g === "OUTPUT IGST")
       ) : null;
 
-      // Find exact code match first to avoid matching core Sales/Purchase entries for adjustment accounts
-      targetEntry = tx.entries.find(e => {
+      const canonicalLedgerAcc = state.getCanonicalAccountId ? state.getCanonicalAccountId(ledger.code) : ledger.code;
+
+      // Find all matching entries for this ledger in the transaction
+      const matchedEntries = (tx.entries || []).filter(e => {
         if (!e || !e.accountId) return false;
-        const canonicalEntryAcc = state.getCanonicalAccountId(e.accountId);
-        const canonicalLedgerAcc = state.getCanonicalAccountId(ledger.code);
-        if (canonicalEntryAcc === canonicalLedgerAcc) return true;
+        const canonicalEntryAcc = state.getCanonicalAccountId ? state.getCanonicalAccountId(e.accountId) : e.accountId;
+        if (canonicalEntryAcc === canonicalLedgerAcc || e.accountId === ledger.code || e.accountId === baseId) return true;
         if (isCashL && (canonicalEntryAcc === "1010" || canonicalEntryAcc === "L0001" || e.accountId === "1010" || e.accountId === "L0001")) return true;
         if (isBankL && (canonicalEntryAcc === "1020" || e.accountId === "1020" || e.accountId === ledger.code)) return true;
 
         if (matchedGstGroup) {
-          const entryLedger = ledgers.find(l => l.code === e.accountId || state.getCanonicalAccountId(l.code) === canonicalEntryAcc);
+          const entryLedger = ledgers.find(l => l.code === e.accountId || (state.getCanonicalAccountId && state.getCanonicalAccountId(l.code) === canonicalEntryAcc));
           const eGroup = entryLedger ? String(entryLedger.groupName || "").toUpperCase() : "";
           const eName = entryLedger ? String(entryLedger.name || "").toUpperCase() : String(e.accountId).toUpperCase();
           if (eGroup === matchedGstGroup || eName.includes(matchedGstGroup)) return true;
         }
         return false;
       });
-      if (!targetEntry) {
-        targetEntry = tx.entries.find(e => {
-          if (!e || !e.accountId) return false;
-          const canonicalEntryAcc = state.getCanonicalAccountId(e.accountId);
-          if (isSalesL) return ["4100", "L022", "L024", "L025"].includes(canonicalEntryAcc);
-          if (isPurL) return ["1200", "L018", "L020", "L021"].includes(canonicalEntryAcc);
-          return false;
-        });
+      if (matchedEntries.length > 0) {
+        targetEntry = matchedEntries[0];
       }
     }
 
-    if (ledger) {
-      
-    }
+    const txTargetEntries = (contact && targetEntry) ? [targetEntry] : (ledger ? (tx.entries || []).filter(e => {
+      if (!e || !e.accountId) return false;
+      const canonicalEntryAcc = state.getCanonicalAccountId ? state.getCanonicalAccountId(e.accountId) : e.accountId;
+      const canonicalLedgerAcc = state.getCanonicalAccountId ? state.getCanonicalAccountId(ledger.code) : ledger.code;
+      if (canonicalEntryAcc === canonicalLedgerAcc || e.accountId === ledger.code || e.accountId === baseId) return true;
+      const isCashL = String(ledger.code).toUpperCase() === "1010" || String(ledger.code).toUpperCase() === "L0001" || String(ledger.groupName || "").toUpperCase() === "CASH-IN-HAND" || String(ledger.name || "").toUpperCase() === "CASH";
+      const isBankL = String(ledger.code).toUpperCase() === "1020" || String(ledger.groupName || "").toUpperCase() === "BANK ACCOUNTS" || (ledger.name && String(ledger.name).toUpperCase().includes("BANK"));
+      if (isCashL && (canonicalEntryAcc === "1010" || canonicalEntryAcc === "L0001" || e.accountId === "1010" || e.accountId === "L0001")) return true;
+      if (isBankL && (canonicalEntryAcc === "1020" || e.accountId === "1020" || e.accountId === ledger.code)) return true;
+      return false;
+    }) : []);
 
-    if (targetEntry) {
+    if (txTargetEntries.length > 0) {
       const txDate = parseDateSafely(tx.date);
-      
-      // Determine debit/credit side based on transaction type for cash/bank entries
-      let dr = targetEntry.debit || 0;
-      let cr = targetEntry.credit || 0;
 
-      const computedVType = (() => {
-        const vTypeRaw = String(tx.voucherType || "").trim();
-        const vTypeUpper = vTypeRaw.toUpperCase();
-        if (["RECEIPT", "PAYMENT", "JOURNAL", "CONTRA", "REC", "PAY", "CON", "JV"].includes(vTypeUpper)) {
-          if (vTypeUpper === "REC" || vTypeUpper === "RECEIPT") return "Receipt";
-          if (vTypeUpper === "PAY" || vTypeUpper === "PAYMENT") return "Payment";
-          if (vTypeUpper === "CON" || vTypeUpper === "CONTRA") return "Contra";
-          if (vTypeUpper === "JV" || vTypeUpper === "JOURNAL") return "Journal";
-        }
-        const refUpper = String(tx.reference || "").toUpperCase();
-        if (refUpper.startsWith("RC-") || refUpper.startsWith("RCPT")) return "Receipt";
-        if (refUpper.startsWith("PAY-") || refUpper.startsWith("PM-") || refUpper.startsWith("PY-")) return "Payment";
-        if (refUpper.startsWith("CNTR-")) return "Contra";
-        if (refUpper.startsWith("JV-") || refUpper.startsWith("JV")) return "Journal";
-        if (refUpper.startsWith("CREDIT NOTE") || refUpper.startsWith("SALES RETURN") || refUpper.startsWith("SR-")) return "Sales Return";
-        if (refUpper.startsWith("DEBIT NOTE") || refUpper.startsWith("PURCHASE RETURN") || refUpper.startsWith("DN-")) return "Purchase Return";
-        if (refUpper.startsWith("B2B") || refUpper.startsWith("LSL") || refUpper.startsWith("ISL") || refUpper.startsWith("NSL") || refUpper.startsWith("SA-")) return "Sales";
-        if (refUpper.startsWith("LPR") || refUpper.startsWith("IPR") || refUpper.startsWith("NPR") || refUpper.startsWith("LP-")) return "Purchase";
-        if (refUpper.startsWith("CN-")) return "Contra";
+      txTargetEntries.forEach(currTargetEntry => {
+        let dr = currTargetEntry.debit || 0;
+        let cr = currTargetEntry.credit || 0;
 
-        const refLower = (tx.reference || "").toLowerCase();
-        const descLower = (tx.description || "").toLowerCase();
-        if (refLower.includes("credit note") || refLower.includes("sales return") || refLower.startsWith("sr-")) return "Sales Return";
-        if (refLower.includes("debit note") || refLower.includes("purchase return") || refLower.startsWith("dn-")) return "Purchase Return";
-        if (refLower.includes("receipt") || refLower.includes("rcpt")) return "Receipt";
-        if (refLower.includes("payment") || refLower.includes("pay")) return "Payment";
-        if (refLower.includes("contra") || refLower.includes("cntr")) return "Contra";
-        if (refLower.includes("purchase") || refLower.includes("bill")) return "Purchase";
-        if (refLower.includes("sales") || refLower.includes("invoice")) return "Sales";
-        return "Journal";
-      })();
-
-      // Record transaction voucher signatures to prevent fallback duplicate synthetic additions
-      const vNoRef = tx.reference || tx.voucherNo || tx.id || "";
-      const docSig = (computedVType === "Purchase" || computedVType === "Sales" || computedVType === "Purchase Return" || computedVType === "Sales Return") ?
-        `${computedVType}::${vNoRef}::${tx.date}::${dr.toFixed(2)}::${cr.toFixed(2)}` :
-        null;
-      const altDocSig = (computedVType === "Purchase" || computedVType === "Sales" || computedVType === "Purchase Return" || computedVType === "Sales Return") ?
-        `${computedVType}::${tx.id}::${tx.date}::${dr.toFixed(2)}::${cr.toFixed(2)}` :
-        null;
-
-      if (docSig) seenVoucherSignatures.add(docSig);
-      if (altDocSig) seenVoucherSignatures.add(altDocSig);
-
-      if (startLimit && txDate < startLimit) {
-        let entryNet = 0;
-        if (balanceType === "Debit") {
-          entryNet = dr - cr;
-        } else {
-          entryNet = cr - dr;
-        }
-        startBal += entryNet;
-      } else if ((!startLimit || txDate >= startLimit) && (!endLimit || txDate <= endLimit)) {
-        let matchesVoucherType = true;
-        if (voucherTypeFilter && voucherTypeFilter !== "All") {
-          matchesVoucherType = computedVType.toLowerCase() === voucherTypeFilter.toLowerCase();
-        }
-
-        let matchesEmployee = true;
-        if (employeeFilter && employeeFilter !== "All") {
-          const inv = invoicesByRef.get(tx.reference) || null;
-          if (inv) {
-            matchesEmployee = inv.employee === employeeFilter;
-          } else {
-            matchesEmployee = tx.description.toLowerCase().includes(employeeFilter.toLowerCase());
+        const computedVType = (() => {
+          const vTypeRaw = String(tx.voucherType || "").trim();
+          const vTypeUpper = vTypeRaw.toUpperCase();
+          if (["RECEIPT", "PAYMENT", "JOURNAL", "CONTRA", "REC", "PAY", "CON", "JV"].includes(vTypeUpper)) {
+            if (vTypeUpper === "REC" || vTypeUpper === "RECEIPT") return "Receipt";
+            if (vTypeUpper === "PAY" || vTypeUpper === "PAYMENT") return "Payment";
+            if (vTypeUpper === "CON" || vTypeUpper === "CONTRA") return "Contra";
+            if (vTypeUpper === "JV" || vTypeUpper === "JOURNAL") return "Journal";
           }
-        }
+          const refUpper = String(tx.reference || "").toUpperCase();
+          if (refUpper.startsWith("RC-") || refUpper.startsWith("RCPT")) return "Receipt";
+          if (refUpper.startsWith("PAY-") || refUpper.startsWith("PM-") || refUpper.startsWith("PY-")) return "Payment";
+          if (refUpper.startsWith("CNTR-") || refUpper.startsWith("CO-")) return "Contra";
+          if (refUpper.startsWith("JV-") || refUpper.startsWith("JV")) return "Journal";
+          if (refUpper.startsWith("CREDIT NOTE") || refUpper.startsWith("CN-") || refUpper.startsWith("CRN-")) return "Credit Note";
+          if (refUpper.startsWith("DEBIT NOTE") || refUpper.startsWith("DN-") || refUpper.startsWith("DBN-")) return "Debit Note";
+          if (refUpper.startsWith("SALES RETURN") || refUpper.startsWith("SR-")) return "Sales Return";
+          if (refUpper.startsWith("PURCHASE RETURN") || refUpper.startsWith("PR-")) return "Purchase Return";
+          if (refUpper.startsWith("B2B") || refUpper.startsWith("LSL") || refUpper.startsWith("ISL") || refUpper.startsWith("NSL") || refUpper.startsWith("SA-")) return "Sales";
+          if (refUpper.startsWith("LPR") || refUpper.startsWith("IPR") || refUpper.startsWith("NPR") || refUpper.startsWith("LP-")) return "Purchase";
 
-        if (matchesVoucherType && matchesEmployee) {
-          // Resolve main party name for purchase/sales documents
-          let partyName = "";
-          const txRef = tx.reference || "";
-          if (globalMatchedInv) {
-            partyName = globalMatchedInv.contactName;
-          } else if (globalMatchedPur) {
-            partyName = globalMatchedPur.contactName;
-          } else {
-            const cleanId = txRef.replace(/^(Credit Note|Debit Note|Sales Return|Purchase Return)\s+/i, "");
-            const salesRet = salesReturnsByRef.get(txRef) || salesReturnsByRef.get(cleanId) || null;
-            const purRet = purchaseReturnsByRef.get(txRef) || purchaseReturnsByRef.get(cleanId) || null;
-            if (salesRet) partyName = salesRet.contactName;
-            else if (purRet) partyName = purRet.contactName;
+          const refLower = (tx.reference || "").toLowerCase();
+          const descLower = (tx.description || "").toLowerCase();
+          if (refLower.includes("credit note") || refLower.startsWith("cn-") || refLower.startsWith("crn-")) return "Credit Note";
+          if (refLower.includes("debit note") || refLower.startsWith("dn-") || refLower.startsWith("dbn-")) return "Debit Note";
+          if (refLower.includes("sales return") || refLower.startsWith("sr-")) return "Sales Return";
+          if (refLower.includes("purchase return") || refLower.startsWith("pr-")) return "Purchase Return";
+          if (refLower.includes("receipt") || refLower.includes("rcpt")) return "Receipt";
+          if (refLower.includes("payment") || refLower.includes("pay")) return "Payment";
+          if (refLower.includes("contra") || refLower.includes("cntr")) return "Contra";
+          if (refLower.includes("purchase") || refLower.includes("bill")) return "Purchase";
+          if (refLower.includes("sales") || refLower.includes("invoice")) return "Sales";
+          return "Journal";
+        })();
+
+        // Record transaction voucher signatures to prevent fallback duplicate synthetic additions
+        const vNoRef = tx.reference || tx.voucherNo || tx.id || "";
+        const cleanVNoRef = String(vNoRef).trim().toUpperCase();
+        const docSig = `${computedVType.toUpperCase()}::${cleanVNoRef}::${tx.date}::${dr.toFixed(2)}::${cr.toFixed(2)}`;
+        const altDocSig = `DOC::${cleanVNoRef}`;
+
+        seenVoucherSignatures.add(docSig);
+        seenVoucherSignatures.add(altDocSig);
+        if (tx.id) seenVoucherSignatures.add(`DOC::${String(tx.id).trim().toUpperCase()}`);
+
+        if (startLimit && txDate < startLimit) {
+          startBal += (dr - cr);
+        } else if ((!startLimit || txDate >= startLimit) && (!endLimit || txDate <= endLimit)) {
+          let matchesVoucherType = true;
+          if (voucherTypeFilter && voucherTypeFilter !== "All") {
+            matchesVoucherType = computedVType.toLowerCase() === voucherTypeFilter.toLowerCase();
           }
 
-          // If no specific voucher found but there's a contact or Cash/Bank account in the counterpart entries, resolve it as the primary party
-          if (!partyName) {
-            const partyEntry = tx.entries.find(e => {
-              const accountIdStr = e.accountId || "";
-              const baseId = accountIdStr.split("::")[0];
-              const canonicalBaseId = state.getCanonicalAccountId(baseId);
-              const matchingC = contactsByCanonicalId.get(canonicalBaseId);
-              return !!matchingC || canonicalBaseId === "1010" || canonicalBaseId === "1020";
-            });
-            if (partyEntry) {
-              const accountIdStr = partyEntry.accountId || "";
-              const baseId = accountIdStr.split("::")[0];
-              const sitePart = accountIdStr.split("::")[1];
-              const canonicalBaseId = state.getCanonicalAccountId(baseId);
-              const matchingC = contactsByCanonicalId.get(canonicalBaseId);
-              if (matchingC) {
-                partyName = sitePart ? `${matchingC.name} - ${sitePart}` : matchingC.name;
-              } else if (canonicalBaseId === "1010") {
-                partyName = "Cash";
-              } else if (canonicalBaseId === "1020") {
-                partyName = "Bank Current Account";
-              }
-            }
-          }
-
-          const counterparts = tx.entries
-            .filter(e => e !== targetEntry)
-            .map(e => {
-              // 1. Resolve base and site branch
-              const accountIdStr = e.accountId || "";
-              const baseId = accountIdStr.split("::")[0];
-              const sitePart = accountIdStr.split("::")[1];
-              const canonicalBaseId = state.getCanonicalAccountId(baseId);
-              
-              // 2. Resolve AR/AP control accounts to contactName if invoice/purchase matches
-              if (canonicalBaseId === "1100" || canonicalBaseId === "2100") {
-                if (globalMatchedInv) return globalMatchedInv.contactName;
-                if (globalMatchedPur) return globalMatchedPur.contactName;
-                
-                // Fallback parsing from description
-                const desc = (tx.description || "");
-                if (desc.includes("Receipt from Customer:")) {
-                  return desc.replace("Receipt from Customer:", "").split("(")[0].trim();
-                }
-                if (desc.includes("Receipt from Supplier:")) {
-                  return desc.replace("Receipt from Supplier:", "").split("(")[0].trim();
-                }
-                if (desc.includes("Payment to Supplier:")) {
-                  return desc.replace("Payment to Supplier:", "").split("(")[0].trim();
-                }
-              }
-
-              // 3. Resolve to contact
-              const matchingC = contactsByCanonicalId.get(canonicalBaseId);
-              if (matchingC) {
-                return sitePart ? `${matchingC.name} - ${sitePart}` : matchingC.name;
-              }
-
-              // 4. Resolve ledgers
-              const matchingL = ledgersByCanonicalCode.get(canonicalBaseId);
-              if (matchingL) return matchingL.name;
-              
-              // 5. Fallback check for static accounts
-              if (ACCOUNTS[canonicalBaseId]) return ACCOUNTS[canonicalBaseId].name;
-              
-              return accountIdStr;
-            });
-          
-          let counterpartNames = "";
-          let resolvedCounterpartName = "";
-          if (contact) {
-            if (globalMatchedInv) {
-              const seriesId = globalMatchedInv.seriesId;
-              const series = state.getSeriesMaster().find(s => s.id === seriesId);
-              const seriesType = series ? series.seriesType : "LOCAL";
-              if (seriesType === "LOCAL") resolvedCounterpartName = "Local Sales";
-              else if (seriesType === "INTERSTATE") resolvedCounterpartName = "IGST Sales";
-              else if (seriesType === "NONTAXABLE") resolvedCounterpartName = "Non Taxable Sales";
-            } else if (globalMatchedPur) {
-              const seriesId = globalMatchedPur.seriesId;
-              const series = state.getSeriesMaster().find(s => s.id === seriesId);
-              const seriesType = series ? series.seriesType : "LOCAL";
-              if (seriesType === "LOCAL") resolvedCounterpartName = "Local Purchase";
-              else if (seriesType === "INTERSTATE") resolvedCounterpartName = "IGST Purchase";
-              else if (seriesType === "NONTAXABLE") resolvedCounterpartName = "Non Taxable Purchase";
+          let matchesEmployee = true;
+          if (employeeFilter && employeeFilter !== "All") {
+            const inv = invoicesByRef.get(tx.reference) || null;
+            if (inv) {
+              matchesEmployee = inv.employee === employeeFilter;
             } else {
-              const desc = (tx.description || "").toLowerCase();
-              const ref = (tx.reference || "").toLowerCase();
-              if (desc.includes("sales return") || desc.includes("credit note") || ref.startsWith("sr-") || ref.startsWith("cn-")) {
-                resolvedCounterpartName = "Sales Return";
-              } else if (desc.includes("purchase return") || desc.includes("debit note") || ref.startsWith("pr-") || ref.startsWith("dn-")) {
-                resolvedCounterpartName = "Purchase Return";
+              matchesEmployee = tx.description.toLowerCase().includes(employeeFilter.toLowerCase());
+            }
+          }
+
+          if (matchesVoucherType && matchesEmployee) {
+            // Resolve main party name for purchase/sales documents
+            let partyName = "";
+            const txRef = tx.reference || "";
+            if (globalMatchedInv) {
+              partyName = globalMatchedInv.contactName;
+            } else if (globalMatchedPur) {
+              partyName = globalMatchedPur.contactName;
+            } else {
+              const cleanId = txRef.replace(/^(Credit Note|Debit Note|Sales Return|Purchase Return)\s+/i, "");
+              const salesRet = salesReturnsByRef.get(txRef) || salesReturnsByRef.get(cleanId) || null;
+              const purRet = purchaseReturnsByRef.get(txRef) || purchaseReturnsByRef.get(cleanId) || null;
+              if (salesRet) partyName = salesRet.contactName;
+              else if (purRet) partyName = purRet.contactName;
+            }
+
+            // If no specific voucher found but there's a contact or Cash/Bank account in the counterpart entries, resolve it as the primary party
+            if (!partyName) {
+              const partyEntry = tx.entries.find(e => {
+                const accountIdStr = e.accountId || "";
+                const baseId = accountIdStr.split("::")[0];
+                const canonicalBaseId = state.getCanonicalAccountId(baseId);
+                const matchingC = contactsByCanonicalId.get(canonicalBaseId);
+                return !!matchingC || canonicalBaseId === "1010" || canonicalBaseId === "1020";
+              });
+              if (partyEntry) {
+                const accountIdStr = partyEntry.accountId || "";
+                const baseId = accountIdStr.split("::")[0];
+                const sitePart = accountIdStr.split("::")[1];
+                const canonicalBaseId = state.getCanonicalAccountId(baseId);
+                const matchingC = contactsByCanonicalId.get(canonicalBaseId);
+                if (matchingC) {
+                  partyName = sitePart ? `${matchingC.name} - ${sitePart}` : matchingC.name;
+                } else if (canonicalBaseId === "1010") {
+                  partyName = "Cash";
+                } else if (canonicalBaseId === "1020") {
+                  partyName = "Bank Current Account";
+                }
               }
             }
-          }
 
-          if (contact && resolvedCounterpartName) {
-            counterpartNames = resolvedCounterpartName;
-          } else {
-            counterpartNames = counterparts.map(cName => {
-              // Translate core accounts to their names if needed
-              if (ACCOUNTS[cName]) return ACCOUNTS[cName].name;
-              return cName;
-            }).join(", ") || "Self / Offset";
-          }
+            const counterparts = tx.entries
+              .filter(e => e !== currTargetEntry)
+              .map(e => {
+                // 1. Resolve base and site branch
+                const accountIdStr = e.accountId || "";
+                const baseId = accountIdStr.split("::")[0];
+                const sitePart = accountIdStr.split("::")[1];
+                const canonicalBaseId = state.getCanonicalAccountId(baseId);
+                
+                // 2. Resolve AR/AP control accounts to contactName if invoice/purchase matches
+                if (canonicalBaseId === "1100" || canonicalBaseId === "2100") {
+                  if (globalMatchedInv) return globalMatchedInv.contactName;
+                  if (globalMatchedPur) return globalMatchedPur.contactName;
+                  
+                  // Fallback parsing from description
+                  const desc = (tx.description || "");
+                  if (desc.includes("Receipt from Customer:")) {
+                    return desc.replace("Receipt from Customer:", "").split("(")[0].trim();
+                  }
+                  if (desc.includes("Receipt from Supplier:")) {
+                    return desc.replace("Receipt from Supplier:", "").split("(")[0].trim();
+                  }
+                  if (desc.includes("Payment to Supplier:")) {
+                    return desc.replace("Payment to Supplier:", "").split("(")[0].trim();
+                  }
+                }
 
-          if (!contact && ledger && partyName) {
-            counterpartNames = partyName;
-          }
-          
-          let particulars = counterpartNames;
+                // 3. Resolve to contact
+                const matchingC = contactsByCanonicalId.get(canonicalBaseId) || contactsByCanonicalId.get(baseId) || contactsByCanonicalId.get(accountIdStr);
+                if (matchingC && matchingC.name) {
+                  return sitePart ? `${matchingC.name} - ${sitePart}` : matchingC.name;
+                }
 
-          if (matchedChildLedger) {
-            particulars += ` (${matchedChildLedger.name})`;
-          }
+                // 4. Resolve ledgers
+                const matchingL = ledgersByCanonicalCode.get(canonicalBaseId) || ledgersByCanonicalCode.get(baseId) || ledgersByCanonicalCode.get(accountIdStr);
+                if (matchingL && matchingL.name) return matchingL.name;
+                
+                // 5. Fallback check for static accounts
+                if (ACCOUNTS[canonicalBaseId]) return ACCOUNTS[canonicalBaseId].name;
+                if (ACCOUNTS[baseId]) return ACCOUNTS[baseId].name;
+                
+                // 6. Global robust resolution fallback via state
+                if (state.getAccountDisplayName) {
+                  const resolvedName = state.getAccountDisplayName(accountIdStr, tx);
+                  if (resolvedName && resolvedName !== accountIdStr) return resolvedName;
+                }
 
-          let narration = tx.description || "";
-          if (matchedChildLedger) {
-            const childPrefix = `[${matchedChildLedger.name}]`;
-            if (!narration.includes(childPrefix)) {
-              narration = narration ? `${childPrefix} ${narration}` : childPrefix;
+                return accountIdStr;
+              });
+            
+            let counterpartNames = "";
+            let resolvedCounterpartName = "";
+            if (contact) {
+              if (globalMatchedInv) {
+                const seriesId = globalMatchedInv.seriesId;
+                const series = state.getSeriesMaster().find(s => s.id === seriesId);
+                const seriesType = series ? series.seriesType : "LOCAL";
+                if (seriesType === "LOCAL") resolvedCounterpartName = "Local Sales";
+                else if (seriesType === "INTERSTATE") resolvedCounterpartName = "IGST Sales";
+                else if (seriesType === "NONTAXABLE") resolvedCounterpartName = "Non Taxable Sales";
+              } else if (globalMatchedPur) {
+                const seriesId = globalMatchedPur.seriesId;
+                const series = state.getSeriesMaster().find(s => s.id === seriesId);
+                const seriesType = series ? series.seriesType : "LOCAL";
+                if (seriesType === "LOCAL") resolvedCounterpartName = "Local Purchase";
+                else if (seriesType === "INTERSTATE") resolvedCounterpartName = "IGST Purchase";
+                else if (seriesType === "NONTAXABLE") resolvedCounterpartName = "Non Taxable Purchase";
+              } else {
+                const desc = (tx.description || "").toLowerCase();
+                const ref = (tx.reference || "").toLowerCase();
+                if (desc.includes("sales return") || desc.includes("credit note") || ref.startsWith("sr-") || ref.startsWith("cn-")) {
+                  resolvedCounterpartName = "Sales Return";
+                } else if (desc.includes("purchase return") || desc.includes("debit note") || ref.startsWith("pr-") || ref.startsWith("dn-")) {
+                  resolvedCounterpartName = "Purchase Return";
+                }
+              }
             }
-          }
 
-          entriesList.push({
-            txId: tx.id,
-            date: tx.date,
-            particulars: particulars,
-            narration: narration,
-            vType: computedVType,
-            vNo: tx.reference,
-            debit: dr,
-            credit: cr,
-            timestamp: txDate.getTime()
-          });
+            if (contact && resolvedCounterpartName) {
+              counterpartNames = resolvedCounterpartName;
+            } else {
+              counterpartNames = counterparts.map(cName => {
+                // Translate core accounts to their names if needed
+                if (ACCOUNTS[cName]) return ACCOUNTS[cName].name;
+                return cName;
+              }).join(", ") || "Self / Offset";
+            }
+
+            if (!contact && ledger && partyName) {
+              counterpartNames = partyName;
+            }
+            
+            let particulars = counterpartNames;
+
+            if (matchedChildLedger) {
+              particulars += ` (${matchedChildLedger.name})`;
+            }
+
+            let narration = tx.description || "";
+            if (matchedChildLedger) {
+              const childPrefix = `[${matchedChildLedger.name}]`;
+              if (!narration.includes(childPrefix)) {
+                narration = narration ? `${childPrefix} ${narration}` : childPrefix;
+              }
+            }
+
+            entriesList.push({
+              txId: tx.id,
+              date: tx.date,
+              particulars: particulars,
+              narration: narration,
+              vType: computedVType,
+              vNo: tx.reference,
+              debit: dr,
+              credit: cr,
+              timestamp: txDate.getTime()
+            });
+          }
         }
-      }
+      });
     }
   });
 
@@ -4657,14 +5561,22 @@ export function getLedgerEntries(ledgerId, fromDate, toDate, voucherTypeFilter, 
       const isSameName = contact.name && inv.contactName && inv.contactName.trim().toUpperCase() === contact.name.trim().toUpperCase();
       
       if (isSameId || isSameName) {
-        const vNo = inv.voucherNo || inv.id || "";
-        const docSig = `Sales::${vNo}::${inv.date}::${(inv.total || 0).toFixed(2)}::0.00`;
-        const altDocSig = `Sales::${vNo}`;
+        const vNo = String(inv.voucherNo || inv.id || "").trim();
+        const cleanVNo = vNo.toUpperCase();
+        const cleanInvId = String(inv.id || "").trim().toUpperCase();
+        const docSig = `SALES::${cleanVNo}::${inv.date}::${(inv.total || 0).toFixed(2)}::0.00`;
+        const altDocSig = `DOC::${cleanVNo}`;
+        const idDocSig = `DOC::${cleanInvId}`;
         
-        const alreadyInLedger = entriesList.some(e => e.vNo === vNo || (e.txId && String(e.txId) === String(inv.id)));
-        if (!alreadyInLedger && !seenVoucherSignatures.has(docSig) && !seenVoucherSignatures.has(altDocSig)) {
+        const alreadyInLedger = entriesList.some(e => {
+          const eVNo = String(e.vNo || "").trim().toUpperCase();
+          const eTxId = String(e.txId || "").trim().toUpperCase();
+          return eVNo === cleanVNo || eVNo === cleanInvId || (eTxId && (eTxId === cleanInvId || eTxId === cleanVNo));
+        });
+        if (!alreadyInLedger && !seenVoucherSignatures.has(docSig) && !seenVoucherSignatures.has(altDocSig) && !seenVoucherSignatures.has(idDocSig)) {
           seenVoucherSignatures.add(docSig);
           seenVoucherSignatures.add(altDocSig);
+          seenVoucherSignatures.add(idDocSig);
           
           const txDate = parseDateSafely(inv.date);
           const dr = parseFloat(inv.total) || 0;
@@ -4734,14 +5646,22 @@ export function getLedgerEntries(ledgerId, fromDate, toDate, voucherTypeFilter, 
       const isSameName = contact.name && (pur.supplierName || pur.contactName) && (pur.supplierName || pur.contactName).trim().toUpperCase() === contact.name.trim().toUpperCase();
       
       if (isSameId || isSameName) {
-        const vNo = pur.voucherNo || pur.id || pur.invoiceNo || "";
-        const docSig = `Purchase::${vNo}::${pur.date}::0.00::${(pur.total || 0).toFixed(2)}`;
-        const altDocSig = `Purchase::${vNo}`;
+        const vNo = String(pur.voucherNo || pur.id || pur.invoiceNo || "").trim();
+        const cleanVNo = vNo.toUpperCase();
+        const cleanPurId = String(pur.id || "").trim().toUpperCase();
+        const docSig = `PURCHASE::${cleanVNo}::${pur.date}::0.00::${(pur.total || 0).toFixed(2)}`;
+        const altDocSig = `DOC::${cleanVNo}`;
+        const idDocSig = `DOC::${cleanPurId}`;
         
-        const alreadyInLedger = entriesList.some(e => e.vNo === vNo || (e.txId && String(e.txId) === String(pur.id)));
-        if (!alreadyInLedger && !seenVoucherSignatures.has(docSig) && !seenVoucherSignatures.has(altDocSig)) {
+        const alreadyInLedger = entriesList.some(e => {
+          const eVNo = String(e.vNo || "").trim().toUpperCase();
+          const eTxId = String(e.txId || "").trim().toUpperCase();
+          return eVNo === cleanVNo || eVNo === cleanPurId || (eTxId && (eTxId === cleanPurId || eTxId === cleanVNo));
+        });
+        if (!alreadyInLedger && !seenVoucherSignatures.has(docSig) && !seenVoucherSignatures.has(altDocSig) && !seenVoucherSignatures.has(idDocSig)) {
           seenVoucherSignatures.add(docSig);
           seenVoucherSignatures.add(altDocSig);
+          seenVoucherSignatures.add(idDocSig);
           
           const txDate = parseDateSafely(pur.date);
           const dr = 0;
@@ -4802,6 +5722,25 @@ export function getLedgerEntries(ledgerId, fromDate, toDate, voucherTypeFilter, 
     }
   };
 
+  // Deduplicate entriesList safely so that transactions with distinct txId are never incorrectly dropped
+  const uniqueReportEntries = [];
+  const seenReportEntryTxIds = new Set();
+  const seenReportEntryFallbackSigs = new Set();
+  entriesList.forEach((e) => {
+    if (e.txId) {
+      const txKey = `${e.txId}::${e.particulars || ''}::${e.debit || 0}::${e.credit || 0}`;
+      if (seenReportEntryTxIds.has(txKey)) return;
+      seenReportEntryTxIds.add(txKey);
+      uniqueReportEntries.push(e);
+    } else {
+      const fallbackSig = `SIG::${e.vType || ''}::${e.vNo || ''}::${e.date || ''}::${(parseFloat(e.debit) || 0).toFixed(2)}::${(parseFloat(e.credit) || 0).toFixed(2)}::${e.particulars || ''}`;
+      if (seenReportEntryFallbackSigs.has(fallbackSig)) return;
+      seenReportEntryFallbackSigs.add(fallbackSig);
+      uniqueReportEntries.push(e);
+    }
+  });
+  entriesList = uniqueReportEntries;
+
   entriesList.sort((a, b) => {
     if (a.timestamp !== b.timestamp) {
       return a.timestamp - b.timestamp;
@@ -4823,10 +5762,7 @@ export function getLedgerEntries(ledgerId, fromDate, toDate, voucherTypeFilter, 
     running += (e.debit - e.credit);
     
     let displayBal = Math.abs(running);
-    let suffix = running >= 0 ? "Dr" : "Cr";
-    if (balanceType === "Credit") {
-      suffix = running <= 0 ? "Cr" : "Dr";
-    }
+    let suffix = running > 0 ? "Dr" : (running < 0 ? "Cr" : (balanceType === "Credit" ? "Cr" : "Dr"));
 
     return {
       ...e,
@@ -4836,10 +5772,7 @@ export function getLedgerEntries(ledgerId, fromDate, toDate, voucherTypeFilter, 
   });
 
   let openingBalanceFormatted = Math.abs(startBal);
-  let opSuffix = startBal >= 0 ? "Dr" : "Cr";
-  if (balanceType === "Credit") {
-    opSuffix = startBal <= 0 ? "Cr" : "Dr";
-  }
+  let opSuffix = startBal > 0 ? "Dr" : (startBal < 0 ? "Cr" : (balanceType === "Credit" ? "Cr" : "Dr"));
 
   return {
     openingBalance: openingBalanceFormatted,
@@ -4893,6 +5826,7 @@ function getBatchStockRecords(dateFrom = "", dateTo = "") {
 
       // 2. Sales Returns
       salesReturns.forEach(sr => {
+        if (!sr || sr.isCancelled || sr.isCanceled || sr.status === "CANCELLED" || sr.status === "cancelled") return;
         (sr.items || []).forEach(item => {
           if (item.materialId === m.id && String(item.batchNo || m.batches[0]?.batchNo || m.landingCost || 350) === String(b.batchNo)) {
             const qty = parseFloat(item.quantity) || 0;
@@ -4922,6 +5856,7 @@ function getBatchStockRecords(dateFrom = "", dateTo = "") {
 
       // 4. Purchase Returns
       purchaseReturns.forEach(pr => {
+        if (!pr || pr.isCancelled || pr.isCanceled || pr.status === "CANCELLED" || pr.status === "cancelled") return;
         (pr.items || []).forEach(item => {
           if (item.materialId === m.id && String(item.batchNo || m.batches[0]?.batchNo || m.landingCost || 350) === String(b.batchNo)) {
             const qty = parseFloat(item.quantity) || 0;
@@ -5885,14 +6820,7 @@ export function showInputGstReportModal(container) {
       backBtn.style.display = isMonthly ? "none" : "inline-block";
     }
 
-    const parseLocal = (dStr) => {
-      if (!dStr) return new Date();
-      const p = dStr.split("-");
-      if (p.length === 3) {
-        return new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
-      }
-      return new Date(dStr);
-    };
+    const parseLocal = (dStr) => parseDateSafely(dStr);
     
     const startLimit = fromDateVal ? parseLocal(fromDateVal) : null;
     const endLimit = toDateVal ? parseLocal(toDateVal) : null;
@@ -5916,6 +6844,7 @@ export function showInputGstReportModal(container) {
 
     const showPurchaseReturn = document.getElementById("igst-purchase-return-chk") ? document.getElementById("igst-purchase-return-chk").checked : true;
     const matchingReturns = showPurchaseReturn ? state.getPurchaseReturns().filter(ret => {
+      if (!ret || ret.isCancelled || ret.isCanceled || ret.status === "CANCELLED" || ret.status === "cancelled") return false;
       const retDate = parseLocal(ret.date);
       if (startLimit && retDate < startLimit) return false;
       if (endLimit && retDate > endLimit) return false;
@@ -6864,14 +7793,7 @@ export function showOutputGstReportModal(container) {
       backBtn.style.display = isMonthly ? "none" : "inline-block";
     }
 
-    const parseLocal = (dStr) => {
-      if (!dStr) return new Date();
-      const p = dStr.split("-");
-      if (p.length === 3) {
-        return new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
-      }
-      return new Date(dStr);
-    };
+    const parseLocal = (dStr) => parseDateSafely(dStr);
     
     const gstinFilter = document.getElementById("ogst-gstin-filter").value;
     
@@ -6906,6 +7828,7 @@ export function showOutputGstReportModal(container) {
     });
 
     const matchingReturns = showReturns ? state.getSalesReturns().filter(ret => {
+      if (!ret || ret.isCancelled || ret.isCanceled || ret.status === "CANCELLED" || ret.status === "cancelled") return false;
       const retDate = parseLocal(ret.date);
       if (startLimit && retDate < startLimit) return false;
       if (endLimit && retDate > endLimit) return false;
@@ -7264,9 +8187,18 @@ export function showOutputGstReportModal(container) {
           return a.timestamp - b.timestamp;
         });
       } else {
+        const extractVoucherNum = (str) => {
+          const m = String(str || "").match(/(\d+)/g);
+          return m ? parseInt(m[m.length - 1], 10) : 0;
+        };
         detailedRows.sort((a, b) => {
-          if (a.timestamp !== b.timestamp) return a.timestamp - b.timestamp;
-          return String(a.id).localeCompare(String(b.id));
+          const numA = extractVoucherNum(a.invNo || a.id);
+          const numB = extractVoucherNum(b.invNo || b.id);
+          if (numA !== numB) return numA - numB;
+          const strA = String(a.invNo || a.id || "");
+          const strB = String(b.invNo || b.id || "");
+          if (strA !== strB) return strA.localeCompare(strB);
+          return a.timestamp - b.timestamp;
         });
       }
 
@@ -7737,7 +8669,7 @@ function showGroupsModal(mainGroupName, groups, container) {
       let current = gnUpper;
       let isCurrentLiab = false;
       for (let i = 0; i < 15; i++) {
-        if (current === "CURRENT LIABILITIES" || current === "LIABILITIES" || ["SUNDRY CREDITORS", "DUTIES & TAXES", "BANK OD A/C", "PROVISIONS"].includes(current)) {
+        if (current === "CURRENT LIABILITIES" || current === "LIABILITIES" || ["SUNDRY CREDITORS", "DUTIES & TAXES", "BANK OD A/C", "PROVISIONS", "ADJUSTMENTS", "ADJUSTMENT", "AJUSTMENTS", "AJUSTMENT"].includes(current)) {
           isCurrentLiab = true;
           break;
         }
@@ -7869,7 +8801,9 @@ function showGroupsModal(mainGroupName, groups, container) {
           m.showDetailedStockRegisterModal();
         });
       } else {
-        showIndividualLedgerModal(code);
+        const fromVal = reportStartDate || (state.getActiveFinancialYearStartDate ? state.getActiveFinancialYearStartDate() : "2026-04-01");
+        const toVal = reportEndDate || new Date().toISOString().split("T")[0];
+        showIndividualLedgerModal(code, fromVal, toVal);
       }
     }
   });
@@ -7934,9 +8868,7 @@ export function showGroupSummaryModal(gName) {
   const modalId = `modal-group-summary-${safeGName.replace(/\s+/g, "-")}`;
   const existing = document.getElementById(modalId);
   if (existing) {
-    root.appendChild(existing);
-    bringToFront(existing);
-    return;
+    existing.remove();
   }
 
   const modalEl = document.createElement("div");
@@ -7946,8 +8878,8 @@ export function showGroupSummaryModal(gName) {
     const html = renderGroupSummaryHtml();
     modalEl.innerHTML = `
       <div class="modal-content window-container" style="width: 1100px; max-width: 95vw; max-height: 90vh; display: flex; flex-direction: column; background: #fff; border-radius: 4px; box-shadow: 0 8px 30px rgba(0,0,0,0.35); overflow: hidden; font-family: Tahoma, sans-serif;">
-        <div class="modal-header" style="background: linear-gradient(to right, #1e3b8b, #3b82f6); color: #fff; padding: 10px 14px; font-weight: bold; font-size: 14px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e3a8a;">
-          <span>Group Summary: ${safeGName}</span>
+        <div class="modal-header" style="background: linear-gradient(to right, #1e3b8b, #3b82f6); color: #fff; padding: 10px 14px; font-weight: bold; font-size: 14px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e3a8a; cursor: move;">
+          <span>Group Summary: ${selectedGroupName || safeGName}</span>
           <button class="modal-close-btn" style="background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; font-weight: bold;">&times;</button>
         </div>
         <div class="modal-body" style="padding: 15px; overflow-y: auto; flex-grow: 1; background-color: #f1f5f9;">
@@ -7956,6 +8888,8 @@ export function showGroupSummaryModal(gName) {
       </div>
     `;
     applyReportModalContainerStyles(modalEl, modalEl.querySelector(".modal-content"));
+    initTallyDatePickers(modalEl);
+    makeDraggable(modalEl.querySelector(".modal-content"), modalEl.querySelector(".modal-header"));
 
     const closeBtn = modalEl.querySelector(".modal-close-btn");
     if (closeBtn) closeBtn.addEventListener("click", () => modalEl.remove());
@@ -8039,11 +8973,18 @@ export function showGroupSummaryModal(gName) {
     const summaryTable = modalEl.querySelector("#gs-summary-table");
     if (summaryTable) {
       summaryTable.addEventListener("dblclick", (e) => {
-        const row = e.target.closest("tr[data-account-id], tr[data-party-tab]");
+        const row = e.target.closest("tr[data-account-id], tr[data-party-tab], tr[data-group-name]");
         if (!row) return;
 
         const partyTab = row.getAttribute("data-party-tab");
         const accountId = row.getAttribute("data-account-id");
+        const groupName = row.getAttribute("data-group-name");
+
+        if (groupName) {
+          selectedGroupName = groupName;
+          renderContent();
+          return;
+        }
 
         if (partyTab) {
           activePartySubTab = partyTab;
@@ -8054,12 +8995,14 @@ export function showGroupSummaryModal(gName) {
         }
 
         if (accountId) {
+          const fromVal = modalEl.querySelector("#gs-from-date")?.value || reportStartDate || (state.getActiveFinancialYearStartDate ? state.getActiveFinancialYearStartDate() : "2026-04-01");
+          const toVal = modalEl.querySelector("#gs-to-date")?.value || reportEndDate || new Date().toISOString().split("T")[0];
           if (accountId === "1200") {
             import("./inventory.js").then(m => {
               m.showDetailedStockRegisterModal();
             });
           } else {
-            showIndividualLedgerModal(accountId);
+            showIndividualLedgerModal(accountId, fromVal, toVal);
           }
         }
       });
@@ -8068,9 +9011,12 @@ export function showGroupSummaryModal(gName) {
 
   renderContent();
   root.appendChild(modalEl);
+  bringToFront(modalEl);
 }
 
-export function showIndividualLedgerModal(ledgerId) {
+export function showIndividualLedgerModal(ledgerId, initialFromDate = null, initialToDate = null) {
+  if (initialFromDate) ledgerFromDate = initialFromDate;
+  if (initialToDate) ledgerToDate = initialToDate;
   const allAccounts = getAllIndividualLedgerAccounts();
   if (!ledgerId && allAccounts.length > 0) {
     ledgerId = allAccounts[0].id;
@@ -8079,24 +9025,31 @@ export function showIndividualLedgerModal(ledgerId) {
   selectedIndividualLedgerId = resolvedAcc ? resolvedAcc.id : ledgerId;
   const root = document.getElementById("modal-container-root") || document.body;
   if (!root) return;
-  const strLedgerId = String(ledgerId || "main");
+  const strLedgerId = String(selectedIndividualLedgerId || ledgerId || "main");
   const modalId = `modal-individual-ledger-${strLedgerId.replace(/[\s:]+/g, "-")}`;
   const existing = document.getElementById(modalId);
   if (existing) {
-    root.appendChild(existing);
-    bringToFront(existing);
-    return;
+    existing.remove();
   }
 
   const modalEl = document.createElement("div");
   modalEl.id = modalId;
 
   const renderContent = () => {
+    const activeEl = document.activeElement;
+    const activeId = activeEl && activeEl.id ? activeEl.id : null;
+    let activeSelStart = 0;
+    let activeSelEnd = 0;
+    if (activeEl && typeof activeEl.selectionStart === "number") {
+      activeSelStart = activeEl.selectionStart;
+      activeSelEnd = activeEl.selectionEnd;
+    }
+
     const html = renderIndividualLedgerHtml();
     modalEl.innerHTML = `
       <div class="modal-content window-container" style="width: 96vw; max-width: 1600px; height: 92vh; max-height: 95vh; display: flex; flex-direction: column; background: #fff; border-radius: 4px; box-shadow: 0 8px 30px rgba(0,0,0,0.35); overflow: hidden; font-family: Tahoma, sans-serif;">
-        <div class="modal-header" style="background: linear-gradient(to right, #1e3b8b, #3b82f6); color: #fff; padding: 10px 14px; font-weight: bold; font-size: 14px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e3a8a; flex-shrink: 0;">
-          <span>Ledger Statement</span>
+        <div class="modal-header" style="background: linear-gradient(to right, #1e3b8b, #3b82f6); color: #fff; padding: 10px 14px; font-weight: bold; font-size: 14px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e3a8a; flex-shrink: 0; cursor: move;">
+          <span>INDIVIDUAL LEDGER STATEMENT</span>
           <button class="modal-close-btn" style="background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; font-weight: bold;">&times;</button>
         </div>
         <div class="modal-body" style="padding: 12px; overflow: hidden; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; background-color: #f1f5f9;">
@@ -8105,9 +9058,43 @@ export function showIndividualLedgerModal(ledgerId) {
       </div>
     `;
     applyReportModalContainerStyles(modalEl, modalEl.querySelector(".modal-content"));
+    initTallyDatePickers(modalEl);
+    makeDraggable(modalEl.querySelector(".modal-content"), modalEl.querySelector(".modal-header"));
+
+    if (activeId && (activeId === "il-from-date" || activeId === "il-to-date")) {
+      const restored = modalEl.querySelector(`#${activeId}`);
+      if (restored) {
+        restored.focus();
+        try {
+          restored.setSelectionRange(activeSelStart, activeSelEnd);
+        } catch (e) {}
+      }
+    }
 
     const closeBtn = modalEl.querySelector(".modal-close-btn");
     if (closeBtn) closeBtn.addEventListener("click", () => modalEl.remove());
+
+    const fromDateInput = modalEl.querySelector("#il-from-date");
+    if (fromDateInput) {
+      fromDateInput.addEventListener("change", (e) => {
+        const val = e.target.value;
+        if (!val || val.length === 10) {
+          ledgerFromDate = val;
+          renderContent();
+        }
+      });
+    }
+
+    const toDateInput = modalEl.querySelector("#il-to-date");
+    if (toDateInput) {
+      toDateInput.addEventListener("change", (e) => {
+        const val = e.target.value;
+        if (!val || val.length === 10) {
+          ledgerToDate = val;
+          renderContent();
+        }
+      });
+    }
 
     setupLedgerCombobox(modalEl, (selectedId) => {
       selectedIndividualLedgerId = selectedId;
@@ -8180,7 +9167,7 @@ export function showIndividualLedgerModal(ledgerId) {
       });
     }
 
-    const btnView = modalEl.querySelector("#il-btn-view");
+    const btnView = modalEl.querySelector("#btn-il-view");
     if (btnView) {
       btnView.addEventListener("click", () => {
         const fromVal = modalEl.querySelector("#il-from-date")?.value;
@@ -8191,38 +9178,74 @@ export function showIndividualLedgerModal(ledgerId) {
       });
     }
 
-    const btnPrint = modalEl.querySelector("#il-btn-print");
+    const btnPrint = modalEl.querySelector("#btn-il-print");
     if (btnPrint) {
       btnPrint.addEventListener("click", () => {
         window.print();
       });
     }
 
-    const btnClose = modalEl.querySelector("#il-btn-close");
+    const btnWhatsapp = modalEl.querySelector("#btn-il-whatsapp");
+    if (btnWhatsapp) {
+      btnWhatsapp.addEventListener("click", () => {
+        const contacts = state.getContacts();
+        const allAccounts = getAllIndividualLedgerAccounts();
+        const selectedAcc = resolveIndividualLedgerAccount(selectedIndividualLedgerId, allAccounts);
+        if (!selectedAcc) {
+          alert("No ledger selected.");
+          return;
+        }
+        
+        const baseId = selectedAcc.id.includes("::") ? selectedAcc.id.split("::")[0] : selectedAcc.id;
+        const contact = contacts.find(c => c.id === baseId);
+        
+        let waNumber = contact ? (contact.whatsApp || contact.mobile || contact.phone || "") : "";
+        if (!waNumber.trim()) {
+          const inputNum = prompt("Enter WhatsApp Number (with country code, e.g. 919876543210):");
+          if (inputNum === null) return;
+          waNumber = inputNum.trim();
+        }
+        if (!waNumber) {
+          alert("WhatsApp number is required.");
+          return;
+        }
+        
+        const reportsMod = getLedgerEntries(selectedAcc.id, ledgerFromDate, ledgerToDate, ledgerVoucherTypeFilter, ledgerEmployeeFilter);
+        const entries = reportsMod.entries || [];
+        const opBal = reportsMod.openingBalance || 0;
+        const opBalSuffix = reportsMod.openingBalanceSuffix || "Dr";
+        
+        let totalDr = 0;
+        let totalCr = 0;
+        entries.forEach(e => {
+          totalDr += e.debit || 0;
+          totalCr += e.credit || 0;
+        });
+        
+        const lastEntry = entries[entries.length - 1];
+        const clBal = lastEntry ? lastEntry.balance : opBal;
+        const clBalSuffix = lastEntry ? lastEntry.balanceSuffix : opBalSuffix;
+        
+        const cleanNum = waNumber.replace(/\D/g, "");
+        const msg = `Dear *${selectedAcc.name}*,\n\nHere is your *Account Statement* from *${formatDateDisplay(ledgerFromDate)}* to *${formatDateDisplay(ledgerToDate)}*.\n\n*Opening Balance*: \u20B9${opBal.toFixed(2)} ${opBalSuffix}\n*Total Debits*: \u20B9${totalDr.toFixed(2)}\n*Total Credits*: \u20B9${totalCr.toFixed(2)}\n*Closing Balance*: *\u20B9${clBal.toFixed(2)} ${clBalSuffix}*\n\nThank you!\n*Material Ledger ERP*`;
+        const waUrl = `https://wa.me/${cleanNum}?text=${encodeURIComponent(msg)}`;
+        window.open(waUrl, "_blank");
+      });
+    }
+
+    const btnClose = modalEl.querySelector("#btn-il-close");
     if (btnClose) {
       btnClose.addEventListener("click", () => {
         modalEl.remove();
       });
     }
 
-    const ledgerTable = modalEl.querySelector("#il-ledger-table");
-    if (ledgerTable) {
-      ledgerTable.addEventListener("dblclick", (e) => {
-        const row = e.target.closest(".ledger-row-clickable");
-        if (!row) return;
-
-        const txId = row.getAttribute("data-tx-id");
-        if (txId) {
-          openVoucherOrInvoice(txId, modalEl, () => {
-            renderContent();
-          });
-        }
-      });
-    }
+    setupLedgerTableKeyboardAndScroll(modalEl, () => renderContent());
   };
 
   renderContent();
   root.appendChild(modalEl);
+  bringToFront(modalEl);
 }
 
 export function showGstSalesReportHsnModal() {
@@ -8334,11 +9357,7 @@ export function showGstSalesReportHsnModal() {
     const hsnFilter = modalEl.querySelector("#gsh-hsn-select").value;
     const billTypeFilter = modalEl.querySelector("#gsh-bill-type").value;
 
-    const parseLocal = (dStr) => {
-      if (!dStr) return new Date();
-      const [y, m, d] = dStr.split("-");
-      return new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
-    };
+    const parseLocal = (dStr) => parseDateSafely(dStr);
 
     const startLimit = fromDateVal ? parseLocal(fromDateVal) : null;
     const endLimit = toDateVal ? parseLocal(toDateVal) : null;
@@ -8542,11 +9561,7 @@ export function showGstSalesReportHsnModal() {
 export function showGstSalesReportHsnDetailModal(hsn, gst, fromDateVal, toDateVal, billTypeFilter) {
   const root = document.getElementById("modal-container-root");
 
-  const parseLocal = (dStr) => {
-    if (!dStr) return new Date();
-    const [y, m, d] = dStr.split("-");
-    return new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
-  };
+  const parseLocal = (dStr) => parseDateSafely(dStr);
 
   const startLimit = fromDateVal ? parseLocal(fromDateVal) : null;
   const endLimit = toDateVal ? parseLocal(toDateVal) : null;
@@ -8821,12 +9836,7 @@ export function showGstSalesReturnReportModal() {
     const salesReturns = state.getSalesReturns();
     const materials = state.getMaterials();
 
-    const parseLocal = (dStr) => {
-      if (!dStr) return new Date();
-      const p = dStr.split("-");
-      if (p.length === 3) return new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
-      return new Date(dStr);
-    };
+    const parseLocal = (dStr) => parseDateSafely(dStr);
 
     const formatRupees = (val) => {
       if (val < 0) return `-₹${Math.abs(val).toFixed(2)}`;
@@ -8841,6 +9851,7 @@ export function showGstSalesReturnReportModal() {
     if (endLimit) endLimit.setHours(23,59,59,999);
 
     const filteredReturns = salesReturns.filter(ret => {
+      if (!ret || ret.isCancelled || ret.isCanceled || ret.status === "CANCELLED" || ret.status === "cancelled") return false;
       const retDate = parseLocal(ret.date);
       if (startLimit && retDate < startLimit) return false;
       if (endLimit && retDate > endLimit) return false;
@@ -9226,12 +10237,7 @@ export function showGstPurchaseReturnReportModal() {
     const purchaseReturns = state.getPurchaseReturns();
     const materials = state.getMaterials();
 
-    const parseLocal = (dStr) => {
-      if (!dStr) return new Date();
-      const p = dStr.split("-");
-      if (p.length === 3) return new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
-      return new Date(dStr);
-    };
+    const parseLocal = (dStr) => parseDateSafely(dStr);
 
     const formatRupees = (val) => {
       if (val < 0) return `-₹${Math.abs(val).toFixed(2)}`;
@@ -9246,6 +10252,7 @@ export function showGstPurchaseReturnReportModal() {
     if (endLimit) endLimit.setHours(23,59,59,999);
 
     const filteredReturns = purchaseReturns.filter(ret => {
+      if (!ret || ret.isCancelled || ret.isCanceled || ret.status === "CANCELLED" || ret.status === "cancelled") return false;
       const retDate = parseLocal(ret.date);
       if (startLimit && retDate < startLimit) return false;
       if (endLimit && retDate > endLimit) return false;

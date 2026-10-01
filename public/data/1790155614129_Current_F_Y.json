@@ -1,117 +1,6 @@
 {
-  "_lastSaved": 1789914525028,
-  "materials": [
-    {
-      "id": "MAT-001",
-      "name": "CEMENT",
-      "code": "ACC",
-      "category": "Cement",
-      "unit": "BAG-BAGS",
-      "reorderLevel": 50,
-      "barcode": "",
-      "eanCode": "",
-      "productGroup": "CEMENT",
-      "company": "Ultratech",
-      "subCategory": "OPC 53",
-      "hsnCode": "2523",
-      "description": "PORTLAND CEMENT, ALUMINOUS CEMENT, SLAG CEMENT",
-      "productType": "Goods",
-      "rackNo": "",
-      "defaultDiscount": 0,
-      "igst": 0,
-      "cgst": 0,
-      "sgst": 0,
-      "cess": 0,
-      "addlCess": 0,
-      "cessOn": "NetValue",
-      "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "unloadingCharge": 0,
-      "openingStock": 0,
-      "stock": 0,
-      "landingCost": 350,
-      "marginPercent": 8.6,
-      "marginAmount": 30,
-      "gstExclRate": 380,
-      "gstInclRate": 380,
-      "mrp": 475,
-      "costPrice": 350,
-      "sellingPrice": 380,
-      "batches": [
-        {
-          "batchNo": "350",
-          "landingCost": 350,
-          "openingStock": 0,
-          "stock": 0,
-          "marginPercent": 8.6,
-          "marginAmount": 30,
-          "gstExclRate": 380,
-          "gstInclRate": 380,
-          "mrp": 475,
-          "sellingPrice": 380
-        }
-      ],
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
-    },
-    {
-      "id": "MAT-002",
-      "name": "CEMENT",
-      "code": "RAMCO",
-      "category": "Cement",
-      "unit": "BAG-BAGS",
-      "reorderLevel": 50,
-      "barcode": "",
-      "eanCode": "",
-      "productGroup": "CEMENT",
-      "company": "RAMCO",
-      "subCategory": "OPC 53",
-      "hsnCode": "",
-      "description": "PORTLAND CEMENT, ALUMINOUS CEMENT, SLAG CEMENT",
-      "productType": "Goods",
-      "rackNo": "",
-      "defaultDiscount": 0,
-      "igst": 0,
-      "cgst": 0,
-      "sgst": 0,
-      "cess": 0,
-      "addlCess": 0,
-      "cessOn": "NetValue",
-      "alternateUnits": [],
-      "loadingChargeEnabled": false,
-      "loadingCharge": 0,
-      "unloadingChargeEnabled": false,
-      "unloadingCharge": 0,
-      "openingStock": 0,
-      "stock": 0,
-      "landingCost": 340,
-      "marginPercent": 10,
-      "marginAmount": 34,
-      "gstExclRate": 374,
-      "gstInclRate": 374,
-      "mrp": 467.5,
-      "costPrice": 340,
-      "sellingPrice": 374,
-      "batches": [
-        {
-          "batchNo": "340",
-          "landingCost": 340,
-          "openingStock": 0,
-          "stock": 0,
-          "marginPercent": 10,
-          "marginAmount": 34,
-          "gstExclRate": 374,
-          "gstInclRate": 374,
-          "mrp": 467.5,
-          "sellingPrice": 374
-        }
-      ],
-      "loadingChargesByType": {},
-      "unloadingChargesByType": {}
-    }
-  ],
+  "_lastSaved": 1790863155877,
+  "materials": [],
   "contacts": [],
   "invoices": [],
   "salesOrders": [],
@@ -124,14 +13,12 @@
   "productGroups": [
     "Structural Supply",
     "Finishing Materials",
-    "Plumbing & Fittings",
-    "CEMENT"
+    "Plumbing & Fittings"
   ],
   "companies": [
     "Ultratech",
     "Jindal",
-    "Ambuja",
-    "RAMCO"
+    "Ambuja"
   ],
   "categories": [
     "Cement",
@@ -146,11 +33,129 @@
     "TMT Reb",
     "River Sand"
   ],
-  "productNames": [
-    "CEMENT"
-  ],
+  "productNames": [],
   "adminPassword": "123",
   "accountGroups": [
+    {
+      "id": "1",
+      "name": "ADAVANCE TO SUPPLIER",
+      "under": "CURRENT ASSETS",
+      "isDefault": true
+    },
+    {
+      "id": "2",
+      "name": "BANK ACCOUNTS",
+      "under": "CURRENT ASSETS",
+      "isDefault": true
+    },
+    {
+      "id": "3",
+      "name": "BANK OD A/C",
+      "under": "CURRENT LIABILITIES",
+      "isDefault": true
+    },
+    {
+      "id": "4",
+      "name": "BRANCH / DIVISIONS",
+      "under": "LIABILITIES",
+      "isDefault": true
+    },
+    {
+      "id": "5",
+      "name": "CAPITAL ACCOUNT",
+      "under": "EQUITY",
+      "isDefault": true
+    },
+    {
+      "id": "6",
+      "name": "CASH-IN-HAND",
+      "under": "CURRENT ASSETS",
+      "isDefault": true
+    },
+    {
+      "id": "7",
+      "name": "CURRENT ASSETS",
+      "under": "ASSETS",
+      "isDefault": true
+    },
+    {
+      "id": "8",
+      "name": "CURRENT LIABILITIES",
+      "under": "LIABILITIES",
+      "isDefault": true
+    },
+    {
+      "id": "9",
+      "name": "DEPOSITS",
+      "under": "CURRENT ASSETS",
+      "isDefault": true
+    },
+    {
+      "id": "10",
+      "name": "DEPOSITS (ASSETS)",
+      "under": "CURRENT ASSETS",
+      "isDefault": true
+    },
+    {
+      "id": "11",
+      "name": "DEPRECIATION",
+      "under": "EXPENSE",
+      "isDefault": true
+    },
+    {
+      "id": "12",
+      "name": "DIRECT EXPENSES",
+      "under": "EXPENSE",
+      "isDefault": true
+    },
+    {
+      "id": "13",
+      "name": "DIRECT INCOME",
+      "under": "INCOME",
+      "isDefault": true
+    },
+    {
+      "id": "14",
+      "name": "DUTIES & TAXES",
+      "under": "CURRENT LIABILITIES",
+      "isDefault": true
+    },
+    {
+      "id": "15",
+      "name": "EMPLOYEE EXPENSES",
+      "under": "EXPENSE",
+      "isDefault": true
+    },
+    {
+      "id": "16",
+      "name": "FIXED ASSETS",
+      "under": "ASSETS",
+      "isDefault": true
+    },
+    {
+      "id": "17",
+      "name": "INDIRECT EXPENSES",
+      "under": "EXPENSE",
+      "isDefault": true
+    },
+    {
+      "id": "18",
+      "name": "INDIRECT INCOME",
+      "under": "INCOME",
+      "isDefault": true
+    },
+    {
+      "id": "19",
+      "name": "INVESTMENTS",
+      "under": "ASSETS",
+      "isDefault": true
+    },
+    {
+      "id": "20",
+      "name": "LOANS & ADVANCES(ASSET)",
+      "under": "CURRENT ASSETS",
+      "isDefault": true
+    },
     {
       "id": "21",
       "name": "PURCHASE ACCOUNT",
@@ -161,18 +166,6 @@
       "id": "22",
       "name": "SALES ACCOUNT",
       "under": "INCOME",
-      "isDefault": true
-    },
-    {
-      "id": "29",
-      "name": "SUNDRY CREDITORS",
-      "under": "CURRENT LIABILITIES",
-      "isDefault": true
-    },
-    {
-      "id": "30",
-      "name": "SUNDRY DEBTORS",
-      "under": "CURRENT ASSETS",
       "isDefault": true
     },
     {
@@ -212,6 +205,18 @@
       "isDefault": true
     },
     {
+      "id": "29",
+      "name": "SUNDRY CREDITORS",
+      "under": "CURRENT LIABILITIES",
+      "isDefault": true
+    },
+    {
+      "id": "30",
+      "name": "SUNDRY DEBTORS",
+      "under": "CURRENT ASSETS",
+      "isDefault": true
+    },
+    {
       "id": "31",
       "name": "ADJUSTMENTS",
       "under": "CURRENT LIABILITIES",
@@ -220,9 +225,65 @@
   ],
   "ledgers": [
     {
-      "code": "L017",
-      "name": "SALES A/C",
-      "groupName": "SALES ACCOUNT",
+      "code": "L001",
+      "name": "ACCRUED INTEREST",
+      "groupName": "CURRENT ASSETS",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L002",
+      "name": "ADDITIONAL TAX",
+      "groupName": "DUTIES & TAXES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L006",
+      "name": "AUDIT FEE PAYABLE",
+      "groupName": "CURRENT LIABILITIES",
+      "openingBalance": 22000,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L007",
+      "name": "BANK CHARGES",
+      "groupName": "INDIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L008",
+      "name": "BUSINESS PERQUISITES",
+      "groupName": "INDIRECT INCOME",
+      "openingBalance": 0,
+      "balanceType": "Credit"
+    },
+    {
+      "code": "L009",
+      "name": "CASH",
+      "groupName": "CASH-IN-HAND",
+      "openingBalance": 612951.91,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L011",
+      "name": "DEPRECIATION",
+      "groupName": "DEPRECIATION",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L013",
+      "name": "DISCOUNT ALLOWED",
+      "groupName": "INDIRECT EXPENSES",
+      "openingBalance": 0,
+      "balanceType": "Debit"
+    },
+    {
+      "code": "L014",
+      "name": "DISCOUNT RECEIVED",
+      "groupName": "INDIRECT INCOME",
       "openingBalance": 0,
       "balanceType": "Credit"
     },
@@ -315,111 +376,6 @@
       "name": "ROUND OFF",
       "groupName": "INDIRECT EXPENSES",
       "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L001",
-      "name": "ACCRUED INTEREST",
-      "groupName": "CURRENT ASSETS",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L002",
-      "name": "ADDITIONAL TAX",
-      "groupName": "DUTIES & TAXES",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L003",
-      "name": "AMAZON GIFT CARD",
-      "groupName": "INDIRECT INCOME",
-      "openingBalance": 0,
-      "balanceType": "Credit"
-    },
-    {
-      "code": "L004",
-      "name": "ASHTECH",
-      "groupName": "CURRENT LIABILITIES",
-      "openingBalance": 0,
-      "balanceType": "Credit"
-    },
-    {
-      "code": "L005",
-      "name": "ASINAR",
-      "groupName": "EMPLOYEE EXPENSES",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L006",
-      "name": "AUDIT FEE PAYABLE",
-      "groupName": "CURRENT LIABILITIES",
-      "openingBalance": 22000,
-      "balanceType": "Credit"
-    },
-    {
-      "code": "L007",
-      "name": "BANK CHARGES",
-      "groupName": "INDIRECT EXPENSES",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L008",
-      "name": "BUSINESS PERQUISITES",
-      "groupName": "INDIRECT INCOME",
-      "openingBalance": 0,
-      "balanceType": "Credit"
-    },
-    {
-      "code": "L009",
-      "name": "CASH",
-      "groupName": "CASH-IN-HAND",
-      "openingBalance": 612951.91,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L010",
-      "name": "DEEPA ASSOCIATES",
-      "groupName": "CURRENT LIABILITIES",
-      "openingBalance": 0,
-      "balanceType": "Credit"
-    },
-    {
-      "code": "L011",
-      "name": "DEPRECIATION",
-      "groupName": "DEPRECIATION",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L012",
-      "name": "DIARIES AND CALENDER",
-      "groupName": "INDIRECT EXPENSES",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L013",
-      "name": "DISCOUNT ALLOWED",
-      "groupName": "INDIRECT EXPENSES",
-      "openingBalance": 0,
-      "balanceType": "Debit"
-    },
-    {
-      "code": "L014",
-      "name": "DISCOUNT RECEIVED",
-      "groupName": "INDIRECT INCOME",
-      "openingBalance": 0,
-      "balanceType": "Credit"
-    },
-    {
-      "code": "L015",
-      "name": "DISTRICT BANK",
-      "groupName": "BANK ACCOUNTS",
-      "openingBalance": 2614.8,
       "balanceType": "Debit"
     },
     {
@@ -1111,7 +1067,8 @@
     "enableCessInSalesBill": false,
     "enablePartyClosingBalanceBottom": true,
     "enableHeadloader": true,
-    "influencerLoyaltyRate": 1
+    "influencerLoyaltyRate": 1,
+    "allowPreviousYearEditing": false
   },
   "influencers": [
     {
@@ -1136,9 +1093,7 @@
     "6901",
     "2517"
   ],
-  "hsnDescriptions": {
-    "2523": "PORTLAND CEMENT, ALUMINOUS CEMENT, SLAG CEMENT"
-  },
+  "hsnDescriptions": {},
   "seriesMaster": [
     {
       "id": "SER-LOCAL-SALES",
@@ -1230,8 +1185,7 @@
     {
       "id": "std",
       "name": "Standard",
-      "isDefault": true,
-      "category": "both"
+      "isDefault": true
     }
   ],
   "gstMaster": [
@@ -1415,5 +1369,6 @@
       "percent": 28,
       "accountGroup": "OUTPUT IGST"
     }
-  ]
+  ],
+  "preTakeOrders": []
 }

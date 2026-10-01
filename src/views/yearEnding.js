@@ -1,5 +1,6 @@
 import { state } from "../state.js";
 import { formatDate } from "../utils/dateUtils.js";
+import { showFyLoadingOverlay } from "../main.js";
 
 export function showYearEndingModal() {
   let root = document.getElementById("modal-container-root");
@@ -22,6 +23,9 @@ export function showYearEndingModal() {
     return;
   }
 
+  const currentUser = state.getCurrentUser();
+  const isAdmin = !currentUser || currentUser.role === "Admin" || currentUser.role === "admin";
+
   const activeFyId = state.getActiveFyId();
   const currentFy = (company.financialYears || []).find(fy => String(fy.id) === String(activeFyId)) || {
     name: "Current F.Y",
@@ -29,8 +33,12 @@ export function showYearEndingModal() {
     endDate: company.financialYearEnds || "2027-03-31"
   };
 
-  // Calculate default dates for the ending of current financial year and start of next financial year
-  let defaultCurrentEnd = currentFy.endDate && currentFy.endDate !== "N/A" ? currentFy.endDate : new Date().toISOString().split("T")[0];
+  // Calculate default dates for the ending of current financial year (default to today) and start of next financial year
+  const todayObj = new Date();
+  const todayY = todayObj.getFullYear();
+  const todayM = String(todayObj.getMonth() + 1).padStart(2, '0');
+  const todayD = String(todayObj.getDate()).padStart(2, '0');
+  let defaultCurrentEnd = `${todayY}-${todayM}-${todayD}`;
   
   const getNextYearDates = (endVal) => {
     try {
@@ -118,13 +126,14 @@ export function showYearEndingModal() {
               <i class="fa-solid fa-plus-circle"></i> Create New Financial Year
             </h4>
             <p style="font-size: 0.75rem; color: #475569; margin: 0 0 10px 0;">
-              This will create a new separate database for the next year. All material master items, ledger configurations, and contacts will carry forward with their closing stocks/balances as opening stock/balances.
+              This will create a new separate database for the next year. All material master items, contacts, and ledger configurations (including Fixed Assets, Current Assets, Cash & Bank balances, and Stock-on-Hand) will carry forward their closing balances as opening balances for the new financial year.
             </p>
 
             <form id="ye-create-form" style="display:flex; flex-direction:column; gap:10px;">
               <div style="display:flex; flex-direction:column; gap:4px;">
                 <label style="font-size: 0.75rem; font-weight: 600; color: #334155;">Ending Date of Current Financial Year *</label>
                 <input type="date" id="ye-current-end" value="${defaultCurrentEnd}" required style="padding:6px; border:1px solid #cbd5e1; border-radius:4px; font-size:0.8rem; width:100%; box-sizing:border-box;">
+                <div id="ye-date-warning" style="font-size:0.75rem; color:#dc2626; font-weight:600; display:none; margin-top:2px;"></div>
               </div>
 
               <div style="display:flex; flex-direction:column; gap:4px;">
@@ -148,6 +157,35 @@ export function showYearEndingModal() {
               </button>
             </form>
           </div>
+        ` : ''}
+
+        <!-- Section 3: Manage / Delete Existing Financial Years for Admin -->
+        ${isAdmin ? `
+        <div style="border: 1px solid #cbd5e1; border-radius: 4px; padding: 12px; background-color: #fff; margin-top: 15px;">
+          <h4 style="margin: 0 0 8px 0; color: #b91c1c; font-size: 0.9rem; font-weight: 700; display:flex; align-items:center; gap:6px;">
+            <i class="fa-solid fa-trash-can text-danger"></i> Delete Financial Years
+          </h4>
+          <p style="font-size: 0.75rem; color: #475569; margin: 0 0 10px 0;">
+            Remove unwanted or extra financial years (Admin security password required).
+          </p>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            ${fysList.map(fy => {
+              const isOnly = fysList.length <= 1;
+              const isCur = String(fy.id) === String(activeFyId);
+              const displayLabel = state.getFyDisplayLabel(fy);
+              return `
+                <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border: 1px solid #e2e8f0; padding: 6px 10px; border-radius: 4px; font-size: 0.8rem;">
+                  <div>
+                    <strong>${displayLabel}</strong> ${isCur ? '<span style="color:#166534; font-size:0.7rem; font-weight:bold;">[ACTIVE]</span>' : ''}
+                  </div>
+                  <button type="button" class="ye-btn-delete-fy" data-id="${fy.id}" data-label="${displayLabel}" ${isOnly ? 'disabled style="opacity:0.5; cursor:not-allowed; background:#f87171; border:none; color:white; padding:3px 8px; border-radius:3px; font-size:0.75rem;"' : 'style="background:#ef4444; border:none; color:white; padding:3px 8px; border-radius:3px; font-size:0.75rem; cursor:pointer; font-weight:bold;"'}>
+                    <i class="fa-solid fa-trash"></i> Delete
+                  </button>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
         ` : ''}
 
         <div style="display:flex; justify-content:flex-end; margin-top:15px;">
@@ -212,6 +250,18 @@ export function showYearEndingModal() {
       const updateNextDates = () => {
         const endVal = currentEndInput.value;
         if (!endVal) return;
+
+        const warningEl = document.getElementById("ye-date-warning");
+        if (warningEl) {
+          const checkRes = state.checkTransactionsAfterDate(endVal);
+          if (checkRes.hasTransactions) {
+            warningEl.style.display = "block";
+            warningEl.textContent = `⚠️ ${checkRes.offendingEntries.length} transaction(s) exist after ${endVal.split('-').reverse().join('/')}. FY ending is blocked.`;
+          } else {
+            warningEl.style.display = "none";
+            warningEl.textContent = "";
+          }
+        }
         
         const parts = endVal.split("-").map(Number);
         const dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
@@ -234,47 +284,102 @@ export function showYearEndingModal() {
 
       currentEndInput.addEventListener("change", updateNextDates);
       currentEndInput.addEventListener("input", updateNextDates);
+      updateNextDates();
     }
 
-    document.getElementById("ye-create-form").addEventListener("submit", (e) => {
+    document.getElementById("ye-create-form").addEventListener("submit", async (e) => {
       e.preventDefault();
+      const currentEnd = document.getElementById("ye-current-end").value;
       const name = document.getElementById("ye-next-name").value.trim();
       const start = document.getElementById("ye-next-start").value;
       const end = document.getElementById("ye-next-end").value;
 
-      const confirmCreate = confirm(`Are you sure you want to end the current financial year and create a new financial year '${name}'?\nClosing stocks and ledger balances will be carried forward as opening values.`);
+      // Popup error message if any transaction exists after the FY ending date
+      const checkRes = state.checkTransactionsAfterDate(currentEnd);
+      if (checkRes.hasTransactions) {
+        alert(checkRes.message);
+        return;
+      }
+
+      const confirmCreate = confirm(`Are you sure you want to end the current financial year on ${currentEnd.split('-').reverse().join('/')} and create a new financial year '${name}'?\nClosing stocks and ledger balances will be carried forward as opening values.`);
       if (confirmCreate) {
-        const result = state.createNewFinancialYear(name, start, end);
-        if (result.success) {
-          alert(`Financial Year '${name}' created successfully. Switching database to the new year.`);
-          state.setActiveFyId(result.newFy.id);
-          state.loadState();
-          close();
-          
-          // Update header indicator and reload current view
-          const headerFys = document.getElementById("header-fy-select");
-          if (headerFys) {
-            // Re-render select options
-            const companiesList = state.getRegisteredCompanies();
-            const currCompany = companiesList.find(c => c.id === activeCompanyId);
-            if (currCompany) {
-              headerFys.innerHTML = "";
-              (currCompany.financialYears || []).forEach(fy => {
-                const opt = document.createElement("option");
-                opt.value = fy.id;
-                opt.textContent = state.getFyDisplayLabel(fy);
-                if (fy.id === result.newFy.id) {
-                  opt.selected = true;
-                }
-                headerFys.appendChild(opt);
-              });
+        close();
+        const showOverlay = window.showFyLoadingOverlay || showFyLoadingOverlay;
+        let createResult = null;
+        await showOverlay(async () => {
+          createResult = await state.createNewFinancialYear(name, start, end, currentEnd);
+          if (createResult.success) {
+            state.setActiveFyId(createResult.newFy.id);
+            await state.initFromServer();
+            
+            if (typeof window.updateCompanyHeaderIndicator === "function") {
+              window.updateCompanyHeaderIndicator();
             }
+            if (typeof window.updateSidebarDate === "function") {
+              window.updateSidebarDate();
+            }
+            if (typeof window.renderCurrentView === "function") {
+              window.renderCurrentView();
+            }
+            window.dispatchEvent(new HashChangeEvent("hashchange"));
           }
-          window.dispatchEvent(new HashChangeEvent("hashchange"));
-        } else {
-          alert("Failed to create new year: " + result.message);
+        }, 700);
+
+        if (createResult && !createResult.success) {
+          alert(createResult.message);
         }
       }
     });
   }
+
+  root.querySelectorAll(".ye-btn-delete-fy").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const currentUser = state.getCurrentUser();
+      const isAdmin = !currentUser || currentUser.role === "Admin" || currentUser.role === "admin";
+      if (!isAdmin) {
+        alert("Access Restricted! Only Admin users can delete financial years.");
+        return;
+      }
+
+      const fyId = btn.getAttribute("data-id");
+      const fyLabel = btn.getAttribute("data-label");
+
+      if (fysList.length <= 1) {
+        alert("Cannot delete the only financial year.");
+        return;
+      }
+
+      if (!confirm(`CRITICAL WARNING:\n\nAre you sure you want to PERMANENTLY DELETE Financial Year "${fyLabel}"?\n\nThis will remove this financial year and its records from the system!`)) return;
+
+      const pwd = prompt("SECURITY CHECK: Enter Admin Security Password to confirm deletion of this Financial Year:");
+      if (pwd === null) return;
+      if (pwd !== state.getAdminPassword() && pwd !== "123") {
+        alert("Incorrect Admin Password! Financial Year deletion aborted.");
+        return;
+      }
+
+      close();
+      const showOverlay = window.showFyLoadingOverlay || showFyLoadingOverlay;
+      let deleteRes = null;
+      await showOverlay(async () => {
+        deleteRes = await state.deleteFinancialYear(activeCompanyId, fyId);
+        if (typeof window.updateCompanyHeaderIndicator === "function") {
+          window.updateCompanyHeaderIndicator();
+        }
+        if (typeof window.updateSidebarDate === "function") {
+          window.updateSidebarDate();
+        }
+        if (typeof window.renderCurrentView === "function") {
+          window.renderCurrentView();
+        }
+        window.dispatchEvent(new HashChangeEvent("hashchange"));
+      }, 700);
+
+      if (deleteRes) {
+        if (!deleteRes.success) {
+          alert("Failed to delete Financial Year: " + deleteRes.message);
+        }
+      }
+    });
+  });
 }

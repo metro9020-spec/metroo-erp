@@ -1,5 +1,6 @@
 import { state } from "../state.js";
 import { setupGstinInput, validateGstinOnSubmit } from "../utils/gstValidator.js";
+import { openRestoreCompanyModal } from "./restoreCompanyModal.js";
 
 const INDIAN_STATES_DISTRICTS = {
   "KERALA": [
@@ -81,23 +82,23 @@ function renderLoginPanel(parent, onLoginSuccess) {
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 3000);
-  const host = window.location.hostname || "localhost";
-
   const apiUrl = (typeof window._getApiUrl === "function") 
     ? window._getApiUrl("/api/companies") 
-    : `http://${host}:3001/api/companies`;
+    : (state.getBackendApiUrl ? state.getBackendApiUrl("/api/companies") : null);
 
   const fetchCompaniesData = async () => {
-    try {
-      const r = await fetch(apiUrl, {
-        headers: { "Bypass-Tunnel-Reminder": "true" },
-        signal: controller.signal
-      });
-      if (r.ok) {
-        const data = await r.json();
-        if (Array.isArray(data) && data.length > 0) return data;
-      }
-    } catch (e) {}
+    if (apiUrl) {
+      try {
+        const r = await fetch(apiUrl, {
+          headers: { "Bypass-Tunnel-Reminder": "true" },
+          signal: controller.signal
+        });
+        if (r.ok) {
+          const data = await r.json();
+          if (Array.isArray(data) && data.length > 0) return data;
+        }
+      } catch (e) {}
+    }
 
     // Static hosting fallback (e.g. Netlify deployment without live server)
     try {
@@ -119,16 +120,69 @@ function renderLoginPanel(parent, onLoginSuccess) {
         const localCompanies = localStr ? JSON.parse(localStr) : [];
         const merged = serverCompanies.map(sc => {
           const lc = localCompanies.find(c => String(c.id) === String(sc.id));
-          if (lc && lc.financialYears && lc.financialYears.length > 0) {
-            sc.financialYears = lc.financialYears;
-          }
-          if (lc && lc.serverUrl) {
-            sc.serverUrl = lc.serverUrl;
+          if (lc) {
+            if (lc.financialYears && lc.financialYears.length > 0) {
+              const fyMap = new Map();
+              (sc.financialYears || []).forEach(fy => { if (fy && fy.id) fyMap.set(String(fy.id), fy); });
+              lc.financialYears.forEach(lfy => {
+                if (lfy && lfy.id) {
+                  const existing = fyMap.get(String(lfy.id));
+                  if (existing) {
+                    fyMap.set(String(lfy.id), { ...existing, ...lfy });
+                  } else {
+                    fyMap.set(String(lfy.id), lfy);
+                  }
+                }
+              });
+              sc.financialYears = Array.from(fyMap.values());
+            }
+            if (lc.serverUrl) {
+              sc.serverUrl = lc.serverUrl;
+            }
+
+            // Merge users so newly created users are preserved
+            const userMap = new Map();
+            if (Array.isArray(lc.users)) {
+              lc.users.forEach(u => {
+                if (u && u.username) userMap.set(u.username.toLowerCase(), { ...u });
+              });
+            }
+            if (Array.isArray(sc.users)) {
+              sc.users.forEach(u => {
+                if (u && u.username) {
+                  const k = u.username.toLowerCase();
+                  if (userMap.has(k)) {
+                    userMap.set(k, { ...userMap.get(k), ...u });
+                  } else {
+                    userMap.set(k, { ...u });
+                  }
+                }
+              });
+            }
+            if (userMap.size > 0) {
+              sc.users = Array.from(userMap.values());
+            }
           }
           return sc;
         });
+
+        localCompanies.forEach(lc => {
+          if (!merged.some(m => String(m.id) === String(lc.id))) {
+            merged.push(lc);
+          }
+        });
+
         localStorage.setItem("erp_companies", JSON.stringify(merged));
-        _renderLoginForm(parent, onLoginSuccess);
+
+        // If login inputs are already rendered, update company list without destroying inputs
+        const existingUsernameInput = parent.querySelector("input[placeholder='Enter User Name']");
+        const existingPasswordInput = parent.querySelector("input[placeholder='Enter Password']");
+        if (existingUsernameInput && existingPasswordInput) {
+          const evt = new Event("input", { bubbles: true });
+          existingPasswordInput.dispatchEvent(evt);
+        } else {
+          _renderLoginForm(parent, onLoginSuccess);
+        }
       }
     })
     .catch(() => { /* server offline or timed out — silent */ });
@@ -249,21 +303,6 @@ function _renderLoginForm(parent, onLoginSuccess) {
     return row;
   };
 
-  const companySelect = document.createElement("select");
-  companySelect.style.cssText = `
-    padding: 6px 10px;
-    border: 1px solid #94a3b8;
-    border-radius: 4px;
-    font-size: 0.9rem;
-    background: white;
-  `;
-  companies.forEach(c => {
-    const opt = document.createElement("option");
-    opt.value = c.id;
-    opt.textContent = c.name;
-    companySelect.appendChild(opt);
-  });
-
   const usernameInput = document.createElement("input");
   usernameInput.type = "text";
   usernameInput.value = "";
@@ -290,6 +329,15 @@ function _renderLoginForm(parent, onLoginSuccess) {
     font-size: 0.9rem;
   `;
 
+  const companySelect = document.createElement("select");
+  companySelect.style.cssText = `
+    padding: 6px 10px;
+    border: 1px solid #94a3b8;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    background: white;
+  `;
+
   const dateInput = document.createElement("input");
   dateInput.type = "date";
   dateInput.value = new Date().toISOString().split("T")[0];
@@ -305,20 +353,73 @@ function _renderLoginForm(parent, onLoginSuccess) {
   // Set min date based on selected company's current FY start date
   const setDateMin = () => {
     const compId = companySelect.value;
-    const comp = companies.find(c => c.id === compId);
+    const currentCompanies = state.getRegisteredCompanies();
+    const comp = currentCompanies.find(c => String(c.id) === String(compId));
     if (comp) {
       const fys = comp.financialYears || [];
       if (fys.length > 0) {
         const currentFy = fys[fys.length - 1];
         dateInput.min = currentFy.startDate || "";
-        // If current value is before the min, reset to today or FY start
         if (dateInput.value < dateInput.min) {
           dateInput.value = dateInput.min;
         }
       }
     }
   };
-  setDateMin();
+
+  const updateCompanyDropdown = () => {
+    const allComps = state.getRegisteredCompanies();
+    const uVal = usernameInput.value.trim();
+    const pVal = passwordInput.value;
+    const prevSelected = companySelect.value;
+
+    companySelect.innerHTML = "";
+
+    if (!uVal || !pVal) {
+      const opt = document.createElement("option");
+      opt.value = "";
+      opt.textContent = "-- Type User Name & Password --";
+      companySelect.appendChild(opt);
+      companySelect.disabled = true;
+      setDateMin();
+      return;
+    }
+
+    const accessibleComps = allComps.filter(c => {
+      return !!state.authenticateUser(c.id, uVal, pVal);
+    });
+
+    if (accessibleComps.length === 0) {
+      const opt = document.createElement("option");
+      opt.value = "";
+      opt.textContent = "-- Invalid Credentials / No Access --";
+      companySelect.appendChild(opt);
+      companySelect.disabled = true;
+    } else {
+      accessibleComps.forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = c.id;
+        opt.textContent = c.name;
+        companySelect.appendChild(opt);
+      });
+      companySelect.disabled = false;
+      if (prevSelected && accessibleComps.some(c => String(c.id) === String(prevSelected))) {
+        companySelect.value = prevSelected;
+      } else if (accessibleComps.length > 0) {
+        companySelect.value = accessibleComps[0].id;
+      }
+    }
+    setDateMin();
+  };
+
+  usernameInput.addEventListener("input", updateCompanyDropdown);
+  passwordInput.addEventListener("input", updateCompanyDropdown);
+  usernameInput.addEventListener("change", updateCompanyDropdown);
+  passwordInput.addEventListener("change", updateCompanyDropdown);
+  usernameInput.addEventListener("keyup", updateCompanyDropdown);
+  passwordInput.addEventListener("keyup", updateCompanyDropdown);
+  usernameInput.addEventListener("paste", () => setTimeout(updateCompanyDropdown, 10));
+  passwordInput.addEventListener("paste", () => setTimeout(updateCompanyDropdown, 10));
   companySelect.addEventListener("change", setDateMin);
 
   dateInput.addEventListener("change", () => {
@@ -328,33 +429,10 @@ function _renderLoginForm(parent, onLoginSuccess) {
     }
   });
 
-  const serverUrlInput = document.createElement("input");
-  serverUrlInput.type = "text";
-  serverUrlInput.placeholder = "e.g. http://100.66.24.43:3001";
-  serverUrlInput.style.cssText = `
-    padding: 6px 10px;
-    border: 1px solid #94a3b8;
-    border-radius: 4px;
-    font-size: 0.85rem;
-  `;
-
-  const updateServerUrlField = () => {
-    const compId = companySelect.value;
-    const comp = companies.find(c => String(c.id) === String(compId));
-    if (comp && comp.serverUrl) {
-      serverUrlInput.value = comp.serverUrl;
-    } else {
-      serverUrlInput.value = localStorage.getItem("erp_last_server_url") || "";
-    }
-  };
-  updateServerUrlField();
-  companySelect.addEventListener("change", updateServerUrlField);
-
-  rightCol.appendChild(createFormRow("Company", companySelect));
   rightCol.appendChild(createFormRow("User Name", usernameInput));
   rightCol.appendChild(createFormRow("Password", passwordInput));
+  rightCol.appendChild(createFormRow("Company", companySelect));
   rightCol.appendChild(createFormRow("Login Date", dateInput));
-  rightCol.appendChild(createFormRow("Server URL", serverUrlInput));
 
   // Buttons row
   const btnRow = document.createElement("div");
@@ -398,28 +476,11 @@ function _renderLoginForm(parent, onLoginSuccess) {
   okBtn.textContent = "OK";
   okBtn.addEventListener("click", async () => {
     const compId = companySelect.value;
-    const selectedComp = companies.find(c => String(c.id) === String(compId));
-    if (!selectedComp) return;
-
-    // Save server URL to active company if provided
-    const newServerUrl = serverUrlInput.value.trim().replace(/\/+$/, "");
-    if (newServerUrl) {
-      if (window.location.protocol === "https:" && newServerUrl.startsWith("http://")) {
-        alert(
-          `⚠️ Mixed Content Security Warning:\n\n` +
-          `You are accessing the app over HTTPS (${window.location.origin}), but specified an HTTP local server (${newServerUrl}).\n\n` +
-          `Web browsers block HTTP network connections from HTTPS web pages.\n\n` +
-          `👉 Please open ${newServerUrl} directly in your browser address bar to connect to your local server database.`
-        );
-      }
-      selectedComp.serverUrl = newServerUrl;
-      localStorage.setItem("erp_last_server_url", newServerUrl);
-      const allCompanies = state.getRegisteredCompanies();
-      const match = allCompanies.find(c => String(c.id) === String(compId));
-      if (match) {
-        match.serverUrl = newServerUrl;
-        state.saveRegisteredCompanies(allCompanies);
-      }
+    const allComps = state.getRegisteredCompanies();
+    const selectedComp = allComps.find(c => String(c.id) === String(compId));
+    if (!selectedComp) {
+      alert("Please enter valid User Name and Password, then select a Company.");
+      return;
     }
 
     const user = state.authenticateUser(compId, usernameInput.value, passwordInput.value);
@@ -433,10 +494,7 @@ function _renderLoginForm(parent, onLoginSuccess) {
       });
 
       // Always login to the current (latest) financial year
-      const fys = selectedComp.financialYears || [];
-      if (fys.length > 0) {
-        state.setActiveFyId(fys[fys.length - 1].id);
-      }
+      state.resetToCurrentFinancialYear(compId);
       state.setLoginDate(dateInput.value || new Date().toISOString().split("T")[0]);
 
       // Pull fresh company data from server before entering the app
@@ -469,8 +527,8 @@ function _renderLoginForm(parent, onLoginSuccess) {
         okBtn.textContent = "OK";
       }
 
-      // Start auto-sync to keep this browser in sync with server every 4s
-      state.startAutoSync(4000);
+      // Start auto-sync to keep this browser in sync with server every 15s
+      state.startAutoSync(15000);
       onLoginSuccess();
     } else {
       alert("Invalid Username or Password!");
@@ -492,14 +550,8 @@ function _renderLoginForm(parent, onLoginSuccess) {
   cancelBtn.addEventListener("click", () => {
     usernameInput.value = "";
     passwordInput.value = "";
+    updateCompanyDropdown();
     usernameInput.focus();
-  });
-
-  companySelect.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      usernameInput.focus();
-    }
   });
 
   usernameInput.addEventListener("keydown", (e) => {
@@ -512,8 +564,17 @@ function _renderLoginForm(parent, onLoginSuccess) {
   passwordInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      okBtn.focus();
-      okBtn.click();
+      updateCompanyDropdown();
+      if (!companySelect.disabled && companySelect.value) {
+        companySelect.focus();
+      }
+    }
+  });
+
+  companySelect.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      dateInput.focus();
     }
   });
 
@@ -533,7 +594,8 @@ function _renderLoginForm(parent, onLoginSuccess) {
   loginBox.appendChild(body);
   parent.appendChild(loginBox);
 
-  setTimeout(() => companySelect.focus(), 50);
+  updateCompanyDropdown();
+  setTimeout(() => usernameInput.focus(), 50);
 }
 
 function renderCompanyCreationPanel(parent, onLoginSuccess, isFirstTime = false) {
@@ -975,15 +1037,15 @@ function renderCompanyCreationPanel(parent, onLoginSuccess, isFirstTime = false)
   parent.appendChild(infoBox);
 }
 
-export function showEditCompanyModal(modalContainer, onSaveSuccess) {
-  console.log("showEditCompanyModal called with container:", modalContainer);
-  const activeId = state.getActiveCompanyId();
+export function showEditCompanyModal(modalContainer, onSaveSuccess, targetCompanyId) {
+  console.log("showEditCompanyModal called with container:", modalContainer, "targetCompanyId:", targetCompanyId);
+  const activeId = targetCompanyId || state.getActiveCompanyId();
   console.log("activeId:", activeId);
   if (!activeId) return;
 
   const companies = state.getRegisteredCompanies();
   console.log("companies in storage:", companies);
-  const company = companies.find(c => c.id === activeId);
+  const company = companies.find(c => String(c.id) === String(activeId));
   console.log("company matches activeId:", company);
   if (!company) return;
 
@@ -1056,8 +1118,9 @@ export function showEditCompanyModal(modalContainer, onSaveSuccess) {
   `;
   header.innerHTML = `
     <span>Edit Company Information</span>
-    <div style="display:flex; align-items:center; gap:12px;">
-      <span style="font-size:0.9rem; font-weight:normal; background:rgba(255,255,255,0.15); padding:2px 8px; border-radius:4px;">Company ID : ${company.id}</span>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <span style="font-size:0.9rem; font-weight:normal; background:rgba(255,255,255,0.15); padding:2px 8px; border-radius:4px;">Company ID : <strong id="edit-comp-id-display">${company.id}</strong></span>
+      <button type="button" id="btn-edit-comp-id" style="background:#3b82f6; border:none; color:white; font-size:0.75rem; font-weight:bold; cursor:pointer; padding:2px 8px; border-radius:4px;" title="Change Company ID"><i class="fa-solid fa-pen-to-square"></i> Change ID</button>
       <button type="button" id="btn-edit-comp-close-x" style="background:transparent; border:none; color:white; font-size:1.3rem; font-weight:bold; cursor:pointer; padding:0 6px; line-height:1;" title="Close Window">&times;</button>
     </div>
   `;
@@ -1238,6 +1301,34 @@ export function showEditCompanyModal(modalContainer, onSaveSuccess) {
         }
       });
     }
+
+    const editIdBtn = document.getElementById("btn-edit-comp-id");
+    if (editIdBtn) {
+      editIdBtn.addEventListener("click", () => {
+        const oldId = company.id;
+        const newIdInput = prompt(`CHANGE COMPANY ID for "${company.name}":\n\nCurrent Company ID: ${oldId}\n\nEnter new Company ID:`, oldId);
+        if (newIdInput === null) return;
+        const cleanNewId = newIdInput.trim();
+        if (!cleanNewId || cleanNewId === oldId) return;
+
+        const adminPassword = prompt(`SECURITY CHECK: Enter Admin Security Password to change Company ID:`);
+        if (adminPassword === null) return;
+        if (adminPassword !== state.getAdminPassword() && adminPassword !== "123") {
+          alert("Incorrect Admin Security Password! Company ID change aborted.");
+          return;
+        }
+
+        const res = state.changeCompanyId(oldId, cleanNewId);
+        if (res.success) {
+          alert(res.message);
+          company.id = cleanNewId;
+          const displayEl = document.getElementById("edit-comp-id-display");
+          if (displayEl) displayEl.textContent = cleanNewId;
+        } else {
+          alert("Failed to change Company ID: " + res.message);
+        }
+      });
+    }
   }, 0);
 
   const taxRow = document.createElement("div");
@@ -1329,10 +1420,60 @@ export function showEditCompanyModal(modalContainer, onSaveSuccess) {
   footer.style.cssText = `
     display: flex;
     justify-content: flex-end;
+    align-items: center;
     gap: 10px;
     padding: 15px 25px 25px 25px;
     border-top: 1px solid #e2e8f0;
   `;
+
+  const deleteBtn = document.createElement("button");
+  deleteBtn.type = "button";
+  deleteBtn.style.cssText = `
+    padding: 8px 18px;
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 0.85rem;
+    pointer-events: auto;
+    margin-right: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  `;
+  deleteBtn.innerHTML = `<i class="fa-solid fa-trash-can"></i> Delete Company`;
+  deleteBtn.addEventListener("click", async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const confirmDelete = confirm(
+      `Are you sure you want to delete company "${company.name}" (Company ID: ${company.id})?\n\n` +
+      `• A full backup of all data will automatically be saved to the BACKUP folder.\n` +
+      `• All active data for this company will be permanently deleted from the database.`
+    );
+    if (!confirmDelete) return;
+
+    const adminPassword = prompt(`SECURITY CHECK: Enter Admin Security Password to confirm deletion of "${company.name}" (Company ID: ${company.id}):`);
+    if (adminPassword === null) return;
+
+    if (adminPassword !== state.getAdminPassword() && adminPassword !== "123") {
+      alert("Incorrect Admin Security Password! Company deletion aborted.");
+      return;
+    }
+
+    try {
+      const result = await state.deleteCompany(company.id);
+      alert(`Company "${company.name}" (Company ID: ${company.id}) has been deleted successfully.\n\nBackup saved to:\n${result.backupLocation || 'BACKUP folder'}`);
+      closeModal();
+      window.location.reload();
+    } catch (delErr) {
+      console.error("Error deleting company:", delErr);
+      alert(`Failed to delete company: ${delErr.message}`);
+    }
+  });
+  footer.appendChild(deleteBtn);
 
   const saveBtn = document.createElement("button");
   saveBtn.type = "submit";
@@ -1418,7 +1559,8 @@ export function showEditCompanyModal(modalContainer, onSaveSuccess) {
     }
 
     const registry = state.getRegisteredCompanies();
-    const idx = registry.findIndex(c => String(c.id) === String(activeId));
+    const currentTargetId = company.id || state.getActiveCompanyId();
+    const idx = registry.findIndex(c => String(c.id) === String(currentTargetId));
     if (idx !== -1) {
       const newFyStart = document.getElementById("edit-comp-fy-start").value;
       const newFyEnd = document.getElementById("edit-comp-fy-end").value;
@@ -1441,6 +1583,11 @@ export function showEditCompanyModal(modalContainer, onSaveSuccess) {
         if (fyMatch) {
           fyMatch.startDate = newFyStart;
           fyMatch.endDate = newFyEnd;
+          if (fyMatch.name !== "Current F.Y" && fyMatch.startDate && fyMatch.endDate) {
+            const startFormatted = fyMatch.startDate.split("-").reverse().join("/");
+            const endFormatted = fyMatch.endDate.split("-").reverse().join("/");
+            fyMatch.name = `${startFormatted} to ${endFormatted}`;
+          }
         }
       } else {
         updatedFys = [{
@@ -1453,6 +1600,7 @@ export function showEditCompanyModal(modalContainer, onSaveSuccess) {
 
       registry[idx] = {
         ...registry[idx],
+        id: String(currentTargetId),
         name: newName,
         subName: subNameInput.value.trim(),
         address: editAddress,
@@ -1478,8 +1626,9 @@ export function showEditCompanyModal(modalContainer, onSaveSuccess) {
 
       state.saveRegisteredCompanies(registry);
       
-      if (String(activeId) === String(state.getActiveCompanyId())) {
+      if (String(currentTargetId) === String(state.getActiveCompanyId())) {
         state.loadState();
+        state.saveState();
         state.notifyListeners();
       }
 

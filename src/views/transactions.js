@@ -1,12 +1,27 @@
-import { state } from "../state.js";
+import { state, toIsoDateStr } from "../state.js";
 import { makeDraggable } from "../utils/draggable.js";
 import { formatDate } from "../utils/dateUtils.js";
+import { renderTallyDatePickerHtml, initTallyDatePickers } from "../utils/datePicker.js";
 import { showCustomerSalesHistoryModal } from "./customerHistoryModal.js";
+import { showVendorPurchaseHistoryModal } from "./vendorHistoryModal.js";
 import { showInvoicePrintPreview } from "./invoices.js";
 import { showSelectBillSeriesModal } from "./selectSeriesModal.js";
 
 let activeSubTab = "sales";
 let searchTxFilter = "";
+
+function formatRateValue(val) {
+  if (val === undefined || val === null || val === "" || isNaN(val)) return "";
+  const num = parseFloat(val);
+  const str = String(val);
+  if (str.includes(".")) {
+    const decimals = str.split(".")[1];
+    if (decimals && decimals.length > 2) {
+      return str;
+    }
+  }
+  return num.toFixed(2);
+}
 
 export function showBatchSelectionModal(materialId, currentPrice, onSelect) {
   const root = document.getElementById("modal-container-root");
@@ -18,62 +33,130 @@ export function showBatchSelectionModal(materialId, currentPrice, onSelect) {
   modalDiv.style = "position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); display:flex; justify-content:center; align-items:center; z-index:3000;";
   
   const batches = mat.batches || [];
+  const isCompUnregistered = state.isCompanyUnregistered ? state.isCompanyUnregistered() : false;
+  const igst = isCompUnregistered ? 0 : (parseFloat(mat.igst !== undefined && mat.igst !== null ? mat.igst : 18) || 0);
+
+  const initialCost = (parseFloat(currentPrice) > 0 ? parseFloat(currentPrice) : (parseFloat(mat.landingCost) || 0));
+  let initialMarginPct = (mat.marginPercent !== undefined && mat.marginPercent !== null && !isNaN(parseFloat(mat.marginPercent))) ? parseFloat(mat.marginPercent) : 30;
+  let initialExcl = (mat.gstExclRate !== undefined && mat.gstExclRate !== null && !isNaN(parseFloat(mat.gstExclRate)) && parseFloat(mat.gstExclRate) > 0)
+    ? parseFloat(mat.gstExclRate)
+    : (initialCost > 0 ? (initialCost * (1 + initialMarginPct / 100)) : 0);
   
+  let initialMarginAmt = initialCost > 0 ? (initialExcl - initialCost) : 0;
+  if (initialCost > 0 && initialExcl > 0) {
+    initialMarginPct = ((initialExcl - initialCost) / initialCost) * 100;
+  }
+  let initialIncl = initialExcl * (1 + igst / 100);
+  let initialMrp = (mat.mrp !== undefined && mat.mrp !== null && !isNaN(parseFloat(mat.mrp)) && parseFloat(mat.mrp) > 0) ? parseFloat(mat.mrp) : (initialExcl * 1.25);
+
   modalDiv.innerHTML = `
-    <div style="background-color:#cbd5e1; color:#0f172a; padding:15px; border:2px solid #1e3b8b; border-radius:6px; width:450px; box-shadow:0 10px 30px rgba(0,0,0,0.5); font-family:sans-serif;">
-      <div style="background-color:#1e3b8b; color:white; padding:6px 12px; font-weight:bold; border-radius:4px 4px 0 0; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-        <span>Select Batch for ${mat.name}</span>
-        <button type="button" id="btn-close-batch-modal" style="background:none; border:none; color:white; font-size:1.2rem; cursor:pointer;">&times;</button>
+    <div style="background-color:#cbd5e1; color:#0f172a; padding:12px; border:2px solid #1e3b8b; border-radius:6px; max-width:650px; width:95vw; max-height:88vh; overflow-y:auto; overflow-x:hidden; box-sizing:border-box; box-shadow:0 10px 30px rgba(0,0,0,0.5); font-family:sans-serif; display:flex; flex-direction:column; gap:8px;">
+      <div style="background-color:#1e3b8b; color:white; padding:6px 10px; font-weight:bold; border-radius:4px 4px 0 0; display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+          <i class="fa-solid fa-layer-group"></i>
+          <span>Select Batch for ${mat.name}</span>
+          ${mat.code ? `<span style="font-size:0.72rem; background:#3b82f6; color:white; padding:1px 6px; border-radius:3px;">${mat.code}</span>` : ''}
+          ${igst > 0 ? `<span style="font-size:0.72rem; background:#0ea5e9; color:white; padding:1px 6px; border-radius:3px;">GST ${igst}%</span>` : ''}
+        </div>
+        <button type="button" id="btn-close-batch-modal" style="background:none; border:none; color:white; font-size:1.2rem; cursor:pointer;" title="Close">&times;</button>
       </div>
-      <div style="margin-bottom:10px;">
-        <p style="font-size:0.8rem; font-weight:600; margin-bottom:6px;">Existing Batches:</p>
-        <div style="max-height:150px; overflow-y:auto; border:1px solid #94a3b8; background:white; border-radius:3px;">
-          <table style="width:100%; font-size:0.8rem; text-align:left; border-collapse:collapse;">
-            <thead>
+
+      <div style="margin-bottom:4px;">
+        <p style="font-size:0.78rem; font-weight:700; margin-bottom:4px; color:#1e293b;">Existing Batches:</p>
+        <div style="max-height:130px; overflow-y:auto; overflow-x:auto; border:1px solid #94a3b8; background:white; border-radius:3px; width:100%; box-sizing:border-box;">
+          <table style="width:100%; min-width:520px; font-size:0.75rem; text-align:left; border-collapse:collapse;">
+            <thead style="position: sticky; top: 0; z-index: 10; background: #e2e8f0;">
               <tr style="background:#e2e8f0; border-bottom:1px solid #cbd5e1;">
-                <th style="padding:4px;">Batch No</th>
-                <th style="padding:4px;">Cost</th>
-                <th style="padding:4px;">Selling Rate</th>
-                <th style="padding:4px;">MRP</th>
-                <th style="padding:4px;">Stock</th>
-                <th style="padding:4px;">Action</th>
+                <th style="padding:4px 6px; white-space:nowrap;">Batch No</th>
+                <th style="padding:4px 6px; text-align:right; white-space:nowrap;">Cost</th>
+                <th style="padding:4px 6px; text-align:right; white-space:nowrap;">Excl.</th>
+                <th style="padding:4px 6px; text-align:right; white-space:nowrap;">Incl.</th>
+                <th style="padding:4px 6px; text-align:right; white-space:nowrap;">Margin</th>
+                <th style="padding:4px 6px; text-align:right; white-space:nowrap;">MRP</th>
+                <th style="padding:4px 6px; text-align:right; white-space:nowrap;">Stock</th>
+                <th style="padding:4px 6px; text-align:center; white-space:nowrap;">Action</th>
               </tr>
             </thead>
             <tbody>
-              ${batches.length === 0 ? '<tr><td colspan="6" style="padding:8px; text-align:center; color:#64748b;">No batches exist. Please create one.</td></tr>' : 
-                batches.map(b => `
-                <tr style="border-bottom:1px solid #cbd5e1;">
-                  <td style="padding:4px; font-weight:bold; color:#1e3b8b;">${b.batchNo}</td>
-                  <td style="padding:4px; font-weight:bold;">\u20B9${b.landingCost}</td>
-                  <td style="padding:4px;">\u20B9${b.sellingPrice}</td>
-                  <td style="padding:4px;">\u20B9${b.mrp}</td>
-                  <td style="padding:4px; font-weight:bold; color:${b.stock > 0 ? '#16a34a' : '#ef4444'};">${b.stock}</td>
-                  <td style="padding:4px;">
-                    <button type="button" class="btn-select-batch-row" data-batch="${b.batchNo}" style="background:#1e3b8b; color:white; border:none; padding:2px 6px; font-size:0.75rem; cursor:pointer; border-radius:2px;">Select</button>
-                  </td>
-                </tr>
-              `).join("")}
+              ${batches.length === 0 ? '<tr><td colspan="8" style="padding:8px; text-align:center; color:#64748b;">No batches exist. Please create one below.</td></tr>' : 
+                batches.map(b => {
+                  const bCost = (b.landingCost !== undefined && b.landingCost !== null && !isNaN(parseFloat(b.landingCost)) && parseFloat(b.landingCost) > 0)
+                    ? parseFloat(b.landingCost)
+                    : (parseFloat(b.batchNo) || 0);
+                  const bExcl = parseFloat(b.sellingPrice) || 0;
+                  const bIncl = (b.gstInclRate !== undefined && b.gstInclRate !== null && !isNaN(parseFloat(b.gstInclRate)) && parseFloat(b.gstInclRate) > 0)
+                    ? parseFloat(b.gstInclRate)
+                    : parseFloat((bExcl * (1 + igst / 100)).toFixed(2));
+                  const bDiff = bExcl - bCost;
+                  const bMargPct = bCost > 0 ? ((bDiff / bCost) * 100) : 0;
+                  const bMrp = parseFloat(b.mrp) || parseFloat((bExcl * 1.25).toFixed(2));
+                  const bStock = parseFloat(b.stock) || 0;
+
+                  return `
+                    <tr style="border-bottom:1px solid #e2e8f0;">
+                      <td style="padding:3px 6px; font-weight:bold; color:#1e3b8b; white-space:nowrap;">${b.batchNo}</td>
+                      <td style="padding:3px 6px; text-align:right; font-weight:bold; white-space:nowrap;">₹${bCost.toFixed(2)}</td>
+                      <td style="padding:3px 6px; text-align:right; color:#0f172a; white-space:nowrap;">₹${bExcl.toFixed(2)}</td>
+                      <td style="padding:3px 6px; text-align:right; color:#1e40af; font-weight:600; white-space:nowrap;">₹${bIncl.toFixed(2)}</td>
+                      <td style="padding:3px 6px; text-align:right; font-size:0.72rem; color:${bDiff >= 0 ? '#16a34a' : '#dc2626'}; white-space:nowrap;">
+                        ${bMargPct.toFixed(1)}% (₹${bDiff.toFixed(2)})
+                      </td>
+                      <td style="padding:3px 6px; text-align:right; white-space:nowrap;">₹${bMrp.toFixed(2)}</td>
+                      <td style="padding:3px 6px; text-align:right; font-weight:bold; color:${bStock > 0 ? '#16a34a' : '#ef4444'}; white-space:nowrap;">${bStock.toFixed(2)}</td>
+                      <td style="padding:3px 6px; text-align:center; white-space:nowrap;">
+                        <button type="button" class="btn-select-batch-row" data-batch="${b.batchNo}" style="background:#1e3b8b; color:white; border:none; padding:1px 6px; font-size:0.72rem; cursor:pointer; border-radius:2px; font-weight:600;">Select</button>
+                      </td>
+                    </tr>
+                  `;
+                }).join("")}
             </tbody>
           </table>
         </div>
       </div>
-      <div style="border-top:1px solid #94a3b8; padding-top:10px; display:flex; flex-direction:column; gap:6px;">
-        <span style="font-size:0.8rem; font-weight:bold; color:#1e3b8b;">Or Create New Batch:</span>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
-          <div>
-            <label style="font-size:0.75rem; font-weight:600; display:block;">Landing/Purchase Cost</label>
-            <input type="number" id="new-batch-cost" style="width:100%; background:white; color:black; border:1px solid #94a3b8; padding:2px 4px; font-size:0.8rem;" value="${currentPrice || ''}">
+
+      <div style="border-top:1px solid #94a3b8; padding-top:6px; display:flex; flex-direction:column; gap:6px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:0.78rem; font-weight:bold; color:#1e3b8b;">Or Create New Batch:</span>
+          ${igst > 0 ? `<span style="font-size:0.72rem; color:#475569;">Tax Rate: <strong>${igst}%</strong></span>` : ''}
+        </div>
+        
+        <div style="background:white; border:1px solid #94a3b8; border-radius:4px; padding:6px 8px; display:flex; flex-direction:column; gap:6px; box-sizing:border-box;">
+          <!-- ROW 1: Landing Cost, Margin %, Margin Amount -->
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px;">
+            <div>
+              <label style="font-size:0.72rem; font-weight:600; display:block; margin-bottom:1px; color:#334155;">Landing Cost *</label>
+              <input type="number" step="0.01" min="0" id="new-batch-cost" style="width:100%; box-sizing:border-box; height:26px; background:white; color:black; border:1px solid #94a3b8; padding:2px 4px; font-size:0.78rem; border-radius:2px; font-weight:bold;" value="${initialCost ? initialCost.toFixed(2) : ''}">
+            </div>
+            <div>
+              <label style="font-size:0.72rem; font-weight:600; display:block; margin-bottom:1px; color:#334155;">Margin %</label>
+              <input type="number" step="0.1" id="new-batch-margin-pct" style="width:100%; box-sizing:border-box; height:26px; background:white; color:black; border:1px solid #94a3b8; padding:2px 4px; font-size:0.78rem; border-radius:2px;" value="${initialMarginPct.toFixed(1)}">
+            </div>
+            <div>
+              <label style="font-size:0.72rem; font-weight:600; display:block; margin-bottom:1px; color:#334155;">Margin Amount</label>
+              <input type="number" step="0.01" id="new-batch-margin-amt" style="width:100%; box-sizing:border-box; height:26px; background:#f8fafc; color:black; border:1px solid #94a3b8; padding:2px 4px; font-size:0.78rem; border-radius:2px;" value="${initialMarginAmt.toFixed(2)}">
+            </div>
           </div>
-          <div>
-            <label style="font-size:0.75rem; font-weight:600; display:block;">Selling Price (Excl. Tax)</label>
-            <input type="number" id="new-batch-selling" style="width:100%; background:white; color:black; border:1px solid #94a3b8; padding:2px 4px; font-size:0.8rem;" value="${mat.gstExclRate || ''}">
+
+          <!-- ROW 2: Selling Price (Excl), Selling Price (Incl), MRP -->
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px;">
+            <div>
+              <label style="font-size:0.72rem; font-weight:600; display:block; margin-bottom:1px; color:#334155;">Selling (Excl) *</label>
+              <input type="number" step="0.01" min="0" id="new-batch-selling" style="width:100%; box-sizing:border-box; height:26px; background:white; color:black; border:1px solid #94a3b8; padding:2px 4px; font-size:0.78rem; border-radius:2px; font-weight:bold;" value="${initialExcl ? initialExcl.toFixed(2) : ''}">
+            </div>
+            <div>
+              <label style="font-size:0.72rem; font-weight:600; display:block; margin-bottom:1px; color:#334155;">Selling (Incl)</label>
+              <input type="number" step="0.01" min="0" id="new-batch-selling-incl" style="width:100%; box-sizing:border-box; height:26px; background:white; color:#1e40af; border:1px solid #94a3b8; padding:2px 4px; font-size:0.78rem; border-radius:2px; font-weight:bold;" value="${initialIncl ? initialIncl.toFixed(2) : ''}">
+            </div>
+            <div>
+              <label style="font-size:0.72rem; font-weight:600; display:block; margin-bottom:1px; color:#334155;">M.R.P *</label>
+              <input type="number" step="0.01" min="0" id="new-batch-mrp" style="width:100%; box-sizing:border-box; height:26px; background:white; color:black; border:1px solid #94a3b8; padding:2px 4px; font-size:0.78rem; border-radius:2px;" value="${initialMrp ? initialMrp.toFixed(2) : ''}">
+            </div>
           </div>
+
           <div>
-            <label style="font-size:0.75rem; font-weight:600; display:block;">M.R.P</label>
-            <input type="number" id="new-batch-mrp" style="width:100%; background:white; color:black; border:1px solid #94a3b8; padding:2px 4px; font-size:0.8rem;" value="${mat.mrp || ''}">
-          </div>
-          <div style="display:flex; align-items:flex-end;">
-            <button type="button" id="btn-create-batch-submit" style="width:100%; height:26px; background:#16a34a; color:white; font-weight:bold; border:none; cursor:pointer; border-radius:2px; font-size:0.75rem;">Create Batch</button>
+            <button type="button" id="btn-create-batch-submit" style="width:100%; height:26px; background:#16a34a; color:white; font-weight:bold; border:none; cursor:pointer; border-radius:2px; font-size:0.75rem; display:flex; align-items:center; justify-content:center; gap:5px; margin-top:2px;">
+              <i class="fa-solid fa-plus-circle"></i> Create Batch
+            </button>
           </div>
         </div>
       </div>
@@ -83,7 +166,9 @@ export function showBatchSelectionModal(materialId, currentPrice, onSelect) {
   document.body.appendChild(modalDiv);
   
   const closeModal = () => {
-    document.body.removeChild(modalDiv);
+    if (modalDiv && modalDiv.parentNode) {
+      modalDiv.parentNode.removeChild(modalDiv);
+    }
   };
   
   modalDiv.querySelector("#btn-close-batch-modal").addEventListener("click", closeModal);
@@ -96,22 +181,93 @@ export function showBatchSelectionModal(materialId, currentPrice, onSelect) {
       onSelect(matched);
     });
   });
+
+  // Reactive price & margin calculations for create batch form
+  const costIn = modalDiv.querySelector("#new-batch-cost");
+  const marginPctIn = modalDiv.querySelector("#new-batch-margin-pct");
+  const marginAmtIn = modalDiv.querySelector("#new-batch-margin-amt");
+  const sellingExclIn = modalDiv.querySelector("#new-batch-selling");
+  const sellingInclIn = modalDiv.querySelector("#new-batch-selling-incl");
+  const mrpIn = modalDiv.querySelector("#new-batch-mrp");
+
+  const recalcFromMarginPct = () => {
+    const lc = parseFloat(costIn.value) || 0;
+    const margP = parseFloat(marginPctIn.value) || 0;
+    const margA = lc * (margP / 100);
+    marginAmtIn.value = margA.toFixed(2);
+    const excl = lc + margA;
+    sellingExclIn.value = excl.toFixed(2);
+    const incl = excl * (1 + igst / 100);
+    sellingInclIn.value = incl.toFixed(2);
+    mrpIn.value = (excl * 1.25).toFixed(2);
+  };
+
+  const recalcFromMarginAmt = () => {
+    const lc = parseFloat(costIn.value) || 0;
+    const margA = parseFloat(marginAmtIn.value) || 0;
+    if (lc > 0) {
+      marginPctIn.value = ((margA / lc) * 100).toFixed(1);
+    }
+    const excl = lc + margA;
+    sellingExclIn.value = excl.toFixed(2);
+    const incl = excl * (1 + igst / 100);
+    sellingInclIn.value = incl.toFixed(2);
+    mrpIn.value = (excl * 1.25).toFixed(2);
+  };
+
+  const recalcFromSellingExcl = () => {
+    const lc = parseFloat(costIn.value) || 0;
+    const excl = parseFloat(sellingExclIn.value) || 0;
+    const diff = excl - lc;
+    marginAmtIn.value = diff.toFixed(2);
+    if (lc > 0) {
+      marginPctIn.value = ((diff / lc) * 100).toFixed(1);
+    }
+    const incl = excl * (1 + igst / 100);
+    sellingInclIn.value = incl.toFixed(2);
+    mrpIn.value = (excl * 1.25).toFixed(2);
+  };
+
+  const recalcFromSellingIncl = () => {
+    const lc = parseFloat(costIn.value) || 0;
+    const incl = parseFloat(sellingInclIn.value) || 0;
+    const excl = igst > 0 ? (incl / (1 + igst / 100)) : incl;
+    sellingExclIn.value = excl.toFixed(2);
+    const diff = excl - lc;
+    marginAmtIn.value = diff.toFixed(2);
+    if (lc > 0) {
+      marginPctIn.value = ((diff / lc) * 100).toFixed(1);
+    }
+    mrpIn.value = (excl * 1.25).toFixed(2);
+  };
+
+  costIn.addEventListener("input", recalcFromMarginPct);
+  marginPctIn.addEventListener("input", recalcFromMarginPct);
+  marginAmtIn.addEventListener("input", recalcFromMarginAmt);
+  sellingExclIn.addEventListener("input", recalcFromSellingExcl);
+  sellingInclIn.addEventListener("input", recalcFromSellingIncl);
   
   modalDiv.querySelector("#btn-create-batch-submit").addEventListener("click", () => {
-    const cost = parseFloat(modalDiv.querySelector("#new-batch-cost").value) || 0;
-    const sell = parseFloat(modalDiv.querySelector("#new-batch-selling").value) || 0;
-    const mrp = parseFloat(modalDiv.querySelector("#new-batch-mrp").value) || 0;
+    const cost = parseFloat(costIn.value) || 0;
+    const sellExcl = parseFloat(sellingExclIn.value) || 0;
+    const sellIncl = parseFloat(sellingInclIn.value) || (sellExcl * (1 + igst / 100));
+    const margP = parseFloat(marginPctIn.value) || 0;
+    const margA = parseFloat(marginAmtIn.value) || 0;
+    const mrp = parseFloat(mrpIn.value) || 0;
     
-    if (cost <= 0 || sell <= 0) {
+    if (cost <= 0 || sellExcl <= 0) {
       alert("Please enter valid cost and selling price.");
       return;
     }
     
-    const bNo = String(cost);
+    const bNo = formatRateValue(cost) || String(cost);
     state.addOrUpdateMaterialBatch(materialId, {
       batchNo: bNo,
       landingCost: cost,
-      sellingPrice: sell,
+      sellingPrice: sellExcl,
+      gstInclRate: sellIncl,
+      marginPercent: margP,
+      marginAmount: margA,
       mrp: mrp
     });
     
@@ -178,10 +334,10 @@ function showAdjustmentsModal(billType, initialBillAmount, adjustmentsList, onSa
 
         <div style="background-color: white; border: 1px solid #94a3b8; max-height: 250px; overflow-y: auto; margin-bottom: 10px;">
           <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.8rem; color: black;">
-            <thead>
-              <tr style="background-color: #e2e8f0; border-bottom: 2px solid #cbd5e1; font-weight: bold;">
-                <th style="padding: 6px; border-right: 1px solid #cbd5e1; color: black;">Adjustment Name</th>
-                <th style="padding: 6px; text-align: right; width: 150px; color: black;">Adj.% / Amount</th>
+            <thead style="position: sticky; top: 0; z-index: 10; background-color: #e2e8f0;">
+              <tr style="background-color: #e2e8f0; border-bottom: 2px solid #cbd5e1; font-weight: bold; position: sticky; top: 0; z-index: 10;">
+                <th style="padding: 6px; border-right: 1px solid #cbd5e1; color: black; position: sticky; top: 0; background-color: #e2e8f0; z-index: 10;">Adjustment Name</th>
+                <th style="padding: 6px; text-align: right; width: 150px; color: black; position: sticky; top: 0; background-color: #e2e8f0; z-index: 10;">Adj.% / Amount</th>
               </tr>
             </thead>
             <tbody>
@@ -455,14 +611,13 @@ function renderSalesSubTab(container) {
   }
 
   filtered.sort((a, b) => {
-    const dateA = a.date || "";
-    const dateB = b.date || "";
-    if (dateA !== dateB) {
-      return dateA.localeCompare(dateB);
-    }
     const noA = String(a.voucherNo || a.id || "");
     const noB = String(b.voucherNo || b.id || "");
-    return noA.localeCompare(noB, undefined, { numeric: true, sensitivity: 'base' });
+    const cmp = noA.localeCompare(noB, undefined, { numeric: true, sensitivity: 'base' });
+    if (cmp !== 0) return cmp;
+    const dateA = a.date || "";
+    const dateB = b.date || "";
+    return dateA.localeCompare(dateB);
   });
 
   container.innerHTML = `
@@ -484,7 +639,8 @@ function renderSalesSubTab(container) {
         </select>
       </div>
       <button class="btn btn-secondary" id="btn-sales-search" style="padding: 4px 12px; font-size: 0.8rem;"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
-      <button class="btn btn-primary" id="btn-add-invoice" style="margin-left: auto; padding: 4px 12px; font-size: 0.8rem;"><i class="fa-solid fa-plus"></i> Create Sales Invoice</button>
+      <button class="btn btn-secondary" id="btn-import-sales-invoices" style="margin-left: auto; padding: 4px 12px; font-size: 0.8rem; background-color: #0284c7; color: white; border-color: #0369a1;"><i class="fa-solid fa-file-import"></i> Import Sales Invoices</button>
+      <button class="btn btn-primary" id="btn-add-invoice" style="margin-left: 6px; padding: 4px 12px; font-size: 0.8rem;"><i class="fa-solid fa-plus"></i> Create Sales Invoice</button>
     </div>
     
     <div class="panel" style="padding-top: 0.5rem;">
@@ -538,6 +694,10 @@ function renderSalesSubTab(container) {
     salesSearchTo = container.querySelector("#sales-search-to").value;
     salesSearchCustomerId = container.querySelector("#sales-search-customer").value;
     renderSalesSubTab(container);
+  });
+
+  container.querySelector("#btn-import-sales-invoices")?.addEventListener("click", () => {
+    import("./importInvoicesModal.js").then(m => m.showImportInvoicesModal(() => renderSalesSubTab(container)));
   });
 
   container.querySelector("#btn-add-invoice").addEventListener("click", () => {
@@ -1039,7 +1199,7 @@ export function showInvoiceBuilderModal(container, customers = null, materials =
   let root;
   try {
     state.recomputeAllStocks();
-    root = document.getElementById("modal-container-root") || container;
+    root = (document.getElementById("modal-container-root") && document.getElementById("modal-container-root").children.length > 0 ? document.getElementById("sub-modal-container-root") : null) || document.getElementById("modal-container-root") || container || document.body;
     if (!customers) customers = state.getContacts().filter(c => c.type === "customer" || c.listInCustomerList === true);
     customers.sort((a, b) => (a.name || "").localeCompare(b.name || "", undefined, { sensitivity: "base" }));
     materials = state.getMaterials();
@@ -1130,8 +1290,8 @@ export function showInvoiceBuilderModal(container, customers = null, materials =
 
   modalEl.innerHTML = `
       <div class="modal-container modal-lg" style="position: relative; max-width:1600px; width: 98vw; background-color:#cbd5e1; color:#0f172a; padding:15px; font-family: var(--font-body); border: 2px solid #5a7b9c; border-radius: 6px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); font-size:0.85rem;">
-        ${editInvoice && editInvoice.isCancelled ? `
-          <div class="cancelled-watermark" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-size: 8rem; font-weight: 900; color: rgba(220, 38, 38, 0.15); pointer-events: none; white-space: nowrap; z-index: 1000; text-transform: uppercase; letter-spacing: 10px; font-family: sans-serif; border: 15px solid rgba(220, 38, 38, 0.15); padding: 10px 30px; border-radius: 20px;">CANCELLED</div>
+        ${editInvoice && (editInvoice.isCancelled || editInvoice.isCanceled || String(editInvoice.status).toUpperCase() === 'CANCELLED') ? `
+          <div class="cancelled-watermark" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-size: 8rem; font-weight: 900; color: rgba(220, 38, 38, 0.25); pointer-events: none; white-space: nowrap; z-index: 1000; text-transform: uppercase; letter-spacing: 10px; font-family: sans-serif; border: 15px solid rgba(220, 38, 38, 0.25); padding: 10px 30px; border-radius: 20px; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;">CANCELLED</div>
         ` : ''}
         
         <!-- Header ribbon -->
@@ -1224,14 +1384,14 @@ export function showInvoiceBuilderModal(container, customers = null, materials =
               <div style="height:15px; margin-bottom:3px;">
                 <label style="font-weight:700; font-size:0.72rem; color:#1e293b; text-transform:uppercase; letter-spacing:0.3px; white-space:nowrap; display:block;">Invoice Date <span style="color:#ef4444;">*</span></label>
               </div>
-              <input type="date" id="inv-date" class="form-control" style="background-color:white; color:black; height:28px; padding:2px 6px; font-size:0.8rem; border:1px solid #94a3b8; border-radius:4px; width:100%; box-sizing:border-box;" value="${editInvoice ? editInvoice.date : state.getLoginDate()}" required>
+              ${renderTallyDatePickerHtml({ id: "inv-date", value: editInvoice ? editInvoice.date : state.getLoginDate(), style: "height:28px; font-size:0.8rem; border:1px solid #94a3b8; border-radius:4px; background-color:white; color:black;", width: "100%" })}
             </div>
 
             <div>
               <div style="height:15px; margin-bottom:3px;">
                 <label style="font-weight:700; font-size:0.72rem; color:#1e293b; text-transform:uppercase; letter-spacing:0.3px; white-space:nowrap; display:block;">Due Date <span style="color:#ef4444;">*</span></label>
               </div>
-              <input type="date" id="inv-duedate" class="form-control" style="background-color:white; color:black; height:28px; padding:2px 6px; font-size:0.8rem; border:1px solid #94a3b8; border-radius:4px; width:100%; box-sizing:border-box;" value="${editInvoice ? editInvoice.dueDate : state.getLoginDate()}" min="${editInvoice ? (editInvoice.date || state.getLoginDate()) : state.getLoginDate()}" required>
+              ${renderTallyDatePickerHtml({ id: "inv-duedate", value: editInvoice ? editInvoice.dueDate : state.getLoginDate(), style: "height:28px; font-size:0.8rem; border:1px solid #94a3b8; border-radius:4px; background-color:white; color:black;", width: "100%" })}
             </div>
           </div>
 
@@ -1287,7 +1447,7 @@ export function showInvoiceBuilderModal(container, customers = null, materials =
             </div>
             <div>
               <label style="font-weight:700; font-size:0.75rem; color:black; display:block; margin-bottom:2px;">Rate [Excl]</label>
-              <input type="number" step="0.01" id="ribbon-sale-rate" class="form-control" style="background-color:white; color:black; padding:2px; font-size:0.75rem;" placeholder="0.00">
+              <input type="number" step="any" id="ribbon-sale-rate" class="form-control" style="background-color:white; color:black; padding:2px; font-size:0.75rem;" placeholder="0.00">
             </div>
             <div>
               <label style="font-weight:700; font-size:0.75rem; color:black; display:block; margin-bottom:2px;">MRP</label>
@@ -1304,111 +1464,160 @@ export function showInvoiceBuilderModal(container, customers = null, materials =
             <button type="button" class="btn btn-primary" id="btn-ribbon-sale-add" style="padding:4px; font-size:0.75rem; font-weight:bold; height:28px; width:100%; background-color:#1e3b8b; border:none; color:white;">Add</button>
           </div>
 
-          <!-- Stock feedback label -->
-          <div style="background-color:#cbd5e1; border:1px solid #94a3b8; padding:3px 8px; font-weight:700; font-size:0.75rem; color:#1e293b;" id="sale-stock-feedback">
-            STOCK: <span id="lbl-sale-availstock">0.00</span>
-          </div>
+          <!-- Main Grid Container -->
+          <div style="border: 1px solid #94a3b8; background-color: white; height: 260px; display: flex; flex-direction: column; border-radius: var(--border-radius-sm); overflow: hidden;">
+            
+            <!-- Scrollable Table Body Container -->
+            <div style="flex: 1; overflow-y: auto;">
+              <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.75rem; color:black; table-layout: fixed;">
+                <thead style="position: sticky; top: 0; z-index: 10; background-color: #1e293b;">
+                  <tr style="background-color:#1e293b; color:white; border-bottom: 2px solid #475569; position: sticky; top: 0; z-index: 10;">
+                    <th style="padding:4px 6px; width:4%; text-align:center; position: sticky; top: 0; background-color: #1e293b; z-index: 10;">Item No</th>
+                    <th style="padding:4px 6px; width:20%; position: sticky; top: 0; background-color: #1e293b; z-index: 10;">Product Name</th>
+                    <th style="padding:4px 6px; width:10%; position: sticky; top: 0; background-color: #1e293b; z-index: 10;">Code/Model</th>
+                    <th style="padding:4px 6px; width:8%; position: sticky; top: 0; background-color: #1e293b; z-index: 10;">Batch</th>
+                    <th style="padding:4px 6px; width:6%; text-align:right; display:${isCompUnregistered ? 'none' : ''}; position: sticky; top: 0; background-color: #1e293b; z-index: 10;">GST %</th>
+                    <th style="padding:4px 6px; width:8%; text-align:right; position: sticky; top: 0; background-color: #1e293b; z-index: 10;">Qty</th>
+                    <th style="padding:4px 6px; width:8%; text-align:right; position: sticky; top: 0; background-color: #1e293b; z-index: 10;">Rate</th>
+                    <th style="padding:4px 6px; width:9%; text-align:right; position: sticky; top: 0; background-color: #1e293b; z-index: 10;">Amount</th>
+                    <th style="padding:4px 6px; width:9%; text-align:right; position: sticky; top: 0; background-color: #1e293b; z-index: 10;">Dis Amt</th>
+                    <th style="padding:4px 6px; width:8%; text-align:right; position: sticky; top: 0; background-color: #1e293b; z-index: 10;">Net Value</th>
+                    <th style="padding:4px 6px; width:8%; text-align:right; display:${isCompUnregistered ? 'none' : ''}; position: sticky; top: 0; background-color: #1e293b; z-index: 10;">GST AMT</th>
+                    <th style="padding:4px 6px; width:10%; text-align:right; font-weight:600; color:#60a5fa; position: sticky; top: 0; background-color: #1e293b; z-index: 10;">Net Amount</th>
+                  </tr>
+                </thead>
+                <tbody id="sales-grid-body">
+                  <!-- Rows populated dynamically -->
+                </tbody>
+              </table>
+            </div>
 
-          <!-- Main Grid -->
-          <div style="border: 1px solid #94a3b8; background-color: white; min-height:180px; max-height:280px; overflow-y:auto; border-radius: var(--border-radius-sm);">
-            <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.75rem; color:black;">
-              <thead>
-                <tr style="background-color:#1e293b; color:white; border-bottom: 2px solid #475569;">
-                  <th style="padding:4px 6px;">Product Name</th>
-                  <th style="padding:4px 6px;">Code/Model</th>
-                  <th style="padding:4px 6px;">Batch</th>
-                  <th style="padding:4px 6px; text-align:right;">Qty</th>
-                  <th style="padding:4px 6px; text-align:right;">Rate</th>
-                  <th style="padding:4px 6px; text-align:right;">Amount</th>
-                  <th style="padding:4px 6px; text-align:right;">Dis Amt</th>
-                  <th style="padding:4px 6px; text-align:right;">Net Value</th>
-                  <th style="padding:4px 6px; text-align:right; display:${isCompUnregistered ? 'none' : ''};">GST %</th>
-                  <th style="padding:4px 6px; text-align:right; display:${isCompUnregistered ? 'none' : ''};">GST AMT</th>
-                  <th style="padding:4px 6px; text-align:right; font-weight:600; color:#1e40af;">Net Amount</th>
-                  <th style="padding:4px 6px; text-align:center; width:40px;">Remove</th>
+            <!-- Extreme Lower Totals Row -->
+            <div style="background-color: #cbd5e1; border-top: 2px solid #94a3b8; padding: 1px 0; overflow-y: scroll; scrollbar-color: transparent transparent;">
+              <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.75rem; color: black; table-layout: fixed;">
+                <tr style="background-color: #cbd5e1;" id="sale-stock-feedback">
+                  <td style="padding: 2px 4px; width: 4%;"></td>
+                  <td style="padding: 2px 4px; width: 20%;">
+                    <div style="display: flex; align-items: center; gap: 4px; font-weight: 700; font-size: 0.75rem; color: #1e293b;">
+                      <span>STOCK:</span>
+                      <span id="lbl-sale-availstock" style="color: #1e3b8b; font-weight: 800;">0.00</span>
+                    </div>
+                  </td>
+                  <td style="padding: 2px 4px; width: 10%;"></td>
+                  <td style="padding: 2px 4px; width: 8%;"></td>
+                  <td style="padding: 2px 4px; width: 6%; display: ${isCompUnregistered ? 'none' : ''};"></td>
+                  <td style="padding: 2px 4px; width: 8%; text-align: right;">
+                    <input type="text" id="sales-tot-qty" value="0.00" readonly style="width: 100%; text-align: right; font-weight: bold; background: white; color: black; border: 1px solid #94a3b8; padding: 1px 4px; font-size: 0.75rem; border-radius: 2px;">
+                  </td>
+                  <td style="padding: 2px 4px; width: 8%; text-align: right;"></td>
+                  <td style="padding: 2px 4px; width: 9%; text-align: right;">
+                    <input type="text" id="sales-tot-amount" value="0.00" readonly style="width: 100%; text-align: right; font-weight: bold; background: white; color: black; border: 1px solid #94a3b8; padding: 1px 4px; font-size: 0.75rem; border-radius: 2px;">
+                  </td>
+                  <td style="padding: 2px 4px; width: 9%; text-align: right;">
+                    <input type="text" id="sales-tot-discount" value="0.00" readonly style="width: 100%; text-align: right; font-weight: bold; background: white; color: #dc2626; border: 1px solid #94a3b8; padding: 1px 4px; font-size: 0.75rem; border-radius: 2px;">
+                  </td>
+                  <td style="padding: 2px 4px; width: 8%; text-align: right;">
+                    <input type="text" id="sales-tot-netvalue" value="0.00" readonly style="width: 100%; text-align: right; font-weight: bold; background: white; color: black; border: 1px solid #94a3b8; padding: 1px 4px; font-size: 0.75rem; border-radius: 2px;">
+                  </td>
+                  <td style="padding: 2px 4px; width: 8%; text-align: right; display: ${isCompUnregistered ? 'none' : ''};">
+                    <input type="text" id="sales-tot-gst" value="0.00" readonly style="width: 100%; text-align: right; font-weight: bold; background: white; color: #16a34a; border: 1px solid #94a3b8; padding: 1px 4px; font-size: 0.75rem; border-radius: 2px;">
+                  </td>
+                  <td style="padding: 2px 4px; width: 10%; text-align: right;">
+                    <input type="text" id="sales-tot-nettotal" value="0.00" readonly style="width: 100%; text-align: right; font-weight: 800; background: white; color: #1e3b8b; border: 1.5px solid #1e3b8b; padding: 1px 4px; font-size: 0.75rem; border-radius: 2px;">
+                  </td>
                 </tr>
-              </thead>
-              <tbody id="sales-grid-body">
-                <!-- Rows populated dynamically -->
-              </tbody>
-            </table>
+              </table>
+            </div>
           </div>
 
           <!-- Bottom panel calculations -->
-          <div style="display:grid; grid-template-columns: ${isCompUnregistered ? '1.2fr 1.2fr 1.2fr' : '1.2fr 1fr 1fr 1.2fr'}; gap:10px; background-color:#cbd5e1; padding:8px; border:1px solid #94a3b8; border-radius:var(--border-radius-sm);">
+          <div style="display:grid; grid-template-columns: ${isCompUnregistered ? '1.2fr 1.2fr 1.2fr' : '1.1fr 1.3fr 1.1fr 1.3fr'}; gap:8px; background-color:#b0c4de; padding:6px; border:1px solid #94a3b8; border-radius:var(--border-radius-sm); align-items:stretch;">
             
-            <!-- General discount and Pay mode -->
-            <div style="display:flex; flex-direction:column; gap:4px;">
+            <!-- Card 1: Tax splits -->
+            <div style="border: 1px solid #94a3b8; background-color:#ffffff; padding:4px 6px; border-radius:4px; display:${isCompUnregistered ? 'none' : 'flex'}; flex-direction:column; gap:3px; justify-content:space-between;">
+              <div style="background-color:#1e3b8b; color:white; font-size:0.68rem; font-weight:700; padding:2px 6px; text-align:center; border-radius:2px; letter-spacing:0.5px;">TAX BREAKDOWN</div>
               <div style="display:grid; grid-template-columns: 1fr 1fr; gap:4px;">
                 <div>
-                  <label style="font-weight:600; font-size:0.75rem;">Disc %</label>
-                  <input type="number" step="0.1" id="inv-discount-percent" class="form-control" style="background-color:white; color:black; padding:2px 6px; font-size:0.75rem;" value="0">
+                  <label style="font-size:0.65rem; font-weight:700; color:#475569; display:block;">CGST</label>
+                  <input type="text" id="inv-cgst" class="form-control" style="background-color:#f1f5f9; color:#1e293b; padding:2px 6px; font-size:0.75rem; height:26px; font-weight:700; border:1px solid #cbd5e1; border-radius:3px; box-sizing:border-box;" value="0.00" readonly>
                 </div>
                 <div>
-                  <label style="font-weight:600; font-size:0.75rem;">Discount Amount</label>
-                  <input type="number" step="0.01" id="inv-discount-amt" class="form-control" style="background-color:white; color:black; padding:2px 6px; font-size:0.75rem;" value="0.00">
+                  <label style="font-size:0.65rem; font-weight:700; color:#475569; display:block;">SGST</label>
+                  <input type="text" id="inv-sgst" class="form-control" style="background-color:#f1f5f9; color:#1e293b; padding:2px 6px; font-size:0.75rem; height:26px; font-weight:700; border:1px solid #cbd5e1; border-radius:3px; box-sizing:border-box;" value="0.00" readonly>
                 </div>
               </div>
-              <div style="display:grid; grid-template-columns: 1fr 1.2fr; gap:4px; align-items:center;">
-                <label style="font-weight:600; font-size:0.75rem;">Pay Mode</label>
-                <select id="inv-paymode" class="form-control" style="background-color:white; color:black; padding:2px 6px; font-size:0.75rem;">
-                  <option value="Credit" selected>Credit</option>
-                  <option value="Cash">Cash</option>
-                  ${state.getLedgers().filter(l => l.groupName === 'CASH-IN-HAND' || l.groupName === 'BANK ACCOUNTS').filter(l => (l.name || '').toUpperCase() !== 'CASH').map(l => `<option value="${l.name}">${l.name}</option>`).join('')}
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:4px;">
+                <div>
+                  <label style="font-size:0.65rem; font-weight:700; color:#475569; display:block;">IGST</label>
+                  <input type="text" id="inv-igst" class="form-control" style="background-color:#f1f5f9; color:#1e293b; padding:2px 6px; font-size:0.75rem; height:26px; font-weight:700; border:1px solid #cbd5e1; border-radius:3px; box-sizing:border-box;" value="0.00" readonly>
+                </div>
+                <div>
+                  <label style="font-size:0.65rem; font-weight:700; color:#475569; display:block;">CESS</label>
+                  <input type="text" id="inv-cess" class="form-control" style="background-color:#f1f5f9; color:#1e293b; padding:2px 6px; font-size:0.75rem; height:26px; font-weight:700; border:1px solid #cbd5e1; border-radius:3px; box-sizing:border-box;" value="0.00" readonly>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 2: General discount and Pay mode -->
+            <div style="background-color:#ffffff; border:1px solid #94a3b8; border-radius:4px; padding:6px; display:flex; flex-direction:column; gap:4px; justify-content:space-between;">
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
+                <div>
+                  <label style="font-weight:700; font-size:0.7rem; color:#334155; display:block; margin-bottom:1px;">Disc %</label>
+                  <input type="number" step="0.1" id="inv-discount-percent" class="form-control" style="background-color:white; color:black; padding:2px 6px; font-size:0.75rem; height:26px; border:1px solid #cbd5e1; border-radius:3px; box-sizing:border-box; width:100%;" value="0">
+                </div>
+                <div>
+                  <label style="font-weight:700; font-size:0.7rem; color:#334155; display:block; margin-bottom:1px;">Discount Amt</label>
+                  <input type="number" step="0.01" id="inv-discount-amt" class="form-control" style="background-color:white; color:black; padding:2px 6px; font-size:0.75rem; height:26px; border:1px solid #cbd5e1; border-radius:3px; box-sizing:border-box; width:100%;" value="0.00">
+                </div>
+              </div>
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
+                <div>
+                  <label style="font-weight:700; font-size:0.7rem; color:#334155; display:block; margin-bottom:1px;">Pay Mode</label>
+                  <select id="inv-paymode" class="form-control" style="background-color:white; color:black; padding:2px 6px; font-size:0.75rem; height:26px; border:1px solid #cbd5e1; border-radius:3px; box-sizing:border-box; width:100%;">
+                    <option value="Credit" selected>Credit</option>
+                    <option value="Cash">Cash</option>
+                    ${state.getLedgers().filter(l => l.groupName === 'CASH-IN-HAND' || l.groupName === 'BANK ACCOUNTS').filter(l => (l.name || '').toUpperCase() !== 'CASH').map(l => `<option value="${l.name}">${l.name}</option>`).join('')}
+                  </select>
+                </div>
+                <div>
+                  <label style="font-weight:700; font-size:0.7rem; color:#334155; display:block; margin-bottom:1px;">Crdt. Period (Days)</label>
+                  <input type="number" id="inv-crperiod" class="form-control" style="background-color:white; color:black; padding:2px 6px; font-size:0.75rem; height:26px; border:1px solid #cbd5e1; border-radius:3px; box-sizing:border-box; width:100%;" value="0">
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 3: Adjustments/Narrations -->
+            <div style="background-color:#ffffff; border:1px solid #94a3b8; border-radius:4px; padding:6px; display:flex; flex-direction:column; gap:4px; justify-content:space-between;">
+              <div style="display:grid; grid-template-columns: 76px 1fr auto; gap:4px; align-items:center;">
+                <label style="font-weight:700; font-size:0.7rem; color:#334155;">Adjustments</label>
+                <input type="number" step="0.01" id="inv-adjustments" class="form-control" style="background-color:white; color:black; padding:2px 6px; font-size:0.75rem; height:26px; border:1px solid #cbd5e1; border-radius:3px; box-sizing:border-box; width:100%;" value="0.00">
+                <button type="button" id="btn-clear-sales-adjustments" title="Clear All Adjustments" style="height:26px; padding:2px 6px; font-size:0.68rem; background:#ef4444; color:white; border:none; border-radius:3px; cursor:pointer; font-weight:700; box-sizing:border-box; display:inline-flex; align-items:center; justify-content:center;">Clear</button>
+              </div>
+              <div id="inv-headloader-container" style="display: ${options.enableHeadloader !== false ? 'grid' : 'none'}; grid-template-columns: 76px 1fr; gap:4px; align-items:center;">
+                <label style="font-weight:700; font-size:0.7rem; color:#334155; white-space:nowrap;" title="Loading / Vehicle Type">Load Type</label>
+                <select id="inv-headloader-type" class="form-control" style="background-color:white; color:black; padding:2px 6px; font-size:0.75rem; height:26px; border:1px solid #cbd5e1; border-radius:3px; box-sizing:border-box; width:100%;">
+                  <option value="none" ${editInvoice && (editInvoice.headloaderType === 'none' || editInvoice.headloaderType === 'no_charge' || editInvoice.headloaderType === 'No Loading Charge') ? 'selected' : ''}>🚫 No Loading Charge</option>
+                  ${(state.getHeadloaderTypes ? state.getHeadloaderTypes('loading') : [{id:'std', name:'Standard'}]).map(t => {
+                    const selVal = editInvoice ? (editInvoice.headloaderType || editInvoice.handlingType || editInvoice.loadingType || '') : '';
+                    const isSelected = selVal ? (selVal === t.id || selVal === t.name) : t.isDefault;
+                    return `<option value="${t.id}" ${isSelected ? 'selected' : ''}>${t.name}</option>`;
+                  }).join('')}
                 </select>
               </div>
-              <div style="display:grid; grid-template-columns: 1fr 1.2fr; gap:4px; align-items:center;">
-                <label style="font-weight:600; font-size:0.75rem;">Crdt. Period (Days)</label>
-                <input type="number" id="inv-crperiod" class="form-control" style="background-color:white; color:black; padding:2px 6px; font-size:0.75rem;" value="0">
+              <div style="display:${options.enableCessInSalesBill ? 'grid' : 'none'}; grid-template-columns: 76px 1fr; gap:4px; align-items:center;">
+                <label style="font-weight:700; font-size:0.7rem; color:#334155;">Addl. Cess</label>
+                <input type="number" step="0.01" id="inv-addlcess" class="form-control" style="background-color:white; color:black; padding:2px 6px; font-size:0.75rem; height:26px; border:1px solid #cbd5e1; border-radius:3px; box-sizing:border-box; width:100%;" value="0.00">
+              </div>
+              <div style="display:grid; grid-template-columns: 76px 1fr; gap:4px; align-items:center;">
+                <label style="font-weight:700; font-size:0.7rem; color:#334155;">Round Off</label>
+                <input type="number" step="0.01" id="inv-roundoff" class="form-control" style="background-color:white; color:black; padding:2px 6px; font-size:0.75rem; height:26px; border:1px solid #cbd5e1; border-radius:3px; box-sizing:border-box; width:100%;" value="0.00">
               </div>
             </div>
 
-            <!-- Tax splits -->
-            <div style="border: 1px solid #94a3b8; background-color:#f1f5f9; padding:6px; border-radius:var(--border-radius-sm); display:${isCompUnregistered ? 'none' : 'flex'}; flex-direction:column; gap:2px;">
-              <div style="background-color:#1e3b8b; color:white; font-size:0.7rem; font-weight:600; padding:1px 6px; text-align:center;">TAX BREAKDOWN</div>
-              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:4px;">
-                <div>
-                  <label style="font-size:0.68rem; font-weight:600;">CGST</label>
-                  <input type="text" id="inv-cgst" class="form-control" style="background-color:#e2e8f0; color:black; padding:1px 4px; font-size:0.75rem;" value="0.00" readonly>
-                </div>
-                <div>
-                  <label style="font-size:0.68rem; font-weight:600;">SGST</label>
-                  <input type="text" id="inv-sgst" class="form-control" style="background-color:#e2e8f0; color:black; padding:1px 4px; font-size:0.75rem;" value="0.00" readonly>
-                </div>
-              </div>
-              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:4px;">
-                <div>
-                  <label style="font-size:0.68rem; font-weight:600;">IGST</label>
-                  <input type="text" id="inv-igst" class="form-control" style="background-color:#e2e8f0; color:black; padding:1px 4px; font-size:0.75rem;" value="0.00" readonly>
-                </div>
-                <div>
-                  <label style="font-size:0.68rem; font-weight:600;">CESS</label>
-                  <input type="text" id="inv-cess" class="form-control" style="background-color:#e2e8f0; color:black; padding:1px 4px; font-size:0.75rem;" value="0.00" readonly>
-                </div>
-              </div>
-            </div>
-
-            <!-- Adjustments/Narrations -->
-            <div style="display:flex; flex-direction:column; gap:4px;">
-              <div style="display:grid; grid-template-columns: 110px 1fr auto; gap:4px; align-items:center;">
-                <label style="font-weight:600; font-size:0.75rem;">Adjustments</label>
-                <input type="number" step="0.01" id="inv-adjustments" class="form-control" style="background-color:white; color:black; padding:2px 6px; font-size:0.75rem;" value="0.00">
-                <button type="button" id="btn-clear-sales-adjustments" title="Clear All Adjustments" style="padding:1px 5px; font-size:0.7rem; background:#ef4444; color:white; border:none; border-radius:3px; cursor:pointer;">Clear</button>
-              </div>
-              <div style="display:${options.enableCessInSalesBill ? 'grid' : 'none'}; grid-template-columns: 110px 1fr; gap:4px; align-items:center;">
-                <label style="font-weight:600; font-size:0.75rem;">Addl. Cess</label>
-                <input type="number" step="0.01" id="inv-addlcess" class="form-control" style="background-color:white; color:black; padding:2px 6px; font-size:0.75rem;" value="0.00">
-              </div>
-              <div style="display:grid; grid-template-columns: 110px 1fr; gap:4px; align-items:center;">
-                <label style="font-weight:600; font-size:0.75rem;">Round Off</label>
-                <input type="number" step="0.01" id="inv-roundoff" class="form-control" style="background-color:white; color:black; padding:2px 6px; font-size:0.75rem;" value="0.00">
-              </div>
-            </div>
-
-            <!-- Net Total Box -->
-            <div style="display:flex; flex-direction:column; justify-content:center; align-items:center; background-color:#1e293b; color:#10b981; border-radius:var(--border-radius-sm); padding:6px; border:2px solid #475569;">
-              <span style="font-size:0.7rem; font-weight:700; color:#94a3b8; text-transform:uppercase;">Grand Net Total</span>
-              <strong id="inv-nettotal-box" style="font-size:1.6rem; font-weight:900;">\u20B90.00</strong>
+            <!-- Card 4: Net Total Box -->
+            <div style="display:flex; flex-direction:column; justify-content:center; align-items:center; background-color:#1e293b; color:#10b981; border-radius:4px; padding:6px; border:1.5px solid #475569; box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);">
+              <span style="font-size:0.7rem; font-weight:800; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">Grand Net Total</span>
+              <strong id="inv-nettotal-box" style="font-size:1.65rem; font-weight:900; letter-spacing:0.5px;">\u20B90.00</strong>
             </div>
 
           </div>
@@ -1428,37 +1637,34 @@ export function showInvoiceBuilderModal(container, customers = null, materials =
           </div>
 
           <!-- Narrations & Footer buttons -->
-          <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:4px;">
-            <div style="display:flex; align-items:center; gap:8px; flex-grow:1;">
-              <label style="font-weight:700; font-size:0.75rem;">Narration:</label>
-              <input type="text" id="inv-narration" class="form-control" style="background-color:white; color:black; padding:4px 8px; font-size:0.8rem; flex-grow:1; max-width:350px;" placeholder="Enter invoice details or remarks...">
-              <label style="font-weight:700; font-size:0.75rem; margin-left:10px;">Vehicle No:</label>
-              <input type="text" id="inv-vehicle-no" class="form-control" style="background-color:white; color:black; padding:4px 8px; font-size:0.8rem; width:110px;" placeholder="Vehicle No" value="${editInvoice ? (editInvoice.vehicleNo || '') : ''}">
-              <div id="inv-headloader-container" style="display: ${options.enableHeadloader !== false ? 'flex' : 'none'}; align-items: center; gap: 4px;">
-                <label style="font-weight:700; font-size:0.75rem; margin-left:8px;" title="Loading / Vehicle Type">Load Type:</label>
-                <select id="inv-headloader-type" class="form-control" style="background-color:white; color:black; padding:2px 6px; font-size:0.75rem; width:150px; height:28px;">
-                  <option value="none" ${editInvoice && (editInvoice.headloaderType === 'none' || editInvoice.headloaderType === 'no_charge' || editInvoice.headloaderType === 'No Loading Charge') ? 'selected' : ''}>🚫 No Loading Charge</option>
-                  ${(state.getHeadloaderTypes ? state.getHeadloaderTypes('loading') : [{id:'std', name:'Standard'}]).map(t => {
-                    const selVal = editInvoice ? (editInvoice.headloaderType || editInvoice.handlingType || editInvoice.loadingType || '') : '';
-                    const isSelected = selVal ? (selVal === t.id || selVal === t.name) : t.isDefault;
-                    return `<option value="${t.id}" ${isSelected ? 'selected' : ''}>${t.name}</option>`;
-                  }).join('')}
-                </select>
-              </div>
-              <button type="button" id="btn-inv-shipping-address" title="Shipping Address" style="background:#f97316; border:none; color:white; font-weight:700; font-size:0.75rem; height:28px; padding:0 8px; border-radius:4px; cursor:pointer; flex-shrink:0; margin-left:8px;">Ship Address</button>
-              ${editInvoice ? `
-                <button type="button" class="btn btn-danger" id="btn-inv-void" style="background-color:#ef4444; border:none; color:white; padding:4px 12px; font-weight:700; margin-left:8px;"><i class="fa-solid fa-ban"></i> Cancel Bill</button>
-              ` : ''}
+          <div style="display:flex; flex-direction:column; gap:6px; margin-top:4px;">
+            <!-- Row 1: Details & Options -->
+            <div style="display:flex; align-items:center; gap:8px;">
+              <label style="font-weight:700; font-size:0.75rem; white-space:nowrap;">Narration:</label>
+              <input type="text" id="inv-narration" class="form-control" style="background-color:white; color:black; padding:2px 6px; font-size:0.75rem; height:26px; flex-grow:1; min-width:0; border:1px solid #94a3b8; border-radius:3px; box-sizing:border-box;" placeholder="Enter invoice details or remarks...">
+              
+              <label style="font-weight:700; font-size:0.75rem; margin-left:4px; white-space:nowrap;">Vehicle No:</label>
+              <input type="text" id="inv-vehicle-no" class="form-control" style="background-color:white; color:black; padding:2px 6px; font-size:0.75rem; height:26px; width:110px; border:1px solid #94a3b8; border-radius:3px; box-sizing:border-box;" placeholder="Vehicle No" value="${editInvoice ? (editInvoice.vehicleNo || '') : ''}">
+              
+              <button type="button" id="btn-inv-shipping-address" title="Shipping Address" style="background:#f97316; border:none; color:white; font-weight:700; font-size:0.75rem; height:26px; padding:0 10px; border-radius:3px; cursor:pointer; flex-shrink:0; white-space:nowrap;">Ship Address</button>
             </div>
             
-            <div class="modal-footer" style="display:flex; justify-content:flex-end; gap:6px; margin:0; padding:0; flex-shrink:0;">
-              <button type="button" class="btn btn-secondary" id="btn-inv-search" style="padding:4px 12px; font-weight:700; background-color: #0284c7; border: none; color: white;"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
-              <button type="button" class="btn btn-secondary" id="btn-inv-prev" style="padding:4px 12px; font-weight:700; background-color: #475569; border: none; color: white;">&lt;</button>
-              <button type="button" class="btn btn-secondary" id="btn-inv-next" style="padding:4px 12px; font-weight:700; background-color: #475569; border: none; color: white;">&gt;</button>
-              <button type="button" class="btn btn-secondary" id="btn-inv-print" style="padding:4px 12px; font-weight:700; background-color: #64748b; border: none; color: white;"><i class="fa-solid fa-print"></i> Print</button>
-              <button type="button" class="btn btn-secondary" id="btn-inv-new" style="padding:4px 12px; font-weight:700; background-color: #0d9488; border: none; color: white;">New</button>
-              <button type="button" class="btn btn-secondary" id="btn-inv-cancel" style="padding:4px 12px; font-weight:700;">Close</button>
-              <button type="submit" class="btn btn-primary" style="padding:4px 16px; font-weight:700;">Save Invoice</button>
+            <!-- Row 2: Action Buttons -->
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div style="display:flex; align-items:center; gap:6px;">
+                <button type="button" class="btn btn-secondary" id="btn-inv-search" style="padding:4px 12px; font-weight:700; background-color: #0284c7; border: none; color: white; font-size:0.75rem; height:28px; border-radius:3px;"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+                <button type="button" class="btn btn-secondary" id="btn-inv-prev" style="padding:4px 10px; font-weight:700; background-color: #475569; border: none; color: white; font-size:0.75rem; height:28px; border-radius:3px;">&lt;</button>
+                <button type="button" class="btn btn-secondary" id="btn-inv-next" style="padding:4px 10px; font-weight:700; background-color: #475569; border: none; color: white; font-size:0.75rem; height:28px; border-radius:3px;">&gt;</button>
+                ${editInvoice ? `
+                  <button type="button" class="btn btn-danger" id="btn-inv-void" style="background-color:#ef4444; border:none; color:white; padding:4px 12px; font-weight:700; height:28px; font-size:0.75rem; border-radius:3px; white-space:nowrap;"><i class="fa-solid fa-ban"></i> Cancel Bill</button>
+                ` : ''}
+              </div>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <button type="button" class="btn btn-secondary" id="btn-inv-print" style="padding:4px 14px; font-weight:700; background-color: #64748b; border: none; color: white; font-size:0.75rem; height:28px; border-radius:3px;"><i class="fa-solid fa-print"></i> Print</button>
+                <button type="button" class="btn btn-secondary" id="btn-inv-new" style="padding:4px 14px; font-weight:700; background-color: #0d9488; border: none; color: white; font-size:0.75rem; height:28px; border-radius:3px;">New</button>
+                <button type="button" class="btn btn-secondary" id="btn-inv-cancel" style="padding:4px 14px; font-weight:700; font-size:0.75rem; height:28px; border-radius:3px; background-color:#e2e8f0; color:#1e293b; border:1px solid #cbd5e1;">Close</button>
+                <button type="submit" class="btn btn-primary" style="padding:4px 20px; font-weight:700; font-size:0.78rem; height:28px; border-radius:3px; background-color:#1e3b8b; color:white; border:none;">Save Invoice</button>
+              </div>
             </div>
           </div>
         </form>
@@ -1466,6 +1672,7 @@ export function showInvoiceBuilderModal(container, customers = null, materials =
   `;
 
   root.appendChild(modalEl);
+  initTallyDatePickers(modalEl);
 
   const overlay = modalEl;
   const winBox = overlay ? overlay.firstElementChild : null;
@@ -1510,8 +1717,20 @@ export function showInvoiceBuilderModal(container, customers = null, materials =
       }
       return;
     }
+    if (e.key === "Delete" || e.key === "Del") {
+      const active = document.activeElement;
+      const isInputFocused = active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA" || active.tagName === "SELECT");
+      if (!isInputFocused && selectedGridIndex !== null && selectedGridIndex >= 0 && selectedGridIndex < gridItems.length) {
+        e.preventDefault();
+        gridItems.splice(selectedGridIndex, 1);
+        if (selectedGridIndex >= gridItems.length) selectedGridIndex = gridItems.length - 1;
+        if (selectedGridIndex < 0) selectedGridIndex = null;
+        renderGridAndRecalc();
+      }
+    }
     if (e.key === "F8") {
       e.preventDefault();
+      e.stopPropagation();
       openCustomerSalesHistory();
     }
     if (e.key === "PageUp") {
@@ -1569,12 +1788,11 @@ export function showInvoiceBuilderModal(container, customers = null, materials =
     seriesInvoices = allInvoices;
   }
   seriesInvoices.sort((a, b) => {
-    if (a.date !== b.date) {
-      return a.date.localeCompare(b.date);
-    }
     const aNum = String(a.voucherNo || a.id || '');
     const bNum = String(b.voucherNo || b.id || '');
-    return aNum.localeCompare(bNum, undefined, { numeric: true, sensitivity: 'base' });
+    const cmp = aNum.localeCompare(bNum, undefined, { numeric: true, sensitivity: 'base' });
+    if (cmp !== 0) return cmp;
+    return (a.date || '').localeCompare(b.date || '');
   });
   
   let curIdx = editInvoice ? seriesInvoices.findIndex(inv => String(inv.id) === String(editInvoice.id) || (inv.voucherNo && String(inv.voucherNo) === String(editInvoice.voucherNo))) : -1;
@@ -1747,12 +1965,14 @@ export function showInvoiceBuilderModal(container, customers = null, materials =
       });
       
       filtered.sort((a, b) => {
-        if (a.date !== b.date) {
-          return a.date.localeCompare(b.date);
-        }
-        const aNum = a.voucherNo || a.id || '';
-        const bNum = b.voucherNo || b.id || '';
-        return aNum.localeCompare(bNum);
+        const matchA = String(a.voucherNo || a.id || "").match(/(\d+)/g);
+        const matchB = String(b.voucherNo || b.id || "").match(/(\d+)/g);
+        const numA = (matchA && matchA.length > 0) ? parseInt(matchA[matchA.length - 1], 10) : 0;
+        const numB = (matchB && matchB.length > 0) ? parseInt(matchB[matchB.length - 1], 10) : 0;
+        if (numA !== numB) return numA - numB;
+        const cmp = String(a.voucherNo || a.id || '').localeCompare(String(b.voucherNo || b.id || ''));
+        if (cmp !== 0) return cmp;
+        return toIsoDateStr(a.date).localeCompare(toIsoDateStr(b.date));
       });
       
       const tbody = searchOverlay.querySelector("#search-log-tbody");
@@ -1826,9 +2046,12 @@ export function showInvoiceBuilderModal(container, customers = null, materials =
         return true;
       };
       if (confirm(`Are you sure you want to cancel Invoice ${editInvoice.voucherNo || editInvoice.id}?`) && validateAdminPassword()) {
-        state.cancelInvoice(editInvoice.id);
+        const ok = state.cancelInvoice(editInvoice.id);
+        if (!ok) return;
+        alert(`Invoice ${editInvoice.voucherNo || editInvoice.id} has been cancelled successfully.`);
         close();
         if (onSuccess) onSuccess();
+        showInvoicePrintPreview(document.getElementById("modal-container-root"), editInvoice.id);
       }
     });
   }
@@ -2482,11 +2705,20 @@ export function showInvoiceBuilderModal(container, customers = null, materials =
 
   const openProductMasterFromSales = () => {
     import("./inventory.js").then(m => {
-      m.showProductMasterModal(container, null, null, () => {
-        showInvoiceBuilderModal(container, customers, materials, onSuccess, editInvoice, activeSeries);
-        setTimeout(() => {
-          repopulateSalesProducts();
-        }, 50);
+      const subRoot = document.getElementById("sub-modal-container-root") || container;
+      m.showProductMasterModal(subRoot, null, null, (createdMat) => {
+        repopulateSalesProducts();
+        if (createdMat && createdMat.name && productSelect) {
+          productSelect.value = createdMat.name;
+          productSelect.dispatchEvent(new Event("change"));
+          setTimeout(() => {
+            if (createdMat.code && codeSelect && !codeSelect.disabled) {
+              codeSelect.value = createdMat.code;
+              if (codeSearch) codeSearch.value = createdMat.code;
+              codeSelect.dispatchEvent(new Event("change"));
+            }
+          }, 30);
+        }
       });
     });
   };
@@ -2499,9 +2731,10 @@ export function showInvoiceBuilderModal(container, customers = null, materials =
   document.getElementById("create-invoice-form").addEventListener("keydown", (e) => {
     if (e.key === "F8") {
       e.preventDefault();
+      e.stopPropagation();
       openCustomerSalesHistory();
     }
-    if (e.key === "F9") {
+    if (e.key === "F2" || e.key === "F9") {
       e.preventDefault();
       openProductMasterFromSales();
     }
@@ -3010,6 +3243,8 @@ export function showInvoiceBuilderModal(container, customers = null, materials =
       unit: item.unit || (mat ? mat.unit : "Pcs"),
       price: price,
       mrp: parseFloat(item.mrp) || (price * 1.25),
+      rowDiscountPercent: disP,
+      rowDiscountAmount: disA,
       discountPercent: disP,
       discountAmount: disA,
       netValue: netVal,
@@ -3021,7 +3256,7 @@ export function showInvoiceBuilderModal(container, customers = null, materials =
   }) : [];
 
   let adjustmentsList = editInvoice ? (editInvoice.adjustmentsList || []) : [];
-  let isSalesManualRoundOff = false;
+  let isSalesManualRoundOff = editInvoice ? (editInvoice.roundOff !== undefined && editInvoice.roundOff !== null && String(editInvoice.roundOff).trim() !== "") : false;
 
   // Pre-fill existing metadata if editing or converting draft
   if (editInvoice) {
@@ -3303,7 +3538,7 @@ export function showInvoiceBuilderModal(container, customers = null, materials =
       const currentMaterials = state.getMaterials() || materials || [];
       const mat = currentMaterials.find(m => m.name.toLowerCase() === pName.toLowerCase() && m.code === pCode);
       if (mat) {
-        rateInput.value = mat.sellingPrice ? mat.sellingPrice.toFixed(2) : "";
+        rateInput.value = mat.sellingPrice !== undefined && mat.sellingPrice !== null ? formatRateValue(mat.sellingPrice) : "";
         mrpInput.value = mat.mrp ? mat.mrp.toFixed(2) : "";
         updateRibbonUnitSelect(unitSelect, mat.unit);
         qtyInput.value = "1";
@@ -3359,7 +3594,7 @@ export function showInvoiceBuilderModal(container, customers = null, materials =
           const batches = state.getMaterialBatches(mat.id);
           const selectedBatch = (batches || []).find(b => b.batchNo === ribbonBatchSelect.value);
           if (selectedBatch) {
-            rateInput.value = selectedBatch.sellingPrice ? selectedBatch.sellingPrice.toFixed(2) : (mat.sellingPrice ? mat.sellingPrice.toFixed(2) : "");
+            rateInput.value = selectedBatch.sellingPrice !== undefined && selectedBatch.sellingPrice !== null ? formatRateValue(selectedBatch.sellingPrice) : (mat.sellingPrice !== undefined && mat.sellingPrice !== null ? formatRateValue(mat.sellingPrice) : "");
             mrpInput.value = selectedBatch.mrp ? selectedBatch.mrp.toFixed(2) : (mat.mrp ? mat.mrp.toFixed(2) : "");
             availStockSpan.innerText = (parseFloat(selectedBatch.stock) || 0).toFixed(2);
             if (typeof recalcRibbonRowDiscount === "function") recalcRibbonRowDiscount();
@@ -3449,6 +3684,8 @@ export function showInvoiceBuilderModal(container, customers = null, materials =
       unit: unitSelect.value,
       price: rate,
       mrp: mrp,
+      rowDiscountPercent: disP,
+      rowDiscountAmount: disA,
       discountPercent: disP,
       discountAmount: disA,
       netValue: netVal,
@@ -3457,6 +3694,7 @@ export function showInvoiceBuilderModal(container, customers = null, materials =
       cessPercent: mat.cess || 0,
       netAmount: netAmount
       };
+      selectedGridIndex = editingItemIndex;
       editingItemIndex = -1;
       addRowBtn.innerText = "Add Item";
     } else {
@@ -3470,6 +3708,8 @@ export function showInvoiceBuilderModal(container, customers = null, materials =
       unit: unitSelect.value,
       price: rate,
       mrp: mrp,
+      rowDiscountPercent: disP,
+      rowDiscountAmount: disA,
       discountPercent: disP,
       discountAmount: disA,
       netValue: netVal,
@@ -3478,6 +3718,7 @@ export function showInvoiceBuilderModal(container, customers = null, materials =
       cessPercent: mat.cess || 0,
       netAmount: netAmount
       });
+      selectedGridIndex = gridItems.length - 1;
     }
 
     productSelect.value = "";
@@ -3491,7 +3732,6 @@ export function showInvoiceBuilderModal(container, customers = null, materials =
 
   // Adjustments changes trigger recalculations
   document.getElementById("inv-adjustments").addEventListener("input", () => {
-    isSalesManualRoundOff = false;
     renderGridAndRecalc();
   });
   document.getElementById("inv-addlcess").addEventListener("input", renderGridAndRecalc);
@@ -3518,10 +3758,10 @@ export function showInvoiceBuilderModal(container, customers = null, materials =
   if (editInvoice) {
     const disPctVal = parseFloat(editInvoice.discountPercent) || 0;
     const disAmtVal = parseFloat(editInvoice.discountAmount) || 0;
-    if (disPctVal > 0) {
+    if (disPctVal !== 0) {
       generalDisPercentInput.value = editInvoice.discountPercent;
       generalDisAmtInput.value = "0.00";
-    } else if (disAmtVal > 0) {
+    } else if (disAmtVal !== 0) {
       generalDisAmtInput.value = editInvoice.discountAmount;
       generalDisPercentInput.value = "0";
     } else {
@@ -3529,6 +3769,8 @@ export function showInvoiceBuilderModal(container, customers = null, materials =
       generalDisAmtInput.value = "0.00";
     }
   }
+
+  let selectedGridIndex = null;
 
   function renderGridAndRecalc() {
     const tbody = document.getElementById("sales-grid-body");
@@ -3538,9 +3780,15 @@ export function showInvoiceBuilderModal(container, customers = null, materials =
     gridItems.forEach(item => {
       const qty = parseFloat(item.quantity) || 0;
       const price = parseFloat(item.price) || 0;
-      const disP = parseFloat(item.discountPercent) || 0;
-      const rowDisAmt = (qty * price) * (disP / 100);
-      item.discountAmount = rowDisAmt;
+      const disP = parseFloat(item.rowDiscountPercent !== undefined ? item.rowDiscountPercent : item.discountPercent) || 0;
+      let rowDisAmt = item.rowDiscountAmount !== undefined ? parseFloat(item.rowDiscountAmount) : 0;
+      if (disP !== 0 && rowDisAmt === 0) {
+        rowDisAmt = (qty * price) * (disP / 100);
+      } else if (disP !== 0) {
+        rowDisAmt = (qty * price) * (disP / 100);
+      }
+      item.rowDiscountPercent = disP;
+      item.rowDiscountAmount = rowDisAmt;
       item.netValue = (qty * price) - rowDisAmt; // taxable value before general discount
       totNetValBeforeGen += item.netValue;
     });
@@ -3548,25 +3796,29 @@ export function showInvoiceBuilderModal(container, customers = null, materials =
     const disPct = parseFloat(generalDisPercentInput.value) || 0;
     let invoiceDiscount = parseFloat(generalDisAmtInput.value) || 0;
     if (totNetValBeforeGen > 0) {
-      if (disPct > 0 && invoiceDiscount === 0) {
+      if (disPct !== 0 && invoiceDiscount === 0) {
         invoiceDiscount = totNetValBeforeGen * (disPct / 100);
       }
     }
-    const generalDiscountPercent = (totNetValBeforeGen > 0 && invoiceDiscount > 0) ? (invoiceDiscount / totNetValBeforeGen) * 100 : disPct;
+    const generalDiscountPercent = (totNetValBeforeGen > 0 && invoiceDiscount !== 0) ? (invoiceDiscount / totNetValBeforeGen) * 100 : disPct;
 
+    let totQty = 0;
+    let totAmt = 0;
+    let totDis = 0;
     let totNetVal = 0;
     let totGst = 0;
     let totCess = 0;
+    let totNetTotal = 0;
+
     const renderedRows = gridItems.map((item, index) => {
       const qty = parseFloat(item.quantity) || 0;
       const price = parseFloat(item.price) || 0;
-      const disP = parseFloat(item.discountPercent) || 0;
-      const rowDisAmt = (qty * price) * (disP / 100);
+      const rowDisAmt = item.rowDiscountAmount || 0;
       const taxableBeforeGeneral = (qty * price) - rowDisAmt;
 
       const gstPercent = parseFloat(item.gstPercent) || 0;
-      const genDisAmt = (taxableBeforeGeneral * (generalDiscountPercent / 100)) / (1 + (gstPercent / 100));
-      const finalNetValue = taxableBeforeGeneral - genDisAmt;
+      const genDisAmt = totNetValBeforeGen > 0 ? (taxableBeforeGeneral / totNetValBeforeGen) * invoiceDiscount : 0;
+      const finalNetValue = Math.max(0, taxableBeforeGeneral - genDisAmt);
       const finalGstAmount = finalNetValue * (gstPercent / 100);
       const finalNetAmount = finalNetValue + finalGstAmount;
 
@@ -3576,30 +3828,33 @@ export function showInvoiceBuilderModal(container, customers = null, materials =
       item.gstAmount = finalGstAmount;
       item.netAmount = finalNetAmount;
 
+      totQty += qty;
+      totAmt += (qty * price);
+      totDis += (rowDisAmt + genDisAmt);
       totNetVal += finalNetValue;
       totGst += finalGstAmount;
+      totNetTotal += finalNetAmount;
       if (options.enableCess !== false) {
         totCess += (finalNetValue * ((parseFloat(item.cessPercent) || 0) / 100));
       }
 
       const totalDisPercent = (qty * price) > 0 ? (((rowDisAmt + genDisAmt) / (qty * price)) * 100).toFixed(1) : "0.0";
+      const isSelected = (index === selectedGridIndex);
 
       return `
-        <tr class="sales-grid-row" data-index="${index}" title="Double click to edit item" style="border-bottom: 1px solid #cbd5e1; background-color:${index % 2 === 0 ? '#f8fafc' : 'white'}; cursor: pointer;">
+        <tr class="sales-grid-row" tabindex="0" data-index="${index}" title="Click to select row, Double click to edit item" style="border-bottom: 1px solid #cbd5e1; background-color:${isSelected ? '#bae6fd' : (index % 2 === 0 ? '#f8fafc' : 'white')}; cursor: pointer; outline: none;">
+          <td style="padding:4px 6px; text-align:center; font-weight:bold; color:#64748b;">${index + 1}</td>
           <td style="padding:4px 6px;"><strong>${item.name}</strong></td>
           <td style="padding:4px 6px;"><code style="background-color:#f1f5f9; padding:2px; font-weight:700;">${item.code}</code></td>
           <td style="padding:4px 6px; font-weight:bold; color:#1e3b8b;">${item.batchNo || ''}</td>
+          <td style="padding:4px 6px; text-align:right; display:${isCompUnregistered ? 'none' : ''};">${item.gstPercent}%</td>
           <td style="padding:4px 6px; text-align:right;">${item.quantity} ${item.unit}</td>
           <td style="padding:4px 6px; text-align:right;">\u20B9${item.price.toFixed(2)}</td>
           <td style="padding:4px 6px; text-align:right;">\u20B9${(qty * price).toFixed(2)}</td>
           <td style="padding:4px 6px; text-align:right; color:#ef4444;">\u20B9${(rowDisAmt + genDisAmt).toFixed(2)} (${totalDisPercent}%)</td>
           <td style="padding:4px 6px; text-align:right; font-weight:600;">\u20B9${finalNetValue.toFixed(2)}</td>
-          <td style="padding:4px 6px; text-align:right; display:${isCompUnregistered ? 'none' : ''};">${item.gstPercent}%</td>
           <td style="padding:4px 6px; text-align:right; display:${isCompUnregistered ? 'none' : ''};">\u20B9${finalGstAmount.toFixed(2)}</td>
           <td style="padding:4px 6px; text-align:right; font-weight:600; color:#1e40af;">\u20B9${finalNetAmount.toFixed(2)}</td>
-          <td style="padding:4px 6px; text-align:center;">
-            <button type="button" class="btn-remove-grid-row" data-index="${index}" style="background:none; border:none; color:#ef4444; font-weight:bold; cursor:pointer; font-size:1.1rem;">&times;</button>
-          </td>
         </tr>
       `;
     }).join("");
@@ -3608,15 +3863,23 @@ export function showInvoiceBuilderModal(container, customers = null, materials =
       <tr><td colspan="12" style="text-align:center; padding:20px; color:#64748b;">No items added to the sales invoice.</td></tr>
     ` : renderedRows;
 
-    tbody.querySelectorAll(".btn-remove-grid-row").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const idx = parseInt(btn.getAttribute("data-index"));
-        gridItems.splice(idx, 1);
-        renderGridAndRecalc();
-      });
-    });
+    // Update bottom totals banner inputs
+    if (document.getElementById("sales-tot-qty")) document.getElementById("sales-tot-qty").value = totQty.toFixed(2);
+    if (document.getElementById("sales-tot-amount")) document.getElementById("sales-tot-amount").value = totAmt.toFixed(2);
+    if (document.getElementById("sales-tot-discount")) document.getElementById("sales-tot-discount").value = totDis.toFixed(2);
+    if (document.getElementById("sales-tot-netvalue")) document.getElementById("sales-tot-netvalue").value = totNetVal.toFixed(2);
+    if (document.getElementById("sales-tot-gst")) document.getElementById("sales-tot-gst").value = totGst.toFixed(2);
+    if (document.getElementById("sales-tot-nettotal")) document.getElementById("sales-tot-nettotal").value = (totNetVal + totGst + totCess).toFixed(2);
 
     tbody.querySelectorAll(".sales-grid-row").forEach(row => {
+      row.addEventListener("click", () => {
+        selectedGridIndex = parseInt(row.getAttribute("data-index"));
+        tbody.querySelectorAll(".sales-grid-row").forEach((r, i) => {
+          r.style.backgroundColor = (i === selectedGridIndex) ? "#bae6fd" : (i % 2 === 0 ? "#f8fafc" : "white");
+        });
+        row.focus();
+      });
+
       row.addEventListener("dblclick", () => {
         const idx = parseInt(row.getAttribute("data-index"));
         const item = gridItems[idx];
@@ -3631,15 +3894,15 @@ export function showInvoiceBuilderModal(container, customers = null, materials =
         if (typeof ribbonBatchSelect !== 'undefined' && ribbonBatchSelect) {
           ribbonBatchSelect.value = String(item.batchNo || "");
         }
-qtyInput.value = item.quantity;
-unitSelect.value = item.unit;
-rateInput.value = item.price;
-mrpInput.value = item.mrp;
-disPercentInput.value = item.discountPercent;
-disAmtInput.value = item.discountAmount;
+        qtyInput.value = item.quantity;
+        unitSelect.value = item.unit;
+        rateInput.value = item.price;
+        mrpInput.value = item.mrp;
+        disPercentInput.value = item.discountPercent;
+        disAmtInput.value = item.discountAmount;
 
-editingItemIndex = idx;
-addRowBtn.innerText = "Modify";
+        editingItemIndex = idx;
+        addRowBtn.innerText = "Modify";
       });
     });
 
@@ -3774,6 +4037,13 @@ addRowBtn.innerText = "Modify";
       };
 
       if (isEditingSavedInvoice) {
+        const fyCheckOld = state.isPreviousFyLocked(editInvoice.date);
+        if (fyCheckOld.locked) {
+          alert(fyCheckOld.reason);
+          isInvoiceSubmitting = false;
+          if (saveBtn) saveBtn.disabled = false;
+          return;
+        }
         const pass = prompt("Enter Admin Password to update this invoice:");
         if (pass === null) {
           isInvoiceSubmitting = false;
@@ -3786,7 +4056,44 @@ addRowBtn.innerText = "Modify";
           if (saveBtn) saveBtn.disabled = false;
           return;
         }
-        state.cancelInvoice(editInvoice.id);
+        // Revert old customer balance if it was credit
+        if (editInvoice.payMode === "Credit" && editInvoice.contactId && editInvoice.contactId !== "__CASH__") {
+          const customer = state.contacts.find(c => c.id === editInvoice.contactId);
+          if (customer) {
+            customer.balance = (customer.balance || 0) - (editInvoice.total || 0);
+          }
+        }
+
+        // Revert old stock
+        (editInvoice.items || []).forEach(item => {
+          const mat = state.materials.find(m => m.id === item.materialId || m.code === item.code);
+          if (mat) {
+            mat.stock = (mat.stock || 0) + (parseFloat(item.quantity) || 0);
+            if (item.batchNo && Array.isArray(mat.batches)) {
+              const batch = mat.batches.find(b => b.batchNo === item.batchNo);
+              if (batch) {
+                batch.stock = (batch.stock || 0) + (parseFloat(item.quantity) || 0);
+              }
+            }
+          }
+        });
+
+        // Purge old transactions for this invoice
+        const invIdUpper = String(editInvoice.id || "").trim().toUpperCase();
+        const vNoUpper = String(editInvoice.voucherNo || "").trim().toUpperCase();
+        const refNoUpper = String(editInvoice.refNo || "").trim().toUpperCase();
+        state.transactions = state.transactions.filter(tx => {
+          const txIdUpper = String(tx.id || "").trim().toUpperCase();
+          const tvidUpper = String(tx.voucherId || "").trim().toUpperCase();
+          if (txIdUpper === invIdUpper || (tvidUpper && tvidUpper === invIdUpper)) return false;
+          const ref = String(tx.reference || "").trim().toUpperCase();
+          const tvno = String(tx.voucherNo || "").trim().toUpperCase();
+          if (vNoUpper && (ref === vNoUpper || tvno === vNoUpper || ref === `${vNoUpper} COGS` || ref === `INVOICE ${vNoUpper}` || ref.startsWith(vNoUpper + " ") || ref.startsWith("INVOICE " + vNoUpper))) return false;
+          if (invIdUpper && (ref === invIdUpper || tvno === invIdUpper || ref === `${invIdUpper} COGS` || ref === `INVOICE ${invIdUpper}` || ref.startsWith(invIdUpper + " ") || ref.startsWith("INVOICE " + invIdUpper))) return false;
+          if (refNoUpper && (ref === refNoUpper || tvno === refNoUpper || ref === `INVOICE ${refNoUpper}`)) return false;
+          return true;
+        });
+
         const idx = state.invoices.findIndex(i => i.id === editInvoice.id);
         if (idx !== -1) {
           state.invoices.splice(idx, 1);
@@ -3816,6 +4123,7 @@ addRowBtn.innerText = "Modify";
       }
     } catch (err) {
       console.error(err);
+      alert(err.message);
       isInvoiceSubmitting = false;
       if (saveBtn) saveBtn.disabled = false;
     }
@@ -3823,7 +4131,7 @@ addRowBtn.innerText = "Modify";
 
   if (editInvoice && editInvoice.isCancelled) {
     setTimeout(() => {
-      const modalOverlay = document.getElementById("modal-overlay");
+      const modalOverlay = document.getElementById("sales-bill-modal-overlay") || document.getElementById("modal-overlay");
       if (modalOverlay) {
         modalOverlay.querySelectorAll("input, select, textarea, button").forEach(el => {
           const allowedIds = ["inv-close-btn", "inv-close-btn-header", "btn-inv-search", "btn-inv-prev", "btn-inv-next", "btn-inv-print", "btn-inv-new", "btn-inv-cancel", "btn-print"];
@@ -3843,7 +4151,7 @@ addRowBtn.innerText = "Modify";
 
 // Sales Return Modal (Credit Note - High-Fidelity ERP Style)
 export function showSalesReturnModal(container, editReturn = null, onSuccess = null, selectedSeries = null) {
-  const root = document.getElementById("modal-container-root");
+  const root = (document.getElementById("modal-container-root") && document.getElementById("modal-container-root").children.length > 0 ? document.getElementById("sub-modal-container-root") : null) || document.getElementById("modal-container-root") || container || document.body;
   const customers = state.getContacts()
     .filter(c => c.type === "customer" || c.listInCustomerList === true)
     .sort((a, b) => (a.name || "").localeCompare(b.name || "", undefined, { sensitivity: "base" }));
@@ -3912,9 +4220,29 @@ export function showSalesReturnModal(container, editReturn = null, onSuccess = n
     }
   }
 
-  root.innerHTML = `
-    <div class="modal-overlay active" id="modal-overlay-tx" style="display:flex; justify-content:center; align-items:center; background: rgba(15,23,42,0.3); backdrop-filter: blur(1px); z-index:2000;">
-      <div class="modal-container modal-lg" style="max-width:1600px; width: 98vw; background-color:#cbd5e1; color:#0f172a; padding:15px; font-family: var(--font-body); border: 2px solid #5a7b9c; border-radius: 6px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); font-size:0.85rem;">
+  const existingOverlay = document.getElementById("sales-return-modal-overlay");
+  if (existingOverlay) existingOverlay.remove();
+
+  const modalEl = document.createElement("div");
+  modalEl.id = "sales-return-modal-overlay";
+  modalEl.className = "modal-overlay active";
+  modalEl.style.position = "fixed";
+  modalEl.style.top = "0";
+  modalEl.style.left = "0";
+  modalEl.style.width = "100%";
+  modalEl.style.height = "100%";
+  modalEl.style.display = "flex";
+  modalEl.style.justifyContent = "center";
+  modalEl.style.alignItems = "center";
+  modalEl.style.background = "rgba(15,23,42,0.3)";
+  modalEl.style.backdropFilter = "blur(1px)";
+  modalEl.style.zIndex = String(2000 + (root.children ? root.children.length : 0) * 10);
+
+  modalEl.innerHTML = `
+      <div class="modal-container modal-lg" style="position: relative; max-width:1600px; width: 98vw; background-color:#cbd5e1; color:#0f172a; padding:15px; font-family: var(--font-body); border: 2px solid #5a7b9c; border-radius: 6px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); font-size:0.85rem;">
+        ${editReturn && (editReturn.isCancelled || editReturn.isCanceled || String(editReturn.status).toUpperCase() === 'CANCELLED') ? `
+          <div class="cancelled-watermark" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-size: 8rem; font-weight: 900; color: rgba(220, 38, 38, 0.25); pointer-events: none; white-space: nowrap; z-index: 1000; text-transform: uppercase; letter-spacing: 10px; font-family: sans-serif; border: 15px solid rgba(220, 38, 38, 0.25); padding: 10px 30px; border-radius: 20px; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;">CANCELLED</div>
+        ` : ''}
         
         <!-- Header ribbon -->
         <div style="background: linear-gradient(180deg, #1e3a8a 0%, #3b82f6 100%); color:white; padding:6px 12px; font-weight:700; display:flex; justify-content:space-between; align-items:center; border-radius: 4px 4px 0 0; border-bottom: 1px solid #1d4ed8;">
@@ -3937,7 +4265,7 @@ export function showSalesReturnModal(container, editReturn = null, onSuccess = n
 
             <div style="background-color: #f1f5f9; border: 1px solid #94a3b8; text-align: center; padding: 4px; border-radius: 2px;">
               <span style="font-weight: 700; font-size: 0.72rem; display: block; color: #1e3b8b;">Date</span>
-              <input type="date" id="ret-inv-date" style="width: 100%; border: none; background: transparent; text-align: center; font-size: 0.8rem;" value="${editReturn ? editReturn.date : state.getLoginDate()}" required>
+              ${renderTallyDatePickerHtml({ id: "ret-inv-date", value: editReturn ? editReturn.date : state.getLoginDate(), style: "height:26px; font-size:0.8rem; border:none; background:transparent;", width: "100%" })}
             </div>
           </div>
 
@@ -4051,18 +4379,18 @@ export function showSalesReturnModal(container, editReturn = null, onSuccess = n
           <!-- Main Grid -->
           <div style="border: 1px solid #94a3b8; background-color: white; min-height:220px; max-height:280px; overflow-y:auto; border-radius: var(--border-radius-sm);">
             <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.75rem; color:black;">
-              <thead>
-                <tr style="background-color:#1e293b; color:white; border-bottom: 2px solid #475569;">
-                  <th style="padding:6px;">Product Name</th>
-                  <th style="padding:6px;">Code/Model</th>
-                  <th style="padding:6px; font-weight:bold; color:#1e3b8b;">Batch</th>
-                  <th style="padding:6px; text-align:right;">Qty</th>
-                  <th style="padding:6px; text-align:right;">Rate</th>
-                  <th style="padding:6px; text-align:right;">Amount</th>
-                  <th style="padding:6px; text-align:right;">GST%</th>
-                  <th style="padding:6px; text-align:right;">GST AMT</th>
-                  <th style="padding:6px; text-align:right; font-weight:600; color:#1e40af;">Net Amount</th>
-                  <th style="padding:6px; text-align:center; width:40px;">Remove</th>
+              <thead style="position: sticky; top: 0; z-index: 10; background-color: #1e293b;">
+                <tr style="background-color:#1e293b; color:white; border-bottom: 2px solid #475569; position: sticky; top: 0; z-index: 10;">
+                  <th style="padding:6px; text-align:center; width:50px; position: sticky; top: 0; background-color: #1e293b; z-index: 10;">Item No</th>
+                  <th style="padding:6px; position: sticky; top: 0; background-color: #1e293b; z-index: 10;">Product Name</th>
+                  <th style="padding:6px; position: sticky; top: 0; background-color: #1e293b; z-index: 10;">Code/Model</th>
+                  <th style="padding:6px; font-weight:bold; color:#60a5fa; position: sticky; top: 0; background-color: #1e293b; z-index: 10;">Batch</th>
+                  <th style="padding:6px; text-align:right; position: sticky; top: 0; background-color: #1e293b; z-index: 10;">Qty</th>
+                  <th style="padding:6px; text-align:right; position: sticky; top: 0; background-color: #1e293b; z-index: 10;">Rate</th>
+                  <th style="padding:6px; text-align:right; position: sticky; top: 0; background-color: #1e293b; z-index: 10;">Amount</th>
+                  <th style="padding:6px; text-align:right; position: sticky; top: 0; background-color: #1e293b; z-index: 10;">GST%</th>
+                  <th style="padding:6px; text-align:right; position: sticky; top: 0; background-color: #1e293b; z-index: 10;">GST AMT</th>
+                  <th style="padding:6px; text-align:right; font-weight:600; color:#60a5fa; position: sticky; top: 0; background-color: #1e293b; z-index: 10;">Net Amount</th>
                 </tr>
               </thead>
               <tbody id="ret-sales-grid-body">
@@ -4142,7 +4470,8 @@ export function showSalesReturnModal(container, editReturn = null, onSuccess = n
             <div style="display:flex; gap:6px;">
               <button type="button" class="btn" id="btn-ret-new" style="background:#e2e8f0; border:1px solid #475569; padding:4px 14px; font-weight:bold; color:black;">New</button>
               <button type="submit" class="btn" style="background:#e2e8f0; border:1px solid #1e3b8b; padding:4px 14px; font-weight:bold; color:black;">Save</button>
-              <button type="button" class="btn btn-secondary" id="btn-ret-cancel" style="background:#f1f5f9; border:1px solid #475569; padding:4px 14px; color:black;">Cancel</button>
+              <button type="button" class="btn" id="btn-ret-void" style="background-color:#ef4444; border:1px solid #dc2626; padding:4px 14px; font-weight:bold; color:white; ${editReturn ? 'cursor:pointer;' : 'opacity:0.5; cursor:not-allowed;'}" ${editReturn ? '' : 'disabled'} title="Cancel Return"><i class="fa-solid fa-ban"></i> Cancel Return</button>
+              <button type="button" class="btn btn-secondary" id="btn-ret-cancel" style="background:#f1f5f9; border:1px solid #475569; padding:4px 14px; color:black;">Close</button>
               <button type="button" class="btn" id="btn-ret-search" style="background:#e2e8f0; border:1px solid #475569; padding:4px 14px; color:black;">Search</button>
               <button type="button" class="btn" id="btn-ret-salesearch" style="background:#e2e8f0; border:1px solid #475569; padding:4px 14px; color:black;">Sale Search</button>
               <button type="button" class="btn" id="btn-ret-prev" style="background:#e2e8f0; border:1px solid #475569; width:28px; color:black;">&lt;</button>
@@ -4155,8 +4484,27 @@ export function showSalesReturnModal(container, editReturn = null, onSuccess = n
     </div>
   `;
 
-  const overlay = document.getElementById("modal-overlay-tx");
-  const close = () => { overlay.classList.remove("active"); root.innerHTML = ""; };
+  root.appendChild(modalEl);
+  const overlay = modalEl;
+  const handleGlobalKeydown = (e) => {
+    if (e.key === "Delete" || e.key === "Del") {
+      const active = document.activeElement;
+      const isInputFocused = active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA" || active.tagName === "SELECT");
+      if (!isInputFocused && selectedGridIndex !== null && selectedGridIndex >= 0 && selectedGridIndex < gridItems.length) {
+        e.preventDefault();
+        gridItems.splice(selectedGridIndex, 1);
+        if (selectedGridIndex >= gridItems.length) selectedGridIndex = gridItems.length - 1;
+        if (selectedGridIndex < 0) selectedGridIndex = null;
+        renderGridAndRecalc();
+      }
+    }
+  };
+  window.addEventListener("keydown", handleGlobalKeydown);
+
+  const close = () => {
+    window.removeEventListener("keydown", handleGlobalKeydown);
+    modalEl.remove();
+  };
 
   document.getElementById("pm-close-btn-header").addEventListener("click", close);
   document.getElementById("btn-ret-cancel").addEventListener("click", close);
@@ -4179,6 +4527,44 @@ export function showSalesReturnModal(container, editReturn = null, onSuccess = n
   document.getElementById("btn-ret-remove-kfc").addEventListener("click", () => {
     alert("KFC Removed successfully.");
   });
+
+  if (editReturn && document.getElementById("btn-ret-void")) {
+    document.getElementById("btn-ret-void").addEventListener("click", () => {
+      const validateAdminPassword = () => {
+        const pass = prompt("Enter Admin Password to cancel this return:");
+        if (pass === null) return false;
+        if (pass !== state.getAdminPassword()) {
+          alert("Incorrect password!");
+          return false;
+        }
+        return true;
+      };
+      if (confirm(`Are you sure you want to cancel Sales Return ${editReturn.id}?`) && validateAdminPassword()) {
+        const ok = state.cancelSalesReturn(editReturn.id);
+        if (ok) {
+          alert(`Sales Return ${editReturn.id} has been cancelled successfully.`);
+          close();
+          if (onSuccess) onSuccess();
+        }
+      }
+    });
+  }
+
+  if (editReturn && (editReturn.isCancelled || editReturn.isCanceled || String(editReturn.status).toUpperCase() === 'CANCELLED')) {
+    setTimeout(() => {
+      const modalOverlay = document.getElementById("modal-overlay-tx");
+      if (modalOverlay) {
+        modalOverlay.querySelectorAll("input, select, textarea, button").forEach(el => {
+          const allowedIds = ["pm-close-btn-header", "btn-ret-search", "btn-ret-salesearch", "btn-ret-prev", "btn-ret-next", "btn-ret-print", "btn-ret-new", "btn-ret-cancel", "btn-ret-void", "btn-print"];
+          if (!allowedIds.includes(el.id) && !el.classList.contains("win-btn") && el.innerText !== "Close" && el.innerText !== "Cancel") {
+            el.disabled = true;
+            el.style.opacity = "0.75";
+            el.style.cursor = "not-allowed";
+          }
+        });
+      }
+    }, 50);
+  }
 
   // Bind Previous and Next buttons
   const allReturns = state.getSalesReturns();
@@ -4267,15 +4653,23 @@ export function showSalesReturnModal(container, editReturn = null, onSuccess = n
   };
 
   fySelect.addEventListener("change", () => {
+    gridItems = [];
+    adjustmentsList = [];
     populateCustomerInvoices(customerSelect.value);
+    renderGridAndRecalc();
   });
 
   customerSelect.addEventListener("change", () => {
+    gridItems = [];
+    adjustmentsList = [];
     populateSites(customerSelect.value);
     populateCustomerInvoices(customerSelect.value);
+    renderGridAndRecalc();
   });
 
   billnoSelect.addEventListener("change", () => {
+    gridItems = [];
+    adjustmentsList = [];
     const billNo = billnoSelect.value;
     if (billNo) {
       const selectedFyId = fySelect.value;
@@ -4304,6 +4698,7 @@ export function showSalesReturnModal(container, editReturn = null, onSuccess = n
     rateInput.value = "";
     mrpInput.value = "";
     availStockSpan.innerText = "0.00";
+    renderGridAndRecalc();
   });
 
   if (editReturn) {
@@ -4346,6 +4741,30 @@ export function showSalesReturnModal(container, editReturn = null, onSuccess = n
 
   const ribbonRetBatchSelect = document.getElementById("ret-ribbon-batch");
 
+  // Helper to reset ribbon inputs for Sales Return
+  const resetSalesRibbonInputs = () => {
+    qtyInput.value = "";
+    rateInput.value = "";
+    mrpInput.value = "";
+    availStockSpan.innerText = "0.00";
+  };
+
+  // Helper to load details for a selected sales invoice item batch
+  const updateSalesBatchDetails = (invoiceItem, bNo) => {
+    if (invoiceItem) {
+      const mat = materials.find(m => m.id === invoiceItem.materialId);
+      rateInput.value = invoiceItem.price ? parseFloat(invoiceItem.price).toFixed(2) : "";
+      mrpInput.value = invoiceItem.mrp ? parseFloat(invoiceItem.mrp).toFixed(2) : (parseFloat(invoiceItem.price) * 1.25).toFixed(2);
+      qtyInput.value = invoiceItem.quantity || "";
+      updateRibbonUnitSelect(unitSelect, invoiceItem.unit || (mat ? mat.unit : "Bags"));
+
+      const batchObj = mat ? (mat.batches || []).find(b => b.batchNo === bNo) : null;
+      availStockSpan.innerText = batchObj ? (batchObj.stock || 0).toFixed(2) : "0.00";
+    } else {
+      resetSalesRibbonInputs();
+    }
+  };
+
   // When product changes
   productSelect.addEventListener("change", () => {
     const pName = productSelect.value;
@@ -4354,30 +4773,31 @@ export function showSalesReturnModal(container, editReturn = null, onSuccess = n
       const selectedFyId = fySelect.value;
       const invoice = getInvoicesForFy(selectedFyId).find(inv => String(inv.id) === String(billNo));
       const invoiceItems = invoice ? (invoice.items || []) : [];
-      const matchingItems = invoiceItems
-        .filter(item => (item.name || item.materialName) === pName)
-        .sort((a, b) => {
-          const matA = materials.find(m => m.id === a.materialId);
-          const matB = materials.find(m => m.id === b.materialId);
-          const codeA = matA ? matA.code : (a.code || "");
-          const codeB = matB ? matB.code : (b.code || "");
-          return codeA.localeCompare(codeB, undefined, { numeric: true, sensitivity: 'base' });
-        });
+      const matchingItems = invoiceItems.filter(item => (item.name || item.materialName) === pName);
 
+      const uniqueCodesMap = new Map();
+      matchingItems.forEach(item => {
+        const mat = materials.find(m => m.id === item.materialId);
+        const code = mat ? mat.code : (item.code || "");
+        if (code && !uniqueCodesMap.has(code)) {
+          uniqueCodesMap.set(code, item);
+        }
+      });
+
+      const uniqueCodes = Array.from(uniqueCodesMap.keys()).sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
       codeSelect.innerHTML = '<option value="">-- Code/Model --</option>' + 
-        matchingItems.map(item => {
-          const mat = materials.find(m => m.id === item.materialId);
-          const code = mat ? mat.code : (item.code || "");
-          return `<option value="${code}" data-item-id="${item.materialId}">${code}</option>`;
-        }).join("");
+        uniqueCodes.map(code => `<option value="${code}">${code}</option>`).join("");
       codeSelect.disabled = false;
-      availStockSpan.innerText = "0.00";
+
+      ribbonRetBatchSelect.innerHTML = '<option value="">-- Batch --</option>';
+      ribbonRetBatchSelect.disabled = true;
+      resetSalesRibbonInputs();
     } else {
       codeSelect.innerHTML = '<option value="">-- Code/Model --</option>';
       codeSelect.disabled = true;
       ribbonRetBatchSelect.innerHTML = '<option value="">-- Batch --</option>';
       ribbonRetBatchSelect.disabled = true;
-      availStockSpan.innerText = "0.00";
+      resetSalesRibbonInputs();
     }
   });
 
@@ -4389,59 +4809,129 @@ export function showSalesReturnModal(container, editReturn = null, onSuccess = n
     if (pName && pCode && billNo) {
       const selectedFyId = fySelect.value;
       const invoice = getInvoicesForFy(selectedFyId).find(inv => String(inv.id) === String(billNo));
-      const selectedOption = codeSelect.options[codeSelect.selectedIndex];
-      const matId = selectedOption.getAttribute("data-item-id");
-      const invoiceItem = invoice ? invoice.items.find(item => item.materialId === matId) : null;
+      const invoiceItems = invoice ? (invoice.items || []) : [];
+      const matchingItems = invoiceItems.filter(item => {
+        const mat = materials.find(m => m.id === item.materialId);
+        const code = mat ? mat.code : (item.code || "");
+        return (item.name || item.materialName) === pName && code === pCode;
+      });
 
-      if (invoiceItem) {
-        const mat = materials.find(m => m.id === matId);
-        rateInput.value = invoiceItem.price ? parseFloat(invoiceItem.price).toFixed(2) : "";
-        mrpInput.value = invoiceItem.mrp ? parseFloat(invoiceItem.mrp).toFixed(2) : (parseFloat(invoiceItem.price) * 1.25).toFixed(2);
-        qtyInput.value = invoiceItem.quantity || "";
-        updateRibbonUnitSelect(unitSelect, invoiceItem.unit || (mat ? mat.unit : "Bags"));
+      ribbonRetBatchSelect.innerHTML = '<option value="">-- Batch --</option>' +
+        matchingItems.map(item => {
+          const bNo = item.batchNo || String(item.price);
+          return `<option value="${bNo}" data-item-id="${item.materialId}">${bNo}</option>`;
+        }).join("");
+      ribbonRetBatchSelect.disabled = false;
 
-        const bNo = invoiceItem.batchNo || String(invoiceItem.price);
-        ribbonRetBatchSelect.innerHTML = `<option value="${bNo}">${bNo}</option>`;
-        ribbonRetBatchSelect.value = bNo;
-        ribbonRetBatchSelect.disabled = false;
-
-        const batchObj = mat ? mat.batches.find(b => b.batchNo === bNo) : null;
-        availStockSpan.innerText = batchObj ? (batchObj.stock || 0).toFixed(2) : "0.00";
+      if (matchingItems.length === 1) {
+        ribbonRetBatchSelect.selectedIndex = 1;
+        const item = matchingItems[0];
+        const bNo = item.batchNo || String(item.price);
+        updateSalesBatchDetails(item, bNo);
+      } else {
+        resetSalesRibbonInputs();
       }
     } else {
       ribbonRetBatchSelect.innerHTML = '<option value="">-- Batch --</option>';
       ribbonRetBatchSelect.disabled = true;
-      qtyInput.value = "";
-      rateInput.value = "";
-      mrpInput.value = "";
-      availStockSpan.innerText = "0.00";
+      resetSalesRibbonInputs();
     }
   });
 
+  // When batch changes
+  ribbonRetBatchSelect.addEventListener("change", () => {
+    const pName = productSelect.value;
+    const pCode = codeSelect.value;
+    const billNo = billnoSelect.value;
+    const bNo = ribbonRetBatchSelect.value;
+    const selectedOption = ribbonRetBatchSelect.options[ribbonRetBatchSelect.selectedIndex];
+    const matId = selectedOption ? selectedOption.getAttribute("data-item-id") : null;
+
+    if (pName && pCode && billNo && bNo) {
+      const selectedFyId = fySelect.value;
+      const invoice = getInvoicesForFy(selectedFyId).find(inv => String(inv.id) === String(billNo));
+      const invoiceItems = invoice ? (invoice.items || []) : [];
+      const invoiceItem = invoiceItems.find(item => {
+        const mat = materials.find(m => m.id === item.materialId);
+        const code = mat ? mat.code : (item.code || "");
+        const itemBatch = item.batchNo || String(item.price);
+        return (item.name || item.materialName) === pName && code === pCode && item.materialId === matId && itemBatch === bNo;
+      }) || invoiceItems.find(item => {
+        const mat = materials.find(m => m.id === item.materialId);
+        const code = mat ? mat.code : (item.code || "");
+        const itemBatch = item.batchNo || String(item.price);
+        return (item.name || item.materialName) === pName && code === pCode && itemBatch === bNo;
+      });
+
+      updateSalesBatchDetails(invoiceItem, bNo);
+    } else {
+      resetSalesRibbonInputs();
+    }
+  });
+
+  let selectedGridIndex = null;
+
   function renderGridAndRecalc() {
     const tbody = document.getElementById("ret-sales-grid-body");
-    tbody.innerHTML = gridItems.map((item, idx) => `
-      <tr style="border-bottom:1px solid #cbd5e1;">
-        <td style="padding:6px;"><strong>${item.name}</strong></td>
-        <td style="padding:6px;">${item.code}</td>
-        <td style="padding:6px; font-weight:bold; color:#1e3b8b;">${item.batchNo || ''}</td>
-        <td style="padding:6px; text-align:right;">${item.quantity.toFixed(2)}</td>
-        <td style="padding:6px; text-align:right;">\u20B9${item.price.toFixed(2)}</td>
-        <td style="padding:6px; text-align:right;">\u20B9${item.amount.toFixed(2)}</td>
-        <td style="padding:6px; text-align:right;">${item.gstPercent}%</td>
-        <td style="padding:6px; text-align:right;">\u20B9${item.gstAmount.toFixed(2)}</td>
-        <td style="padding:6px; text-align:right; font-weight:600; color:#1e40af;">\u20B9${item.netAmount.toFixed(2)}</td>
-        <td style="padding:6px; text-align:center;">
-          <button type="button" class="btn btn-danger btn-icon btn-remove-grid-row" data-index="${idx}" style="padding: 2px 6px;"><i class="fa-solid fa-trash-can"></i></button>
-        </td>
-      </tr>
-    `).join("");
+    if (gridItems.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:20px; color:#64748b;">No items added to the return grid.</td></tr>`;
+    } else {
+      tbody.innerHTML = gridItems.map((item, idx) => {
+        const isSelected = (idx === selectedGridIndex);
+        return `
+          <tr class="ret-sales-grid-row" tabindex="0" data-index="${idx}" style="border-bottom:1px solid #cbd5e1; cursor:pointer; background-color:${isSelected ? '#bae6fd' : (idx % 2 === 0 ? '#f8fafc' : 'white')}; outline:none;" title="Click to select row, Double click to edit line">
+            <td style="padding:6px; text-align:center; font-weight:bold; color:#64748b;">${idx + 1}</td>
+            <td style="padding:6px;"><strong>${item.name}</strong></td>
+            <td style="padding:6px;">${item.code}</td>
+            <td style="padding:6px; font-weight:bold; color:#1e3b8b;">${item.batchNo || ''}</td>
+            <td style="padding:6px; text-align:right;">${item.quantity.toFixed(2)}</td>
+            <td style="padding:6px; text-align:right;">\u20B9${item.price.toFixed(2)}</td>
+            <td style="padding:6px; text-align:right;">\u20B9${item.amount.toFixed(2)}</td>
+            <td style="padding:6px; text-align:right;">${item.gstPercent}%</td>
+            <td style="padding:6px; text-align:right;">\u20B9${item.gstAmount.toFixed(2)}</td>
+            <td style="padding:6px; text-align:right; font-weight:600; color:#1e40af;">\u20B9${item.netAmount.toFixed(2)}</td>
+          </tr>
+        `;
+      }).join("");
+    }
 
-    tbody.querySelectorAll(".btn-remove-grid-row").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const idx = parseInt(btn.getAttribute("data-index"));
+    tbody.querySelectorAll(".ret-sales-grid-row").forEach(tr => {
+      tr.addEventListener("click", () => {
+        selectedGridIndex = parseInt(tr.getAttribute("data-index"));
+        tbody.querySelectorAll(".ret-sales-grid-row").forEach((r, i) => {
+          r.style.backgroundColor = (i === selectedGridIndex) ? "#bae6fd" : (i % 2 === 0 ? "#f8fafc" : "white");
+        });
+        tr.focus();
+      });
+
+      tr.addEventListener("dblclick", () => {
+        const idx = parseInt(tr.getAttribute("data-index"));
+        if (isNaN(idx) || idx < 0 || idx >= gridItems.length) return;
+
+        const item = gridItems[idx];
         gridItems.splice(idx, 1);
+        selectedGridIndex = null;
         renderGridAndRecalc();
+
+        if (item) {
+          productSelect.value = item.name || "";
+          productSelect.dispatchEvent(new Event("change"));
+          if (item.code) {
+            codeSelect.value = item.code;
+            codeSelect.dispatchEvent(new Event("change"));
+          }
+          if (item.batchNo) {
+            ribbonRetBatchSelect.value = item.batchNo;
+            ribbonRetBatchSelect.dispatchEvent(new Event("change"));
+          }
+          if (item.quantity !== undefined) qtyInput.value = item.quantity;
+          if (item.price !== undefined) rateInput.value = parseFloat(item.price).toFixed(2);
+          if (item.mrp !== undefined) mrpInput.value = parseFloat(item.mrp).toFixed(2);
+          if (item.unit) updateRibbonUnitSelect(unitSelect, item.unit);
+
+          qtyInput.focus();
+          qtyInput.select();
+        }
       });
     });
 
@@ -4562,44 +5052,54 @@ export function showSalesReturnModal(container, editReturn = null, onSuccess = n
     }));
 
     if (editReturn) {
+      const fyCheckOld = state.isPreviousFyLocked(editReturn.date);
+      if (fyCheckOld.locked) {
+        alert(fyCheckOld.reason);
+        return;
+      }
       const pass = prompt("Enter Admin Password to update this Sales Return:");
       if (pass === null) return;
       if (pass !== state.getAdminPassword()) {
         alert("Incorrect password!");
         return;
       }
-      state.deleteSalesReturn(editReturn.id);
+      const delOk = state.deleteSalesReturn(editReturn.id);
+      if (!delOk) return;
     }
 
-    const success = state.createSalesReturn({
-      id: editReturn ? editReturn.id : undefined,
-      contactId: customerSelect.value,
-      billNo: billnoSelect.value,
-      date: document.getElementById("ret-inv-date").value,
-      state: document.getElementById("ret-state").value,
-      taxRate: 18,
-      siteName: siteSelect.value,
-      items: items,
-      adjustmentsList: adjustmentsList,
-      roundOff: parseFloat(document.getElementById("ret-roundoff").value) || 0
-    });
+    try {
+      const success = state.createSalesReturn({
+        id: editReturn ? editReturn.id : undefined,
+        contactId: customerSelect.value,
+        billNo: billnoSelect.value,
+        date: document.getElementById("ret-inv-date").value,
+        state: document.getElementById("ret-state").value,
+        taxRate: 18,
+        siteName: siteSelect.value,
+        items: items,
+        adjustmentsList: adjustmentsList,
+        roundOff: parseFloat(document.getElementById("ret-roundoff").value) || 0
+      });
 
-    if (success) {
-      alert("Sales Return successfully saved");
-      close();
-      if (onSuccess) onSuccess();
-      if (!editReturn) {
-        showSalesReturnModal(container, null, onSuccess);
-      } else {
-        const tc = document.getElementById("transactions-content");
-        if (tc) {
-          renderSalesReturnSubTab(tc);
+      if (success) {
+        alert("Sales Return successfully saved");
+        close();
+        if (onSuccess) onSuccess();
+        if (!editReturn) {
+          showSalesReturnModal(container, null, onSuccess);
         } else {
-          renderSalesReturnSubTab(container);
+          const tc = document.getElementById("transactions-content");
+          if (tc) {
+            renderSalesReturnSubTab(tc);
+          } else {
+            renderSalesReturnSubTab(container);
+          }
         }
+      } else {
+        alert("Failed to save Sales Return. Please try again.");
       }
-    } else {
-      alert("Failed to save Sales Return. Please try again.");
+    } catch (err) {
+      alert(err.message);
     }
   });
 
@@ -4628,7 +5128,7 @@ export function showSalesReturnModal(container, editReturn = null, onSuccess = n
 
 // Supplier Purchase Bill Modal (Incoming Batch-Wise Costing - ERP Style)
 export function showRecordPurchaseModal(container, editPurchase = null, onSuccess = null, selectedSeries = null) {
-  const root = document.getElementById("modal-container-root");
+  const root = (document.getElementById("modal-container-root") && document.getElementById("modal-container-root").children.length > 0 ? document.getElementById("sub-modal-container-root") : null) || document.getElementById("modal-container-root") || container || document.body;
   const suppliers = state.getContacts().filter(c => c.type === "supplier" || c.listInVendorList === true);
   const materials = state.getMaterials();
   const options = state.getOptions();
@@ -4673,78 +5173,116 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
     else el.remove();
   });
 
-  // Create UI overlay replicating the screenshot theme
-  root.innerHTML = `
-    <div class="modal-overlay active" id="modal-overlay-tx" style="display:flex; justify-content:center; align-items:center; background: rgba(15,23,42,0.3); backdrop-filter: blur(1px); z-index:2000;">
+  const existingOverlay = document.getElementById("purchase-bill-modal-overlay");
+  if (existingOverlay) existingOverlay.remove();
+
+  const modalEl = document.createElement("div");
+  modalEl.id = "purchase-bill-modal-overlay";
+  modalEl.className = "modal-overlay active";
+  modalEl.style.position = "fixed";
+  modalEl.style.top = "0";
+  modalEl.style.left = "0";
+  modalEl.style.width = "100%";
+  modalEl.style.height = "100%";
+  modalEl.style.display = "flex";
+  modalEl.style.justifyContent = "center";
+  modalEl.style.alignItems = "center";
+  modalEl.style.background = "rgba(15,23,42,0.3)";
+  modalEl.style.backdropFilter = "blur(1px)";
+  modalEl.style.zIndex = String(2000 + (root.children ? root.children.length : 0) * 10);
+
+  modalEl.innerHTML = `
       <div class="modal-container modal-lg" style="position: relative; max-width:1600px; width: 98vw; background-color:#cbd5e1; color:#0f172a; padding:15px; font-family: var(--font-body); border: 2px solid #5a7b9c; border-radius: 6px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); font-size:0.85rem;">
-        ${editPurchase && editPurchase.isCancelled ? `
-          <div class="cancelled-watermark" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-size: 8rem; font-weight: 900; color: rgba(220, 38, 38, 0.15); pointer-events: none; white-space: nowrap; z-index: 1000; text-transform: uppercase; letter-spacing: 10px; font-family: sans-serif; border: 15px solid rgba(220, 38, 38, 0.15); padding: 10px 30px; border-radius: 20px;">CANCELLED</div>
+        ${editPurchase && (editPurchase.isCancelled || editPurchase.isCanceled || String(editPurchase.status).toUpperCase() === 'CANCELLED') ? `
+          <div class="cancelled-watermark" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-size: 8rem; font-weight: 900; color: rgba(220, 38, 38, 0.25); pointer-events: none; white-space: nowrap; z-index: 1000; text-transform: uppercase; letter-spacing: 10px; font-family: sans-serif; border: 15px solid rgba(220, 38, 38, 0.25); padding: 10px 30px; border-radius: 20px; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;">CANCELLED</div>
         ` : ''}
         
         <!-- Header ribbon -->
-        <div style="background: linear-gradient(180deg, #1e3a8a 0%, #3b82f6 100%); color:white; padding:6px 12px; font-weight:700; display:flex; justify-content:space-between; align-items:center; border-radius: 4px 4px 0 0; border-bottom: 1px solid #1d4ed8;">
-          <div style="display:flex; flex-direction:column; gap:2px;">
-            <div style="font-size:1.15rem; font-weight:800; text-transform:uppercase; letter-spacing:0.5px;">${activeCompany ? activeCompany.name : 'ERP SYSTEM'}</div>
-            <div style="font-size:0.7rem; color:#e0f2fe; font-weight:500; display:flex; align-items:center; gap:5px;"><i class="fa-solid fa-cart-shopping"></i> PURCHASE ENTRY [Bill Series: &lt;${activeSeries ? activeSeries.name : 'DEFAULT'}&gt;]</div>
+        <div style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); color:white; padding:8px 14px; font-weight:700; display:flex; justify-content:space-between; align-items:center; border-radius: 6px 6px 0 0; border-bottom: 2px solid #1d4ed8; box-shadow: 0 2px 6px rgba(0,0,0,0.15);">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div style="font-size:1.15rem; font-weight:800; text-transform:uppercase; letter-spacing:0.6px; text-shadow:0 1px 2px rgba(0,0,0,0.2);"><i class="fa-solid fa-building" style="margin-right:6px; opacity:0.85;"></i>${activeCompany ? activeCompany.name : 'ERP SYSTEM'}</div>
+            <span style="background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3); padding: 3px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: 600; color: #f0f9ff; display: inline-flex; align-items: center; gap: 6px; letter-spacing: 0.3px;">
+              <i class="fa-solid fa-cart-shopping" style="font-size: 0.75rem;"></i> PURCHASE ENTRY &bull; Bill Series: &lt;${activeSeries ? activeSeries.name : 'DEFAULT'}&gt;
+            </span>
           </div>
-          <button type="button" style="background:none; border:none; color:white; font-size:1.3rem; cursor:pointer;" id="pm-close-btn-header">&times;</button>
+          <button type="button" style="background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25); color:white; font-size:1.1rem; width:28px; height:28px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.15s ease;" id="pm-close-btn-header" title="Close (Esc)">&times;</button>
         </div>
 
         <form id="purchase-bill-form" style="display:flex; flex-direction:column; gap:10px; margin-top:8px;">
           <!-- Top Row metadata inputs -->
-          <div style="background-color:#f1f5f9; padding:10px; border:1px solid #94a3b8; border-radius:4px; display:grid; grid-template-columns: 1fr 1fr 1fr 1.5fr 1fr 1fr 0.8fr; gap:10px; align-items:center;">
-            <div style="display:flex; flex-direction:column; align-items:center;">
-              <div style="background:linear-gradient(180deg, #1e4a8c, #3a6dba); color:white; font-weight:bold; font-size:12px; width:100%; text-align:center; padding:2px 0; border-radius:3px 3px 0 0; border:1px solid #1e4a8c;">
-                P. No.
+          <div id="pur-top-row" style="background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%); padding: 10px 14px; border: 1px solid #94a3b8; border-radius: 6px; display: flex; gap: 12px; align-items: flex-start; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">
+            <div style="flex: 0 0 130px;">
+              <div style="height:16px; margin-bottom:4px; display:flex; align-items:center; justify-content:center;">
+                <label style="font-weight:700; font-size:0.72rem; color:#1e3a8a; text-transform:uppercase; letter-spacing:0.4px; margin:0;">P. NO.</label>
               </div>
-              <input type="text" id="pur-refno" class="form-control" style="background-color:#f1f5f9; color:#1e4a8c; font-weight:bold; text-align:center; padding:3px; font-size:0.9rem; width:100%; border:1px solid #94a3b8; border-top:none; border-radius:0 0 3px 3px;" value="${editPurchase ? (editPurchase.voucherNo || editPurchase.id) : defaultPurRefNo}" readonly tabindex="-1">
+              <input type="text" id="pur-refno" class="form-control" style="background-color:#e0e7ff; color:#1e3a8a; font-weight:800; text-align:center; height:30px; padding:0 6px; font-size:0.85rem; width:100%; border:1px solid #93c5fd; border-radius:5px; box-sizing:border-box; letter-spacing:0.5px; box-shadow:inset 0 1px 2px rgba(0,0,0,0.04);" value="${editPurchase ? (editPurchase.voucherNo || editPurchase.id) : defaultPurRefNo}" readonly tabindex="-1">
             </div>
-            <div>
-              <label style="font-weight:600; display:block; margin-bottom:2px; font-size:0.75rem;">Invoice No *</label>
-              <input type="text" id="pur-invoiceno" class="form-control" style="background-color:white; color:black; padding:2px 6px; font-size:0.8rem;" placeholder="Invoice No" required value="${editPurchase ? editPurchase.invoiceNo || '' : ''}">
+
+            <div style="flex: 0 0 160px;">
+              <div style="height:16px; margin-bottom:4px; display:flex; align-items:center;">
+                <label style="font-weight:700; font-size:0.72rem; color:#1e293b; text-transform:uppercase; letter-spacing:0.4px; margin:0; white-space:nowrap;">INVOICE NO <span style="color:#ef4444;">*</span></label>
+              </div>
+              <input type="text" id="pur-invoiceno" class="form-control" style="background-color:#ffffff; color:#0f172a; height:30px; padding:0 8px; font-size:0.85rem; font-weight:600; width:100%; border:1px solid #94a3b8; border-radius:5px; box-sizing:border-box;" placeholder="Enter Invoice No" required value="${editPurchase ? editPurchase.invoiceNo || '' : ''}">
             </div>
-            <div>
-              <label style="font-weight:600; display:block; margin-bottom:2px; font-size:0.75rem;">Invoice Date *</label>
-              <input type="date" id="pur-date" class="form-control" style="background-color:white; color:black; padding:2px 6px; font-size:0.8rem;" value="${editPurchase ? editPurchase.date : state.getLoginDate()}" required>
+
+            <div style="flex: 0 0 155px;">
+              <div style="height:16px; margin-bottom:4px; display:flex; align-items:center;">
+                <label style="font-weight:700; font-size:0.72rem; color:#1e293b; text-transform:uppercase; letter-spacing:0.4px; margin:0; white-space:nowrap;">INVOICE DATE <span style="color:#ef4444;">*</span></label>
+              </div>
+              ${renderTallyDatePickerHtml({ id: "pur-date", value: editPurchase ? editPurchase.date : state.getLoginDate(), style: "height:30px; font-size:0.85rem; font-weight:600; border:1px solid #94a3b8; border-radius:5px; background-color:white; color:#0f172a; padding:0 6px;", width: "100%" })}
             </div>
-            <div>
-              <div style="display:flex; align-items:flex-end; gap:4px;">
-                <button type="button" id="btn-add-vendor-purchase" title="Add New Vendor" style="background:#10b981; border:none; color:white; font-weight:700; font-size:1rem; height:28px; width:28px; border-radius:4px; cursor:pointer; flex-shrink:0;">+</button>
-                <div style="flex:1; position:relative;" id="pur-supplier-combobox-wrapper">
-                  <label style="font-weight:600; display:block; margin-bottom:2px; font-size:0.75rem;">Vendor Name * (Type to Search)</label>
-                  <div style="display:flex; align-items:center; position:relative;">
-                    <input type="text" id="pur-supplier-search" class="form-control" autocomplete="off" spellcheck="false" placeholder="-- Type to Search Vendor --" style="background-color:white; color:black; padding:3px 22px 3px 6px; font-size:0.8rem; width:100%; font-weight:700; border:1px solid #7a96b2; border-radius:3px;" required>
-                    <span id="btn-pur-supplier-dropdown-toggle" style="position:absolute; right:6px; cursor:pointer; color:#64748b; font-size:0.75rem; user-select:none;" title="Click to view all vendors">▼</span>
-                  </div>
-                  <select id="pur-supplier" class="form-control" style="display:none;" required>
-                    <option value="">-- Choose Supplier --</option>
-                    ${suppliers.map(s => `<option value="${s.id}" data-branchtype="${s.siteType || 'single'}" data-branches="${(s.sites || []).join(',')}">${s.name}</option>`).join("")}
-                  </select>
-                  <div id="pur-supplier-dropdown" style="display:none; position:absolute; top:100%; left:0; width:100%; min-width:340px; max-width:480px; background:white; border:1.5px solid #1e3b8b; box-shadow:0 8px 24px rgba(0,0,0,0.35); z-index:99999; border-radius:0 0 5px 5px; overflow:hidden;">
-                    <div id="pur-supplier-list" style="max-height:220px; overflow-y:auto; background:white;"></div>
-                    <div style="background:linear-gradient(180deg, #dbeafe 0%, #bfdbfe 100%); border-top:1px solid #93c5fd; padding:3px 8px; display:flex; justify-content:space-between; align-items:center; font-size:0.7rem; font-weight:700; color:#1e3b8b; user-select:none;">
-                      <span>↑↓ to navigate, Enter to select</span>
-                      <span>Search by Name, Phone, GSTIN</span>
-                    </div>
-                  </div>
+
+            <div style="flex: 1 1 340px; min-width: 280px; position:relative;" id="pur-supplier-combobox-wrapper">
+              <div style="display:flex; justify-content:space-between; align-items:center; height:16px; margin-bottom:4px;">
+                <label style="font-weight:700; font-size:0.72rem; color:#1e293b; text-transform:uppercase; letter-spacing:0.4px; margin:0; white-space:nowrap;">VENDOR NAME <span style="color:#ef4444;">*</span></label>
+                <span style="font-size:0.68rem; color:#64748b; font-weight:600; text-transform:none;">(Search / F8)</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:4px;">
+                <button type="button" id="btn-add-vendor-purchase" title="Add New Vendor (F4)" style="background:linear-gradient(180deg, #10b981 0%, #059669 100%); border:none; color:white; font-weight:700; font-size:1.05rem; height:30px; width:30px; border-radius:5px; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; padding:0; box-shadow:0 1px 3px rgba(0,0,0,0.15);">+</button>
+                <div style="position:relative; flex:1; min-width:0;">
+                  <input type="text" id="pur-supplier-search" class="form-control" autocomplete="off" spellcheck="false" placeholder="-- Type to Search Vendor --" style="background-color:#ffffff; color:#0f172a; height:30px; padding:0 24px 0 8px; font-size:0.85rem; width:100%; font-weight:700; border:1px solid #94a3b8; border-radius:5px; box-sizing:border-box;" required>
+                  <span id="btn-pur-supplier-dropdown-toggle" style="position:absolute; right:8px; top:50%; transform:translateY(-50%); cursor:pointer; color:#64748b; font-size:0.7rem; user-select:none; line-height:1;" title="Click to view all vendors">▼</span>
+                </div>
+                <select id="pur-supplier" class="form-control" style="display:none;" required>
+                  <option value="">-- Choose Supplier --</option>
+                  ${suppliers.map(s => `<option value="${s.id}" data-branchtype="${s.siteType || 'single'}" data-branches="${(s.sites || []).join(',')}">${s.name}</option>`).join("")}
+                </select>
+                <button type="button" id="btn-pur-vendor-history" title="View Vendor Purchase History (F8)" style="background:linear-gradient(180deg, #0284c7 0%, #0369a1 100%); border:none; color:white; font-weight:700; font-size:0.75rem; height:30px; padding:0 8px; border-radius:5px; cursor:pointer; flex-shrink:0; display:flex; align-items:center; gap:4px; white-space:nowrap; box-shadow:0 1px 3px rgba(0,0,0,0.15);">
+                  <i class="fa-solid fa-clock-rotate-left"></i> F8
+                </button>
+              </div>
+              <div id="pur-supplier-dropdown" style="display:none; position:absolute; top:100%; left:0; width:100%; min-width:360px; max-width:500px; background:white; border:1.5px solid #1e3b8b; box-shadow:0 8px 24px rgba(0,0,0,0.35); z-index:99999; border-radius:0 0 6px 6px; overflow:hidden; margin-top:2px;">
+                <div id="pur-supplier-list" style="max-height:220px; overflow-y:auto; background:white;"></div>
+                <div style="background:linear-gradient(180deg, #dbeafe 0%, #bfdbfe 100%); border-top:1px solid #93c5fd; padding:4px 8px; display:flex; justify-content:space-between; align-items:center; font-size:0.7rem; font-weight:700; color:#1e3b8b; user-select:none;">
+                  <span>↑↓ to navigate, Enter to select</span>
+                  <span>Search by Name, Phone, GSTIN</span>
                 </div>
               </div>
             </div>
-            <div id="pur-branch-container" style="display: none;">
-              <label style="font-weight:600; display:block; margin-bottom:2px; font-size:0.75rem;">Branch Name *</label>
-              <select id="pur-branch" class="form-control" style="background-color:white; color:black; padding:2px 6px; font-size:0.8rem;">
+
+            <div id="pur-branch-container" style="display: none; flex: 0 0 150px;">
+              <div style="height:16px; margin-bottom:4px; display:flex; align-items:center;">
+                <label style="font-weight:700; font-size:0.72rem; color:#1e293b; text-transform:uppercase; letter-spacing:0.4px; margin:0; white-space:nowrap;">BRANCH NAME <span style="color:#ef4444;">*</span></label>
+              </div>
+              <select id="pur-branch" class="form-control" style="background-color:white; color:#0f172a; height:30px; padding:0 8px; font-size:0.85rem; font-weight:600; border:1px solid #94a3b8; border-radius:5px; width:100%; box-sizing:border-box;">
                 <option value="">-- Select Branch --</option>
               </select>
             </div>
-            <div>
-              <label style="font-weight:600; display:block; margin-bottom:2px; font-size:0.75rem;">State</label>
-              <select id="pur-state" class="form-control" style="background-color:white; color:black; padding:2px 6px; font-size:0.8rem;">
+
+            <div style="flex: 0 0 140px;">
+              <div style="height:16px; margin-bottom:4px; display:flex; align-items:center;">
+                <label style="font-weight:700; font-size:0.72rem; color:#1e293b; text-transform:uppercase; letter-spacing:0.4px; margin:0; white-space:nowrap;">STATE</label>
+              </div>
+              <select id="pur-state" class="form-control" style="background-color:white; color:#0f172a; height:30px; padding:0 8px; font-size:0.85rem; font-weight:600; border:1px solid #94a3b8; border-radius:5px; width:100%; box-sizing:border-box;">
                 ${stateOptionsHtml}
               </select>
             </div>
-            <div>
-              <label style="font-weight:600; display:block; margin-bottom:2px; font-size:0.75rem;">Currency</label>
-              <select id="pur-currency" class="form-control" style="background-color:#e2e8f0; color:black; padding:2px 6px; font-size:0.8rem;" disabled>
+
+            <div style="flex: 0 0 115px;">
+              <div style="height:16px; margin-bottom:4px; display:flex; align-items:center;">
+                <label style="font-weight:700; font-size:0.72rem; color:#64748b; text-transform:uppercase; letter-spacing:0.4px; margin:0; white-space:nowrap;">CURRENCY</label>
+              </div>
+              <select id="pur-currency" class="form-control" style="background-color:#f1f5f9; color:#64748b; height:30px; padding:0 8px; font-size:0.85rem; font-weight:600; border:1px solid #cbd5e1; border-radius:5px; width:100%; box-sizing:border-box;" disabled>
                 <option value="INR" selected>INR (Rs.)</option>
               </select>
             </div>
@@ -4787,7 +5325,7 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
                 </select>
                 <button type="button" id="btn-ribbon-select-batch" style="padding:2px 6px; font-weight:bold; font-size:0.75rem; background-color:#1e3b8b; border:none; color:white; cursor:pointer; border-radius:2px; flex-shrink:0;" title="Choose/Create Batch" disabled>...</button>
               </div>
-              <div id="ribbon-batch-dropdown" style="display:none; position:absolute; top:100%; left:0; width:100%; min-width:240px; background:white; border:1.5px solid #1e3b8b; box-shadow:0 8px 24px rgba(0,0,0,0.35); z-index:9999; border-radius:0 0 6px 6px; overflow:hidden;">
+              <div id="ribbon-batch-dropdown" style="display:none; position:absolute; top:100%; left:0; width:max-content; min-width:100%; max-width:240px; background:white; border:1.5px solid #1e3b8b; box-shadow:0 8px 24px rgba(0,0,0,0.35); z-index:9999; border-radius:0 0 6px 6px; overflow:hidden;">
                 <div id="ribbon-batch-list" style="max-height:160px; overflow-y:auto; background:white;"></div>
                 <div style="background:linear-gradient(180deg, #dbeafe 0%, #bfdbfe 100%); border-top:1px solid #93c5fd; padding:3px 6px; text-align:center; font-size:0.72rem; font-weight:700; color:#1e3b8b; user-select:none; border-radius:0 0 5px 5px;">
                   Double click or Press Enter to select
@@ -4806,7 +5344,7 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
             </div>
             <div>
               <label style="font-weight:700; font-size:0.75rem; color:black; display:block; margin-bottom:2px;">Rate [Excl]</label>
-              <input type="number" step="0.01" id="ribbon-rate" class="form-control" style="background-color:white; color:black; padding:2px; font-size:0.75rem;" placeholder="0.00">
+              <input type="number" step="any" id="ribbon-rate" class="form-control" style="background-color:white; color:black; padding:2px; font-size:0.75rem;" placeholder="0.00">
             </div>
             <div>
               <label style="font-weight:700; font-size:0.75rem; color:black; display:block; margin-bottom:2px;">MRP</label>
@@ -4823,87 +5361,157 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
             <button type="button" class="btn btn-primary" id="btn-ribbon-add" style="padding:4px; font-size:0.75rem; font-weight:bold; height:28px; width:100%; background-color:#1e3b8b; border:none; color:white;">Add</button>
           </div>
 
-          <!-- Main Grid -->
-          <div style="border: 1px solid #94a3b8; background-color: white; min-height:180px; max-height:280px; overflow-y:auto; border-radius: var(--border-radius-sm);">
-            <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.75rem; color:black;">
-              <thead>
-                <tr style="background-color:#1e293b; color:white; border-bottom: 2px solid #475569;">
-                  <th style="padding:4px 6px;">Product Name</th>
-                  <th style="padding:4px 6px;">Code/Model</th>
-                  <th style="padding:4px 6px;">Batch</th>
-                  <th style="padding:4px 6px; text-align:right;">Qty</th>
-                  <th style="padding:4px 6px; text-align:right;">Rate</th>
-                  <th style="padding:4px 6px; text-align:right;">Amount</th>
-                  <th style="padding:4px 6px; text-align:right;">Dis Amt</th>
-                  <th style="padding:4px 6px; text-align:right;">Net Value</th>
-                  <th style="padding:4px 6px; text-align:right;">GST %</th>
-                  <th style="padding:4px 6px; text-align:right;">GST AMT</th>
-                  <th style="padding:4px 6px; text-align:right; font-weight:600; color:#1e40af;">Net Amount</th>
-                  <th style="padding:4px 6px; text-align:center; width:40px;">Remove</th>
+          <!-- Main Grid Container -->
+          <div style="border: 1px solid #94a3b8; background-color: white; height: 260px; display: flex; flex-direction: column; border-radius: var(--border-radius-sm); overflow: hidden;">
+            
+            <!-- Scrollable Table Body Container -->
+            <div style="flex: 1; overflow-y: auto;">
+              <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.75rem; color:black; table-layout: fixed;">
+                <thead style="position: sticky; top: 0; z-index: 10; background-color: #1e293b;">
+                  <tr style="background-color:#1e293b; color:white; border-bottom: 2px solid #475569; position: sticky; top: 0; z-index: 10;">
+                    <th style="padding:4px 6px; width:4%; text-align:center; position: sticky; top: 0; background-color: #1e293b; z-index: 10;">Item No</th>
+                    <th style="padding:4px 6px; width:20%; position: sticky; top: 0; background-color: #1e293b; z-index: 10;">Product Name</th>
+                    <th style="padding:4px 6px; width:10%; position: sticky; top: 0; background-color: #1e293b; z-index: 10;">Code/Model</th>
+                    <th style="padding:4px 6px; width:8%; position: sticky; top: 0; background-color: #1e293b; z-index: 10;">Batch</th>
+                    <th style="padding:4px 6px; width:6%; text-align:right; position: sticky; top: 0; background-color: #1e293b; z-index: 10;">GST %</th>
+                    <th style="padding:4px 6px; width:8%; text-align:right; position: sticky; top: 0; background-color: #1e293b; z-index: 10;">Qty</th>
+                    <th style="padding:4px 6px; width:8%; text-align:right; position: sticky; top: 0; background-color: #1e293b; z-index: 10;">Rate</th>
+                    <th style="padding:4px 6px; width:9%; text-align:right; position: sticky; top: 0; background-color: #1e293b; z-index: 10;">Amount</th>
+                    <th style="padding:4px 6px; width:9%; text-align:right; position: sticky; top: 0; background-color: #1e293b; z-index: 10;">Dis Amt</th>
+                    <th style="padding:4px 6px; width:8%; text-align:right; position: sticky; top: 0; background-color: #1e293b; z-index: 10;">Net Value</th>
+                    <th style="padding:4px 6px; width:8%; text-align:right; position: sticky; top: 0; background-color: #1e293b; z-index: 10;">GST AMT</th>
+                    <th style="padding:4px 6px; width:10%; text-align:right; font-weight:600; color:#60a5fa; position: sticky; top: 0; background-color: #1e293b; z-index: 10;">Net Amount</th>
+                  </tr>
+                </thead>
+                <tbody id="purchase-grid-body">
+                  <!-- Rows populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Extreme Lower Totals Row -->
+            <div style="background-color: #cbd5e1; border-top: 2px solid #94a3b8; padding: 1px 0; overflow-y: scroll; scrollbar-color: transparent transparent;">
+              <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.75rem; color: black; table-layout: fixed;">
+                <tr style="background-color: #cbd5e1;">
+                  <td style="padding: 2px 4px; width: 4%;"></td>
+                  <td style="padding: 2px 4px; width: 20%;">
+                    <div style="display: flex; align-items: center; gap: 4px; font-weight: 700; font-size: 0.75rem; color: #1e293b;">
+                      <span>STOCK:</span>
+                      <span id="lbl-pur-availstock" style="color: #1e3b8b; font-weight: 800;">0.00</span>
+                    </div>
+                  </td>
+                  <td style="padding: 2px 4px; width: 10%;"></td>
+                  <td style="padding: 2px 4px; width: 8%;"></td>
+                  <td style="padding: 2px 4px; width: 6%;"></td>
+                  <td style="padding: 2px 4px; width: 8%; text-align: right;">
+                    <input type="text" id="pur-tot-qty" value="0.00" readonly style="width: 100%; text-align: right; font-weight: bold; background: white; color: black; border: 1px solid #94a3b8; padding: 1px 4px; font-size: 0.75rem; border-radius: 2px;">
+                  </td>
+                  <td style="padding: 2px 4px; width: 8%; text-align: right;"></td>
+                  <td style="padding: 2px 4px; width: 9%; text-align: right;">
+                    <input type="text" id="pur-tot-amount" value="0.00" readonly style="width: 100%; text-align: right; font-weight: bold; background: white; color: black; border: 1px solid #94a3b8; padding: 1px 4px; font-size: 0.75rem; border-radius: 2px;">
+                  </td>
+                  <td style="padding: 2px 4px; width: 9%; text-align: right;">
+                    <input type="text" id="pur-tot-discount" value="0.00" readonly style="width: 100%; text-align: right; font-weight: bold; background: white; color: #dc2626; border: 1px solid #94a3b8; padding: 1px 4px; font-size: 0.75rem; border-radius: 2px;">
+                  </td>
+                  <td style="padding: 2px 4px; width: 8%; text-align: right;">
+                    <input type="text" id="pur-tot-netvalue" value="0.00" readonly style="width: 100%; text-align: right; font-weight: bold; background: white; color: black; border: 1px solid #94a3b8; padding: 1px 4px; font-size: 0.75rem; border-radius: 2px;">
+                  </td>
+                  <td style="padding: 2px 4px; width: 8%; text-align: right;">
+                    <input type="text" id="pur-tot-gst" value="0.00" readonly style="width: 100%; text-align: right; font-weight: bold; background: white; color: #16a34a; border: 1px solid #94a3b8; padding: 1px 4px; font-size: 0.75rem; border-radius: 2px;">
+                  </td>
+                  <td style="padding: 2px 4px; width: 10%; text-align: right;">
+                    <input type="text" id="pur-tot-nettotal" value="0.00" readonly style="width: 100%; text-align: right; font-weight: 800; background: white; color: #1e3b8b; border: 1.5px solid #1e3b8b; padding: 1px 4px; font-size: 0.75rem; border-radius: 2px;">
+                  </td>
                 </tr>
-              </thead>
-              <tbody id="purchase-grid-body">
-                <!-- Rows populated dynamically -->
-              </tbody>
-            </table>
+              </table>
+            </div>
           </div>
 
           <!-- Bottom panel calculations -->
-          <div style="display:grid; grid-template-columns: 1.2fr 1fr 1fr 1.2fr; gap:10px; background-color:#cbd5e1; padding:8px; border:1px solid #94a3b8; border-radius:var(--border-radius-sm);">
+          <div style="display:grid; grid-template-columns: 1.1fr 1.3fr 1.1fr 1.3fr; gap:8px; background-color:#b0c4de; padding:6px; border:1px solid #94a3b8; border-radius:var(--border-radius-sm); align-items:stretch;">
             
-            <!-- Grid Totals -->
-            <div style="font-size:0.75rem; display:flex; flex-direction:column; gap:2px; font-weight:700;">
-              <div>Qty Total: <span id="tot-qty" style="color:blue;">0.00</span></div>
-              <div>Amt Total: \u20B9<span id="tot-amount">0.00</span></div>
-              <div>Disc Total: \u20B9<span id="tot-discount" style="color:red;">0.00</span></div>
-              <div>Net Value: \u20B9<span id="tot-netvalue">0.00</span></div>
-              <div>GST Total: \u20B9<span id="tot-gst">0.00</span></div>
-              <div style="font-size:0.8rem; border-top:1px solid #94a3b8; padding-top:2px;">Grid Total: \u20B9<span id="tot-nettotal" style="color:green;">0.00</span></div>
-            </div>
-
-            <!-- Tax splits -->
-            <div style="border: 1px solid #94a3b8; background-color:#f1f5f9; padding:6px; border-radius:var(--border-radius-sm); display:flex; flex-direction:column; gap:2px;">
-              <div style="background-color:#1e3b8b; color:white; font-size:0.7rem; font-weight:600; padding:1px 6px; text-align:center;">TAX SPLITS</div>
+            <!-- Card 1: Tax splits -->
+            <div style="border: 1px solid #94a3b8; background-color:#ffffff; padding:4px 6px; border-radius:4px; display:flex; flex-direction:column; gap:3px; justify-content:space-between;">
+              <div style="background-color:#1e3b8b; color:white; font-size:0.68rem; font-weight:700; padding:2px 6px; text-align:center; border-radius:2px; letter-spacing:0.5px;">TAX BREAKDOWN</div>
               <div style="display:grid; grid-template-columns: 1fr 1fr; gap:4px;">
                 <div>
-                  <label style="font-size:0.68rem; font-weight:600;">CGST</label>
-                  <input type="text" id="pur-cgst" class="form-control" style="background-color:#e2e8f0; color:black; padding:1px 4px; font-size:0.75rem;" value="0.00" readonly>
+                  <label style="font-size:0.65rem; font-weight:700; color:#475569; display:block;">CGST</label>
+                  <input type="text" id="pur-cgst" class="form-control" style="background-color:#f1f5f9; color:#1e293b; padding:2px 6px; font-size:0.75rem; height:26px; font-weight:700; border:1px solid #cbd5e1; border-radius:3px; box-sizing:border-box;" value="0.00" readonly>
                 </div>
                 <div>
-                  <label style="font-size:0.68rem; font-weight:600;">SGST</label>
-                  <input type="text" id="pur-sgst" class="form-control" style="background-color:#e2e8f0; color:black; padding:1px 4px; font-size:0.75rem;" value="0.00" readonly>
+                  <label style="font-size:0.65rem; font-weight:700; color:#475569; display:block;">SGST</label>
+                  <input type="text" id="pur-sgst" class="form-control" style="background-color:#f1f5f9; color:#1e293b; padding:2px 6px; font-size:0.75rem; height:26px; font-weight:700; border:1px solid #cbd5e1; border-radius:3px; box-sizing:border-box;" value="0.00" readonly>
                 </div>
               </div>
               <div style="display:grid; grid-template-columns: 1fr 1fr; gap:4px;">
                 <div>
-                  <label style="font-size:0.68rem; font-weight:600;">IGST</label>
-                  <input type="text" id="pur-igst" class="form-control" style="background-color:#e2e8f0; color:black; padding:1px 4px; font-size:0.75rem;" value="0.00" readonly>
+                  <label style="font-size:0.65rem; font-weight:700; color:#475569; display:block;">IGST</label>
+                  <input type="text" id="pur-igst" class="form-control" style="background-color:#f1f5f9; color:#1e293b; padding:2px 6px; font-size:0.75rem; height:26px; font-weight:700; border:1px solid #cbd5e1; border-radius:3px; box-sizing:border-box;" value="0.00" readonly>
                 </div>
                 <div>
-                  <label style="font-size:0.68rem; font-weight:600;">CESS</label>
-                  <input type="text" id="pur-cess" class="form-control" style="background-color:#e2e8f0; color:black; padding:1px 4px; font-size:0.75rem;" value="0.00" readonly>
+                  <label style="font-size:0.65rem; font-weight:700; color:#475569; display:block;">CESS</label>
+                  <input type="text" id="pur-cess" class="form-control" style="background-color:#f1f5f9; color:#1e293b; padding:2px 6px; font-size:0.75rem; height:26px; font-weight:700; border:1px solid #cbd5e1; border-radius:3px; box-sizing:border-box;" value="0.00" readonly>
                 </div>
               </div>
             </div>
 
-            <!-- Adjustments/Narrations -->
-            <div style="display:flex; flex-direction:column; gap:4px;">
-              <div style="display:grid; grid-template-columns: 110px 1fr auto; gap:4px; align-items:center;">
-                <label id="lbl-pur-adjustments" style="font-weight:600; font-size:0.75rem; cursor:pointer;" title="Click or press Insert to configure Adjustments">Adjustments</label>
-                <input type="number" step="0.01" id="pur-adjustments" class="form-control" style="background-color:white; color:black; padding:2px 6px; font-size:0.75rem;" value="0.00" title="Press Insert or double click to configure Adjustments">
-                <button type="button" id="btn-clear-purchase-adjustments" title="Clear All Adjustments" style="padding:1px 5px; font-size:0.7rem; background:#ef4444; color:white; border:none; border-radius:3px; cursor:pointer;">Clear</button>
+            <!-- Card 2: Common discount and Pay mode -->
+            <div style="background-color:#ffffff; border:1px solid #94a3b8; border-radius:4px; padding:6px; display:flex; flex-direction:column; gap:4px; justify-content:space-between;">
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
+                <div>
+                  <label style="font-weight:700; font-size:0.7rem; color:#334155; display:block; margin-bottom:1px;">Disc %</label>
+                  <input type="number" step="0.1" id="pur-discount-percent" class="form-control" style="background-color:white; color:black; padding:2px 6px; font-size:0.75rem; height:26px; border:1px solid #cbd5e1; border-radius:3px; box-sizing:border-box; width:100%;" value="${editPurchase ? (editPurchase.discountPercent || 0) : 0}">
+                </div>
+                <div>
+                  <label style="font-weight:700; font-size:0.7rem; color:#334155; display:block; margin-bottom:1px;">Discount Amt</label>
+                  <input type="number" step="0.01" id="pur-discount-amt" class="form-control" style="background-color:white; color:black; padding:2px 6px; font-size:0.75rem; height:26px; border:1px solid #cbd5e1; border-radius:3px; box-sizing:border-box; width:100%;" value="${editPurchase ? (editPurchase.discountAmount || 0) : '0.00'}">
+                </div>
+              </div>
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
+                <div>
+                  <label style="font-weight:700; font-size:0.7rem; color:#334155; display:block; margin-bottom:1px;">Pay Mode</label>
+                  <select id="pur-paymode" class="form-control" style="background-color:white; color:black; padding:2px 6px; font-size:0.75rem; height:26px; border:1px solid #cbd5e1; border-radius:3px; box-sizing:border-box; width:100%;">
+                    <option value="Credit" selected>Credit</option>
+                    <option value="Cash">Cash</option>
+                    ${state.getLedgers().filter(l => l.groupName === 'CASH-IN-HAND' || l.groupName === 'BANK ACCOUNTS').filter(l => (l.name || '').toUpperCase() !== 'CASH').map(l => `<option value="${l.name}">${l.name}</option>`).join('')}
+                  </select>
+                </div>
+                <div id="pur-crperiod-container">
+                  <label style="font-weight:700; font-size:0.7rem; color:#334155; display:block; margin-bottom:1px;">Crdt. Period (Days)</label>
+                  <input type="number" id="pur-crperiod" class="form-control" style="background-color:white; color:black; padding:2px 6px; font-size:0.75rem; height:26px; border:1px solid #cbd5e1; border-radius:3px; box-sizing:border-box; width:100%;" value="0">
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 3: Adjustments/Round Off -->
+            <div style="background-color:#ffffff; border:1px solid #94a3b8; border-radius:4px; padding:6px; display:flex; flex-direction:column; gap:4px; justify-content:space-between;">
+              <div style="display:grid; grid-template-columns: 76px 1fr auto; gap:4px; align-items:center;">
+                <label id="lbl-pur-adjustments" style="font-weight:700; font-size:0.7rem; color:#334155; cursor:pointer;" title="Click or press Insert to configure Adjustments">Adjustments</label>
+                <input type="number" step="0.01" id="pur-adjustments" class="form-control" style="background-color:white; color:black; padding:2px 6px; font-size:0.75rem; height:26px; border:1px solid #cbd5e1; border-radius:3px; box-sizing:border-box; width:100%;" value="0.00" title="Press Insert or double click to configure Adjustments">
+                <button type="button" id="btn-clear-purchase-adjustments" title="Clear All Adjustments" style="height:26px; padding:2px 6px; font-size:0.68rem; background:#ef4444; color:white; border:none; border-radius:3px; cursor:pointer; font-weight:700; box-sizing:border-box; display:inline-flex; align-items:center; justify-content:center;">Clear</button>
               </div>
               <input type="hidden" id="pur-addlcess" value="0.00">
-              <div style="display:grid; grid-template-columns: 110px 1fr; gap:4px; align-items:center;">
-                <label style="font-weight:600; font-size:0.75rem;">Round Off</label>
-                <input type="number" step="0.01" id="pur-roundoff" class="form-control" style="background-color:white; color:black; padding:2px 6px; font-size:0.75rem;" value="0.00">
+              <div id="pur-headloader-container" style="display: ${options.enableHeadloader !== false ? 'grid' : 'none'}; grid-template-columns: 76px 1fr; gap:4px; align-items:center;">
+                <label style="font-weight:700; font-size:0.7rem; color:#334155; white-space:nowrap;" title="Unloading / Vehicle Type">Unload Type</label>
+                <select id="pur-headloader-type" class="form-control" style="background-color:white; color:black; padding:2px 6px; font-size:0.75rem; height:26px; border:1px solid #cbd5e1; border-radius:3px; box-sizing:border-box; width:100%;">
+                  <option value="none" ${editPurchase && (editPurchase.headloaderType === 'none' || editPurchase.headloaderType === 'no_charge' || editPurchase.headloaderType === 'No Loading Charge' || editPurchase.headloaderType === 'No Unloading Charge') ? 'selected' : ''}>🚫 No Unloading Charge</option>
+                  ${(state.getHeadloaderTypes ? state.getHeadloaderTypes('unloading') : [{id:'std', name:'Standard'}]).map(t => {
+                    const selVal = editPurchase ? (editPurchase.headloaderType || editPurchase.handlingType || editPurchase.unloadingType || '') : '';
+                    const isSelected = selVal ? (selVal === t.id || selVal === t.name) : t.isDefault;
+                    return `<option value="${t.id}" ${isSelected ? 'selected' : ''}>${t.name}</option>`;
+                  }).join('')}
+                </select>
+              </div>
+              <div style="display:grid; grid-template-columns: 76px 1fr; gap:4px; align-items:center;">
+                <label style="font-weight:700; font-size:0.7rem; color:#334155;">Round Off</label>
+                <input type="number" step="0.01" id="pur-roundoff" class="form-control" style="background-color:white; color:black; padding:2px 6px; font-size:0.75rem; height:26px; border:1px solid #cbd5e1; border-radius:3px; box-sizing:border-box; width:100%;" value="0.00">
               </div>
             </div>
 
-            <!-- Big Net Amount summary -->
-            <div style="display:flex; flex-direction:column; justify-content:center; align-items:center; background-color:#1e293b; color:#10b981; border-radius:var(--border-radius-sm); padding:6px; border:2px solid #475569;">
-              <span style="font-size:0.7rem; font-weight:700; color:#94a3b8; text-transform:uppercase;">Grand Net Total</span>
-              <strong id="pur-nettotal-box" style="font-size:1.6rem; font-weight:900;">\u20B90.00</strong>
+            <!-- Card 4: Net Total Box -->
+            <div style="display:flex; flex-direction:column; justify-content:center; align-items:center; background-color:#1e293b; color:#10b981; border-radius:4px; padding:6px; border:1.5px solid #475569; box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);">
+              <span style="font-size:0.7rem; font-weight:800; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">Grand Net Total</span>
+              <strong id="pur-nettotal-box" style="font-size:1.65rem; font-weight:900; letter-spacing:0.5px;">\u20B90.00</strong>
             </div>
 
           </div>
@@ -4923,45 +5531,29 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
           </div>
 
           <!-- Bottom Action Buttons Ribbon -->
-          <div style="display:grid; grid-template-columns: 2.2fr 1fr; gap:10px; align-items:center; margin-top:4px;">
+          <div style="display:flex; flex-direction:column; gap:6px; margin-top:4px;">
+            <!-- Row 1: Details -->
             <div style="display:flex; align-items:center; gap:8px;">
-              <label style="font-weight:700; font-size:0.75rem;">Narration:</label>
-              <input type="text" id="pur-narration" class="form-control" style="background-color:white; color:black; padding:4px 8px; font-size:0.8rem; flex-grow:1; max-width:320px;" placeholder="Enter purchase details or remarks..." value="${editPurchase ? editPurchase.narration || '' : ''}">
-              <div id="pur-headloader-container" style="display: ${options.enableHeadloader !== false ? 'flex' : 'none'}; align-items: center; gap: 4px;">
-                <label style="font-weight:700; font-size:0.75rem; margin-left:6px;" title="Unloading / Vehicle Type">Unload Type:</label>
-                <select id="pur-headloader-type" class="form-control" style="background-color:white; color:black; padding:2px 6px; font-size:0.75rem; width:150px; height:28px;">
-                  <option value="none" ${editPurchase && (editPurchase.headloaderType === 'none' || editPurchase.headloaderType === 'no_charge' || editPurchase.headloaderType === 'No Loading Charge' || editPurchase.headloaderType === 'No Unloading Charge') ? 'selected' : ''}>🚫 No Unloading Charge</option>
-                  ${(state.getHeadloaderTypes ? state.getHeadloaderTypes('unloading') : [{id:'std', name:'Standard'}]).map(t => {
-                    const selVal = editPurchase ? (editPurchase.headloaderType || editPurchase.handlingType || editPurchase.unloadingType || '') : '';
-                    const isSelected = selVal ? (selVal === t.id || selVal === t.name) : t.isDefault;
-                    return `<option value="${t.id}" ${isSelected ? 'selected' : ''}>${t.name}</option>`;
-                  }).join('')}
-                </select>
-              </div>
+              <label style="font-weight:700; font-size:0.75rem; white-space:nowrap;">Narration:</label>
+              <input type="text" id="pur-narration" class="form-control" style="background-color:white; color:black; padding:2px 6px; font-size:0.75rem; height:26px; flex-grow:1; min-width:0; border:1px solid #94a3b8; border-radius:3px; box-sizing:border-box;" placeholder="Enter purchase details or remarks..." value="${editPurchase ? editPurchase.narration || '' : ''}">
             </div>
             
-            <div style="display:flex; justify-content:flex-end; gap:6px; align-items:center;">
-              <div style="display:flex; align-items:center; gap:4px; margin-right:10px;">
-                <label style="font-weight:700; font-size:0.75rem;">Pay Mode</label>
-                <select id="pur-paymode" class="form-control" style="background-color:white; color:black; padding:2px 6px; font-size:0.75rem;">
-                  <option value="Credit" selected>Credit</option>
-                  <option value="Cash">Cash</option>
-                  ${state.getLedgers().filter(l => l.groupName === 'CASH-IN-HAND' || l.groupName === 'BANK ACCOUNTS').filter(l => (l.name || '').toUpperCase() !== 'CASH').map(l => `<option value="${l.name}">${l.name}</option>`).join('')}
-                </select>
+            <!-- Row 2: Action Buttons -->
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div style="display:flex; align-items:center; gap:6px;">
+                <button type="button" class="btn btn-secondary" id="btn-pur-search" style="padding:4px 12px; font-weight:700; background-color: #0284c7; border: none; color: white; font-size:0.75rem; height:28px; border-radius:3px;" title="Search Bills"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+                <button type="button" class="btn btn-secondary" id="btn-pur-prev" style="padding:4px 10px; font-weight:700; background-color: #475569; border: none; color: white; font-size:0.75rem; height:28px; border-radius:3px;" title="Previous Bill">&lt;</button>
+                <button type="button" class="btn btn-secondary" id="btn-pur-next" style="padding:4px 10px; font-weight:700; background-color: #475569; border: none; color: white; font-size:0.75rem; height:28px; border-radius:3px;" title="Next Bill">&gt;</button>
+                ${editPurchase ? `
+                  <button type="button" class="btn btn-danger" id="btn-pur-void" style="background-color:#ef4444; border:none; color:white; padding:4px 12px; font-weight:700; height:28px; font-size:0.75rem; border-radius:3px; white-space:nowrap;" title="Cancel Bill"><i class="fa-solid fa-ban"></i> Cancel Bill</button>
+                ` : ''}
               </div>
-              <div style="display:none; align-items:center; gap:4px; margin-right:10px;" id="pur-crperiod-container">
-                <label style="font-weight:700; font-size:0.75rem;">Days</label>
-                <input type="number" id="pur-crperiod" class="form-control" style="background-color:white; color:black; padding:2px; font-size:0.75rem; width:50px;" value="0">
+              <div style="display:flex; align-items:center; gap:6px;">
+                <button type="button" class="btn btn-secondary" id="btn-pur-print" style="padding:4px 14px; font-weight:700; background-color: #64748b; border: none; color: white; font-size:0.75rem; height:28px; border-radius:3px; ${editPurchase ? 'cursor:pointer;' : 'opacity:0.5; cursor:not-allowed;'}" ${editPurchase ? '' : 'disabled'} title="Print Bill"><i class="fa-solid fa-print"></i> Print</button>
+                <button type="button" class="btn btn-secondary" id="btn-pur-new" style="padding:4px 14px; font-weight:700; background-color: #0d9488; border: none; color: white; font-size:0.75rem; height:28px; border-radius:3px;" title="New Bill">New</button>
+                <button type="button" class="btn btn-secondary" id="btn-pur-cancel" style="padding:4px 14px; font-weight:700; font-size:0.75rem; height:28px; border-radius:3px; background-color:#e2e8f0; color:#1e293b; border:1px solid #cbd5e1;">Close</button>
+                <button type="submit" class="btn btn-primary" id="btn-pur-save" style="padding:4px 20px; font-weight:700; font-size:0.78rem; height:28px; border-radius:3px; background-color:#1e3b8b; color:white; border:none;">Save Bill</button>
               </div>
-
-              <button type="button" id="btn-pur-new" style="height:30px; padding:4px 12px; font-size:0.8rem; font-weight:700; background-color: #0d9488; border: none; color: white; border-radius:4px; display:inline-flex; align-items:center; gap:5px; cursor:pointer;" title="New Bill">New</button>
-              <button type="submit" id="btn-pur-save" style="height:30px; padding:4px 16px; font-size:0.8rem; font-weight:700; background-color: #2563eb; border: none; color: white; border-radius:4px; display:inline-flex; align-items:center; gap:5px; cursor:pointer;" title="Save Bill">Save Bill</button>
-              <button type="button" id="btn-pur-print" style="height:30px; padding:4px 12px; font-size:0.8rem; font-weight:700; background-color: #64748b; border: none; color: white; border-radius:4px; display:inline-flex; align-items:center; gap:5px; ${editPurchase ? 'cursor:pointer;' : 'opacity:0.5; cursor:not-allowed;'}" ${editPurchase ? '' : 'disabled'} title="Print Bill"><i class="fa-solid fa-print"></i> Print</button>
-              <button type="button" id="btn-pur-void" style="height:30px; padding:4px 12px; font-size:0.8rem; font-weight:700; background-color: #ef4444; border: none; color: white; border-radius:4px; display:inline-flex; align-items:center; gap:5px; ${editPurchase ? 'cursor:pointer;' : 'opacity:0.5; cursor:not-allowed;'}" ${editPurchase ? '' : 'disabled'} title="Cancel Bill"><i class="fa-solid fa-ban"></i> Cancel Bill</button>
-              <button type="button" id="btn-pur-search" style="height:30px; padding:4px 12px; font-size:0.8rem; font-weight:700; background-color: #0284c7; border: none; color: white; border-radius:4px; display:inline-flex; align-items:center; gap:5px; cursor:pointer;" title="Search Bills"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
-              <button type="button" id="btn-pur-prev" style="height:30px; padding:4px 12px; font-size:0.8rem; font-weight:700; background-color: #475569; border: none; color: white; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer;" title="Previous Bill">&lt;</button>
-              <button type="button" id="btn-pur-next" style="height:30px; padding:4px 12px; font-size:0.8rem; font-weight:700; background-color: #475569; border: none; color: white; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer;" title="Next Bill">&gt;</button>
-              <button type="button" id="btn-pur-cancel" style="height:30px; padding:4px 12px; font-size:0.8rem; font-weight:700; background-color: #64748b; border: none; color: white; border-radius:4px; display:inline-flex; align-items:center; gap:5px; cursor:pointer;" title="Close Modal">Close</button>
             </div>
           </div>
         </form>
@@ -4969,7 +5561,8 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
     </div>
   `;
 
-  const overlay = document.getElementById("modal-overlay-tx");
+  root.appendChild(modalEl);
+  const overlay = modalEl;
   const winBox = overlay ? overlay.firstElementChild : null;
   const headerBar = winBox ? winBox.firstElementChild : null;
   if (winBox && headerBar) makeDraggable(winBox, headerBar);
@@ -4978,7 +5571,47 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
   let onDocClickClosePurSupplierDropdown = null;
   let onDocClickClosePurBatchDropdown = null;
   let onDocClickClosePurCodeDropdown = null;
+
+  const openVendorPurchaseHistory = () => {
+    const supSelect = document.getElementById("pur-supplier");
+    const supId = supSelect ? supSelect.value : "";
+    if (!supId) {
+      alert("Please select a vendor first to view history (F8).");
+      if (supSelect) supSelect.focus();
+      return;
+    }
+    const supObj = state.getContacts().find(c => c.id === supId) || { id: supId, name: "Vendor" };
+    showVendorPurchaseHistoryModal(supObj, (selectedPurId) => {
+      const purToEdit = state.getPurchases().find(p => String(p.id) === String(selectedPurId));
+      if (purToEdit) {
+        close();
+        showRecordPurchaseModal(container, purToEdit, onSuccess, activeSeries);
+      }
+    });
+  };
+
+  const handleGlobalKeydown = (e) => {
+    if (e.key === "Delete" || e.key === "Del") {
+      const active = document.activeElement;
+      const isInputFocused = active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA" || active.tagName === "SELECT");
+      if (!isInputFocused && selectedGridIndex !== null && selectedGridIndex >= 0 && selectedGridIndex < gridItems.length) {
+        e.preventDefault();
+        gridItems.splice(selectedGridIndex, 1);
+        if (selectedGridIndex >= gridItems.length) selectedGridIndex = gridItems.length - 1;
+        if (selectedGridIndex < 0) selectedGridIndex = null;
+        renderGridAndRecalc();
+      }
+    }
+    if (e.key === "F8") {
+      e.preventDefault();
+      e.stopPropagation();
+      openVendorPurchaseHistory();
+    }
+  };
+  window.addEventListener("keydown", handleGlobalKeydown);
+
   const close = () => { 
+    window.removeEventListener("keydown", handleGlobalKeydown);
     if (onDocClickClosePurProductDropdown) {
       document.removeEventListener("click", onDocClickClosePurProductDropdown);
     }
@@ -4991,8 +5624,7 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
     if (onDocClickClosePurCodeDropdown) {
       document.removeEventListener("click", onDocClickClosePurCodeDropdown);
     }
-    overlay.classList.remove("active"); 
-    root.innerHTML = ""; 
+    modalEl.remove();
   };
 
   document.getElementById("pm-close-btn-header").addEventListener("click", close);
@@ -5254,10 +5886,13 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
         }
         return true;
       };
-      if (confirm(`Are you sure you want to cancel Purchase Bill ${editPurchase.id}?`) && validateAdminPassword()) {
-        state.cancelPurchase(editPurchase.id);
+      if (confirm(`Are you sure you want to cancel Purchase Bill ${editPurchase.voucherNo || editPurchase.id}?`) && validateAdminPassword()) {
+        const ok = state.cancelPurchase(editPurchase.id);
+        if (!ok) return;
+        alert(`Purchase Bill ${editPurchase.voucherNo || editPurchase.id} has been cancelled successfully.`);
         close();
         if (onSuccess) onSuccess();
+        showRecordPurchaseModal(container, editPurchase, onSuccess, activeSeries);
       }
     });
   }
@@ -5265,9 +5900,13 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
   // Handle Paymode change
   const paymodeSelect = document.getElementById("pur-paymode");
   const crperiodContainer = document.getElementById("pur-crperiod-container");
-  paymodeSelect.addEventListener("change", () => {
-    crperiodContainer.style.display = paymodeSelect.value === "Credit" ? "flex" : "none";
-  });
+  if (paymodeSelect) {
+    paymodeSelect.addEventListener("change", () => {
+      if (crperiodContainer) {
+        crperiodContainer.style.display = paymodeSelect.value === "Credit" ? "block" : "none";
+      }
+    });
+  }
 
   // Bind Supplier search combobox & closing balance
   const supplierSelect = document.getElementById("pur-supplier");
@@ -5718,11 +6357,20 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
 
   const openProductMasterFromPurchase = () => {
     import("./inventory.js").then(m => {
-      m.showProductMasterModal(container, null, null, () => {
-        showRecordPurchaseModal(container, editPurchase, onSuccess, activeSeries);
-        setTimeout(() => {
-          repopulateProducts();
-        }, 50);
+      const subRoot = document.getElementById("sub-modal-container-root") || container;
+      m.showProductMasterModal(subRoot, null, null, (createdMat) => {
+        repopulateProducts();
+        if (createdMat && createdMat.name && productSelect) {
+          productSelect.value = createdMat.name;
+          productSelect.dispatchEvent(new Event("change"));
+          setTimeout(() => {
+            if (createdMat.code && codeSelect && !codeSelect.disabled) {
+              codeSelect.value = createdMat.code;
+              if (codeSearch) codeSearch.value = createdMat.code;
+              codeSelect.dispatchEvent(new Event("change"));
+            }
+          }, 30);
+        }
       });
     });
   };
@@ -5735,7 +6383,7 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
 
   // F9 / F10 keydown inside form
   document.getElementById("purchase-bill-form").addEventListener("keydown", (e) => {
-    if (e.key === "F9") {
+    if (e.key === "F2" || e.key === "F9") {
       e.preventDefault();
       openProductMasterFromPurchase();
     }
@@ -5823,7 +6471,17 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
     });
   });
 
+  document.getElementById("btn-pur-vendor-history")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    openVendorPurchaseHistory();
+  });
+
   document.getElementById("purchase-bill-form").addEventListener("keydown", (e) => {
+    if (e.key === "F8") {
+      e.preventDefault();
+      e.stopPropagation();
+      openVendorPurchaseHistory();
+    }
     if (e.key === "Enter" && e.target.tagName !== "TEXTAREA" && e.target.type !== "submit" && !e.target.id.startsWith("ribbon-") && e.target.id !== "pur-supplier-search") {
       e.preventDefault();
       const focusables = Array.from(document.getElementById("purchase-bill-form").querySelectorAll("input, select, button:not([type='button'])"));
@@ -6248,8 +6906,8 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
   let gridItems = editPurchase ? editPurchase.items.map(item => {
     const qty = parseFloat(item.quantity) || 0;
     const price = parseFloat(item.price) || 0;
-    const disP = parseFloat(item.discountPercent) || 0;
-    const disA = parseFloat(item.discountAmount) || 0;
+    const disP = item.rowDiscountPercent !== undefined ? parseFloat(item.rowDiscountPercent) : (parseFloat(item.discountPercent) || 0);
+    const disA = item.rowDiscountAmount !== undefined ? parseFloat(item.rowDiscountAmount) : (parseFloat(item.discountAmount) || 0);
     const netVal = item.netValue !== undefined ? parseFloat(item.netValue) : (item.amount !== undefined ? parseFloat(item.amount) : ((qty * price) - disA));
     const gstPct = item.gstPercent !== undefined && item.gstPercent !== null && !isNaN(item.gstPercent) && Number(item.gstPercent) > 0 ? parseFloat(item.gstPercent) : (item.taxRate !== undefined ? parseFloat(item.taxRate) : 0);
     const existingGstAmt = (parseFloat(item.cgst) || 0) + (parseFloat(item.sgst) || 0) + (parseFloat(item.igst) || 0);
@@ -6267,6 +6925,8 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
       price: price,
       landingCost: parseFloat(item.landingCost) || price,
       mrp: parseFloat(item.mrp) || (price * 1.25),
+      rowDiscountPercent: disP,
+      rowDiscountAmount: disA,
       discountPercent: disP,
       discountAmount: disA,
       netValue: netVal,
@@ -6278,7 +6938,7 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
   }) : [];
 
   let adjustmentsList = editPurchase ? (editPurchase.adjustmentsList || []) : [];
-  let isManualRoundOff = false;
+  let isManualRoundOff = editPurchase ? (editPurchase.roundOff !== undefined && editPurchase.roundOff !== null && String(editPurchase.roundOff).trim() !== "") : false;
 
   // Pre-fill existing metadata if editing
   if (editPurchase) {
@@ -6327,6 +6987,12 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
     document.getElementById("pur-adjustments").value = editPurchase.adjustments || "0.00";
     document.getElementById("pur-addlcess").value = editPurchase.additionalCess || "0.00";
     document.getElementById("pur-roundoff").value = editPurchase.roundOff || "0.00";
+    if (document.getElementById("pur-discount-percent")) {
+      document.getElementById("pur-discount-percent").value = editPurchase.discountPercent || 0;
+    }
+    if (document.getElementById("pur-discount-amt")) {
+      document.getElementById("pur-discount-amt").value = editPurchase.discountAmount || "0.00";
+    }
   }
   updateVendorClosingBalanceDisplay();
 
@@ -6447,9 +7113,15 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
     ribbonBatchSearch.value = batchNo;
     const matched = currentBatchesList.find(b => b.batchNo === batchNo);
     if (matched) {
-      rateInput.value = matched.landingCost ? matched.landingCost.toFixed(2) : rateInput.value;
+      rateInput.value = matched.landingCost !== undefined && matched.landingCost !== null ? formatRateValue(matched.landingCost) : (formatRateValue(batchNo) || rateInput.value);
       mrpInput.value = matched.mrp ? matched.mrp.toFixed(2) : mrpInput.value;
       recalcRibbonRowDiscount();
+    } else {
+      const num = parseFloat(batchNo);
+      if (!isNaN(num) && num > 0) {
+        rateInput.value = formatRateValue(num);
+        recalcRibbonRowDiscount();
+      }
     }
     closePurBatchDropdown();
     setTimeout(() => {
@@ -6545,15 +7217,19 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
       ribbonBatchSearch.value = selectedBatchNo;
       const matched = batches.find(b => b.batchNo === selectedBatchNo);
       if (matched) {
-        rateInput.value = matched.landingCost ? matched.landingCost.toFixed(2) : rateInput.value;
+        rateInput.value = matched.landingCost !== undefined && matched.landingCost !== null ? formatRateValue(matched.landingCost) : rateInput.value;
         mrpInput.value = matched.mrp ? matched.mrp.toFixed(2) : mrpInput.value;
         recalcRibbonRowDiscount();
       }
-    } else if (batches.length === 1) {
+    } else if (rateInput.value && !isNaN(parseFloat(rateInput.value)) && parseFloat(rateInput.value) > 0) {
+      const bName = formatRateValue(rateInput.value);
+      ribbonBatchSelect.value = bName;
+      ribbonBatchSearch.value = bName;
+    } else if (batches.length > 0) {
       const b = batches[0];
       ribbonBatchSelect.value = b.batchNo;
       ribbonBatchSearch.value = b.batchNo;
-      rateInput.value = b.landingCost ? b.landingCost.toFixed(2) : rateInput.value;
+      rateInput.value = b.landingCost !== undefined && b.landingCost !== null ? formatRateValue(b.landingCost) : rateInput.value;
       mrpInput.value = b.mrp ? b.mrp.toFixed(2) : mrpInput.value;
       recalcRibbonRowDiscount();
     } else {
@@ -6653,13 +7329,18 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
       const currentMaterials = state.getMaterials() || materials || [];
       const mat = currentMaterials.find(m => m.name.toLowerCase() === pName.toLowerCase() && m.code === pCode);
       if (mat) {
-        rateInput.value = mat.landingCost ? mat.landingCost.toFixed(2) : "";
+        rateInput.value = mat.landingCost !== undefined && mat.landingCost !== null ? formatRateValue(mat.landingCost) : "";
         mrpInput.value = mat.mrp ? mat.mrp.toFixed(2) : "";
         updateRibbonUnitSelect(unitSelect, mat.unit);
         qtyInput.value = "100";
         disPercentInput.value = "0";
         disAmtInput.value = "0.00";
         populateRibbonBatches(mat.id);
+        if (rateInput.value) {
+          const bName = formatRateValue(rateInput.value);
+          if (ribbonBatchSearch) ribbonBatchSearch.value = bName;
+          if (ribbonBatchSelect) ribbonBatchSelect.value = bName;
+        }
         recalcRibbonRowDiscount();
       }
     }
@@ -6677,7 +7358,7 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
         const selectedBatch = mat.batches.find(b => b.batchNo === ribbonBatchSelect.value);
         if (selectedBatch) {
           if (ribbonBatchSearch) ribbonBatchSearch.value = selectedBatch.batchNo;
-          rateInput.value = selectedBatch.landingCost ? selectedBatch.landingCost.toFixed(2) : rateInput.value;
+          rateInput.value = selectedBatch.landingCost !== undefined && selectedBatch.landingCost !== null ? formatRateValue(selectedBatch.landingCost) : rateInput.value;
           mrpInput.value = selectedBatch.mrp ? selectedBatch.mrp.toFixed(2) : mrpInput.value;
           recalcRibbonRowDiscount();
         }
@@ -6685,9 +7366,26 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
     }
   });
 
-  // Ribbon discounts auto-calculations
+  // Ribbon discounts auto-calculations & keep batch name equal to purchase rate / landing cost
   qtyInput.addEventListener("input", recalcRibbonRowDiscount);
-  rateInput.addEventListener("input", recalcRibbonRowDiscount);
+  rateInput.addEventListener("input", () => {
+    recalcRibbonRowDiscount();
+    const val = rateInput.value.trim();
+    if (val !== "" && !isNaN(parseFloat(val))) {
+      const bName = formatRateValue(val);
+      if (ribbonBatchSearch) ribbonBatchSearch.value = bName;
+      if (ribbonBatchSelect) {
+        let optExists = Array.from(ribbonBatchSelect.options).some(o => o.value === bName);
+        if (!optExists) {
+          const opt = document.createElement("option");
+          opt.value = bName;
+          opt.text = bName;
+          ribbonBatchSelect.add(opt);
+        }
+        ribbonBatchSelect.value = bName;
+      }
+    }
+  });
   disPercentInput.addEventListener("input", () => {
     const q = parseFloat(qtyInput.value) || 0;
     const r = parseFloat(rateInput.value) || 0;
@@ -6718,15 +7416,9 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
     const mrp = parseFloat(mrpInput.value) || rate * 1.5;
     const disP = parseFloat(disPercentInput.value) || 0;
     const disA = parseFloat(disAmtInput.value) || 0;
-    const selectedBatchNo = ribbonBatchSelect.value;
 
     if (!pName || !pCode || qty <= 0 || rate <= 0) {
       alert("Missing product details! Select Product, Code, and enter Qty/Rate.");
-      return;
-    }
-
-    if (!selectedBatchNo) {
-      alert("Please select or create a Batch first.");
       return;
     }
 
@@ -6734,20 +7426,21 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
     const mat = currentMaterials.find(m => m.name.toLowerCase() === pName.toLowerCase() && m.code === pCode);
     if (!mat) return;
 
-    // Validate if entered rate matches selected batch cost
-    const matchedBatch = mat.batches.find(b => b.batchNo === selectedBatchNo);
-    if (matchedBatch && parseFloat(matchedBatch.landingCost) !== rate) {
-      alert("The entered rate does not match the landing cost of the selected batch. Please choose an existing batch that matches or create a new batch.");
-      showBatchSelectionModal(mat.id, rate, (selectedBatch) => {
-        if (selectedBatch) {
-          populateRibbonBatches(mat.id, selectedBatch.batchNo);
-          rateInput.value = selectedBatch.landingCost.toFixed(2);
-          mrpInput.value = selectedBatch.mrp.toFixed(2);
-          recalcRibbonRowDiscount();
-        }
+    // Batch name ALWAYS equals purchase rate / landing cost
+    const targetBatchNo = formatRateValue(rate) || String(rate);
+
+    mat.batches = mat.batches || [];
+    let matchedBatch = mat.batches.find(b => b.batchNo === targetBatchNo || Math.abs(parseFloat(b.landingCost) - rate) < 0.0001);
+    if (!matchedBatch) {
+      state.addOrUpdateMaterialBatch(mat.id, {
+        batchNo: targetBatchNo,
+        landingCost: rate,
+        sellingPrice: mat.gstExclRate || mat.sellingPrice || (rate * 1.25),
+        mrp: mrp
       });
-      return;
+      matchedBatch = (mat.batches || []).find(b => b.batchNo === targetBatchNo);
     }
+    const selectedBatchNo = matchedBatch ? matchedBatch.batchNo : targetBatchNo;
 
     const netVal = (qty * rate) - disA;
     const seriesType = activeSeries ? activeSeries.seriesType : "LOCAL";
@@ -6763,6 +7456,8 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
       unit: unitSelect.value,
       price: rate,
       mrp: mrp,
+      rowDiscountPercent: disP,
+      rowDiscountAmount: disA,
       discountPercent: disP,
       discountAmount: disA,
       netValue: netVal,
@@ -6771,6 +7466,7 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
       cessPercent: mat.cess || 0,
       netAmount: netVal + gstAmt
     });
+    selectedGridIndex = gridItems.length - 1;
 
     productSelect.value = "";
     productSelect.dispatchEvent(new Event("change"));
@@ -6786,9 +7482,48 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
     }
   });
 
-  // Adjustments changes trigger recalculations
+  // Common discount event listeners
+  const purDisPercentInput = document.getElementById("pur-discount-percent");
+  const purDisAmtInput = document.getElementById("pur-discount-amt");
+
+  if (purDisPercentInput) {
+    purDisPercentInput.addEventListener("input", () => {
+      if (purDisAmtInput) {
+        let grossTotalBeforeDiscount = 0;
+        gridItems.forEach(item => {
+          const qty = parseFloat(item.quantity) || 0;
+          const price = parseFloat(item.price) || 0;
+          const rowDisA = item.rowDiscountAmount !== undefined ? parseFloat(item.rowDiscountAmount) : (parseFloat(item.discountAmount) || 0);
+          grossTotalBeforeDiscount += ((qty * price) - rowDisA);
+        });
+        const pct = parseFloat(purDisPercentInput.value) || 0;
+        const calcAmt = grossTotalBeforeDiscount * (pct / 100);
+        purDisAmtInput.value = calcAmt.toFixed(2);
+      }
+      renderGridAndRecalc();
+    });
+  }
+
+  if (purDisAmtInput) {
+    purDisAmtInput.addEventListener("input", () => {
+      if (purDisPercentInput) {
+        let grossTotalBeforeDiscount = 0;
+        gridItems.forEach(item => {
+          const qty = parseFloat(item.quantity) || 0;
+          const price = parseFloat(item.price) || 0;
+          const rowDisA = item.rowDiscountAmount !== undefined ? parseFloat(item.rowDiscountAmount) : (parseFloat(item.discountAmount) || 0);
+          grossTotalBeforeDiscount += ((qty * price) - rowDisA);
+        });
+        const amt = parseFloat(purDisAmtInput.value) || 0;
+        const calcPct = grossTotalBeforeDiscount > 0 ? (amt / grossTotalBeforeDiscount) * 100 : 0;
+        purDisPercentInput.value = calcPct.toFixed(2);
+      }
+      renderGridAndRecalc();
+    });
+  }
+
+  // Adjustments changes trigger recalculations without overriding manual round off
   document.getElementById("pur-adjustments").addEventListener("input", () => {
-    isManualRoundOff = false;
     renderGridAndRecalc();
   });
   document.getElementById("pur-addlcess").addEventListener("input", renderGridAndRecalc);
@@ -6799,39 +7534,86 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
   document.getElementById("pur-roundoff").addEventListener("focus", (e) => e.target.select());
   document.getElementById("pur-state").addEventListener("change", renderGridAndRecalc);
 
+  const clearPurAdjBtn = document.getElementById("btn-clear-purchase-adjustments");
+  if (clearPurAdjBtn) {
+    clearPurAdjBtn.addEventListener("click", () => {
+      adjustmentsList = [];
+      const adjEl = document.getElementById("pur-adjustments");
+      if (adjEl) adjEl.value = "0.00";
+      renderGridAndRecalc();
+    });
+  }
+
+  let selectedGridIndex = null;
+
   function renderGridAndRecalc() {
+    const generalDiscountPercent = parseFloat(document.getElementById("pur-discount-percent")?.value) || 0;
+    const generalDiscountAmount = parseFloat(document.getElementById("pur-discount-amt")?.value) || 0;
+
+    let grossTaxableBeforeGeneralDiscount = 0;
+    gridItems.forEach(item => {
+      const rowTaxable = (item.quantity * item.price) - (item.rowDiscountAmount !== undefined ? item.rowDiscountAmount : (item.discountAmount || 0));
+      grossTaxableBeforeGeneralDiscount += rowTaxable;
+    });
+
+    const isGeneralDiscountFlat = generalDiscountAmount !== 0 && generalDiscountPercent === 0;
+
+    gridItems.forEach(item => {
+      const rowTaxable = (item.quantity * item.price) - (item.rowDiscountAmount !== undefined ? item.rowDiscountAmount : (item.discountAmount || 0));
+      let generalItemDiscount = 0;
+      if (grossTaxableBeforeGeneralDiscount > 0) {
+        if (isGeneralDiscountFlat) {
+          generalItemDiscount = (rowTaxable / grossTaxableBeforeGeneralDiscount) * generalDiscountAmount;
+        } else if (generalDiscountPercent !== 0) {
+          generalItemDiscount = rowTaxable * (generalDiscountPercent / 100);
+        }
+      }
+      const totalRowDiscount = (item.rowDiscountAmount !== undefined ? item.rowDiscountAmount : (item.discountAmount || 0)) + generalItemDiscount;
+      item.discountAmount = totalRowDiscount;
+      item.netValue = (item.quantity * item.price) - totalRowDiscount;
+      const gstPct = item.gstPercent || 0;
+      item.gstAmount = item.netValue * (gstPct / 100);
+      item.netAmount = item.netValue + item.gstAmount;
+    });
+
     const tbody = document.getElementById("purchase-grid-body");
     tbody.innerHTML = gridItems.length === 0 ? `
       <tr><td colspan="12" style="text-align:center; padding:20px; color:#64748b;">No items added to the purchase grid.</td></tr>
-    ` : gridItems.map((item, index) => `
-      <tr class="purchase-grid-row" data-index="${index}" title="Double click to edit item" style="border-bottom: 1px solid #cbd5e1; background-color:${index % 2 === 0 ? '#f8fafc' : 'white'}; cursor: pointer;">
-        <td style="padding:4px 6px;"><strong>${item.name}</strong></td>
-        <td style="padding:4px 6px;"><code style="background-color:#f1f5f9; padding:2px; font-weight:700;">${item.code}</code></td>
-        <td style="padding:4px 6px; font-weight:bold; color:#1e3b8b;">${item.batchNo || ''}</td>
-        <td style="padding:4px 6px; text-align:right;">${item.quantity} ${item.unit}</td>
-        <td style="padding:4px 6px; text-align:right;">\u20B9${item.price.toFixed(2)}</td>
-        <td style="padding:4px 6px; text-align:right;">\u20B9${(item.quantity * item.price).toFixed(2)}</td>
-        <td style="padding:4px 6px; text-align:right; color:#ef4444;">\u20B9${item.discountAmount.toFixed(2)} (${item.discountPercent}%)</td>
-        <td style="padding:4px 6px; text-align:right; font-weight:600;">\u20B9${item.netValue.toFixed(2)}</td>
-        <td style="padding:4px 6px; text-align:right;">${item.gstPercent}%</td>
-        <td style="padding:4px 6px; text-align:right;">\u20B9${item.gstAmount.toFixed(2)}</td>
-        <td style="padding:4px 6px; text-align:right; font-weight:600; color:#1e40af;">\u20B9${item.netAmount.toFixed(2)}</td>
-        <td style="padding:4px 6px; text-align:center;">
-          <button type="button" class="btn-remove-grid-row" data-index="${index}" style="background:none; border:none; color:#ef4444; font-weight:bold; cursor:pointer; font-size:1.1rem;">&times;</button>
-        </td>
-      </tr>
-    `).join("");
-
-    // Bind remove buttons
-    tbody.querySelectorAll(".btn-remove-grid-row").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const idx = parseInt(btn.getAttribute("data-index"));
-        gridItems.splice(idx, 1);
-        renderGridAndRecalc();
-      });
-    });
+    ` : gridItems.map((item, index) => {
+      const isSelected = (index === selectedGridIndex);
+      return `
+        <tr class="purchase-grid-row" tabindex="0" data-index="${index}" title="Click to select row, Double click to edit item" style="border-bottom: 1px solid #cbd5e1; background-color:${isSelected ? '#bae6fd' : (index % 2 === 0 ? '#f8fafc' : 'white')}; cursor: pointer; outline: none;">
+          <td style="padding:4px 6px; width:4%; text-align:center; font-weight:bold; color:#64748b;">${index + 1}</td>
+          <td style="padding:4px 6px; width:20%;"><strong>${item.name}</strong></td>
+          <td style="padding:4px 6px; width:10%;"><code style="background-color:#f1f5f9; padding:2px; font-weight:700;">${item.code}</code></td>
+          <td style="padding:4px 6px; width:8%; font-weight:bold; color:#1e3b8b;">${item.batchNo || ''}</td>
+          <td style="padding:4px 6px; width:6%; text-align:right;">${item.gstPercent}%</td>
+          <td style="padding:4px 6px; width:8%; text-align:right;">${item.quantity} ${item.unit}</td>
+          <td style="padding:4px 6px; width:8%; text-align:right;">\u20B9${item.price.toFixed(2)}</td>
+          <td style="padding:4px 6px; width:9%; text-align:right;">\u20B9${(item.quantity * item.price).toFixed(2)}</td>
+          <td style="padding:4px 6px; width:9%; text-align:right; color:#ef4444;">\u20B9${item.discountAmount.toFixed(2)}</td>
+          <td style="padding:4px 6px; width:8%; text-align:right; font-weight:600;">\u20B9${item.netValue.toFixed(2)}</td>
+          <td style="padding:4px 6px; width:8%; text-align:right;">\u20B9${item.gstAmount.toFixed(2)}</td>
+          <td style="padding:4px 6px; width:10%; text-align:right; font-weight:600; color:#1e40af;">\u20B9${item.netAmount.toFixed(2)}</td>
+        </tr>
+      `;
+    }).join("");
 
     tbody.querySelectorAll(".purchase-grid-row").forEach(row => {
+      row.addEventListener("click", () => {
+        selectedGridIndex = parseInt(row.getAttribute("data-index"));
+        tbody.querySelectorAll(".purchase-grid-row").forEach((r, i) => {
+          r.style.backgroundColor = (i === selectedGridIndex) ? "#bae6fd" : (i % 2 === 0 ? "#f8fafc" : "white");
+        });
+        const currentItem = gridItems[selectedGridIndex];
+        const stockEl = document.getElementById("lbl-pur-availstock");
+        if (currentItem && stockEl) {
+          const mat = state.getMaterials().find(m => m.id === currentItem.materialId);
+          stockEl.innerText = mat ? `${mat.stock || 0} ${mat.unit || 'Bags'}` : '0.00';
+        }
+        row.focus();
+      });
+
       row.addEventListener("dblclick", () => {
         const idx = parseInt(row.getAttribute("data-index"));
         const item = gridItems[idx];
@@ -6846,11 +7628,15 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
         qtyInput.value = item.quantity;
         unitSelect.value = item.unit;
         rateInput.value = item.price;
+        const bName = item.batchNo || formatRateValue(item.price);
+        if (ribbonBatchSearch) ribbonBatchSearch.value = bName;
+        if (ribbonBatchSelect) ribbonBatchSelect.value = bName;
         mrpInput.value = item.mrp;
-        disPercentInput.value = item.discountPercent;
-        disAmtInput.value = item.discountAmount;
+        disPercentInput.value = item.rowDiscountPercent !== undefined ? item.rowDiscountPercent : item.discountPercent;
+        disAmtInput.value = item.rowDiscountAmount !== undefined ? item.rowDiscountAmount : item.discountAmount;
 
         gridItems.splice(idx, 1);
+        selectedGridIndex = null;
         renderGridAndRecalc();
       });
     });
@@ -6875,12 +7661,19 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
       }
     });
 
-    document.getElementById("tot-qty").innerText = totQty.toFixed(2);
-    document.getElementById("tot-amount").innerText = totAmt.toFixed(2);
-    document.getElementById("tot-discount").innerText = totDis.toFixed(2);
-    document.getElementById("tot-netvalue").innerText = totNetVal.toFixed(2);
-    document.getElementById("tot-gst").innerText = totGst.toFixed(2);
-    document.getElementById("tot-nettotal").innerText = (totNetVal + totGst + totCess).toFixed(2);
+    const elTotQty = document.getElementById("pur-tot-qty") || document.getElementById("tot-qty");
+    const elTotAmt = document.getElementById("pur-tot-amount") || document.getElementById("tot-amount");
+    const elTotDis = document.getElementById("pur-tot-discount") || document.getElementById("tot-discount");
+    const elTotNetVal = document.getElementById("pur-tot-netvalue") || document.getElementById("tot-netvalue");
+    const elTotGst = document.getElementById("pur-tot-gst") || document.getElementById("tot-gst");
+    const elTotNetTotal = document.getElementById("pur-tot-nettotal") || document.getElementById("tot-nettotal");
+
+    if (elTotQty) elTotQty[elTotQty.tagName === 'INPUT' ? 'value' : 'innerText'] = totQty.toFixed(2);
+    if (elTotAmt) elTotAmt[elTotAmt.tagName === 'INPUT' ? 'value' : 'innerText'] = totAmt.toFixed(2);
+    if (elTotDis) elTotDis[elTotDis.tagName === 'INPUT' ? 'value' : 'innerText'] = totDis.toFixed(2);
+    if (elTotNetVal) elTotNetVal[elTotNetVal.tagName === 'INPUT' ? 'value' : 'innerText'] = totNetVal.toFixed(2);
+    if (elTotGst) elTotGst[elTotGst.tagName === 'INPUT' ? 'value' : 'innerText'] = totGst.toFixed(2);
+    if (elTotNetTotal) elTotNetTotal[elTotNetTotal.tagName === 'INPUT' ? 'value' : 'innerText'] = (totNetVal + totGst + totCess).toFixed(2);
 
     // Enforce State-wise IGST or CGST/SGST splitting
     const selectedState = document.getElementById("pur-state").value;
@@ -6894,15 +7687,15 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
     const companyState = activeCompany ? (activeCompany.state || "KERALA").toUpperCase() : "KERALA";
 
     if (selectedState === companyState) {
-      cgstInput.value = (totGst / 2).toFixed(2);
-      sgstInput.value = (totGst / 2).toFixed(2);
-      igstInput.value = "0.00";
+      if (cgstInput) cgstInput.value = (totGst / 2).toFixed(2);
+      if (sgstInput) sgstInput.value = (totGst / 2).toFixed(2);
+      if (igstInput) igstInput.value = "0.00";
     } else {
-      cgstInput.value = "0.00";
-      sgstInput.value = "0.00";
-      igstInput.value = totGst.toFixed(2);
+      if (cgstInput) cgstInput.value = "0.00";
+      if (sgstInput) sgstInput.value = "0.00";
+      if (igstInput) igstInput.value = totGst.toFixed(2);
     }
-    cessInput.value = totCess.toFixed(2);
+    if (cessInput) cessInput.value = totCess.toFixed(2);
 
     // Apply adjustments footer inputs
     let adj = 0;
@@ -6910,7 +7703,8 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
       if (a.type === "Add") adj += parseFloat(a.amount) || 0;
       else adj -= parseFloat(a.amount) || 0;
     });
-    document.getElementById("pur-adjustments").value = adj.toFixed(2);
+    const adjEl = document.getElementById("pur-adjustments");
+    if (adjEl) adjEl.value = adj.toFixed(2);
 
     const addlCess = parseFloat(document.getElementById("pur-addlcess")?.value) || 0;
 
@@ -6932,7 +7726,10 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
       netFinal = rawTotal + roundOff;
     }
 
-    document.getElementById("pur-nettotal-box").innerText = `\u20B9${netFinal.toLocaleString("en-US", { minimumFractionDigits:2, maximumFractionDigits:2 })}`;
+    const netTotalBox = document.getElementById("pur-nettotal-box");
+    if (netTotalBox) {
+      netTotalBox.innerText = `\u20B9${netFinal.toLocaleString("en-US", { minimumFractionDigits:2, maximumFractionDigits:2 })}`;
+    }
   }
 
 
@@ -7017,11 +7814,20 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
         adjustmentsList: adjustmentsList,
         additionalCess: document.getElementById("pur-addlcess").value,
         roundOff: document.getElementById("pur-roundoff").value,
+        discountPercent: document.getElementById("pur-discount-percent") ? (parseFloat(document.getElementById("pur-discount-percent").value) || 0) : 0,
+        discountAmount: document.getElementById("pur-discount-amt") ? (parseFloat(document.getElementById("pur-discount-amt").value) || 0) : 0,
         
         items: gridItems
       };
 
       if (editPurchase) {
+        const fyCheckOld = state.isPreviousFyLocked(editPurchase.date);
+        if (fyCheckOld.locked) {
+          alert(fyCheckOld.reason);
+          isPurchaseSubmitting = false;
+          if (saveBtn) saveBtn.disabled = false;
+          return;
+        }
         const pass = prompt("Enter Admin Password to update this purchase bill:");
         if (pass === null) {
           isPurchaseSubmitting = false;
@@ -7034,7 +7840,48 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
           if (saveBtn) saveBtn.disabled = false;
           return;
         }
-        state.cancelPurchase(editPurchase.id);
+        // Revert previous vendor balance for credit purchase
+        if (editPurchase.payMode === "Credit" && editPurchase.supplierId && editPurchase.supplierId !== "__CASH__") {
+          const supplier = state.contacts.find(c => c.id === editPurchase.supplierId);
+          if (supplier) {
+            supplier.balance = (supplier.balance || 0) - (editPurchase.total || 0);
+          }
+        }
+
+        // Revert previous stock
+        (editPurchase.items || []).forEach(item => {
+          const mat = state.materials.find(m => m.id === item.materialId || m.code === item.code);
+          if (mat) {
+            mat.stock = (mat.stock || 0) - (parseFloat(item.quantity) || 0);
+            if (mat.stock < 0) mat.stock = 0;
+            if (item.batchNo && Array.isArray(mat.batches)) {
+              const batch = mat.batches.find(b => b.batchNo === item.batchNo);
+              if (batch) {
+                batch.stock = (batch.stock || 0) - (parseFloat(item.quantity) || 0);
+                if (batch.stock < 0) batch.stock = 0;
+              }
+            }
+          }
+        });
+
+        // Purge previous transactions for this purchase bill
+        const purIdUpper = String(editPurchase.id || "").trim().toUpperCase();
+        const vNoUpper = String(editPurchase.voucherNo || "").trim().toUpperCase();
+        const refNoUpper = String(editPurchase.refNo || "").trim().toUpperCase();
+        const invNoUpper = String(editPurchase.invoiceNo || "").trim().toUpperCase();
+        state.transactions = state.transactions.filter(tx => {
+          const txIdUpper = String(tx.id || "").trim().toUpperCase();
+          const tvidUpper = String(tx.voucherId || "").trim().toUpperCase();
+          if (txIdUpper === purIdUpper || (tvidUpper && tvidUpper === purIdUpper)) return false;
+          const ref = String(tx.reference || "").trim().toUpperCase();
+          const tvno = String(tx.voucherNo || "").trim().toUpperCase();
+          if (vNoUpper && (ref === vNoUpper || tvno === vNoUpper || ref.startsWith(vNoUpper + " ") || ref.startsWith("PURCHASE " + vNoUpper))) return false;
+          if (purIdUpper && (ref === purIdUpper || tvno === purIdUpper || ref.startsWith(purIdUpper + " ") || ref.startsWith("PURCHASE " + purIdUpper))) return false;
+          if (refNoUpper && (ref === refNoUpper || tvno === refNoUpper || ref === `PURCHASE ${refNoUpper}`)) return false;
+          if (invNoUpper && (ref === invNoUpper || tvno === invNoUpper || ref === `PURCHASE ${invNoUpper}`)) return false;
+          return true;
+        });
+
         const idx = state.purchases.findIndex(p => p.id === editPurchase.id);
         if (idx !== -1) {
           state.purchases.splice(idx, 1);
@@ -7053,6 +7900,7 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
       }
     } catch (err) {
       console.error(err);
+      alert(err.message);
       isPurchaseSubmitting = false;
       if (saveBtn) saveBtn.disabled = false;
     }
@@ -7079,82 +7927,103 @@ export function showRecordPurchaseModal(container, editPurchase = null, onSucces
 
 // Purchase Return Modal (Debit Note - High-Fidelity ERP Style)
 export function showPurchaseReturnModal(container, editReturn = null, onSuccess = null, selectedSeries = null) {
-  const root = document.getElementById("modal-container-root");
+  const root = (document.getElementById("modal-container-root") && document.getElementById("modal-container-root").children.length > 0 ? document.getElementById("sub-modal-container-root") : null) || document.getElementById("modal-container-root") || container || document.body;
   const suppliers = state.getContacts().filter(c => c.type === "supplier" || c.listInVendorList === true);
   const materials = state.getMaterials();
   const salesExecutivesList = ["Mr. Suresh Kumar", "Mr. Rajesh P.", "Mr. Anil Nair", "Mrs. Bindu V."];
 
-  root.innerHTML = `
-    <div class="modal-overlay active" id="modal-overlay-tx" style="display:flex; justify-content:center; align-items:center; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); z-index:2000; padding: 20px;">
-      <div class="modal-container" style="max-width:1400px; width: 100%; background-color:#ffffff; color:#1e293b; font-family: 'Inter', system-ui, sans-serif; border: 1px solid rgba(255,255,255,0.2); border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25), 0 0 0 1px rgba(0,0,0,0.05); font-size:0.875rem; display: flex; flex-direction: column; max-height: 95vh; overflow: hidden;">
+  const existingOverlay = document.getElementById("purchase-return-modal-overlay");
+  if (existingOverlay) existingOverlay.remove();
+
+  const modalEl = document.createElement("div");
+  modalEl.id = "purchase-return-modal-overlay";
+  modalEl.className = "modal-overlay active";
+  modalEl.style.position = "fixed";
+  modalEl.style.top = "0";
+  modalEl.style.left = "0";
+  modalEl.style.width = "100%";
+  modalEl.style.height = "100%";
+  modalEl.style.display = "flex";
+  modalEl.style.justifyContent = "center";
+  modalEl.style.alignItems = "center";
+  modalEl.style.background = "rgba(15, 23, 42, 0.6)";
+  modalEl.style.backdropFilter = "blur(8px)";
+  modalEl.style.zIndex = String(2000 + (root.children ? root.children.length : 0) * 10);
+  modalEl.style.padding = "12px";
+
+  modalEl.innerHTML = `
+      <div class="modal-container" style="position: relative; max-width:1320px; width: 100%; background-color:#ffffff; color:#1e293b; font-family: 'Inter', system-ui, sans-serif; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; box-shadow: 0 20px 40px -12px rgba(0,0,0,0.25); font-size:0.8rem; display: flex; flex-direction: column; max-height: 96vh; overflow: hidden;">
+        ${editReturn && (editReturn.isCancelled || editReturn.isCanceled || String(editReturn.status).toUpperCase() === 'CANCELLED') ? `
+          <div class="cancelled-watermark" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-size: 8rem; font-weight: 900; color: rgba(220, 38, 38, 0.25); pointer-events: none; white-space: nowrap; z-index: 1000; text-transform: uppercase; letter-spacing: 10px; font-family: sans-serif; border: 15px solid rgba(220, 38, 38, 0.25); padding: 10px 30px; border-radius: 20px; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;">CANCELLED</div>
+        ` : ''}
         
         <!-- Header ribbon -->
-        <div style="background: linear-gradient(135deg, #1e1b4b 0%, #4338ca 100%); color:white; padding:16px 24px; font-weight:600; display:flex; justify-content:space-between; align-items:center; border-radius: 16px 16px 0 0;">
-          <div style="display:flex; align-items:center; gap:12px; letter-spacing:0.5px;">
-            <div style="background: rgba(255,255,255,0.2); padding: 8px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-              <i class="fa-solid fa-arrow-rotate-left" style="color:#e0e7ff; font-size: 1.1rem;"></i>
+        <div style="background: linear-gradient(135deg, #1e1b4b 0%, #4338ca 100%); color:white; padding:8px 16px; font-weight:600; display:flex; justify-content:space-between; align-items:center; border-radius: 12px 12px 0 0;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <div style="background: rgba(255,255,255,0.2); padding: 5px 7px; border-radius: 6px; display: flex; align-items: center; justify-content: center;">
+              <i class="fa-solid fa-arrow-rotate-left" style="color:#e0e7ff; font-size: 0.95rem;"></i>
             </div>
             <div style="display: flex; flex-direction: column;">
-              <span style="font-size: 1.1rem; font-weight: 700;">Purchase Return</span>
-              <span style="font-size:0.75rem; color:#c7d2fe; font-weight:400; margin-top: 2px;">Bill Series: &lt;DEFAULT&gt; ${editReturn ? '<span style="color:#fbbf24; font-weight:600; margin-left: 4px;">(EDITING PR)</span>' : ''} <span style="margin-left: 10px; opacity: 0.8;">[Press Alt+F5 to change]</span></span>
+              <span style="font-size: 0.95rem; font-weight: 700;">Purchase Return</span>
+              <span style="font-size:0.68rem; color:#c7d2fe; font-weight:400; margin-top: 1px;">Bill Series: &lt;DEFAULT&gt; ${editReturn ? '<span style="color:#fbbf24; font-weight:600; margin-left: 4px;">(EDITING PR)</span>' : ''} <span style="margin-left: 8px; opacity: 0.8;">[Alt+F5 to change]</span></span>
             </div>
           </div>
-          <button type="button" style="background: rgba(255,255,255,0.1); border:none; color:#e0e7ff; width: 36px; height: 36px; border-radius: 50%; font-size:1.25rem; cursor:pointer; transition:all 0.2s; display: flex; align-items: center; justify-content: center;" id="pm-close-btn-header" onmouseover="this.style.background='rgba(255,255,255,0.2)'; this.style.color='white'; this.style.transform='rotate(90deg)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'; this.style.color='#e0e7ff'; this.style.transform='rotate(0deg)'"><i class="fa-solid fa-xmark"></i></button>
+          <button type="button" style="background: rgba(255,255,255,0.1); border:none; color:#e0e7ff; width: 28px; height: 28px; border-radius: 50%; font-size: 1rem; cursor:pointer; transition:all 0.2s; display: flex; align-items: center; justify-content: center;" id="pm-close-btn-header" onmouseover="this.style.background='rgba(255,255,255,0.2)'; this.style.color='white'; this.style.transform='rotate(90deg)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'; this.style.color='#e0e7ff'; this.style.transform='rotate(0deg)'"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
-        <form id="create-purchase-return-form" style="display:flex; flex-direction:column; flex: 1; overflow-y: auto; padding: 24px; gap: 20px; background-color: #f8fafc;">
+        <form id="create-purchase-return-form" style="display:flex; flex-direction:column; flex: 1; overflow-y: auto; padding: 12px 16px; gap: 10px; background-color: #f8fafc;">
           
           <!-- Top Row banner & metadata inputs -->
-          <div style="display: grid; grid-template-columns: 160px 1fr 180px; gap: 20px; align-items: center;">
-            <div style="background-color: #ffffff; border: 1px solid #e2e8f0; padding: 12px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-              <span style="font-weight: 600; font-size: 0.7rem; display: block; color: #64748b; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">Return No</span>
-              <input type="text" id="ret-pur-refno" style="width: 100%; border: none; background: transparent; font-weight: 700; font-size: 1.1rem; color:#1e293b; outline:none;" value="${editReturn ? editReturn.id : 'PR-' + String(state.getPurchaseReturns().length + 1).padStart(3, '0')}" readonly>
+          <div style="display: grid; grid-template-columns: 140px 1fr 150px; gap: 12px; align-items: center;">
+            <div style="background-color: #ffffff; border: 1px solid #e2e8f0; padding: 6px 10px; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
+              <span style="font-weight: 600; font-size: 0.65rem; display: block; color: #64748b; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:2px;">Return No</span>
+              <input type="text" id="ret-pur-refno" style="width: 100%; border: none; background: transparent; font-weight: 700; font-size: 0.95rem; color:#1e293b; outline:none;" value="${editReturn ? editReturn.id : 'PR-' + String(state.getPurchaseReturns().length + 1).padStart(3, '0')}" readonly>
             </div>
             
             <div style="text-align: center; display: flex; flex-direction: column; align-items: center;">
-              <span style="background: linear-gradient(90deg, #4f46e5 0%, #2563eb 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; font-size: 1.5rem; letter-spacing: 4px; text-transform: uppercase;">
+              <span style="background: linear-gradient(90deg, #4f46e5 0%, #2563eb 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; font-size: 1.15rem; letter-spacing: 2px; text-transform: uppercase;">
                 ${(state.getRegisteredCompanies().find(c => String(c.id) === String(state.getActiveCompanyId()))?.name || '').toUpperCase()}
               </span>
-              <span style="font-size: 0.75rem; color: #64748b; letter-spacing: 1px; margin-top: 4px; font-weight: 500;">PURCHASE RETURN VOUCHER</span>
+              <span style="font-size: 0.68rem; color: #64748b; letter-spacing: 0.5px; margin-top: 1px; font-weight: 600;">PURCHASE RETURN VOUCHER</span>
             </div>
 
-            <div style="background-color: #ffffff; border: 1px solid #e2e8f0; padding: 12px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-              <span style="font-weight: 600; font-size: 0.7rem; display: block; color: #64748b; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">Return Date</span>
-              <input type="date" id="ret-pur-date" style="width: 100%; border: none; background: transparent; font-size: 1rem; color:#1e293b; font-weight:600; outline:none;" value="${editReturn ? editReturn.date : state.getLoginDate()}" required>
+            <div style="background-color: #ffffff; border: 1px solid #e2e8f0; padding: 6px 10px; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
+              <span style="font-weight: 600; font-size: 0.65rem; display: block; color: #64748b; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:2px;">Return Date</span>
+              ${renderTallyDatePickerHtml({ id: "ret-pur-date", value: editReturn ? editReturn.date : state.getLoginDate(), style: "height:26px; font-size:0.85rem; border:none; background:transparent;", width: "100%" })}
             </div>
           </div>
 
           <!-- Metadata card -->
-          <div style="background-color:#ffffff; padding:20px; border:1px solid #e2e8f0; border-radius:12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:16px;">
+          <div style="background-color:#ffffff; padding:8px 12px; border:1px solid #e2e8f0; border-radius:8px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:10px;">
             <div>
-              <label style="font-weight:600; display:flex; align-items: center; gap: 6px; margin-bottom:6px; font-size:0.75rem; color:#475569;"><i class="fa-solid fa-building-user" style="color:#818cf8;"></i> Vendor *</label>
-              <select id="ret-pur-supplier" style="width:100%; padding:8px 12px; border-radius:6px; border:1px solid #cbd5e1; background-color:#f8fafc; font-size:0.875rem; color:#0f172a; transition: all 0.2s; outline:none;" onfocus="this.style.borderColor='#818cf8'; this.style.boxShadow='0 0 0 3px rgba(129, 140, 248, 0.2)'" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none'" required>
+              <label style="font-weight:600; display:flex; align-items: center; gap: 4px; margin-bottom:3px; font-size:0.7rem; color:#475569;"><i class="fa-solid fa-building-user" style="color:#818cf8;"></i> Vendor *</label>
+              <select id="ret-pur-supplier" style="width:100%; padding:4px 8px; height: 30px; border-radius:4px; border:1px solid #cbd5e1; background-color:#f8fafc; font-size:0.8rem; color:#0f172a; transition: all 0.2s; outline:none;" onfocus="this.style.borderColor='#818cf8';" onblur="this.style.borderColor='#cbd5e1';" required>
                 <option value="">-- Choose Vendor --</option>
                 ${suppliers.map(s => `<option value="${s.id}">${s.name}</option>`).join("")}
               </select>
             </div>
             <div>
-              <label style="font-weight:600; display:flex; align-items: center; gap: 6px; margin-bottom:6px; font-size:0.75rem; color:#475569;"><i class="fa-solid fa-file-invoice" style="color:#818cf8;"></i> Purchase Bill No *</label>
-              <select id="ret-pur-billno-select" style="width:100%; padding:8px 12px; border-radius:6px; border:1px solid #cbd5e1; background-color:#f8fafc; font-size:0.875rem; color:#0f172a; transition: all 0.2s; outline:none;" onfocus="this.style.borderColor='#818cf8'; this.style.boxShadow='0 0 0 3px rgba(129, 140, 248, 0.2)'" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none'" required disabled>
+              <label style="font-weight:600; display:flex; align-items: center; gap: 4px; margin-bottom:3px; font-size:0.7rem; color:#475569;"><i class="fa-solid fa-file-invoice" style="color:#818cf8;"></i> Purchase Bill No *</label>
+              <select id="ret-pur-billno-select" style="width:100%; padding:4px 8px; height: 30px; border-radius:4px; border:1px solid #cbd5e1; background-color:#f8fafc; font-size:0.8rem; color:#0f172a; transition: all 0.2s; outline:none;" onfocus="this.style.borderColor='#818cf8';" onblur="this.style.borderColor='#cbd5e1';" required disabled>
                 <option value="">-- Choose Bill No --</option>
               </select>
             </div>
             <div>
-              <label style="font-weight:600; display:flex; align-items: center; gap: 6px; margin-bottom:6px; font-size:0.75rem; color:#475569;"><i class="fa-solid fa-code-branch" style="color:#818cf8;"></i> Branch Name</label>
-              <select id="ret-pur-site" style="width:100%; padding:8px 12px; border-radius:6px; border:1px solid #cbd5e1; background-color:#f8fafc; font-size:0.875rem; color:#0f172a; transition: all 0.2s; outline:none;" onfocus="this.style.borderColor='#818cf8'; this.style.boxShadow='0 0 0 3px rgba(129, 140, 248, 0.2)'" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none'">
+              <label style="font-weight:600; display:flex; align-items: center; gap: 4px; margin-bottom:3px; font-size:0.7rem; color:#475569;"><i class="fa-solid fa-code-branch" style="color:#818cf8;"></i> Branch Name</label>
+              <select id="ret-pur-site" style="width:100%; padding:4px 8px; height: 30px; border-radius:4px; border:1px solid #cbd5e1; background-color:#f8fafc; font-size:0.8rem; color:#0f172a; transition: all 0.2s; outline:none;" onfocus="this.style.borderColor='#818cf8';" onblur="this.style.borderColor='#cbd5e1';">
                 <option value="">-- Main Branch --</option>
               </select>
             </div>
             <div>
-              <label style="font-weight:600; display:flex; align-items: center; gap: 6px; margin-bottom:6px; font-size:0.75rem; color:#475569;"><i class="fa-solid fa-user-tag" style="color:#818cf8;"></i> Executive Name</label>
-              <select id="ret-pur-salesman" style="width:100%; padding:8px 12px; border-radius:6px; border:1px solid #cbd5e1; background-color:#f8fafc; font-size:0.875rem; color:#0f172a; transition: all 0.2s; outline:none;" onfocus="this.style.borderColor='#818cf8'; this.style.boxShadow='0 0 0 3px rgba(129, 140, 248, 0.2)'" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none'">
+              <label style="font-weight:600; display:flex; align-items: center; gap: 4px; margin-bottom:3px; font-size:0.7rem; color:#475569;"><i class="fa-solid fa-user-tag" style="color:#818cf8;"></i> Executive Name</label>
+              <select id="ret-pur-salesman" style="width:100%; padding:4px 8px; height: 30px; border-radius:4px; border:1px solid #cbd5e1; background-color:#f8fafc; font-size:0.8rem; color:#0f172a; transition: all 0.2s; outline:none;" onfocus="this.style.borderColor='#818cf8';" onblur="this.style.borderColor='#cbd5e1';">
                 <option value="">-- Choose Name --</option>
                 ${salesExecutivesList.map(se => `<option value="${se}">${se}</option>`).join("")}
               </select>
             </div>
             <div>
-              <label style="font-weight:600; display:flex; align-items: center; gap: 6px; margin-bottom:6px; font-size:0.75rem; color:#475569;"><i class="fa-solid fa-map-pin" style="color:#818cf8;"></i> Place of Supply</label>
-              <select id="ret-pur-state" style="width:100%; padding:8px 12px; border-radius:6px; border:1px solid #cbd5e1; background-color:#f8fafc; font-size:0.875rem; color:#0f172a; transition: all 0.2s; outline:none;" onfocus="this.style.borderColor='#818cf8'; this.style.boxShadow='0 0 0 3px rgba(129, 140, 248, 0.2)'" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none'">
+              <label style="font-weight:600; display:flex; align-items: center; gap: 4px; margin-bottom:3px; font-size:0.7rem; color:#475569;"><i class="fa-solid fa-map-pin" style="color:#818cf8;"></i> Place of Supply</label>
+              <select id="ret-pur-state" style="width:100%; padding:4px 8px; height: 30px; border-radius:4px; border:1px solid #cbd5e1; background-color:#f8fafc; font-size:0.8rem; color:#0f172a; transition: all 0.2s; outline:none;" onfocus="this.style.borderColor='#818cf8';" onblur="this.style.borderColor='#cbd5e1';">
                 <option value="KERALA" selected>KERALA</option>
                 <option value="KARNATAKA">KARNATAKA</option>
                 <option value="TAMIL NADU">TAMIL NADU</option>
@@ -7162,77 +8031,74 @@ export function showPurchaseReturnModal(container, editReturn = null, onSuccess 
               </select>
             </div>
             <div>
-              <label style="font-weight:600; display:flex; align-items: center; gap: 6px; margin-bottom:6px; font-size:0.75rem; color:#475569;"><i class="fa-solid fa-warehouse" style="color:#818cf8;"></i> Stock Location</label>
-              <select id="ret-pur-location" style="width:100%; padding:8px 12px; border-radius:6px; border:1px solid #cbd5e1; background-color:#f8fafc; font-size:0.875rem; color:#0f172a; transition: all 0.2s; outline:none;" onfocus="this.style.borderColor='#818cf8'; this.style.boxShadow='0 0 0 3px rgba(129, 140, 248, 0.2)'" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none'">
+              <label style="font-weight:600; display:flex; align-items: center; gap: 4px; margin-bottom:3px; font-size:0.7rem; color:#475569;"><i class="fa-solid fa-warehouse" style="color:#818cf8;"></i> Stock Location</label>
+              <select id="ret-pur-location" style="width:100%; padding:4px 8px; height: 30px; border-radius:4px; border:1px solid #cbd5e1; background-color:#f8fafc; font-size:0.8rem; color:#0f172a; transition: all 0.2s; outline:none;" onfocus="this.style.borderColor='#818cf8';" onblur="this.style.borderColor='#cbd5e1';">
                 <option value="Main" selected>&lt;Main&gt;</option>
               </select>
             </div>
           </div>
 
           <!-- Product Add Ribbon -->
-          <div style="background-color:#ffffff; padding:16px; border:1px solid #e2e8f0; border-radius:12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display:grid; grid-template-columns: 2fr 1.5fr 1.2fr 0.8fr 0.8fr 1fr 1fr 100px; gap:12px; align-items:end; position: relative; overflow: visible;">
+          <div style="background-color:#ffffff; padding:8px 12px; border:1px solid #e2e8f0; border-radius:8px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); display:grid; grid-template-columns: 2.2fr 1.3fr 1.1fr 0.9fr 0.9fr 1fr 90px; gap:8px; align-items:end; position: relative; overflow: visible;">
             <div>
-              <label style="font-weight:600; font-size:0.75rem; color:#475569; display:block; margin-bottom:6px;">Product Name</label>
-              <select id="ret-pur-ribbon-product" style="width:100%; padding:8px 12px; border-radius:6px; border:1px solid #cbd5e1; background-color:#f8fafc; font-size:0.875rem; color:#0f172a; outline:none; transition: all 0.2s;" onfocus="this.style.borderColor='#818cf8'; this.style.boxShadow='0 0 0 3px rgba(129, 140, 248, 0.2)'" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none'">
+              <label style="font-weight:600; font-size:0.7rem; color:#475569; display:block; margin-bottom:3px;">Product Name</label>
+              <select id="ret-pur-ribbon-product" style="width:100%; padding:4px 8px; height: 30px; border-radius:4px; border:1px solid #cbd5e1; background-color:#f8fafc; font-size:0.8rem; color:#0f172a; outline:none; transition: all 0.2s;" onfocus="this.style.borderColor='#818cf8';" onblur="this.style.borderColor='#cbd5e1';">
                 <option value="">-- Choose Product --</option>
                 ${[...new Set(materials.map(m => m.name).filter(Boolean))].sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })).map(name => `<option value="${name}">${name}</option>`).join("")}
               </select>
             </div>
             <div>
-              <label style="font-weight:600; font-size:0.75rem; color:#475569; display:block; margin-bottom:6px;">Code/Model</label>
-              <select id="ret-pur-ribbon-code" style="width:100%; padding:8px 12px; border-radius:6px; border:1px solid #cbd5e1; background-color:#f1f5f9; font-size:0.875rem; color:#64748b; outline:none;" disabled>
+              <label style="font-weight:600; font-size:0.7rem; color:#475569; display:block; margin-bottom:3px;">Code/Model</label>
+              <select id="ret-pur-ribbon-code" style="width:100%; padding:4px 8px; height: 30px; border-radius:4px; border:1px solid #cbd5e1; background-color:#f1f5f9; font-size:0.8rem; color:#64748b; outline:none;" disabled>
                 <option value="">-- Code/Model --</option>
               </select>
             </div>
             <div>
-              <label style="font-weight:600; font-size:0.75rem; color:#475569; display:block; margin-bottom:6px;">Batch</label>
-              <select id="ret-pur-ribbon-batch" style="width:100%; padding:8px 12px; border-radius:6px; border:1px solid #cbd5e1; background-color:#f1f5f9; font-size:0.875rem; color:#64748b; outline:none;" disabled>
+              <label style="font-weight:600; font-size:0.7rem; color:#475569; display:block; margin-bottom:3px;">Batch</label>
+              <select id="ret-pur-ribbon-batch" style="width:100%; padding:4px 8px; height: 30px; border-radius:4px; border:1px solid #cbd5e1; background-color:#f1f5f9; font-size:0.8rem; color:#64748b; outline:none;" disabled>
                 <option value="">-- Batch --</option>
               </select>
             </div>
             <div>
-              <label style="font-weight:600; font-size:0.75rem; color:#475569; display:block; margin-bottom:6px;">Qty</label>
-              <input type="number" step="0.01" id="ret-pur-ribbon-qty" style="width:100%; padding:8px 12px; border-radius:6px; border:1px solid #cbd5e1; background-color:#f8fafc; font-size:0.875rem; color:#0f172a; outline:none; transition: all 0.2s;" placeholder="0" onfocus="this.style.borderColor='#818cf8'; this.style.boxShadow='0 0 0 3px rgba(129, 140, 248, 0.2)'" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none'">
+              <label style="font-weight:600; font-size:0.7rem; color:#475569; display:block; margin-bottom:3px;">Qty</label>
+              <input type="number" step="0.01" id="ret-pur-ribbon-qty" style="width:100%; padding:4px 8px; height: 30px; border-radius:4px; border:1px solid #cbd5e1; background-color:#f8fafc; font-size:0.8rem; color:#0f172a; outline:none; transition: all 0.2s;" placeholder="0" onfocus="this.style.borderColor='#818cf8';" onblur="this.style.borderColor='#cbd5e1';">
             </div>
             <div>
-              <label style="font-weight:600; font-size:0.75rem; color:#475569; display:block; margin-bottom:6px;">Unit</label>
-              <select id="ret-pur-ribbon-unit" style="width:100%; padding:8px 12px; border-radius:6px; border:1px solid #cbd5e1; background-color:#f8fafc; font-size:0.875rem; color:#0f172a; outline:none; transition: all 0.2s;" onfocus="this.style.borderColor='#818cf8'; this.style.boxShadow='0 0 0 3px rgba(129, 140, 248, 0.2)'" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none'">
+              <label style="font-weight:600; font-size:0.7rem; color:#475569; display:block; margin-bottom:3px;">Unit</label>
+              <select id="ret-pur-ribbon-unit" style="width:100%; padding:4px 8px; height: 30px; border-radius:4px; border:1px solid #cbd5e1; background-color:#f8fafc; font-size:0.8rem; color:#0f172a; outline:none; transition: all 0.2s;" onfocus="this.style.borderColor='#818cf8';" onblur="this.style.borderColor='#cbd5e1';">
                 ${getUnitOptionsHTML()}
               </select>
             </div>
             <div>
-              <label style="font-weight:600; font-size:0.75rem; color:#475569; display:block; margin-bottom:6px;">Rate [Excl]</label>
-              <input type="number" step="0.01" id="ret-pur-ribbon-rate" style="width:100%; padding:8px 12px; border-radius:6px; border:1px solid #cbd5e1; background-color:#f8fafc; font-size:0.875rem; color:#0f172a; outline:none; transition: all 0.2s;" placeholder="0.00" onfocus="this.style.borderColor='#818cf8'; this.style.boxShadow='0 0 0 3px rgba(129, 140, 248, 0.2)'" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none'">
+              <label style="font-weight:600; font-size:0.7rem; color:#475569; display:block; margin-bottom:3px;">Rate [Excl]</label>
+              <input type="number" step="0.01" id="ret-pur-ribbon-rate" style="width:100%; padding:4px 8px; height: 30px; border-radius:4px; border:1px solid #cbd5e1; background-color:#f8fafc; font-size:0.8rem; color:#0f172a; outline:none; transition: all 0.2s;" placeholder="0.00" onfocus="this.style.borderColor='#818cf8';" onblur="this.style.borderColor='#cbd5e1';">
             </div>
-            <div>
-              <label style="font-weight:600; font-size:0.75rem; color:#475569; display:block; margin-bottom:6px;">M.R.P</label>
-              <input type="number" step="0.01" id="ret-pur-ribbon-mrp" style="width:100%; padding:8px 12px; border-radius:6px; border:1px solid #cbd5e1; background-color:#f8fafc; font-size:0.875rem; color:#0f172a; outline:none; transition: all 0.2s;" placeholder="0.00" onfocus="this.style.borderColor='#818cf8'; this.style.boxShadow='0 0 0 3px rgba(129, 140, 248, 0.2)'" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none'">
-            </div>
-            <button type="button" id="btn-ret-pur-ribbon-add" style="width:100%; padding:8px; border-radius:6px; font-size:0.875rem; font-weight:600; background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); border:none; color:white; cursor:pointer; height: 38px; transition: all 0.2s; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3), 0 2px 4px -1px rgba(79, 70, 229, 0.06);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 15px -3px rgba(79, 70, 229, 0.4), 0 4px 6px -2px rgba(79, 70, 229, 0.05)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px -1px rgba(79, 70, 229, 0.3), 0 2px 4px -1px rgba(79, 70, 229, 0.06)'">
-              <i class="fa-solid fa-plus" style="margin-right:4px;"></i> Add
+            <input type="hidden" id="ret-pur-ribbon-mrp" value="0.00">
+            <button type="button" id="btn-ret-pur-ribbon-add" style="width:100%; padding:4px; height: 30px; border-radius:4px; font-size:0.8rem; font-weight:600; background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); border:none; color:white; cursor:pointer; transition: all 0.2s; box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);">
+              <i class="fa-solid fa-plus" style="margin-right:3px;"></i> Add
             </button>
             
             <!-- Stock feedback label floating -->
-            <div style="position: absolute; top: -14px; right: 16px; background-color:#eff6ff; border:1px solid #bfdbfe; padding:4px 10px; font-weight:600; font-size:0.7rem; color:#1e40af; border-radius:12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);" id="ret-pur-stock-feedback">
-              <i class="fa-solid fa-box" style="margin-right:4px;"></i> Available Stock : <span id="lbl-ret-pur-availstock" style="font-weight: 800;">0.00</span>
+            <div style="position: absolute; top: -10px; right: 12px; background-color:#eff6ff; border:1px solid #bfdbfe; padding:2px 8px; font-weight:600; font-size:0.68rem; color:#1e40af; border-radius:8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);" id="ret-pur-stock-feedback">
+              <i class="fa-solid fa-box" style="margin-right:3px;"></i> Stock: <span id="lbl-ret-pur-availstock" style="font-weight: 800;">0.00</span>
             </div>
           </div>
 
           <!-- Main Grid -->
-          <div style="border: 1px solid #e2e8f0; background-color: #ffffff; min-height:200px; max-height:250px; overflow-y:auto; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-            <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.875rem;">
+          <div style="border: 1px solid #e2e8f0; background-color: #ffffff; min-height:180px; max-height:280px; overflow-y:auto; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
+            <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.8rem;">
               <thead style="position:sticky; top:0; z-index:10; background-color:#f8fafc; box-shadow: 0 1px 0 #e2e8f0;">
-                <tr>
-                  <th style="padding:12px 16px; font-weight:600; color:#475569; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.5px;">Product Name</th>
-                  <th style="padding:12px 16px; font-weight:600; color:#475569; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.5px;">Code/Model</th>
-                  <th style="padding:12px 16px; font-weight:600; color:#475569; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.5px;">Batch</th>
-                  <th style="padding:12px 16px; font-weight:600; color:#475569; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.5px; text-align:right;">Qty</th>
-                  <th style="padding:12px 16px; font-weight:600; color:#475569; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.5px; text-align:right;">Rate</th>
-                  <th style="padding:12px 16px; font-weight:600; color:#475569; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.5px; text-align:right;">Amount</th>
-                  <th style="padding:12px 16px; font-weight:600; color:#475569; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.5px; text-align:right;">GST%</th>
-                  <th style="padding:12px 16px; font-weight:600; color:#475569; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.5px; text-align:right;">GST AMT</th>
-                  <th style="padding:12px 16px; font-weight:600; color:#4f46e5; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.5px; text-align:right;">Net Amount</th>
-                  <th style="padding:12px 16px; text-align:center; width:60px;"></th>
+                <tr style="position:sticky; top:0; z-index:10; background-color:#f8fafc;">
+                  <th style="padding:8px 10px; font-weight:600; color:#475569; text-transform: uppercase; font-size: 0.68rem; letter-spacing: 0.5px; text-align:center; width:50px; position:sticky; top:0; background-color:#f8fafc; z-index:10;">Item No</th>
+                  <th style="padding:8px 10px; font-weight:600; color:#475569; text-transform: uppercase; font-size: 0.68rem; letter-spacing: 0.5px; position:sticky; top:0; background-color:#f8fafc; z-index:10;">Product Name</th>
+                  <th style="padding:8px 10px; font-weight:600; color:#475569; text-transform: uppercase; font-size: 0.68rem; letter-spacing: 0.5px; position:sticky; top:0; background-color:#f8fafc; z-index:10;">Code/Model</th>
+                  <th style="padding:8px 10px; font-weight:600; color:#475569; text-transform: uppercase; font-size: 0.68rem; letter-spacing: 0.5px; position:sticky; top:0; background-color:#f8fafc; z-index:10;">Batch</th>
+                  <th style="padding:8px 10px; font-weight:600; color:#475569; text-transform: uppercase; font-size: 0.68rem; letter-spacing: 0.5px; text-align:right; position:sticky; top:0; background-color:#f8fafc; z-index:10;">Qty</th>
+                  <th style="padding:8px 10px; font-weight:600; color:#475569; text-transform: uppercase; font-size: 0.68rem; letter-spacing: 0.5px; text-align:right; position:sticky; top:0; background-color:#f8fafc; z-index:10;">Rate</th>
+                  <th style="padding:8px 10px; font-weight:600; color:#475569; text-transform: uppercase; font-size: 0.68rem; letter-spacing: 0.5px; text-align:right; position:sticky; top:0; background-color:#f8fafc; z-index:10;">Amount</th>
+                  <th style="padding:8px 10px; font-weight:600; color:#475569; text-transform: uppercase; font-size: 0.68rem; letter-spacing: 0.5px; text-align:right; position:sticky; top:0; background-color:#f8fafc; z-index:10;">GST%</th>
+                  <th style="padding:8px 10px; font-weight:600; color:#475569; text-transform: uppercase; font-size: 0.68rem; letter-spacing: 0.5px; text-align:right; position:sticky; top:0; background-color:#f8fafc; z-index:10;">GST AMT</th>
+                  <th style="padding:8px 10px; font-weight:600; color:#4f46e5; text-transform: uppercase; font-size: 0.68rem; letter-spacing: 0.5px; text-align:right; position:sticky; top:0; background-color:#f8fafc; z-index:10;">Net Amount</th>
                 </tr>
               </thead>
               <tbody id="ret-pur-grid-body" style="color: #1e293b;">
@@ -7242,38 +8108,38 @@ export function showPurchaseReturnModal(container, editReturn = null, onSuccess 
           </div>
 
           <!-- Bottom calculations and splits -->
-          <div style="display:grid; grid-template-columns: 1fr 1.5fr 1fr; gap:24px; background-color:#ffffff; padding:20px; border:1px solid #e2e8f0; border-radius:12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); align-items: stretch;">
+          <div style="display:grid; grid-template-columns: 1fr 1.3fr 1fr; gap:16px; background-color:#ffffff; padding:10px 14px; border:1px solid #e2e8f0; border-radius:8px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); align-items: stretch;">
             <!-- Bottom Left Fields -->
-            <div style="display:flex; flex-direction:column; gap:16px;">
+            <div style="display:flex; flex-direction:column; gap:10px;">
               <div>
-                <label style="font-weight:600; font-size:0.75rem; color:#475569; display:block; margin-bottom:6px;"><i class="fa-solid fa-wallet" style="color:#64748b; margin-right:4px;"></i> Pay Mode</label>
-                <select id="ret-pur-paymode" style="width:100%; padding:8px 12px; border-radius:6px; border:1px solid #cbd5e1; background-color:#f8fafc; font-size:0.875rem; color:#0f172a; outline:none; transition: all 0.2s;" onfocus="this.style.borderColor='#818cf8'; this.style.boxShadow='0 0 0 3px rgba(129, 140, 248, 0.2)'" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none'">
+                <label style="font-weight:600; font-size:0.7rem; color:#475569; display:block; margin-bottom:3px;"><i class="fa-solid fa-wallet" style="color:#64748b; margin-right:3px;"></i> Pay Mode</label>
+                <select id="ret-pur-paymode" style="width:100%; padding:4px 8px; height: 28px; border-radius:4px; border:1px solid #cbd5e1; background-color:#f8fafc; font-size:0.8rem; color:#0f172a; outline:none;" onfocus="this.style.borderColor='#818cf8';" onblur="this.style.borderColor='#cbd5e1';">
                   <option value="Credit" selected>Credit</option>
                   <option value="Cash">Cash</option>
                   <option value="Bank">Bank</option>
                 </select>
               </div>
               <div>
-                <label style="font-weight:600; font-size:0.75rem; color:#475569; display:block; margin-bottom:6px;"><i class="fa-regular fa-comment" style="color:#64748b; margin-right:4px;"></i> Narration / Remarks</label>
-                <input type="text" id="ret-pur-narration" style="width:100%; padding:8px 12px; border-radius:6px; border:1px solid #cbd5e1; background-color:#f8fafc; font-size:0.875rem; color:#0f172a; outline:none; transition: all 0.2s;" placeholder="Reason for return..." onfocus="this.style.borderColor='#818cf8'; this.style.boxShadow='0 0 0 3px rgba(129, 140, 248, 0.2)'" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none'">
+                <label style="font-weight:600; font-size:0.7rem; color:#475569; display:block; margin-bottom:3px;"><i class="fa-regular fa-comment" style="color:#64748b; margin-right:3px;"></i> Narration / Remarks</label>
+                <input type="text" id="ret-pur-narration" style="width:100%; padding:4px 8px; height: 28px; border-radius:4px; border:1px solid #cbd5e1; background-color:#f8fafc; font-size:0.8rem; color:#0f172a; outline:none;" placeholder="Reason for return..." onfocus="this.style.borderColor='#818cf8';" onblur="this.style.borderColor='#cbd5e1';">
               </div>
             </div>
 
             <!-- Tax splits as modern widgets -->
             <div style="display:flex; flex-direction:column; align-items:center; justify-content: center;">
-              <span style="font-size: 0.7rem; font-weight: 700; color: #64748b; text-transform:uppercase; letter-spacing:1px; margin-bottom: 12px;">Tax Breakdown</span>
-              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%;">
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;">
-                  <span style="font-weight:700; font-size:0.7rem; text-align:center; background:#f1f5f9; color:#475569; padding:6px; border-bottom: 1px solid #e2e8f0;">CGST</span>
-                  <input type="text" id="ret-pur-tax-cgst" readonly style="width:100%; border:none; background:transparent; text-align:center; padding:10px; font-size:0.9rem; font-weight:700; color:#1e293b; outline: none;" value="0.00">
+              <span style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform:uppercase; letter-spacing:0.5px; margin-bottom: 6px;">Tax Breakdown</span>
+              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%;">
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden; display: flex; flex-direction: column;">
+                  <span style="font-weight:700; font-size:0.65rem; text-align:center; background:#f1f5f9; color:#475569; padding:3px; border-bottom: 1px solid #e2e8f0;">CGST</span>
+                  <input type="text" id="ret-pur-tax-cgst" readonly style="width:100%; border:none; background:transparent; text-align:center; padding:4px; font-size:0.8rem; font-weight:700; color:#1e293b; outline: none; height: 26px;" value="0.00">
                 </div>
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;">
-                  <span style="font-weight:700; font-size:0.7rem; text-align:center; background:#f1f5f9; color:#475569; padding:6px; border-bottom: 1px solid #e2e8f0;">SGST</span>
-                  <input type="text" id="ret-pur-tax-sgst" readonly style="width:100%; border:none; background:transparent; text-align:center; padding:10px; font-size:0.9rem; font-weight:700; color:#1e293b; outline: none;" value="0.00">
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden; display: flex; flex-direction: column;">
+                  <span style="font-weight:700; font-size:0.65rem; text-align:center; background:#f1f5f9; color:#475569; padding:3px; border-bottom: 1px solid #e2e8f0;">SGST</span>
+                  <input type="text" id="ret-pur-tax-sgst" readonly style="width:100%; border:none; background:transparent; text-align:center; padding:4px; font-size:0.8rem; font-weight:700; color:#1e293b; outline: none; height: 26px;" value="0.00">
                 </div>
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;">
-                  <span style="font-weight:700; font-size:0.7rem; text-align:center; background:#f1f5f9; color:#475569; padding:6px; border-bottom: 1px solid #e2e8f0;">IGST</span>
-                  <input type="text" id="ret-pur-tax-igst" readonly style="width:100%; border:none; background:transparent; text-align:center; padding:10px; font-size:0.9rem; font-weight:700; color:#1e293b; outline: none;" value="0.00">
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden; display: flex; flex-direction: column;">
+                  <span style="font-weight:700; font-size:0.65rem; text-align:center; background:#f1f5f9; color:#475569; padding:3px; border-bottom: 1px solid #e2e8f0;">IGST</span>
+                  <input type="text" id="ret-pur-tax-igst" readonly style="width:100%; border:none; background:transparent; text-align:center; padding:4px; font-size:0.8rem; font-weight:700; color:#1e293b; outline: none; height: 26px;" value="0.00">
                 </div>
                 <!-- Hidden CESS -->
                 <input type="text" id="ret-pur-tax-cess" style="display:none;" value="0.00">
@@ -7281,42 +8147,42 @@ export function showPurchaseReturnModal(container, editReturn = null, onSuccess 
             </div>
 
             <!-- Bottom Right totals block -->
-            <div style="display:flex; flex-direction:column; gap:10px; font-size:0.875rem; justify-content:flex-end;">
+            <div style="display:flex; flex-direction:column; gap:6px; font-size:0.8rem; justify-content:flex-end;">
               <div style="display:flex; justify-content:space-between; align-items:center;">
                 <span style="color:#64748b; font-weight: 500;">Adjustments</span>
-                <input type="number" step="0.01" id="ret-pur-adjustments" style="width:130px; background-color:#f1f5f9; color:#475569; text-align:right; padding:6px 10px; border-radius:6px; border:1px solid #cbd5e1; outline: none;" value="0.00" readonly>
+                <input type="number" step="0.01" id="ret-pur-adjustments" style="width:110px; background-color:#f1f5f9; color:#475569; text-align:right; padding:3px 6px; border-radius:4px; border:1px solid #cbd5e1; outline: none; height: 26px;" value="0.00" readonly>
               </div>
               <div style="display:flex; justify-content:space-between; align-items:center;">
                 <span style="color:#64748b; font-weight: 500;">Round Off</span>
-                <input type="number" step="0.01" id="ret-pur-roundoff" style="width:130px; background-color:#f8fafc; color:#0f172a; text-align:right; padding:6px 10px; border-radius:6px; border:1px solid #cbd5e1; outline: none; transition: all 0.2s;" value="0.00" onfocus="this.style.borderColor='#818cf8'; this.style.boxShadow='0 0 0 3px rgba(129, 140, 248, 0.2)'" onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none'">
+                <input type="number" step="0.01" id="ret-pur-roundoff" style="width:110px; background-color:#f8fafc; color:#0f172a; text-align:right; padding:3px 6px; border-radius:4px; border:1px solid #cbd5e1; outline: none; transition: all 0.2s; height: 26px;" value="0.00" onfocus="this.style.borderColor='#818cf8';" onblur="this.style.borderColor='#cbd5e1';">
               </div>
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px; padding-top:12px; border-top:1px dashed #cbd5e1;">
-                <span style="font-size: 1rem; color: #4338ca; font-weight:800; text-transform: uppercase;">Net Amount</span>
-                <input type="text" id="lbl-ret-pur-nettotal" readonly style="width:160px; background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); color:#312e81; font-weight:900; text-align:right; padding:8px 12px; border:1px solid #a5b4fc; font-size:1.4rem; border-radius:8px; box-shadow: inset 0 2px 4px rgba(255,255,255,0.5);" value="0.00">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px; padding-top:6px; border-top:1px dashed #cbd5e1;">
+                <span style="font-size: 0.85rem; color: #4338ca; font-weight:800; text-transform: uppercase;">Net Amount</span>
+                <input type="text" id="lbl-ret-pur-nettotal" readonly style="width:130px; background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); color:#312e81; font-weight:800; text-align:right; padding:4px 8px; border:1px solid #a5b4fc; font-size:1.15rem; border-radius:6px; box-shadow: inset 0 1px 2px rgba(255,255,255,0.5);" value="0.00">
               </div>
             </div>
           </div>
 
           <!-- Bottom Action Buttons -->
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 4px;">
-            <div style="display:flex; gap:12px;">
-              <button type="button" id="btn-ret-pur-remove-kfc" style="background:#ffffff; border:1px solid #cbd5e1; padding:8px 16px; font-size: 0.875rem; font-weight:600; color:#64748b; border-radius:8px; cursor:pointer; transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05);" onmouseover="this.style.background='#f8fafc'; this.style.color='#0f172a';" onmouseout="this.style.background='#ffffff'; this.style.color='#64748b';">Remove KFC</button>
-              <button type="button" id="btn-ret-pur-print" style="background:#ffffff; border:1px solid #cbd5e1; padding:8px 16px; font-size: 0.875rem; font-weight:600; color:#64748b; border-radius:8px; cursor:pointer; transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05);" onmouseover="this.style.background='#f8fafc'; this.style.color='#0f172a';" onmouseout="this.style.background='#ffffff'; this.style.color='#64748b';"><i class="fa-solid fa-print" style="margin-right: 6px;"></i> Print</button>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 2px;">
+            <div style="display:flex; gap:8px;">
+              <button type="button" id="btn-ret-pur-print" style="background:#ffffff; border:1px solid #cbd5e1; padding:5px 12px; font-size: 0.8rem; font-weight:600; color:#64748b; border-radius:6px; cursor:pointer; height: 32px; transition: all 0.2s;" onmouseover="this.style.background='#f8fafc'; this.style.color='#0f172a';" onmouseout="this.style.background='#ffffff'; this.style.color='#64748b';"><i class="fa-solid fa-print" style="margin-right: 4px;"></i> Print</button>
             </div>
             
-            <div style="display:flex; gap:12px;">
-              <div style="display:flex; gap: 4px; margin-right: 8px;">
-                <button type="button" id="btn-ret-pur-prev" style="background:#ffffff; border:1px solid #cbd5e1; width:38px; height:38px; color:#64748b; border-radius:8px; cursor:pointer; font-weight:bold; transition: all 0.2s; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 2px rgba(0,0,0,0.05);" onmouseover="this.style.background='#f8fafc'; this.style.color='#0f172a';" onmouseout="this.style.background='#ffffff'; this.style.color='#64748b';"><i class="fa-solid fa-chevron-left"></i></button>
-                <button type="button" id="btn-ret-pur-next" style="background:#ffffff; border:1px solid #cbd5e1; width:38px; height:38px; color:#64748b; border-radius:8px; cursor:pointer; font-weight:bold; transition: all 0.2s; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 2px rgba(0,0,0,0.05);" onmouseover="this.style.background='#f8fafc'; this.style.color='#0f172a';" onmouseout="this.style.background='#ffffff'; this.style.color='#64748b';"><i class="fa-solid fa-chevron-right"></i></button>
+            <div style="display:flex; gap:8px;">
+              <div style="display:flex; gap: 4px; margin-right: 4px;">
+                <button type="button" id="btn-ret-pur-prev" style="background:#ffffff; border:1px solid #cbd5e1; width:32px; height:32px; color:#64748b; border-radius:6px; cursor:pointer; font-weight:bold; transition: all 0.2s; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.background='#f8fafc'; this.style.color='#0f172a';" onmouseout="this.style.background='#ffffff'; this.style.color='#64748b';"><i class="fa-solid fa-chevron-left"></i></button>
+                <button type="button" id="btn-ret-pur-next" style="background:#ffffff; border:1px solid #cbd5e1; width:32px; height:32px; color:#64748b; border-radius:6px; cursor:pointer; font-weight:bold; transition: all 0.2s; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.background='#f8fafc'; this.style.color='#0f172a';" onmouseout="this.style.background='#ffffff'; this.style.color='#64748b';"><i class="fa-solid fa-chevron-right"></i></button>
               </div>
               
-              <button type="button" id="btn-ret-pur-search" style="background:#ffffff; border:1px solid #cbd5e1; padding:8px 16px; font-size: 0.875rem; font-weight:600; color:#64748b; border-radius:8px; cursor:pointer; transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05);" onmouseover="this.style.background='#f8fafc'; this.style.color='#0f172a';" onmouseout="this.style.background='#ffffff'; this.style.color='#64748b';">Search</button>
-              <button type="button" id="btn-ret-pur-salesearch" style="background:#ffffff; border:1px solid #cbd5e1; padding:8px 16px; font-size: 0.875rem; font-weight:600; color:#64748b; border-radius:8px; cursor:pointer; transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05);" onmouseover="this.style.background='#f8fafc'; this.style.color='#0f172a';" onmouseout="this.style.background='#ffffff'; this.style.color='#64748b';">Sale Search</button>
-              <button type="button" id="btn-ret-pur-new" style="background:#ffffff; border:1px solid #cbd5e1; padding:8px 20px; font-size: 0.875rem; font-weight:600; color:#64748b; border-radius:8px; cursor:pointer; transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05);" onmouseover="this.style.background='#f8fafc'; this.style.color='#0f172a';" onmouseout="this.style.background='#ffffff'; this.style.color='#64748b';">New</button>
-              <button type="button" id="btn-ret-pur-cancel" style="background:#f1f5f9; border:1px solid #cbd5e1; padding:8px 20px; font-size: 0.875rem; font-weight:600; color:#64748b; border-radius:8px; cursor:pointer; transition: all 0.2s;" onmouseover="this.style.background='#e2e8f0';" onmouseout="this.style.background='#f1f5f9';">Cancel</button>
+              <button type="button" id="btn-ret-pur-search" style="background:#ffffff; border:1px solid #cbd5e1; padding:5px 12px; font-size: 0.8rem; font-weight:600; color:#64748b; border-radius:6px; cursor:pointer; height: 32px; transition: all 0.2s;" onmouseover="this.style.background='#f8fafc'; this.style.color='#0f172a';" onmouseout="this.style.background='#ffffff'; this.style.color='#64748b';">Search</button>
+              <button type="button" id="btn-ret-pur-salesearch" style="background:#ffffff; border:1px solid #cbd5e1; padding:5px 12px; font-size: 0.8rem; font-weight:600; color:#64748b; border-radius:6px; cursor:pointer; height: 32px; transition: all 0.2s;" onmouseover="this.style.background='#f8fafc'; this.style.color='#0f172a';" onmouseout="this.style.background='#ffffff'; this.style.color='#64748b';">Purchase Search</button>
+              <button type="button" id="btn-ret-pur-new" style="background:#ffffff; border:1px solid #cbd5e1; padding:5px 14px; font-size: 0.8rem; font-weight:600; color:#64748b; border-radius:6px; cursor:pointer; height: 32px; transition: all 0.2s;" onmouseover="this.style.background='#f8fafc'; this.style.color='#0f172a';" onmouseout="this.style.background='#ffffff'; this.style.color='#64748b';">New</button>
+              <button type="button" id="btn-ret-pur-void" style="height:32px; padding:5px 14px; font-size:0.8rem; font-weight:700; background-color: #ef4444; border: none; color: white; border-radius:6px; ${editReturn ? 'cursor:pointer;' : 'opacity:0.5; cursor:not-allowed;'}" ${editReturn ? '' : 'disabled'} title="Cancel Return"><i class="fa-solid fa-ban"></i> Cancel Return</button>
+              <button type="button" id="btn-ret-pur-cancel" style="background:#f1f5f9; border:1px solid #cbd5e1; padding:5px 14px; font-size: 0.8rem; font-weight:600; color:#64748b; border-radius:6px; cursor:pointer; height: 32px; transition: all 0.2s;" onmouseover="this.style.background='#e2e8f0';" onmouseout="this.style.background='#f1f5f9';">Close</button>
               
-              <button type="submit" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border:none; padding:8px 28px; font-size: 0.875rem; font-weight:700; color:white; border-radius:8px; cursor:pointer; transition:all 0.2s; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3), 0 2px 4px -1px rgba(16, 185, 129, 0.06);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 15px -3px rgba(16, 185, 129, 0.4), 0 4px 6px -2px rgba(16, 185, 129, 0.05)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px -1px rgba(16, 185, 129, 0.3), 0 2px 4px -1px rgba(16, 185, 129, 0.06)'">
-                <i class="fa-solid fa-check" style="margin-right: 6px;"></i> Save
+              <button type="submit" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border:none; padding:5px 20px; font-size: 0.8rem; font-weight:700; color:white; border-radius:6px; cursor:pointer; height: 32px; transition:all 0.2s; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.25);" onmouseover="this.style.transform='translateY(-1px)';" onmouseout="this.style.transform='translateY(0)';">
+                <i class="fa-solid fa-check" style="margin-right: 4px;"></i> Save
               </button>
             </div>
           </div>
@@ -7325,8 +8191,27 @@ export function showPurchaseReturnModal(container, editReturn = null, onSuccess 
     </div>
   `;
 
-  const overlay = document.getElementById("modal-overlay-tx");
-  const close = () => { overlay.classList.remove("active"); root.innerHTML = ""; };
+  root.appendChild(modalEl);
+  const overlay = modalEl;
+  const handleGlobalKeydown = (e) => {
+    if (e.key === "Delete" || e.key === "Del") {
+      const active = document.activeElement;
+      const isInputFocused = active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA" || active.tagName === "SELECT");
+      if (!isInputFocused && selectedGridIndex !== null && selectedGridIndex >= 0 && selectedGridIndex < gridItems.length) {
+        e.preventDefault();
+        gridItems.splice(selectedGridIndex, 1);
+        if (selectedGridIndex >= gridItems.length) selectedGridIndex = gridItems.length - 1;
+        if (selectedGridIndex < 0) selectedGridIndex = null;
+        renderGridAndRecalc();
+      }
+    }
+  };
+  window.addEventListener("keydown", handleGlobalKeydown);
+
+  const close = () => {
+    window.removeEventListener("keydown", handleGlobalKeydown);
+    modalEl.remove();
+  };
 
   document.getElementById("pm-close-btn-header").addEventListener("click", close);
   document.getElementById("btn-ret-pur-cancel").addEventListener("click", close);
@@ -7346,9 +8231,44 @@ export function showPurchaseReturnModal(container, editReturn = null, onSuccess 
   document.getElementById("btn-ret-pur-print").addEventListener("click", () => {
     window.print();
   });
-  document.getElementById("btn-ret-pur-remove-kfc").addEventListener("click", () => {
-    alert("KFC Removed successfully.");
-  });
+
+  if (editReturn && document.getElementById("btn-ret-pur-void")) {
+    document.getElementById("btn-ret-pur-void").addEventListener("click", () => {
+      const validateAdminPassword = () => {
+        const pass = prompt("Enter Admin Password to cancel this return:");
+        if (pass === null) return false;
+        if (pass !== state.getAdminPassword()) {
+          alert("Incorrect password!");
+          return false;
+        }
+        return true;
+      };
+      if (confirm(`Are you sure you want to cancel Purchase Return ${editReturn.id}?`) && validateAdminPassword()) {
+        const ok = state.cancelPurchaseReturn(editReturn.id);
+        if (ok) {
+          alert(`Purchase Return ${editReturn.id} has been cancelled successfully.`);
+          close();
+          if (onSuccess) onSuccess();
+        }
+      }
+    });
+  }
+
+  if (editReturn && (editReturn.isCancelled || editReturn.isCanceled || String(editReturn.status).toUpperCase() === 'CANCELLED')) {
+    setTimeout(() => {
+      const modalOverlay = document.getElementById("modal-overlay-tx");
+      if (modalOverlay) {
+        modalOverlay.querySelectorAll("input, select, textarea, button").forEach(el => {
+          const allowedIds = ["pm-close-btn-header", "btn-ret-pur-search", "btn-ret-pur-salesearch", "btn-ret-pur-prev", "btn-ret-pur-next", "btn-ret-pur-print", "btn-ret-pur-new", "btn-ret-pur-cancel", "btn-ret-pur-void", "btn-print"];
+          if (!allowedIds.includes(el.id) && !el.classList.contains("win-btn") && el.innerText !== "Close" && el.innerText !== "Cancel") {
+            el.disabled = true;
+            el.style.opacity = "0.75";
+            el.style.cursor = "not-allowed";
+          }
+        });
+      }
+    }, 50);
+  }
 
   // Bind Previous and Next buttons
   const allPurReturns = state.getPurchaseReturns();
@@ -7387,6 +8307,16 @@ export function showPurchaseReturnModal(container, editReturn = null, onSuccess 
     const amount = qty * rate;
     const gstPercent = mat ? ((mat.igst !== undefined && mat.igst !== null && mat.igst !== "") ? parseFloat(mat.igst) : 18) : 18;
     const gstAmount = amount * (gstPercent / 100);
+    let batchNo = item.batchNo || "";
+    if (!batchNo && editReturn.billNo) {
+      const pur = state.getPurchases().find(p => String(p.invoiceNo) === String(editReturn.billNo) || String(p.voucherNo) === String(editReturn.billNo));
+      if (pur && pur.items) {
+        const purItem = pur.items.find(pi => pi.materialId === item.materialId || pi.name === item.name);
+        if (purItem) {
+          batchNo = purItem.batchNo || String(purItem.price || "");
+        }
+      }
+    }
     return {
       materialId: item.materialId,
       name: item.name || (mat ? mat.name : ""),
@@ -7395,7 +8325,7 @@ export function showPurchaseReturnModal(container, editReturn = null, onSuccess 
       unit: item.unit || (mat ? mat.unit : "Bags"),
       price: rate,
       mrp: item.mrp || (mat ? mat.mrp : rate * 1.25),
-      batchNo: item.batchNo || "",
+      batchNo: batchNo,
       amount: amount,
       gstPercent: gstPercent,
       gstAmount: gstAmount,
@@ -7438,9 +8368,22 @@ export function showPurchaseReturnModal(container, editReturn = null, onSuccess 
   supplierSelect.addEventListener("change", () => {
     populateBranches(supplierSelect.value);
     populateVendorBills(supplierSelect.value);
+    gridItems = [];
+    adjustmentsList = [];
+    codeSelect.innerHTML = '<option value="">-- Code/Model --</option>';
+    codeSelect.disabled = true;
+    ribbonRetPurBatchSelect.innerHTML = '<option value="">-- Batch --</option>';
+    ribbonRetPurBatchSelect.disabled = true;
+    qtyInput.value = "";
+    rateInput.value = "";
+    mrpInput.value = "";
+    availStockSpan.innerText = "0.00";
+    renderGridAndRecalc();
   });
 
   billnoSelect.addEventListener("change", () => {
+    gridItems = [];
+    adjustmentsList = [];
     const billNo = billnoSelect.value;
     if (billNo) {
       const purchase = state.getPurchases().find(pur => String(pur.invoiceNo) === String(billNo));
@@ -7468,6 +8411,7 @@ export function showPurchaseReturnModal(container, editReturn = null, onSuccess 
     rateInput.value = "";
     mrpInput.value = "";
     availStockSpan.innerText = "0.00";
+    renderGridAndRecalc();
   });
 
   if (editReturn) {
@@ -7507,6 +8451,30 @@ export function showPurchaseReturnModal(container, editReturn = null, onSuccess 
     document.getElementById("ret-pur-roundoff").value = editReturn.roundOff || "0.00";
   }
 
+  // Helper to reset ribbon inputs
+  const resetRibbonInputs = () => {
+    qtyInput.value = "";
+    rateInput.value = "";
+    mrpInput.value = "";
+    availStockSpan.innerText = "0.00";
+  };
+
+  // Helper to load details for a selected invoice item batch
+  const updateBatchDetails = (invoiceItem, bNo) => {
+    if (invoiceItem) {
+      const mat = materials.find(m => m.id === invoiceItem.materialId);
+      rateInput.value = invoiceItem.price ? parseFloat(invoiceItem.price).toFixed(2) : "";
+      mrpInput.value = invoiceItem.mrp ? parseFloat(invoiceItem.mrp).toFixed(2) : (parseFloat(invoiceItem.price) * 1.25).toFixed(2);
+      qtyInput.value = invoiceItem.quantity || "";
+      updateRibbonUnitSelect(unitSelect, invoiceItem.unit || (mat ? mat.unit : "Bags"));
+
+      const batchObj = mat ? (mat.batches || []).find(b => b.batchNo === bNo) : null;
+      availStockSpan.innerText = batchObj ? (batchObj.stock || 0).toFixed(2) : "0.00";
+    } else {
+      resetRibbonInputs();
+    }
+  };
+
   // When product changes
   productSelect.addEventListener("change", () => {
     const pName = productSelect.value;
@@ -7514,30 +8482,31 @@ export function showPurchaseReturnModal(container, editReturn = null, onSuccess 
     if (pName && billNo) {
       const purchase = state.getPurchases().find(pur => String(pur.invoiceNo) === String(billNo));
       const purchaseItems = purchase ? (purchase.items || []) : [];
-      const matchingItems = purchaseItems
-        .filter(item => (item.name || item.materialName) === pName)
-        .sort((a, b) => {
-          const matA = materials.find(m => m.id === a.materialId);
-          const matB = materials.find(m => m.id === b.materialId);
-          const codeA = matA ? matA.code : (a.code || "");
-          const codeB = matB ? matB.code : (b.code || "");
-          return codeA.localeCompare(codeB, undefined, { numeric: true, sensitivity: 'base' });
-        });
+      const matchingItems = purchaseItems.filter(item => (item.name || item.materialName) === pName);
 
+      const uniqueCodesMap = new Map();
+      matchingItems.forEach(item => {
+        const mat = materials.find(m => m.id === item.materialId);
+        const code = mat ? mat.code : (item.code || "");
+        if (code && !uniqueCodesMap.has(code)) {
+          uniqueCodesMap.set(code, item);
+        }
+      });
+
+      const uniqueCodes = Array.from(uniqueCodesMap.keys()).sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
       codeSelect.innerHTML = '<option value="">-- Code/Model --</option>' + 
-        matchingItems.map(item => {
-          const mat = materials.find(m => m.id === item.materialId);
-          const code = mat ? mat.code : (item.code || "");
-          return `<option value="${code}" data-item-id="${item.materialId}">${code}</option>`;
-        }).join("");
+        uniqueCodes.map(code => `<option value="${code}">${code}</option>`).join("");
       codeSelect.disabled = false;
-      availStockSpan.innerText = "0.00";
+
+      ribbonRetPurBatchSelect.innerHTML = '<option value="">-- Batch --</option>';
+      ribbonRetPurBatchSelect.disabled = true;
+      resetRibbonInputs();
     } else {
       codeSelect.innerHTML = '<option value="">-- Code/Model --</option>';
       codeSelect.disabled = true;
       ribbonRetPurBatchSelect.innerHTML = '<option value="">-- Batch --</option>';
       ribbonRetPurBatchSelect.disabled = true;
-      availStockSpan.innerText = "0.00";
+      resetRibbonInputs();
     }
   });
 
@@ -7548,32 +8517,62 @@ export function showPurchaseReturnModal(container, editReturn = null, onSuccess 
     const billNo = billnoSelect.value;
     if (pName && pCode && billNo) {
       const purchase = state.getPurchases().find(pur => String(pur.invoiceNo) === String(billNo));
-      const selectedOption = codeSelect.options[codeSelect.selectedIndex];
-      const matId = selectedOption.getAttribute("data-item-id");
-      const invoiceItem = purchase ? purchase.items.find(item => item.materialId === matId) : null;
+      const purchaseItems = purchase ? (purchase.items || []) : [];
+      const matchingItems = purchaseItems.filter(item => {
+        const mat = materials.find(m => m.id === item.materialId);
+        const code = mat ? mat.code : (item.code || "");
+        return (item.name || item.materialName) === pName && code === pCode;
+      });
 
-      if (invoiceItem) {
-        const mat = materials.find(m => m.id === matId);
-        rateInput.value = invoiceItem.price ? parseFloat(invoiceItem.price).toFixed(2) : "";
-        mrpInput.value = invoiceItem.mrp ? parseFloat(invoiceItem.mrp).toFixed(2) : (parseFloat(invoiceItem.price) * 1.25).toFixed(2);
-        qtyInput.value = invoiceItem.quantity || "";
-        updateRibbonUnitSelect(unitSelect, invoiceItem.unit || (mat ? mat.unit : "Bags"));
+      ribbonRetPurBatchSelect.innerHTML = '<option value="">-- Batch --</option>' +
+        matchingItems.map(item => {
+          const bNo = item.batchNo || String(item.price);
+          return `<option value="${bNo}" data-item-id="${item.materialId}">${bNo}</option>`;
+        }).join("");
+      ribbonRetPurBatchSelect.disabled = false;
 
-        const bNo = invoiceItem.batchNo || String(invoiceItem.price);
-        ribbonRetPurBatchSelect.innerHTML = `<option value="${bNo}">${bNo}</option>`;
-        ribbonRetPurBatchSelect.value = bNo;
-        ribbonRetPurBatchSelect.disabled = false;
-
-        const batchObj = mat ? mat.batches.find(b => b.batchNo === bNo) : null;
-        availStockSpan.innerText = batchObj ? (batchObj.stock || 0).toFixed(2) : "0.00";
+      if (matchingItems.length === 1) {
+        ribbonRetPurBatchSelect.selectedIndex = 1;
+        const item = matchingItems[0];
+        const bNo = item.batchNo || String(item.price);
+        updateBatchDetails(item, bNo);
+      } else {
+        resetRibbonInputs();
       }
     } else {
       ribbonRetPurBatchSelect.innerHTML = '<option value="">-- Batch --</option>';
       ribbonRetPurBatchSelect.disabled = true;
-      qtyInput.value = "";
-      rateInput.value = "";
-      mrpInput.value = "";
-      availStockSpan.innerText = "0.00";
+      resetRibbonInputs();
+    }
+  });
+
+  // When batch changes
+  ribbonRetPurBatchSelect.addEventListener("change", () => {
+    const pName = productSelect.value;
+    const pCode = codeSelect.value;
+    const billNo = billnoSelect.value;
+    const bNo = ribbonRetPurBatchSelect.value;
+    const selectedOption = ribbonRetPurBatchSelect.options[ribbonRetPurBatchSelect.selectedIndex];
+    const matId = selectedOption ? selectedOption.getAttribute("data-item-id") : null;
+
+    if (pName && pCode && billNo && bNo) {
+      const purchase = state.getPurchases().find(pur => String(pur.invoiceNo) === String(billNo));
+      const purchaseItems = purchase ? (purchase.items || []) : [];
+      const invoiceItem = purchaseItems.find(item => {
+        const mat = materials.find(m => m.id === item.materialId);
+        const code = mat ? mat.code : (item.code || "");
+        const itemBatch = item.batchNo || String(item.price);
+        return (item.name || item.materialName) === pName && code === pCode && item.materialId === matId && itemBatch === bNo;
+      }) || purchaseItems.find(item => {
+        const mat = materials.find(m => m.id === item.materialId);
+        const code = mat ? mat.code : (item.code || "");
+        const itemBatch = item.batchNo || String(item.price);
+        return (item.name || item.materialName) === pName && code === pCode && itemBatch === bNo;
+      });
+
+      updateBatchDetails(invoiceItem, bNo);
+    } else {
+      resetRibbonInputs();
     }
   });
 
@@ -7597,30 +8596,69 @@ export function showPurchaseReturnModal(container, editReturn = null, onSuccess 
     }
   });
 
+  let selectedGridIndex = null;
+
   function renderGridAndRecalc() {
     const tbody = document.getElementById("ret-pur-grid-body");
-    tbody.innerHTML = gridItems.map((item, idx) => `
-      <tr style="border-bottom:1px solid #cbd5e1;">
-        <td style="padding:6px;"><strong>${item.name}</strong></td>
-        <td style="padding:6px;">${item.code}</td>
-        <td style="padding:6px; font-weight:bold; color:#1e3b8b;">${item.batchNo || ''}</td>
-        <td style="padding:6px; text-align:right;">${item.quantity.toFixed(2)}</td>
-        <td style="padding:6px; text-align:right;">\u20B9${item.price.toFixed(2)}</td>
-        <td style="padding:6px; text-align:right;">\u20B9${item.amount.toFixed(2)}</td>
-        <td style="padding:6px; text-align:right;">${item.gstPercent}%</td>
-        <td style="padding:6px; text-align:right;">\u20B9${item.gstAmount.toFixed(2)}</td>
-        <td style="padding:6px; text-align:right; font-weight:600; color:#1e40af;">\u20B9${item.netAmount.toFixed(2)}</td>
-        <td style="padding:6px; text-align:center;">
-          <button type="button" class="btn btn-danger btn-icon btn-remove-grid-row" data-index="${idx}" style="padding: 2px 6px;"><i class="fa-solid fa-trash-can"></i></button>
-        </td>
-      </tr>
-    `).join("");
+    if (gridItems.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:20px; color:#64748b;">No items added to the return grid.</td></tr>`;
+    } else {
+      tbody.innerHTML = gridItems.map((item, idx) => {
+        const isSelected = (idx === selectedGridIndex);
+        return `
+          <tr class="ret-pur-grid-row" tabindex="0" data-index="${idx}" style="border-bottom:1px solid #cbd5e1; cursor:pointer; background-color:${isSelected ? '#bae6fd' : (idx % 2 === 0 ? '#f8fafc' : 'white')}; outline:none;" title="Click to select row, Double click to edit line">
+            <td style="padding:6px; text-align:center; font-weight:bold; color:#64748b;">${idx + 1}</td>
+            <td style="padding:6px;"><strong>${item.name}</strong></td>
+            <td style="padding:6px;">${item.code}</td>
+            <td style="padding:6px; font-weight:bold; color:#1e3b8b;">${item.batchNo || ''}</td>
+            <td style="padding:6px; text-align:right;">${item.quantity.toFixed(2)}</td>
+            <td style="padding:6px; text-align:right;">\u20B9${item.price.toFixed(2)}</td>
+            <td style="padding:6px; text-align:right;">\u20B9${item.amount.toFixed(2)}</td>
+            <td style="padding:6px; text-align:right;">${item.gstPercent}%</td>
+            <td style="padding:6px; text-align:right;">\u20B9${item.gstAmount.toFixed(2)}</td>
+            <td style="padding:6px; text-align:right; font-weight:600; color:#1e40af;">\u20B9${item.netAmount.toFixed(2)}</td>
+          </tr>
+        `;
+      }).join("");
+    }
 
-    tbody.querySelectorAll(".btn-remove-grid-row").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const idx = parseInt(btn.getAttribute("data-index"));
+    tbody.querySelectorAll(".ret-pur-grid-row").forEach(tr => {
+      tr.addEventListener("click", () => {
+        selectedGridIndex = parseInt(tr.getAttribute("data-index"));
+        tbody.querySelectorAll(".ret-pur-grid-row").forEach((r, i) => {
+          r.style.backgroundColor = (i === selectedGridIndex) ? "#bae6fd" : (i % 2 === 0 ? "#f8fafc" : "white");
+        });
+        tr.focus();
+      });
+
+      tr.addEventListener("dblclick", () => {
+        const idx = parseInt(tr.getAttribute("data-index"));
+        if (isNaN(idx) || idx < 0 || idx >= gridItems.length) return;
+
+        const item = gridItems[idx];
         gridItems.splice(idx, 1);
+        selectedGridIndex = null;
         renderGridAndRecalc();
+
+        if (item) {
+          productSelect.value = item.name || "";
+          productSelect.dispatchEvent(new Event("change"));
+          if (item.code) {
+            codeSelect.value = item.code;
+            codeSelect.dispatchEvent(new Event("change"));
+          }
+          if (item.batchNo) {
+            ribbonRetPurBatchSelect.value = item.batchNo;
+            ribbonRetPurBatchSelect.dispatchEvent(new Event("change"));
+          }
+          if (item.quantity !== undefined) qtyInput.value = item.quantity;
+          if (item.price !== undefined) rateInput.value = parseFloat(item.price).toFixed(2);
+          if (item.mrp !== undefined) mrpInput.value = parseFloat(item.mrp).toFixed(2);
+          if (item.unit) updateRibbonUnitSelect(unitSelect, item.unit);
+
+          qtyInput.focus();
+          qtyInput.select();
+        }
       });
     });
 
@@ -7664,6 +8702,22 @@ export function showPurchaseReturnModal(container, editReturn = null, onSuccess 
 
   document.getElementById("ret-pur-state").addEventListener("change", renderGridAndRecalc);
   document.getElementById("ret-pur-roundoff").addEventListener("input", renderGridAndRecalc);
+
+  // Enter key navigation to add product directly from Rate input
+  rateInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addRowBtn.click();
+    }
+  });
+
+  qtyInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      rateInput.focus();
+      rateInput.select();
+    }
+  });
 
   // Add item from ribbon
   addRowBtn.addEventListener("click", () => {
@@ -7748,44 +8802,54 @@ export function showPurchaseReturnModal(container, editReturn = null, onSuccess 
     }));
 
     if (editReturn) {
+      const fyCheckOld = state.isPreviousFyLocked(editReturn.date);
+      if (fyCheckOld.locked) {
+        alert(fyCheckOld.reason);
+        return;
+      }
       const pass = prompt("Enter Admin Password to update this Purchase Return:");
       if (pass === null) return;
       if (pass !== state.getAdminPassword()) {
         alert("Incorrect password!");
         return;
       }
-      state.deletePurchaseReturn(editReturn.id);
+      const delOk = state.deletePurchaseReturn(editReturn.id);
+      if (!delOk) return;
     }
 
-    const success = state.createPurchaseReturn({
-      id: editReturn ? editReturn.id : undefined,
-      contactId: supplierSelect.value,
-      billNo: billnoSelect.value,
-      date: document.getElementById("ret-pur-date").value,
-      state: document.getElementById("ret-pur-state").value,
-      taxRate: 18,
-      siteName: branchSelect.value,
-      items: items,
-      adjustmentsList: adjustmentsList,
-      roundOff: parseFloat(document.getElementById("ret-pur-roundoff").value) || 0
-    });
+    try {
+      const success = state.createPurchaseReturn({
+        id: editReturn ? editReturn.id : undefined,
+        contactId: supplierSelect.value,
+        billNo: billnoSelect.value,
+        date: document.getElementById("ret-pur-date").value,
+        state: document.getElementById("ret-pur-state").value,
+        taxRate: 18,
+        siteName: branchSelect.value,
+        items: items,
+        adjustmentsList: adjustmentsList,
+        roundOff: parseFloat(document.getElementById("ret-pur-roundoff").value) || 0
+      });
 
-    if (success) {
-      alert("Purchase Return successfully saved");
-      close();
-      if (onSuccess) onSuccess();
-      if (!editReturn) {
-        showPurchaseReturnModal(container, null, onSuccess);
-      } else {
-        const tc = document.getElementById("transactions-content");
-        if (tc) {
-          renderPurchaseReturnSubTab(tc);
+      if (success) {
+        alert("Purchase Return successfully saved");
+        close();
+        if (onSuccess) onSuccess();
+        if (!editReturn) {
+          showPurchaseReturnModal(container, null, onSuccess);
         } else {
-          renderPurchaseReturnSubTab(container);
+          const tc = document.getElementById("transactions-content");
+          if (tc) {
+            renderPurchaseReturnSubTab(tc);
+          } else {
+            renderPurchaseReturnSubTab(container);
+          }
         }
+      } else {
+        alert("Error: Failed to save Purchase Return. Please verify that you have sufficient stock for all returned items.");
       }
-    } else {
-      alert("Error: Failed to save Purchase Return. Please verify that you have sufficient stock for all returned items.");
+    } catch (err) {
+      alert(err.message);
     }
   });
 
@@ -7931,7 +8995,7 @@ export function showStockAdjustWizard(container, searchRef = null) {
             <!-- Date Picker -->
             <div style="display: flex; flex-direction: column; border: 1px solid #1e3b8b; border-radius: 3px; overflow: hidden; min-width: 130px; text-align: center; background-color: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
               <div style="background-color: #1e3b8b; color: white; font-size: 0.75rem; font-weight: bold; padding: 2px 4px; letter-spacing: 0.5px;">Date</div>
-              <input type="date" id="adj-date" style="border: none; outline: none; padding: 4px; text-align: center; font-weight: bold; color: #1e3b8b; width: 100%; font-size: 0.85rem;" value="${todayStr}">
+              ${renderTallyDatePickerHtml({ id: "adj-date", value: todayStr, style: "height:26px; font-size:0.85rem; border:none; background:transparent;", width: "100%" })}
             </div>
           </div>
 
@@ -8000,7 +9064,7 @@ export function showStockAdjustWizard(container, searchRef = null) {
               </div>
               <div style="display: flex; flex-direction: column; gap: 2px;">
                 <label style="font-weight: bold; font-size: 0.75rem; color: #1e3b8b;">Rate</label>
-                <input type="number" step="0.01" id="ribbon-rate" class="form-control" style="height: 28px; padding: 2px 5px; font-size: 0.8rem; background-color: white; color: black; border: 1px solid #b4cbe6; width: 100%;" placeholder="0.00">
+                <input type="number" step="any" id="ribbon-rate" class="form-control" style="height: 28px; padding: 2px 5px; font-size: 0.8rem; background-color: white; color: black; border: 1px solid #b4cbe6; width: 100%;" placeholder="0.00">
               </div>
               <div style="display: flex; flex-direction: column; gap: 2px;">
                 <label style="font-weight: bold; font-size: 0.75rem; color: #1e3b8b;">Type</label>
@@ -8033,17 +9097,17 @@ export function showStockAdjustWizard(container, searchRef = null) {
           <!-- Fourth Section: Grid (Table) -->
           <div style="background-color: white; border: 1.5px solid #1e3b8b; height: 200px; overflow-y: auto; border-radius: 3px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.08);">
             <table class="custom-voucher-table" style="width: 100%; border-collapse: collapse; margin-top: 0;">
-              <thead>
-                <tr>
-                  <th style="background-color: #1e3b8b !important; color: white !important; font-weight: bold; border: 1px solid #94a3b8; padding: 6px; text-align: left; font-size: 0.8rem; width: 25%;">Product Name</th>
-                  <th style="background-color: #1e3b8b !important; color: white !important; font-weight: bold; border: 1px solid #94a3b8; padding: 6px; text-align: left; font-size: 0.8rem; width: 12%;">Code/Model</th>
-                  <th style="background-color: #1e3b8b !important; color: white !important; font-weight: bold; border: 1px solid #94a3b8; padding: 6px; text-align: left; font-size: 0.8rem; width: 12%;">Batch</th>
-                  <th style="background-color: #1e3b8b !important; color: white !important; font-weight: bold; border: 1px solid #94a3b8; padding: 6px; text-align: right; font-size: 0.8rem; width: 8%;">Qty</th>
-                  <th style="background-color: #1e3b8b !important; color: white !important; font-weight: bold; border: 1px solid #94a3b8; padding: 6px; text-align: right; font-size: 0.8rem; width: 10%;">Rate</th>
-                  <th style="background-color: #1e3b8b !important; color: white !important; font-weight: bold; border: 1px solid #94a3b8; padding: 6px; text-align: right; font-size: 0.8rem; width: 10%;">Amount</th>
-                  <th style="background-color: #1e3b8b !important; color: white !important; font-weight: bold; border: 1px solid #94a3b8; padding: 6px; text-align: left; font-size: 0.8rem; width: 10%;">Type</th>
-                  <th style="background-color: #1e3b8b !important; color: white !important; font-weight: bold; border: 1px solid #94a3b8; padding: 6px; text-align: left; font-size: 0.8rem; width: 10%;">Comments</th>
-                  <th style="background-color: #1e3b8b !important; color: white !important; font-weight: bold; border: 1px solid #94a3b8; padding: 6px; text-align: center; width: 3%;"></th>
+              <thead style="position: sticky; top: 0; z-index: 10; background-color: #1e3b8b;">
+                <tr style="position: sticky; top: 0; z-index: 10;">
+                  <th style="background-color: #1e3b8b !important; color: white !important; font-weight: bold; border: 1px solid #94a3b8; padding: 6px; text-align: left; font-size: 0.8rem; width: 25%; position: sticky; top: 0; z-index: 10;">Product Name</th>
+                  <th style="background-color: #1e3b8b !important; color: white !important; font-weight: bold; border: 1px solid #94a3b8; padding: 6px; text-align: left; font-size: 0.8rem; width: 12%; position: sticky; top: 0; z-index: 10;">Code/Model</th>
+                  <th style="background-color: #1e3b8b !important; color: white !important; font-weight: bold; border: 1px solid #94a3b8; padding: 6px; text-align: left; font-size: 0.8rem; width: 12%; position: sticky; top: 0; z-index: 10;">Batch</th>
+                  <th style="background-color: #1e3b8b !important; color: white !important; font-weight: bold; border: 1px solid #94a3b8; padding: 6px; text-align: right; font-size: 0.8rem; width: 8%; position: sticky; top: 0; z-index: 10;">Qty</th>
+                  <th style="background-color: #1e3b8b !important; color: white !important; font-weight: bold; border: 1px solid #94a3b8; padding: 6px; text-align: right; font-size: 0.8rem; width: 10%; position: sticky; top: 0; z-index: 10;">Rate</th>
+                  <th style="background-color: #1e3b8b !important; color: white !important; font-weight: bold; border: 1px solid #94a3b8; padding: 6px; text-align: right; font-size: 0.8rem; width: 10%; position: sticky; top: 0; z-index: 10;">Amount</th>
+                  <th style="background-color: #1e3b8b !important; color: white !important; font-weight: bold; border: 1px solid #94a3b8; padding: 6px; text-align: left; font-size: 0.8rem; width: 10%; position: sticky; top: 0; z-index: 10;">Type</th>
+                  <th style="background-color: #1e3b8b !important; color: white !important; font-weight: bold; border: 1px solid #94a3b8; padding: 6px; text-align: left; font-size: 0.8rem; width: 10%; position: sticky; top: 0; z-index: 10;">Comments</th>
+                  <th style="background-color: #1e3b8b !important; color: white !important; font-weight: bold; border: 1px solid #94a3b8; padding: 6px; text-align: center; width: 3%; position: sticky; top: 0; z-index: 10;"></th>
                 </tr>
               </thead>
               <tbody id="grid-tbody">
@@ -8137,10 +9201,10 @@ export function showStockAdjustWizard(container, searchRef = null) {
       const batches = state.getMaterialBatches(mat.id);
       if (batches.length > 0) {
         batchSelect.value = batches[0].batchNo;
-        rateInput.value = (batches[0].landingCost || mat.landingCost || 0).toFixed(2);
+        rateInput.value = formatRateValue(batches[0].landingCost || mat.landingCost || 0);
         stockInfo.innerText = `Stock : ${batches[0].stock.toFixed(2)}`;
       } else {
-        rateInput.value = (mat.landingCost || 0).toFixed(2);
+        rateInput.value = formatRateValue(mat.landingCost || 0);
         stockInfo.innerText = `Stock : ${mat.stock.toFixed(2)}`;
       }
     } else {
@@ -8158,10 +9222,10 @@ export function showStockAdjustWizard(container, searchRef = null) {
       const bNo = batchSelect.value;
       const batch = mat.batches.find(b => b.batchNo === bNo);
       if (batch) {
-        rateInput.value = (batch.landingCost || mat.landingCost || 0).toFixed(2);
+        rateInput.value = formatRateValue(batch.landingCost || mat.landingCost || 0);
         stockInfo.innerText = `Stock : ${batch.stock.toFixed(2)}`;
       } else {
-        rateInput.value = (mat.landingCost || 0).toFixed(2);
+        rateInput.value = formatRateValue(mat.landingCost || 0);
         stockInfo.innerText = `Stock : ${mat.stock.toFixed(2)}`;
       }
     }
@@ -8302,10 +9366,15 @@ export function showStockAdjustWizard(container, searchRef = null) {
       total: parseFloat(document.getElementById("adj-total").value) || 0
     };
 
-    state.saveStockAdjustment(doc);
-    alert("Stock Adjustment saved successfully!");
-    close();
-    renderStockAdjustSubTab(container);
+    try {
+      const ok = state.saveStockAdjustment(doc);
+      if (!ok) return;
+      alert("Stock Adjustment saved successfully!");
+      close();
+      renderStockAdjustSubTab(container);
+    } catch (err) {
+      alert(err.message);
+    }
   });
 
   // Action DELETE
@@ -8317,7 +9386,8 @@ export function showStockAdjustWizard(container, searchRef = null) {
     if (confirm("Are you sure you want to delete this stock adjustment?")) {
       const pw = prompt("Enter Admin Password:");
       if (pw === state.getAdminPassword() || pw === "123") {
-        state.deleteStockAdjustment(stockAdjustments[currentIndex].id);
+        const ok = state.deleteStockAdjustment(stockAdjustments[currentIndex].id);
+        if (!ok) return;
         alert("Stock Adjustment deleted.");
         close();
         renderStockAdjustSubTab(container);
@@ -8502,19 +9572,23 @@ function showStockConversionModal(container) {
       return;
     }
 
-    const success = state.createStockConversion({
-      sourceMaterialId: srcId,
-      sourceQty: sQty,
-      targetMaterialId: tgtId,
-      targetQty: tQty,
-      date: date
-    });
+    try {
+      const success = state.createStockConversion({
+        sourceMaterialId: srcId,
+        sourceQty: sQty,
+        targetMaterialId: tgtId,
+        targetQty: tQty,
+        date: date
+      });
 
-    if (success) {
-      close();
-      renderStockConversionSubTab(container);
-    } else {
-      alert("Failed to complete conversion. Check inputs.");
+      if (success) {
+        close();
+        renderStockConversionSubTab(container);
+      } else {
+        alert("Failed to complete conversion. Check inputs.");
+      }
+    } catch (err) {
+      alert(err.message);
     }
   });
 }

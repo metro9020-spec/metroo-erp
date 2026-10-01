@@ -24,17 +24,14 @@ export function showDayBookModal(container) {
   });
   const defaultToDate = activeFyEnd && activeFyEnd > maxTxDate ? activeFyEnd : maxTxDate;
 
-  // Helper to format date like 'DD/MM/YYYY'
   function formatDateShort(dateStr) {
     return formatDateDisplay(dateStr);
   }
 
-  // Get voucher type from transaction reference
   function getVoucherType(ref) {
     const refStr = String(ref || "");
     const r = refStr.toLowerCase();
     
-    // Direct match against database records to support custom prefixes
     if (state.getPurchases().some(p => p && (p.voucherNo === refStr || p.refNo === refStr || p.id === refStr))) return "Purchases";
     if (state.getInvoices().some(i => i && (i.voucherNo === refStr || i.refNo === refStr || i.id === refStr))) return "Sales";
     if (state.getSalesReturns().some(sr => sr && (sr.id === refStr || `Credit Note ${sr.id}` === refStr || `Sales Return ${sr.id}` === refStr || sr.billNo === refStr))) return "Sales Return";
@@ -51,8 +48,8 @@ export function showDayBookModal(container) {
     }
     if (r.includes("sales return") || r.startsWith("sr-")) return "Sales Return";
     if (r.includes("purchase return") || r.startsWith("pr-")) return "Purchase Return";
-    if (r.includes("credit note") || r.startsWith("crn-")) return "Credit Note";
-    if (r.includes("debit note") || r.startsWith("dbn-")) return "Debit Note";
+    if (r.includes("credit note") || r.startsWith("crn-") || r.startsWith("cn-")) return "Credit Note";
+    if (r.includes("debit note") || r.startsWith("dbn-") || r.startsWith("dn-")) return "Debit Note";
     if (r.includes("expense") || r.startsWith("exp-")) return "Emp Expense";
     return "Journal";
   }
@@ -79,14 +76,19 @@ export function showDayBookModal(container) {
           <button type="button" style="background:none; border:none; color:white; font-size:1.2rem; cursor:pointer;" id="db-close-x-btn">&times;</button>
         </div>
         <!-- Filters Bar -->
-        <div class="no-print" style="background:#cbd5e1; padding:8px; border:1px solid #94a3b8; border-radius:2px; display:grid; grid-template-columns: 2fr 1.2fr 1fr; gap:15px; align-items:center; color:black;">
+        <div class="no-print" style="background:#cbd5e1; padding:8px; border:1px solid #94a3b8; border-radius:2px; display:flex; justify-content:space-between; align-items:center; gap:15px; color:black;">
           
           <div style="display:flex; align-items:center; gap:10px;">
-            <div style="font-weight:bold; width:85px;">Show Book</div>
-            <select id="db-book-type" class="form-control" style="flex-grow:1; background:white; color:black; padding:3px; height:26px; border:1px solid #7f99c2;">
-              <option value="All">All Transactions / Vouchers Log</option>
+            <div style="font-weight:bold; white-space:nowrap;">Show Book:</div>
+            <select id="db-book-type" class="form-control" style="background:white; color:black; padding:3px; height:26px; border:1px solid #7f99c2; font-size:0.8rem;">
+              <option value="All">All Transactions / Vouchers</option>
               <option value="Cash">Cash Book Only</option>
               <option value="Bank">Bank Book Only</option>
+              <option value="Sales">Sales Only</option>
+              <option value="Purchases">Purchases Only</option>
+              <option value="Payments">Payments Only</option>
+              <option value="Receipts">Receipts Only</option>
+              <option value="Journal">Journal Only</option>
             </select>
           </div>
 
@@ -96,9 +98,6 @@ export function showDayBookModal(container) {
             <span style="font-weight:bold; font-size:0.75rem;">To:</span>
             ${renderTallyDatePickerHtml({ id: "db-to-date", value: defaultToDate, style: "height:26px; padding:2px 6px; font-size:0.8rem; border:1px solid #7f9db9; border-radius:3px;", width: "130px" })}
           </div>
-
-
-
 
           <div style="display:flex; gap:6px; justify-content:flex-end;">
             <button type="button" class="btn btn-secondary" id="btn-db-view" style="font-weight:bold; background-color:#e2e8f0; border:1px solid #475569; color:black; padding:3px 12px; font-size:0.75rem;">View</button>
@@ -110,31 +109,32 @@ export function showDayBookModal(container) {
 
         <!-- Document Header Label -->
         <div style="text-align:center; font-weight:bold; font-size:0.95rem; margin-top:2px;" id="db-report-heading">
-          Day Book from 01-Apr-2026 to 25-Jul-2026
+          Day Book from ${formatDateShort(activeFyStart)} to ${formatDateShort(defaultToDate)}
         </div>
 
         <!-- Table Content View -->
         <div style="flex-grow:1; background:white; border:1px solid #94a3b8; overflow-y:auto; border-radius:2px;">
           <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.8rem; color:black;">
             <thead>
-              <tr style="background-color:#f1f5f9; border-bottom: 2px solid #cbd5e1; position:sticky; top:0; font-weight:bold;">
-                <th style="padding:8px 12px; border-right:1px solid #cbd5e1; width:150px;">Date</th>
-                <th style="padding:8px 12px; border-right:1px solid #cbd5e1; text-align:right;">Opening balance</th>
-                <th style="padding:8px 12px; border-right:1px solid #cbd5e1; text-align:right;" id="db-col-debit">Debit/Receipt</th>
-                <th style="padding:8px 12px; border-right:1px solid #cbd5e1; text-align:right;" id="db-col-credit">Credit/Payment</th>
-                <th style="padding:8px 12px; text-align:right;">Closing Balance</th>
+              <tr style="background-color:#f1f5f9; border-bottom: 2px solid #cbd5e1; position:sticky; top:0; font-weight:bold; z-index:5;">
+                <th style="padding:8px 12px; border-right:1px solid #cbd5e1; width:110px;">Date</th>
+                <th style="padding:8px 12px; border-right:1px solid #cbd5e1;">Particulars / Description</th>
+                <th style="padding:8px 12px; border-right:1px solid #cbd5e1; width:130px;">Voucher Type</th>
+                <th style="padding:8px 12px; border-right:1px solid #cbd5e1; width:150px;">Voucher No / Ref</th>
+                <th style="padding:8px 12px; border-right:1px solid #cbd5e1; text-align:right; width:130px;">Debit (₹)</th>
+                <th style="padding:8px 12px; text-align:right; width:130px;">Credit (₹)</th>
               </tr>
             </thead>
             <tbody id="db-table-body">
               <!-- Rendered list -->
             </tbody>
+            <tfoot id="db-table-foot" style="position:sticky; bottom:0; background:#e2e8f0; font-weight:bold; border-top:2px solid #cbd5e1;">
+            </tfoot>
           </table>
         </div>
 
       </div>
   `;
-
-
 
   root.appendChild(modalEl);
   initTallyDatePickers(modalEl);
@@ -146,40 +146,32 @@ export function showDayBookModal(container) {
 
   const fromInput = document.getElementById("db-from-date");
   const toInput = document.getElementById("db-to-date");
-  const voucherSelect = document.getElementById("db-voucher-select");
-  const monthlyCheck = document.getElementById("db-monthly");
-  const dailyCheck = document.getElementById("db-daily");
-  const mergeCheck = document.getElementById("db-merge");
-  const narrationCheck = document.getElementById("db-narration");
-
-  // Setup mutual exclusion for Daily / Monthly checkboxes
-  monthlyCheck.addEventListener("change", () => {
-    if (monthlyCheck.checked) dailyCheck.checked = false;
-  });
-  dailyCheck.addEventListener("change", () => {
-    if (dailyCheck.checked) monthlyCheck.checked = false;
-  });
+  const bookTypeSelect = document.getElementById("db-book-type");
 
   function renderData() {
-    const fromVal = fromInput.value;
-    const toVal = toInput.value;
-    const vType = voucherSelect.value;
-    const isDaily = dailyCheck.checked;
-    const isMonthly = monthlyCheck.checked;
-    const isMerge = mergeCheck.checked;
-    const showNarr = narrationCheck.checked;
+    const fromVal = fromInput ? fromInput.value : activeFyStart;
+    const toVal = toInput ? toInput.value : defaultToDate;
+    const bType = bookTypeSelect ? bookTypeSelect.value : "All";
 
-    document.getElementById("db-report-heading").innerText = `Day Book from ${formatDateShort(fromVal)} to ${formatDateShort(toVal)}`;
+    const headingEl = document.getElementById("db-report-heading");
+    if (headingEl) {
+      headingEl.innerText = `Day Book from ${formatDateShort(fromVal)} to ${formatDateShort(toVal)}`;
+    }
 
     // Identify Cash and Bank ledger accounts
-    const cashBankLedgers = state.getLedgers().filter(l => l.groupName === "CASH-IN-HAND" || l.groupName === "BANK ACCOUNTS");
-    const cbCodes = cashBankLedgers.map(l => l.code);
-    
-    // Initial opening balance (sum of CASH & DISTRICT BANK opening)
-    const initialOpeningBalance = cashBankLedgers.reduce((sum, l) => sum + (parseFloat(l.openingBalance) || 0), 0);
+    const cashLedgers = state.getLedgers().filter(l => l.groupName === "CASH-IN-HAND").map(l => l.code);
+    const bankLedgers = state.getLedgers().filter(l => l.groupName === "BANK ACCOUNTS").map(l => l.code);
 
     const transactions = [...state.getTransactions()].filter(tx => {
-      const txRef = tx.reference || "";
+      if (!tx || !tx.date) return false;
+      const txRef = String(tx.reference || "");
+      const txDesc = String(tx.description || "");
+
+      // Filter out auto-generated background COGS entries (e.g., "LSL-0005 COGS", "Cost of Goods Sold...")
+      if (txRef.toUpperCase().includes("COGS") || txDesc.toUpperCase().includes("COST OF GOODS SOLD")) {
+        return false;
+      }
+
       const cleanRef = txRef.split(" ")[0];
       const inv = state.getInvoices().find(i => cleanRef && (cleanRef === i.voucherNo || cleanRef === i.id));
       const pur = state.getPurchases().find(p => cleanRef && (cleanRef === p.voucherNo || cleanRef === p.invoiceNo));
@@ -187,250 +179,117 @@ export function showDayBookModal(container) {
       return true;
     }).sort((a, b) => new Date(a.date) - new Date(b.date));
 
-    // Step 1: Pre-calculate running balance of Cash/Bank chronologically up to the "From" date
-    let runningBal = initialOpeningBalance;
-    const preTx = transactions.filter(t => new Date(t.date) < new Date(fromVal));
-    preTx.forEach(t => {
-      t.entries.forEach(e => {
-        if (cbCodes.includes(e.accountId)) {
-          runningBal += (parseFloat(e.debit) || 0);
-          runningBal -= (parseFloat(e.credit) || 0);
-        }
-      });
+    // Filter date range
+    const rangeTx = transactions.filter(t => {
+      const d = t.date;
+      return d >= fromVal && d <= toVal;
     });
 
-    // Step 2: Gather target date range transactions
-    const rangeTx = transactions.filter(t => {
-      const d = new Date(t.date);
-      return d >= new Date(fromVal) && d <= new Date(toVal);
+    // Filter by book type
+    const filteredTx = rangeTx.filter(t => {
+      const vType = getVoucherType(t.reference);
+      if (bType === "All") return true;
+      if (bType === "Cash") {
+        return (t.entries || []).some(e => cashLedgers.includes(e.accountId) || e.accountId === "1010" || e.accountId === "L0001");
+      }
+      if (bType === "Bank") {
+        return (t.entries || []).some(e => bankLedgers.includes(e.accountId) || e.accountId === "1020");
+      }
+      if (bType === "Sales") return vType === "Sales" || vType === "Sales Return";
+      if (bType === "Purchases") return vType === "Purchases" || vType === "Purchase Return";
+      if (bType === "Payments") return vType === "Payments";
+      if (bType === "Receipts") return vType === "Receipts";
+      if (bType === "Journal") return vType === "Journal" || vType === "Contra" || vType === "Credit Note" || vType === "Debit Note";
+      return true;
     });
 
     const tbody = document.getElementById("db-table-body");
-    tbody.innerHTML = "";
+    const tfoot = document.getElementById("db-table-foot");
+    if (!tbody) return;
 
-    // Header label for Opening Balance
-    tbody.innerHTML += `
-      <tr style="background:#f8fafc; font-weight:bold;">
-        <td style="padding:6px 12px; border-right:1px solid #cbd5e1;">Opening Balance :</td>
-        <td colspan="4" style="padding:6px 12px; font-weight:bold; color:#1e40af;">\u20B9${runningBal.toFixed(2)} Dr.</td>
-      </tr>
-    `;
-
-    let html = "";
-    
-    if (isDaily) {
-      // Group range transactions by date
-      const daysMap = {};
-      
-      // Seed all dates in the range to ensure we list everyday sequentially like the screenshot
-      let curr = new Date(fromVal);
-      const end = new Date(toVal);
-      while (curr <= end) {
-        const dateStr = curr.toISOString().split("T")[0];
-        daysMap[dateStr] = [];
-        curr.setDate(curr.getDate() + 1);
-      }
-
-      // Distribute transactions
-      rangeTx.forEach(t => {
-        if (daysMap[t.date]) {
-          daysMap[t.date].push(t);
-        }
-      });
-
-      const sortedDates = Object.keys(daysMap).sort();
-      let dayOpening = runningBal;
-
-      sortedDates.forEach(dateStr => {
-        const dayTxs = daysMap[dateStr];
-        
-        let debitTotal = 0;
-        let creditTotal = 0;
-        let dayRowsHtml = "";
-
-        dayTxs.forEach(t => {
-          const type = getVoucherType(t.reference);
-          if (vType !== "All" && type !== vType) return;
-
-          // Sum cash bank postings
-          t.entries.forEach(e => {
-            if (cbCodes.includes(e.accountId)) {
-              debitTotal += (parseFloat(e.debit) || 0);
-              creditTotal += (parseFloat(e.credit) || 0);
-            }
-          });
-
-          if (!isMerge) {
-            // Render individual vouchers if not merged
-            const part = t.description || t.reference;
-            dayRowsHtml += `
-              <tr class="db-voucher-row" data-ref="${t.reference}" style="border-bottom:1px dashed #cbd5e1; cursor:pointer;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
-                <td style="padding:4px 20px; color:#475569; font-size:0.75rem; border-right:1px solid #cbd5e1;">&nbsp;&nbsp;&bull; ${t.reference}</td>
-                <td style="border-right:1px solid #cbd5e1;"></td>
-                <td style="padding:4px 12px; text-align:right; border-right:1px solid #cbd5e1;">\u20B9${(t.entries.filter(e => cbCodes.includes(e.accountId)).reduce((sum, e) => sum + (parseFloat(e.debit) || 0), 0)).toFixed(2)}</td>
-                <td style="padding:4px 12px; text-align:right; border-right:1px solid #cbd5e1;">\u20B9${(t.entries.filter(e => cbCodes.includes(e.accountId)).reduce((sum, e) => sum + (parseFloat(e.credit) || 0), 0)).toFixed(2)}</td>
-                <td></td>
-              </tr>
-            `;
-          }
-        });
-
-        const dayClosing = dayOpening + debitTotal - creditTotal;
-
-        // Daily summary row (double-click opens detailed layout for this day)
-        html += `
-          <tr class="db-day-row" data-date="${dateStr}" style="border-bottom: 1px solid #cbd5e1; font-weight:500; cursor:pointer;" title="Double-click to view all transactions for ${formatDateShort(dateStr)}">
-            <td style="padding:6px 12px; border-right:1px solid #cbd5e1; font-weight:700;">${formatDateShort(dateStr)}</td>
-            <td style="padding:6px 12px; text-align:right; border-right:1px solid #cbd5e1; color:#475569;">\u20B9${dayOpening.toFixed(2)} Dr.</td>
-            <td style="padding:6px 12px; text-align:right; border-right:1px solid #cbd5e1; color:#16a34a; font-weight:bold;">${debitTotal > 0 ? "\u20B9" + debitTotal.toFixed(2) : ""}</td>
-            <td style="padding:6px 12px; text-align:right; border-right:1px solid #cbd5e1; color:#ef4444; font-weight:bold;">${creditTotal > 0 ? "\u20B9" + creditTotal.toFixed(2) : ""}</td>
-            <td style="padding:6px 12px; text-align:right; font-weight:bold; color:#1e40af;">\u20B9${dayClosing.toFixed(2)} Dr.</td>
-          </tr>
-        `;
-
-        if (!isMerge && dayRowsHtml) {
-          html += dayRowsHtml;
-        }
-
-        dayOpening = dayClosing;
-      });
-
-    } else if (isMonthly) {
-      // Group by month
-      const monthsMap = {};
-      rangeTx.forEach(t => {
-        const monthKey = t.date.substring(0, 7); // YYYY-MM
-        if (!monthsMap[monthKey]) monthsMap[monthKey] = [];
-        monthsMap[monthKey].push(t);
-      });
-
-      const sortedMonths = Object.keys(monthsMap).sort();
-      let monthOpening = runningBal;
-
-      sortedMonths.forEach(mKey => {
-        const monthTxs = monthsMap[mKey];
-        let debitTotal = 0;
-        let creditTotal = 0;
-
-        monthTxs.forEach(t => {
-          const type = getVoucherType(t.reference);
-          if (vType !== "All" && type !== vType) return;
-
-          t.entries.forEach(e => {
-            if (cbCodes.includes(e.accountId)) {
-              debitTotal += (parseFloat(e.debit) || 0);
-              creditTotal += (parseFloat(e.credit) || 0);
-            }
-          });
-        });
-
-        const monthClosing = monthOpening + debitTotal - creditTotal;
-        const [year, month] = mKey.split("-");
-        const monthName = new Date(year, month - 1).toLocaleString('default', { month: 'long' });
-
-        html += `
-          <tr class="db-month-row" data-month="${mKey}" style="border-bottom: 1px solid #cbd5e1; font-weight:500; cursor:pointer;" title="Double-click to view daily breakdown for ${monthName}">
-            <td style="padding:8px 12px; border-right:1px solid #cbd5e1; font-weight:bold;">${monthName} ${year}</td>
-            <td style="padding:8px 12px; text-align:right; border-right:1px solid #cbd5e1; color:#475569;">\u20B9${monthOpening.toFixed(2)} Dr.</td>
-            <td style="padding:8px 12px; text-align:right; border-right:1px solid #cbd5e1; color:#16a34a; font-weight:bold;">\u20B9${debitTotal.toFixed(2)}</td>
-            <td style="padding:8px 12px; text-align:right; border-right:1px solid #cbd5e1; color:#ef4444; font-weight:bold;">\u20B9${creditTotal.toFixed(2)}</td>
-            <td style="padding:8px 12px; text-align:right; font-weight:bold; color:#1e40af;">\u20B9${monthClosing.toFixed(2)} Dr.</td>
-          </tr>
-        `;
-        monthOpening = monthClosing;
-      });
+    if (filteredTx.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="6" style="padding:24px; text-align:center; color:#64748b; font-style:italic;">
+            No transactions found for the selected period.
+          </td>
+        </tr>
+      `;
+      if (tfoot) tfoot.innerHTML = "";
+      return;
     }
 
-    tbody.innerHTML += html;
+    let grandDr = 0;
+    let grandCr = 0;
 
-    // Bind double click to open corresponding vouchers
+    const rowsHtml = filteredTx.map(t => {
+      const vType = getVoucherType(t.reference);
+      let totDr = 0;
+      let totCr = 0;
+
+      (t.entries || []).forEach(e => {
+        totDr += parseFloat(e.debit) || 0;
+        totCr += parseFloat(e.credit) || 0;
+      });
+
+      grandDr += totDr;
+      grandCr += totCr;
+
+      let partyNames = [];
+      if (t.entries && Array.isArray(t.entries)) {
+        t.entries.forEach(e => {
+          if (!e || !e.accountId) return;
+          const name = state.getAccountDisplayName ? state.getAccountDisplayName(e.accountId, t) : e.accountId;
+          if (name && !["1010", "1020", "L0001", "Cash", "Bank Current Account"].includes(name) && !partyNames.includes(name)) {
+            partyNames.push(name);
+          }
+        });
+      }
+      let desc = t.description || "";
+      if (!desc && partyNames.length > 0) {
+        desc = partyNames.join(", ");
+      } else if (desc && partyNames.length > 0) {
+        partyNames.forEach(pName => {
+          if (!desc.includes(pName)) {
+            desc += ` (${pName})`;
+          }
+        });
+      }
+      if (!desc) desc = t.reference || "Voucher Transaction";
+
+      return `
+        <tr class="db-voucher-row" data-ref="${t.reference}" style="border-bottom:1px solid #e2e8f0; cursor:pointer;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
+          <td style="padding:6px 12px; border-right:1px solid #cbd5e1; font-weight:600;">${formatDateShort(t.date)}</td>
+          <td style="padding:6px 12px; border-right:1px solid #cbd5e1;">${desc}</td>
+          <td style="padding:6px 12px; border-right:1px solid #cbd5e1; font-weight:600; color:#475569;">${vType}</td>
+          <td style="padding:6px 12px; border-right:1px solid #cbd5e1; font-weight:bold; color:#1e3b8b;">${t.reference || '-'}</td>
+          <td style="padding:6px 12px; border-right:1px solid #cbd5e1; text-align:right; font-weight:600; color:#16a34a;">${totDr > 0 ? '₹' + totDr.toFixed(2) : '-'}</td>
+          <td style="padding:6px 12px; text-align:right; font-weight:600; color:#ef4444;">${totCr > 0 ? '₹' + totCr.toFixed(2) : '-'}</td>
+        </tr>
+      `;
+    }).join("");
+
+    tbody.innerHTML = rowsHtml;
+
+    if (tfoot) {
+      tfoot.innerHTML = `
+        <tr>
+          <td colspan="4" style="padding:8px 12px; text-align:right; font-weight:bold;">Total:</td>
+          <td style="padding:8px 12px; text-align:right; font-weight:bold; color:#16a34a;">₹${grandDr.toFixed(2)}</td>
+          <td style="padding:8px 12px; text-align:right; font-weight:bold; color:#ef4444;">₹${grandCr.toFixed(2)}</td>
+        </tr>
+      `;
+    }
+
+    // Double-click row → open voucher/invoice detail
     tbody.querySelectorAll(".db-voucher-row").forEach(row => {
       row.addEventListener("dblclick", () => {
         const ref = row.getAttribute("data-ref");
-        import("./reports.js").then(m => {
-          m.openVoucherOrInvoice(ref, container);
-        });
-      });
-    });
-
-    // Double-click Month row → open Daily Day Book view for that month
-    tbody.querySelectorAll(".db-month-row").forEach(row => {
-      row.addEventListener("dblclick", () => {
-        const mKey = row.getAttribute("data-month");
-        if (!mKey) return;
-        const [y, m] = mKey.split("-");
-        const lastDay = new Date(parseInt(y), parseInt(m), 0).getDate();
-        fromInput.value = `${mKey}-01`;
-        toInput.value = `${mKey}-${String(lastDay).padStart(2, '0')}`;
-        dailyCheck.checked = true;
-        monthlyCheck.checked = false;
-        renderData();
-      });
-    });
-
-    // Double-click Day row → open second layout showing all transactions for that specific day
-    tbody.querySelectorAll(".db-day-row").forEach(row => {
-      row.addEventListener("dblclick", () => {
-        const dateStr = row.getAttribute("data-date");
-        if (!dateStr) return;
-        showDayTransactionsLayout(dateStr);
-      });
-    });
-  }
-
-  // Second Layout: Detailed Transactions for a Single Day
-  function showDayTransactionsLayout(dateStr) {
-    const dayTxList = state.getTransactions().filter(t => t.date === dateStr);
-    const tbody = document.getElementById("db-table-body");
-    if (!tbody) return;
-    
-    tbody.innerHTML = `
-      <tr style="background:#1e3b8b; color:white; font-weight:bold;">
-        <td colspan="5" style="padding:8px 12px;">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <span>Transactions for ${formatDateShort(dateStr)} (${dayTxList.length} Entries)</span>
-            <button type="button" id="btn-back-to-daybook" style="background:#cbd5e1; border:none; color:black; font-weight:bold; padding:2px 10px; border-radius:3px; cursor:pointer;">&larr; Back to Day Book</button>
-          </div>
-        </td>
-      </tr>
-      <tr style="background:#f1f5f9; font-weight:bold; border-bottom:2px solid #cbd5e1;">
-        <td style="padding:6px 12px; border-right:1px solid #cbd5e1;">Voucher No / Ref</td>
-        <td style="padding:6px 12px; border-right:1px solid #cbd5e1;">Type</td>
-        <td style="padding:6px 12px; border-right:1px solid #cbd5e1;">Particulars / Description</td>
-        <td style="padding:6px 12px; border-right:1px solid #cbd5e1; text-align:right;">Debit (\u20B9)</td>
-        <td style="padding:6px 12px; text-align:right;">Credit (\u20B9)</td>
-      </tr>
-      ${dayTxList.length === 0 ? `
-        <tr><td colspan="5" style="padding:20px; text-align:center; color:#888;">No transactions found for this day.</td></tr>
-      ` : dayTxList.map(t => {
-        const vType = getVoucherType(t.reference);
-        let totDr = 0, totCr = 0;
-        t.entries.forEach(e => {
-          totDr += parseFloat(e.debit) || 0;
-          totCr += parseFloat(e.credit) || 0;
-        });
-        return `
-          <tr class="db-day-tx-item" data-ref="${t.reference}" style="border-bottom:1px solid #cbd5e1; cursor:pointer;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background=''">
-            <td style="padding:6px 12px; border-right:1px solid #cbd5e1; font-weight:bold; color:#1e3b8b;">${t.reference}</td>
-            <td style="padding:6px 12px; border-right:1px solid #cbd5e1;">${vType}</td>
-            <td style="padding:6px 12px; border-right:1px solid #cbd5e1;">${t.description || t.reference}</td>
-            <td style="padding:6px 12px; border-right:1px solid #cbd5e1; text-align:right; font-weight:600; color:#16a34a;">${totDr > 0 ? '\u20B9' + totDr.toFixed(2) : '-'}</td>
-            <td style="padding:6px 12px; text-align:right; font-weight:600; color:#ef4444;">${totCr > 0 ? '\u20B9' + totCr.toFixed(2) : '-'}</td>
-          </tr>
-        `;
-      }).join("")}
-    `;
-
-    document.getElementById("btn-back-to-daybook")?.addEventListener("click", () => {
-      renderData();
-    });
-
-    tbody.querySelectorAll(".db-day-tx-item").forEach(itemRow => {
-      itemRow.addEventListener("dblclick", () => {
-        const ref = itemRow.getAttribute("data-ref");
-        import("./reports.js").then(m => {
-          m.openVoucherOrInvoice(ref, container);
-        });
+        if (ref) {
+          import("./reports.js").then(m => {
+            m.openVoucherOrInvoice(ref, container);
+          });
+        }
       });
     });
   }
@@ -445,11 +304,9 @@ export function showDayBookModal(container) {
     toInput.addEventListener("change", renderData);
     toInput.addEventListener("input", renderData);
   }
-  if (voucherSelect) voucherSelect.addEventListener("change", renderData);
-  if (monthlyCheck) monthlyCheck.addEventListener("change", renderData);
-  if (dailyCheck) dailyCheck.addEventListener("change", renderData);
-  if (mergeCheck) mergeCheck.addEventListener("change", renderData);
-  if (narrationCheck) narrationCheck.addEventListener("change", renderData);
+  if (bookTypeSelect) {
+    bookTypeSelect.addEventListener("change", renderData);
+  }
 
   renderData();
 

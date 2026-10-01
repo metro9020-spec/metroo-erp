@@ -940,14 +940,25 @@ export function showBillwiseMarginReportModal(container) {
       let billMargin = 0;
       let costSum = 0;
       
-      inv.items.forEach(item => {
-        const mat = materials.find(m => m.id === item.materialId || m.code === item.code);
+      (inv.items || []).forEach(item => {
+        const mat = materials.find(m => 
+          (item.materialId && m.id === item.materialId) || 
+          (item.code && m.code && String(m.code).trim().toUpperCase() === String(item.code).trim().toUpperCase()) ||
+          (item.name && m.name && String(m.name).trim().toUpperCase() === String(item.name).trim().toUpperCase())
+        );
         const batch = mat?.batches?.find(b => b.batchNo === item.batchNo) || mat?.batches?.[0];
-        const purchaseCost = batch ? (parseFloat(batch.landingCost) || 0) : 0;
+        const purchaseCost = (batch && parseFloat(batch.landingCost) > 0)
+          ? parseFloat(batch.landingCost)
+          : (parseFloat(mat?.landingCost) || parseFloat(mat?.purchaseRate) || parseFloat(mat?.purchasePrice) || parseFloat(item.landingCost) || parseFloat(item.purchasePrice) || 0);
         
-        // Selling Price (without adjustment or GST) after discount:
-        const sellingPrice = parseFloat(item.amount) || (item.quantity * item.price);
-        const itemCost = purchaseCost * item.quantity;
+        const qty = parseFloat(item.quantity) || 0;
+        const rate = parseFloat(item.price) || 0;
+        const disc = parseFloat(item.discountAmount) || 0;
+        const taxAmt = parseFloat(item.gstAmount) || ((parseFloat(item.cgstAmount) || 0) + (parseFloat(item.sgstAmount) || 0) + (parseFloat(item.igstAmount) || 0));
+        const rowTotal = parseFloat(item.netAmount) || parseFloat(item.amount) || ((qty * rate) - disc + taxAmt);
+        const sellingPrice = parseFloat(item.netValue) || (rowTotal - taxAmt) || ((qty * rate) - disc);
+        
+        const itemCost = purchaseCost * qty;
         const itemMargin = sellingPrice - itemCost;
         
         billMargin += itemMargin;

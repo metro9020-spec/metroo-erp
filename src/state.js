@@ -7,7 +7,34 @@ import {
   initialLedgers,
   initialUnits
 } from "./sampleData.js";
+import {
+  appwriteClient,
+  appwriteDatabases,
+  appwriteStorage,
+  APPWRITE_DATABASE_ID,
+  APPWRITE_STORAGE_BUCKET,
+  APPWRITE_ENDPOINT,
+  APPWRITE_PROJECT_ID,
+  Query,
+  ID,
+  Permission,
+  Role,
+  sanitizeAppwriteId
+} from "./appwrite.js";
 import { getValidGstRate } from "./utils/gstValidator.js";
+
+export function formatRateValue(val) {
+  if (val === undefined || val === null || val === "" || isNaN(val)) return "";
+  const num = parseFloat(val);
+  const str = String(val);
+  if (str.includes(".")) {
+    const decimals = str.split(".")[1];
+    if (decimals && decimals.length > 2) {
+      return str;
+    }
+  }
+  return num.toFixed(2);
+}
 
 export function isManualVoucherOrReturn(t) {
   if (!t) return false;
@@ -18,11 +45,45 @@ export function isManualVoucherOrReturn(t) {
 
   if (["RECEIPT", "PAYMENT", "JOURNAL", "CONTRA", "REC", "PAY", "CON", "JV"].includes(vUpper)) return true;
   if (idUpper.startsWith("TX-REC-") || idUpper.startsWith("TX-PAY-") || idUpper.startsWith("TX-CON-") || idUpper.startsWith("TX-JV-") || idUpper.startsWith("TX-VOUCHER-")) return true;
-  if (refUpper.startsWith("RC-") || refUpper.startsWith("PAY-") || refUpper.startsWith("PY-") || refUpper.startsWith("PM-") || refUpper.startsWith("CNTR-") || refUpper.startsWith("JV-") || refUpper.startsWith("DN-") || refUpper.startsWith("DEBIT NOTE") || refUpper.startsWith("CREDIT NOTE") || refUpper.startsWith("SALES RETURN") || refUpper.startsWith("PURCHASE RETURN")) return true;
-  if ((refUpper.startsWith("CN-") && !refUpper.startsWith("CNTR-")) || (refUpper.startsWith("SR-") && !refUpper.startsWith("SALES"))) return true;
+  if (refUpper.startsWith("RC-") || refUpper.startsWith("PAY-") || refUpper.startsWith("PY-") || refUpper.startsWith("PM-") || refUpper.startsWith("CNTR-") || refUpper.startsWith("CO-") || refUpper.startsWith("CON-") || refUpper.startsWith("JV-") || refUpper.startsWith("DN-") || refUpper.startsWith("DEBIT NOTE") || refUpper.startsWith("CREDIT NOTE") || refUpper.startsWith("SALES RETURN") || refUpper.startsWith("PURCHASE RETURN")) return true;
+  if ((refUpper.startsWith("CN-") && !refUpper.startsWith("CNTR-") && !refUpper.startsWith("CON-") && !refUpper.startsWith("CO-")) || (refUpper.startsWith("SR-") && !refUpper.startsWith("SALES"))) return true;
   if (descUpper.includes("REC VOUCHER") || descUpper.includes("PAY VOUCHER") || descUpper.includes("CONTRA VOUCHER") || descUpper.includes("RECEIPT FROM") || descUpper.includes("PAYMENT TO")) return true;
 
   return false;
+}
+
+export function getTimeoutSignal(ms) {
+  if (typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function") {
+    try {
+      return AbortSignal.timeout(ms);
+    } catch (e) {}
+  }
+  const controller = new AbortController();
+  setTimeout(() => controller.abort(), ms);
+  return controller.signal;
+}
+
+export function extractNormalizedDocKeys(str) {
+  if (!str) return [];
+  const upper = String(str).trim().toUpperCase();
+  const keys = new Set();
+  const tokens = upper.split(/[\s,;]+/);
+  for (let token of tokens) {
+    token = token.trim();
+    if (!token) continue;
+    const match = token.match(/^([A-Z0-9]+?)[-_\s]*0*(\d+)$/);
+    if (match) {
+      const prefix = match[1];
+      const num = parseInt(match[2], 10);
+      if (prefix && !isNaN(num)) {
+        keys.add(`${prefix}-${num}`);
+      }
+    }
+    const cleanToken = token.replace(/0*(\d+)/g, (m, n) => parseInt(n, 10));
+    if (cleanToken) keys.add(cleanToken);
+    keys.add(token);
+  }
+  return Array.from(keys);
 }
 
 
@@ -157,24 +218,121 @@ export const STANDARD_HSN_DESCRIPTIONS = {
 export function parseDateSafely(dateStr) {
   if (!dateStr) return new Date();
   if (dateStr instanceof Date) return dateStr;
-  
-  // Try normal parsing first (e.g. YYYY-MM-DD)
-  let d = new Date(dateStr);
-  if (!isNaN(d.getTime())) return d;
-  
-  // Try parsing DD-MM-YYYY or DD/MM/YYYY
-  const parts = dateStr.split(/[-/]/);
+  const str = String(dateStr).trim();
+  if (!str) return new Date();
+
+  const parts = str.split(/[-/]/);
   if (parts.length === 3) {
-    if (parts[2].length === 4) {
-      d = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
-      if (!isNaN(d.getTime())) return d;
-    }
-    if (parts[0].length === 4) {
-      d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-      if (!isNaN(d.getTime())) return d;
+    const p0 = parseInt(parts[0], 10);
+    const p1 = parseInt(parts[1], 10);
+    const p2 = parseInt(parts[2], 10);
+    if (!isNaN(p0) && !isNaN(p1) && !isNaN(p2)) {
+      if (parts[0].length === 4) {
+        // YYYY-MM-DD
+        return new Date(p0, p1 - 1, p2);
+      }
+      if (parts[2].length === 4) {
+        // DD-MM-YYYY or DD/MM/YYYY
+        return new Date(p2, p1 - 1, p0);
+      }
     }
   }
-  return new Date(dateStr);
+
+  const d = new Date(str);
+  if (!isNaN(d.getTime())) return d;
+  return new Date();
+}
+
+export function toIsoDateStr(dateStr) {
+  if (!dateStr) return "";
+  if (dateStr instanceof Date) {
+    if (isNaN(dateStr.getTime())) return "";
+    const yyyy = dateStr.getFullYear();
+    const mm = String(dateStr.getMonth() + 1).padStart(2, '0');
+    const dd = String(dateStr.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
+  const str = String(dateStr).trim();
+  const parts = str.split(/[-/]/);
+  if (parts.length === 3) {
+    if (parts[0].length === 4) {
+      return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+    }
+    if (parts[2].length === 4) {
+      return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+    }
+  }
+  const d = parseDateSafely(str);
+  if (!isNaN(d.getTime())) {
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
+  return str;
+}
+
+export function mergeCollectionDatasets(target = {}, source = {}) {
+  if (!source || typeof source !== "object") return target || {};
+  if (!target || typeof target !== "object") target = {};
+
+  const result = { ...target };
+  const keysToMerge = [
+    "materials", "contacts", "invoices", "purchases", 
+    "salesOrders", "salesReturns", "purchaseReturns", 
+    "transactions", "ledgers"
+  ];
+
+  keysToMerge.forEach(key => {
+    const arrTarget = Array.isArray(target[key]) ? target[key] : [];
+    const arrSource = Array.isArray(source[key]) ? source[key] : [];
+    const idProp = key === "ledgers" ? "code" : "id";
+
+    const map = new Map();
+    const getKey = (item) => {
+      if (!item) return null;
+      let val = item[idProp] || item.id || item.code;
+      if (!val && item.voucherNo) val = item.voucherNo;
+      if (!val && item.reference) val = item.reference;
+      return val ? String(val).trim() : null;
+    };
+
+    arrTarget.forEach(item => {
+      const k = getKey(item);
+      if (k) map.set(k, item);
+    });
+
+    arrSource.forEach(item => {
+      const k = getKey(item);
+      if (!k) return;
+      if (!map.has(k)) {
+        map.set(k, item);
+      } else {
+        const existing = map.get(k);
+        const mergedItem = { ...existing };
+        Object.keys(item).forEach(prop => {
+          if (item[prop] !== undefined && item[prop] !== null) {
+            mergedItem[prop] = item[prop];
+          }
+        });
+        map.set(k, mergedItem);
+      }
+    });
+
+    result[key] = Array.from(map.values());
+  });
+
+  Object.keys(source).forEach(k => {
+    if (!keysToMerge.includes(k) && result[k] === undefined) {
+      result[k] = source[k];
+    }
+  });
+
+  if (source._lastSaved && (!result._lastSaved || source._lastSaved > result._lastSaved)) {
+    result._lastSaved = source._lastSaved;
+  }
+
+  return result;
 }
 
 class StateManager {
@@ -201,10 +359,19 @@ class StateManager {
     this.seriesMaster = [];
     this.gstMaster = [];
     this.adminPassword = "123";
+    this._currentUser = null;
+    try {
+      if (typeof localStorage !== "undefined") {
+        localStorage.removeItem("erp_current_user");
+      }
+    } catch (e) {}
     this.influencerRedemptions = [];
     this.loyaltyPrograms = [];
     this._suppressSave = true;
     this._pendingSave = false;
+    this._isDataLoadedFromCloud = false;
+    this._accountBalancesCache = null;
+    this._cancelledDocKeysCache = null;
     this.checkAndMigrateLegacyData();
     this.loadState();
     this.ensureDefaultSeries();
@@ -214,6 +381,7 @@ class StateManager {
     this.migrateLegacyTaxEntries();
     this.rebuildAllTaxTransactions();
     this.cleanDuplicateTransactions();
+    this.repairMissingTransactions();
     this.alignVoucherPrefixesWithSeries();
     this.realignSeriesCurrentNumbers();
     this.forceAlignTransactionUnits();
@@ -225,52 +393,343 @@ class StateManager {
     this.notifyListeners();
   }
 
-  // ── Auto-Sync: Poll server every 30 seconds ───────────────────────────────
-  startAutoSync(intervalMs = 5000) {
+  invalidateBalancesCache() {
+    this._accountBalancesCache = null;
+    this._cancelledDocKeysCache = null;
+    this._canonicalAccountCache = null;
+    this._groupParentMapCache = null;
+  }
+
+  getGroupParentMap() {
+    if (this._groupParentMapCache) return this._groupParentMapCache;
+    const map = new Map();
+    (this.accountGroups || []).forEach(g => {
+      if (g && g.name) map.set(String(g.name).trim().toUpperCase(), g);
+    });
+    this._groupParentMapCache = map;
+    return map;
+  }
+
+  getBackendApiUrl(endpoint = "") {
+    if (typeof window === "undefined") return null;
+    const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+
+    try {
+      const activeCompany = this.getActiveCompany ? this.getActiveCompany() : null;
+      let customUrl = (activeCompany && activeCompany.serverUrl) ? activeCompany.serverUrl.trim() : "";
+      if (!customUrl) {
+        customUrl = (localStorage.getItem("erp_custom_backend_url") || "").trim();
+      }
+      if (!customUrl) {
+        const comps = this.getRegisteredCompanies ? this.getRegisteredCompanies() : [];
+        const compWithUrl = comps.find(c => c && c.serverUrl && c.serverUrl.trim());
+        if (compWithUrl) customUrl = compWithUrl.serverUrl.trim();
+      }
+      if (customUrl) {
+        const base = customUrl.replace(/\/+$/, "");
+        if (window.location.protocol === "https:" && base.startsWith("http://") && !base.includes("localhost") && !base.includes("127.0.0.1")) {
+          console.warn("[Backend API] Custom server URL is HTTP on an HTTPS page. Browser may block mixed content:", base);
+        }
+        return `${base}${cleanEndpoint}`;
+      }
+    } catch (e) {}
+
+    const host = window.location.hostname || "localhost";
+    const port = window.location.port;
+    const isLocalHost = host === "localhost" || host === "127.0.0.1" || /^(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|127\.)/.test(host);
+
+    if (isLocalHost) {
+      if (port === "3001") {
+        return cleanEndpoint;
+      }
+      return `http://${host}:3001${cleanEndpoint}`;
+    }
+
+    return null;
+  }
+
+  getCancelledDocKeys() {
+    if (this._cancelledDocKeysCache) return this._cancelledDocKeysCache;
+    const keys = new Set();
+    const addKeys = (item) => {
+      if (!item) return;
+      // ONLY use self-identifying document keys (id, voucherNo). NEVER use parent billNo/refNo/invoiceNo.
+      const fields = [item.id, item.voucherNo];
+      fields.forEach(f => {
+        if (f) {
+          extractNormalizedDocKeys(f).forEach(k => {
+            if (!['SALES', 'RETURN', 'PURCHASE', 'INVOICE', 'BILL', 'COGS'].includes(k)) {
+              keys.add(k);
+            }
+          });
+        }
+      });
+    };
+
+    (this.invoices || []).filter(i => i.isCancelled).forEach(addKeys);
+    (this.purchases || []).filter(p => p.isCancelled).forEach(addKeys);
+    (this.salesReturns || []).filter(r => r.isCancelled).forEach(addKeys);
+    (this.purchaseReturns || []).filter(r => r.isCancelled).forEach(addKeys);
+
+    this._cancelledDocKeysCache = keys;
+    return keys;
+  }
+
+  isTransactionForCancelledDoc(tx) {
+    if (!tx) return false;
+    if (tx.isCancelled) return true;
+    const cancelledKeys = this.getCancelledDocKeys();
+    if (!cancelledKeys || cancelledKeys.size === 0) return false;
+
+    if (!tx._normDocKeys) {
+      const txId = tx.id ? String(tx.id).trim().toUpperCase() : '';
+      const tvid = tx.voucherId ? String(tx.voucherId).trim().toUpperCase() : '';
+      const ref = tx.reference ? String(tx.reference).trim() : '';
+      const tvno = tx.voucherNo ? String(tx.voucherNo).trim() : '';
+      const desc = tx.description ? String(tx.description).trim() : '';
+
+      tx._normDocKeys = [
+        ...extractNormalizedDocKeys(txId),
+        ...extractNormalizedDocKeys(tvid),
+        ...extractNormalizedDocKeys(ref),
+        ...extractNormalizedDocKeys(tvno),
+        ...extractNormalizedDocKeys(desc)
+      ].filter(k => !['SALES', 'RETURN', 'PURCHASE', 'INVOICE', 'BILL', 'COGS'].includes(k));
+    }
+
+    for (let i = 0; i < tx._normDocKeys.length; i++) {
+      if (cancelledKeys.has(tx._normDocKeys[i])) return true;
+    }
+    return false;
+  }
+
+  // ── Appwrite Realtime Transaction Listener ─────────────────────────────────
+  initAppwriteRealtime() {
+    if (this._appwriteRealtimeUnsubscribe) {
+      try {
+        this._appwriteRealtimeUnsubscribe();
+      } catch (e) {}
+      this._appwriteRealtimeUnsubscribe = null;
+    }
+
+    try {
+      if (typeof appwriteClient !== "undefined" && typeof appwriteClient.subscribe === "function") {
+        const channel = `databases.${APPWRITE_DATABASE_ID}.collections.transactions.documents`;
+        console.log(`[Appwrite Realtime] Subscribing to instant transaction channel: ${channel}`);
+
+        this._appwriteRealtimeUnsubscribe = appwriteClient.subscribe(channel, (response) => {
+          try {
+            const activeId = String(this.getActiveCompanyId() || "");
+            const activeFyId = String(this.getActiveFyId() || "default");
+            const payload = response && response.payload;
+            if (!payload || !payload.company_id) return;
+
+            // Check if document belongs to current company
+            if (String(payload.company_id) !== activeId) return;
+
+            // Check FY match (allow default or matching FY)
+            if (payload.fy_id && String(payload.fy_id) !== activeFyId && payload.fy_id !== "default" && activeFyId !== "default") {
+              return;
+            }
+
+            const events = Array.isArray(response.events) ? response.events : [];
+            const isDelete = events.some(e => String(e).includes(".delete"));
+
+            let rawTx = null;
+            if (payload.raw_data) {
+              try {
+                rawTx = typeof payload.raw_data === "string" ? JSON.parse(payload.raw_data) : payload.raw_data;
+              } catch (e) {}
+            }
+
+            const txId = (rawTx && rawTx.id) || payload.voucher_no || payload.$id;
+
+            if (isDelete) {
+              const prevLen = (this.transactions || []).length;
+              this.transactions = (this.transactions || []).filter(t => t && t.id !== txId && t.voucherId !== txId);
+              if (this.transactions.length !== prevLen) {
+                this.persistLocalStateOnly();
+                this.notifyListeners();
+                if (typeof window !== "undefined" && typeof window.dispatchEvent === "function") {
+                  window.dispatchEvent(new CustomEvent("erp:data-refreshed"));
+                }
+                console.log(`[Appwrite Realtime] Removed transaction ${txId} via real-time push.`);
+              }
+            } else {
+              // Create or Update
+              if (!rawTx) {
+                rawTx = {
+                  id: txId,
+                  voucherId: payload.voucher_no || txId,
+                  voucherNo: payload.voucher_no,
+                  voucherType: payload.voucher_type,
+                  date: payload.date,
+                  partyId: payload.party_id,
+                  partyName: payload.party_name,
+                  amount: payload.amount,
+                  description: payload.narration || "",
+                  entries: []
+                };
+              }
+
+              if (!this.transactions) this.transactions = [];
+              const idx = this.transactions.findIndex(t => t && (t.id === rawTx.id || (t.voucherId && rawTx.voucherId && t.voucherId === rawTx.voucherId)));
+
+              if (idx >= 0) {
+                this.transactions[idx] = { ...this.transactions[idx], ...rawTx };
+                console.log(`[Appwrite Realtime] Updated transaction ${rawTx.id} via real-time push.`);
+              } else {
+                this.transactions.push(rawTx);
+                console.log(`[Appwrite Realtime] Inserted new transaction ${rawTx.id} via real-time push.`);
+              }
+
+              this.persistLocalStateOnly();
+              this.notifyListeners();
+              if (typeof window !== "undefined" && typeof window.dispatchEvent === "function") {
+                window.dispatchEvent(new CustomEvent("erp:data-refreshed"));
+              }
+            }
+          } catch (err) {
+            console.warn("[Appwrite Realtime] Error processing event:", err);
+          }
+        });
+      }
+    } catch (e) {
+      console.warn("[Appwrite Realtime] Subscription error:", e);
+    }
+  }
+
+  persistLocalStateOnly() {
+    try {
+      const activeId = this.getActiveCompanyId();
+      if (!activeId) return;
+      const fyId = this.getActiveFyId();
+      const stateToSave = {
+        _lastSaved: Date.now(),
+        materials: this.materials,
+        contacts: this.contacts,
+        invoices: this.invoices,
+        salesOrders: this.salesOrders || [],
+        transactions: this.transactions,
+        purchases: this.purchases,
+        salesReturns: this.salesReturns,
+        purchaseReturns: this.purchaseReturns,
+        conversions: this.conversions,
+        stockAdjustments: this.stockAdjustments || [],
+        productGroups: this.productGroups,
+        companies: this.companies,
+        categories: this.categories,
+        subCategories: this.subCategories,
+        productNames: this.productNames,
+        adminPassword: this.adminPassword || "123",
+        accountGroups: this.accountGroups,
+        ledgers: this.ledgers,
+        salesAdjustments: this.salesAdjustments || [],
+        purchaseAdjustments: this.purchaseAdjustments || [],
+        units: this.units,
+        options: this.options,
+        influencers: this.influencers,
+        influencerRedemptions: this.influencerRedemptions || [],
+        loyaltyPrograms: this.loyaltyPrograms || [],
+        hsnCodes: this.hsnCodes,
+        hsnDescriptions: this.hsnDescriptions || {},
+        seriesMaster: this.seriesMaster || [],
+        headloaderProductIds: this.headloaderProductIds || [],
+        headloaderTypes: this.headloaderTypes || [{ id: "std", name: "Standard", isDefault: true }],
+        gstMaster: this.gstMaster || []
+      };
+      const lsKey = `erp_company_data_${activeId}${fyId === 'default' ? '' : '_' + fyId}`;
+      localStorage.setItem(lsKey, JSON.stringify(stateToSave));
+      this._serverLoadedData = stateToSave;
+    } catch (e) {}
+  }
+
+  // ── Auto-Sync: Poll server & Appwrite every 15 seconds ──────────────────────
+  startAutoSync(intervalMs = 15000) {
     if (this._autoSyncInterval) clearInterval(this._autoSyncInterval);
+    this.initAppwriteRealtime();
 
     this._autoSyncInterval = setInterval(async () => {
+      // Pause polling if tab is hidden to save CPU and battery
+      if (typeof document !== "undefined" && document.hidden) return;
+
       const activeId = this.getActiveCompanyId();
       if (!activeId) return;
 
-      // Don't sync if user is actively typing/editing (a modal is open)
+      // Skip sync if local save happened recently (within 10 seconds)
+      if (this._lastLocalSaveTime && (Date.now() - this._lastLocalSaveTime < 10000)) return;
+
+      // Don't sync if user is actively typing/editing (a modal, voucher popup, or active voucher entry is in progress)
       const modalRoot = document.getElementById("modal-container-root");
       if (modalRoot && modalRoot.children.length > 0) return;
 
-      const host = window.location.hostname || "localhost";
+      const overlay = document.getElementById("modal-overlay");
+      if (overlay && overlay.classList.contains("active")) return;
+
+      const popup = document.getElementById("jv-input-popup");
+      if (popup && popup.style.display !== "none") return;
+
+      const gridBody = document.getElementById("jv-grid-body");
+      if (gridBody && gridBody.children.length > 0 && !gridBody.innerHTML.includes("No entry lines added")) return;
+
+      const activeEl = document.activeElement;
+      if (activeEl && (activeEl.tagName === "INPUT" || activeEl.tagName === "SELECT" || activeEl.tagName === "TEXTAREA")) return;
+
       const fyId = this.getActiveFyId();
 
       try {
-        const apiUrl = (typeof window._getApiUrl === "function")
-          ? window._getApiUrl(`/api/data/${activeId}/${fyId}`)
-          : `http://${host}:3001/api/data/${activeId}/${fyId}`;
+        const dataUrl = this.getBackendApiUrl(`/api/data/${activeId}/${fyId}`);
+        let incomingData = null;
 
-        const res = await fetch(apiUrl, {
-          cache: "no-store",
-          headers: { "Bypass-Tunnel-Reminder": "true" },
-          signal: AbortSignal.timeout(5000)
-        });
-        if (!res.ok) return;
+        if (dataUrl) {
+          try {
+            const res = await fetch(dataUrl, {
+              cache: "no-store",
+              headers: { "Bypass-Tunnel-Reminder": "true" },
+              signal: getTimeoutSignal(4000)
+            });
+            if (res.ok) incomingData = await res.json();
+          } catch (e) {}
+        } else {
+          // In cloud static mode (e.g. Cloudflare Pages), poll Appwrite Cloud Storage
+          try {
+            incomingData = await this.fetchAppwriteCloudData(activeId, fyId);
+          } catch (e) {}
+        }
 
-        const serverData = await res.json();
-        if (!serverData || typeof serverData !== "object") return;
+        if (!incomingData || typeof incomingData !== "object") return;
 
-        const serverStr = JSON.stringify(serverData);
+        const incomingInvs = Array.isArray(incomingData.invoices) ? incomingData.invoices.length : 0;
+        const incomingTxs = Array.isArray(incomingData.transactions) ? incomingData.transactions.length : 0;
+        const currentInvs = Array.isArray(this.invoices) ? this.invoices.length : 0;
+        const currentTxs = Array.isArray(this.transactions) ? this.transactions.length : 0;
+
+        const incomingLastSaved = Number(incomingData._lastSaved || 0);
+        const currentLastSaved = Number((this._serverLoadedData && this._serverLoadedData._lastSaved) || this._lastLocalSaveTime || 0);
+
+        // If incoming server/cloud dataset is not newer than our loaded state, skip
+        if (incomingLastSaved <= currentLastSaved) {
+          return;
+        }
+
+        let merged = incomingData;
         const currentStr = JSON.stringify(this._serverLoadedData || {});
+        const mergedStr = JSON.stringify(merged);
 
-        // Only reload if server has different (newer) data
-        if (currentStr !== serverStr) {
-          this._serverLoadedData = serverData;
+        if (currentStr !== mergedStr) {
+          this._serverLoadedData = merged;
           this.loadState();
-          this.notifyListeners();
+          const lsKey = `erp_company_data_${activeId}${fyId === 'default' ? '' : '_' + fyId}`;
+          try {
+            localStorage.setItem(lsKey, JSON.stringify(merged));
+          } catch (e) {}
+
           if (typeof window !== "undefined" && typeof window.dispatchEvent === "function") {
             window.dispatchEvent(new CustomEvent("erp:data-refreshed"));
           }
-          console.log("[AutoSync] Data refreshed from server.");
+          console.log("[AutoSync] Data refreshed from " + (dataUrl ? "Local Server API" : "Appwrite Cloud") + ".");
         }
-      } catch (e) {
-        // Server offline or unreachable — silently skip this tick
-      }
+      } catch (e) {}
     }, intervalMs);
   }
 
@@ -281,37 +740,243 @@ class StateManager {
     }
   }
 
-  async initFromServer() {
-    // Always purge any cached company data from localStorage
-    try {
-      Object.keys(localStorage).forEach(k => {
-        if (k.startsWith("erp_company_data_")) {
-          localStorage.removeItem(k);
-        }
-      });
-    } catch (e) {}
+  async fetchAppwriteCloudData(activeId, fyId) {
+    if (!activeId) return null;
+    const targetFyId = String(fyId || this.getActiveFyId() || "default");
+    const candidateFileIds = Array.from(new Set([
+      sanitizeAppwriteId(`db_${activeId}_${targetFyId}`),
+      sanitizeAppwriteId(`db_${activeId}_default`),
+      sanitizeAppwriteId(`db_${activeId}_Current_F_Y`),
+      sanitizeAppwriteId(`db_${activeId}_fy_bkp`)
+    ]));
 
-    const host = window.location.hostname || "localhost";
-    const apiUrl = (typeof window._getApiUrl === "function")
-      ? window._getApiUrl("/api/companies")
-      : `http://${host}:3001/api/companies`;
+    // 1. FAST PATH: Instant download of full company DB from Appwrite Cloud Storage
+    // Check all candidate files in parallel and select the newest snapshot by _lastSaved timestamp
+    const validSnapshots = [];
+    await Promise.all(candidateFileIds.map(async (fileId) => {
+      try {
+        const storageUrl = `${APPWRITE_ENDPOINT}/storage/buckets/${APPWRITE_STORAGE_BUCKET}/files/${fileId}/download?project=${APPWRITE_PROJECT_ID}&t=${Date.now()}`;
+        const res = await fetch(storageUrl, { cache: "no-store" });
+        if (res.ok) {
+          const fullData = await res.json();
+          if (fullData && typeof fullData === "object" && (
+            (Array.isArray(fullData.ledgers) && fullData.ledgers.length > 0) ||
+            (Array.isArray(fullData.transactions) && fullData.transactions.length > 0) ||
+            (Array.isArray(fullData.contacts) && fullData.contacts.length > 0) ||
+            (Array.isArray(fullData.invoices) && fullData.invoices.length > 0)
+          )) {
+            validSnapshots.push({
+              fileId,
+              fullData,
+              lastSaved: Number(fullData._lastSaved || 0)
+            });
+          }
+        }
+      } catch (storageErr) {}
+    }));
+
+    // Helper to query all documents for a collection
+    const fetchAllDocs = async (collectionId) => {
+      let all = [];
+      let offset = 0;
+      const limit = 100;
+      while (true) {
+        try {
+          const res = await appwriteDatabases.listDocuments(
+            APPWRITE_DATABASE_ID,
+            collectionId,
+            [
+              Query.equal("company_id", String(activeId)),
+              Query.limit(limit),
+              Query.offset(offset)
+            ]
+          );
+          if (!res || !Array.isArray(res.documents) || res.documents.length === 0) break;
+          all = all.concat(res.documents);
+          if (res.documents.length < limit) break;
+          offset += limit;
+        } catch (e) {
+          break;
+        }
+      }
+
+      if (targetFyId && targetFyId !== 'default' && targetFyId !== 'all') {
+        const fyMatches = all.filter(d => String(d.fy_id) === String(targetFyId));
+        if (fyMatches.length > 0) return fyMatches;
+      }
+      return all;
+    };
+
+    const parseRaw = (doc) => {
+      if (!doc) return null;
+      if (doc.raw_data) {
+        try {
+          return typeof doc.raw_data === 'string' ? JSON.parse(doc.raw_data) : doc.raw_data;
+        } catch (e) {}
+      }
+      return doc;
+    };
+
+    if (validSnapshots.length > 0) {
+      // Always select the newest snapshot by _lastSaved timestamp
+      validSnapshots.sort((a, b) => (b.lastSaved || 0) - (a.lastSaved || 0));
+      const best = validSnapshots[0];
+      const baseData = best.fullData || {};
+
+      console.log(`[Appwrite Cloud] Selected newest DB snapshot (${best.fileId}, _lastSaved: ${best.lastSaved}) with ${baseData.invoices?.length || 0} invoices and ${baseData.transactions?.length || 0} vouchers.`);
+      return baseData;
+    }
+
+    // 2. FALLBACK PATH: Query Appwrite Database Collections
+
+    try {
+      const [materials, contacts, invoices, purchases, salesOrders, salesReturns, purchaseReturns, transactions, ledgers, settings] = await Promise.all([
+        fetchAllDocs("materials"),
+        fetchAllDocs("contacts"),
+        fetchAllDocs("invoices"),
+        fetchAllDocs("purchases"),
+        fetchAllDocs("sales_orders"),
+        fetchAllDocs("sales_returns"),
+        fetchAllDocs("purchase_returns"),
+        fetchAllDocs("transactions"),
+        fetchAllDocs("ledgers"),
+        fetchAllDocs("company_settings")
+      ]);
+
+      if (materials.length > 0 || contacts.length > 0 || invoices.length > 0 || purchases.length > 0 || transactions.length > 0 || ledgers.length > 0) {
+        let maxDocTime = 0;
+        const allDocs = [...materials, ...contacts, ...invoices, ...purchases, ...transactions, ...ledgers];
+        allDocs.forEach(d => {
+          if (d && d.$updatedAt) {
+            const t = new Date(d.$updatedAt).getTime();
+            if (t > maxDocTime) maxDocTime = t;
+          }
+        });
+
+        const result = {
+          _fyId: targetFyId,
+          _lastSaved: maxDocTime || 1,
+          materials: materials.map(parseRaw).filter(Boolean),
+          contacts: contacts.map(parseRaw).filter(Boolean),
+          invoices: invoices.map(parseRaw).filter(Boolean),
+          purchases: purchases.map(parseRaw).filter(Boolean),
+          salesOrders: salesOrders.map(parseRaw).filter(Boolean),
+          salesReturns: salesReturns.map(parseRaw).filter(Boolean),
+          purchaseReturns: purchaseReturns.map(parseRaw).filter(Boolean),
+          transactions: transactions.map(parseRaw).filter(Boolean),
+          ledgers: ledgers.map(l => {
+            const item = parseRaw(l);
+            if (l.account_group && !item.groupName) item.groupName = l.account_group;
+            return item;
+          }).filter(Boolean)
+        };
+
+        if (Array.isArray(settings)) {
+          settings.forEach(s => {
+            if (s && s.setting_key && s.setting_value) {
+              try {
+                result[s.setting_key] = JSON.parse(s.setting_value);
+              } catch (e) {}
+            }
+          });
+        }
+
+        return result;
+      }
+      return {
+        _fyId: targetFyId,
+        _lastSaved: 0,
+        materials: [],
+        contacts: [],
+        invoices: [],
+        purchases: [],
+        salesOrders: [],
+        salesReturns: [],
+        purchaseReturns: [],
+        transactions: [],
+        ledgers: []
+      };
+    } catch (e) {
+      console.warn("Appwrite cloud fetch error:", e);
+    }
+    return null;
+  }
+
+  async fetchSupabaseData(activeId, fyId) {
+    return this.fetchAppwriteCloudData(activeId, fyId);
+  }
+
+  async initFromServer() {
+    const apiUrl = this.getBackendApiUrl("/api/companies");
 
     try {
       let serverCompanies = null;
-      try {
-        const res = await fetch(apiUrl, {
-          headers: { "Bypass-Tunnel-Reminder": "true" },
-          signal: AbortSignal.timeout(10000)
-        });
-        if (res.ok) serverCompanies = await res.json();
-      } catch (e) {}
+      if (apiUrl) {
+        try {
+          const res = await fetch(apiUrl, {
+            headers: { "Bypass-Tunnel-Reminder": "true" },
+            signal: getTimeoutSignal(2000)
+          });
+          if (res.ok) serverCompanies = await res.json();
+        } catch (e) {}
+      }
 
       if (!Array.isArray(serverCompanies) || serverCompanies.length === 0) {
-        // Fallback for static Netlify deployment
+        // Fallback to Appwrite Cloud Database
         try {
-          const staticRes = await fetch("/data/companies.json");
-          if (staticRes.ok) serverCompanies = await staticRes.json();
+          const compRes = await appwriteDatabases.listDocuments(APPWRITE_DATABASE_ID, "companies", [Query.limit(100)]);
+          if (compRes && Array.isArray(compRes.documents) && compRes.documents.length > 0) {
+            let allFys = [];
+            try {
+              const fysRes = await appwriteDatabases.listDocuments(APPWRITE_DATABASE_ID, "financial_years", [Query.limit(100)]);
+              if (fysRes && Array.isArray(fysRes.documents)) allFys = fysRes.documents;
+            } catch (e) {}
+
+            serverCompanies = compRes.documents.map(c => {
+              if (c.raw_data) {
+                try {
+                  return JSON.parse(c.raw_data);
+                } catch (e) {}
+              }
+              const compFys = (allFys || [])
+                .filter(f => String(f.company_id) === String(c.company_id || c.$id))
+                .map(f => ({
+                  id: String(f.$id || f.name),
+                  name: f.name,
+                  startDate: f.start_date,
+                  endDate: f.end_date
+                }));
+
+              return {
+                id: String(c.company_id || c.$id),
+                name: c.name,
+                subName: c.sub_name || "",
+                address: c.address || "",
+                country: c.country || "INDIA",
+                state: c.state || "KERALA",
+                district: c.district || "",
+                phone: c.phone || "",
+                mobile: c.mobile || "",
+                email: c.email || "",
+                pincode: c.pincode || "",
+                website: c.website || "",
+                currencyName: c.currency_name || "Rupees",
+                taxApplicable: c.tax_applicable || "",
+                gstin: c.gstin || "",
+                username: c.username || "admin",
+                password: c.password || "123",
+                financialYears: compFys.length > 0 ? compFys : [{ id: "default", name: "Current F.Y" }]
+              };
+            });
+          }
         } catch (e) {}
+
+        if (!Array.isArray(serverCompanies) || serverCompanies.length === 0) {
+          try {
+            const staticRes = await fetch("/data/companies.json");
+            if (staticRes.ok) serverCompanies = await staticRes.json();
+          } catch (e) {}
+        }
       }
 
       if (Array.isArray(serverCompanies) && serverCompanies.length > 0) {
@@ -319,9 +984,58 @@ class StateManager {
         const localCompanies = localStr ? JSON.parse(localStr) : [];
         const merged = serverCompanies.map(sc => {
           const lc = localCompanies.find(c => String(c.id) === String(sc.id));
-          if (lc && lc.serverUrl) sc.serverUrl = lc.serverUrl;
+          if (lc) {
+            if (lc.serverUrl) sc.serverUrl = lc.serverUrl;
+            if (Array.isArray(lc.financialYears) && lc.financialYears.length > 0) {
+              const fyMap = new Map();
+              (sc.financialYears || []).forEach(fy => {
+                if (fy && fy.id) fyMap.set(String(fy.id), fy);
+              });
+              lc.financialYears.forEach(lfy => {
+                if (lfy && lfy.id) {
+                  const existing = fyMap.get(String(lfy.id));
+                  if (existing) {
+                    fyMap.set(String(lfy.id), { ...existing, ...lfy });
+                  } else {
+                    fyMap.set(String(lfy.id), lfy);
+                  }
+                }
+              });
+              sc.financialYears = Array.from(fyMap.values());
+            }
+
+            // Merge users so locally added users are not overwritten
+            const userMap = new Map();
+            if (Array.isArray(lc.users)) {
+              lc.users.forEach(u => {
+                if (u && u.username) userMap.set(u.username.toLowerCase(), { ...u });
+              });
+            }
+            if (Array.isArray(sc.users)) {
+              sc.users.forEach(u => {
+                if (u && u.username) {
+                  const k = u.username.toLowerCase();
+                  if (userMap.has(k)) {
+                    userMap.set(k, { ...userMap.get(k), ...u });
+                  } else {
+                    userMap.set(k, { ...u });
+                  }
+                }
+              });
+            }
+            if (userMap.size > 0) {
+              sc.users = Array.from(userMap.values());
+            }
+          }
           return sc;
         });
+
+        localCompanies.forEach(lc => {
+          if (!merged.some(m => String(m.id) === String(lc.id))) {
+            merged.push(lc);
+          }
+        });
+
         localStorage.setItem("erp_companies", JSON.stringify(merged));
       }
     } catch (e) {
@@ -341,45 +1055,147 @@ class StateManager {
 
     if (activeId) {
       const fyId = this.getActiveFyId();
+      const lsKey = `erp_company_data_${activeId}${fyId === 'default' ? '' : '_' + fyId}`;
+      let localCachedData = null;
       try {
-        const dataUrl = (typeof window._getApiUrl === "function")
-          ? window._getApiUrl(`/api/data/${activeId}/${fyId}`)
-          : `http://${host}:3001/api/data/${activeId}/${fyId}`;
-        
-        let loadedData = null;
+        const localStr = localStorage.getItem(lsKey);
+        if (localStr) localCachedData = JSON.parse(localStr);
+      } catch (e) {}
+
+      let localServerData = null;
+      const dataUrl = this.getBackendApiUrl(`/api/data/${activeId}/${fyId}`);
+      if (dataUrl) {
         try {
           const dataRes = await fetch(dataUrl, {
             headers: { "Bypass-Tunnel-Reminder": "true" },
-            signal: AbortSignal.timeout(15000)
+            signal: getTimeoutSignal(2000)
           });
           if (dataRes.ok) {
-            loadedData = await dataRes.json();
+            localServerData = await dataRes.json();
           }
         } catch (e) {}
+      }
 
-        // Fallback for static Netlify deployment without backend server
-        if (!loadedData || typeof loadedData !== "object") {
+      const hasValidData = (d) => d && typeof d === "object" && (
+        (Array.isArray(d.invoices) && d.invoices.length > 0) ||
+        (Array.isArray(d.contacts) && d.contacts.length > 0) ||
+        (Array.isArray(d.materials) && d.materials.length > 0) ||
+        (Array.isArray(d.transactions) && d.transactions.length > 0) ||
+        (Array.isArray(d.ledgers) && d.ledgers.length > 0)
+      );
+
+      let cloudData = null;
+      try {
+        cloudData = await this.fetchAppwriteCloudData(activeId, fyId);
+      } catch (e) {}
+
+      let staticData = null;
+      try {
+        const staticRes = await fetch(`/data/${activeId}_${fyId}.json?v=${Date.now()}`);
+        if (staticRes.ok) staticData = await staticRes.json();
+      } catch (e) {}
+
+      const localInvs = Array.isArray(localCachedData?.invoices) ? localCachedData.invoices.length : 0;
+      const localTxs = Array.isArray(localCachedData?.transactions) ? localCachedData.transactions.length : 0;
+      const localCount = (localInvs * 100000) + localTxs;
+
+      const serverInvs = Array.isArray(localServerData?.invoices) ? localServerData.invoices.length : 0;
+      const serverTxs = Array.isArray(localServerData?.transactions) ? localServerData.transactions.length : 0;
+      const serverCount = (serverInvs * 100000) + serverTxs;
+
+      const cloudInvs = Array.isArray(cloudData?.invoices) ? cloudData.invoices.length : 0;
+      const cloudTxs = Array.isArray(cloudData?.transactions) ? cloudData.transactions.length : 0;
+      const cloudCount = (cloudInvs * 100000) + cloudTxs;
+
+      const staticInvs = Array.isArray(staticData?.invoices) ? staticData.invoices.length : 0;
+      const staticTxs = Array.isArray(staticData?.transactions) ? staticData.transactions.length : 0;
+      const staticCount = (staticInvs * 100000) + staticTxs;
+
+      const localTime = Number(localCachedData?._lastSaved || 0);
+      const serverTime = Number(localServerData?._lastSaved || 0);
+      const cloudTime = Number(cloudData?._lastSaved || 0);
+      const staticTime = Number(staticData?._lastSaved || 0);
+
+      let mergedData = null;
+
+      // Select authoritative external candidate (Cloud / Server / Static)
+      let externalCandidate = null;
+      if (hasValidData(cloudData) && cloudCount >= serverCount && cloudTime >= staticTime) {
+        externalCandidate = cloudData;
+      } else if (hasValidData(localServerData) && serverTime >= cloudTime && serverTime >= staticTime) {
+        externalCandidate = localServerData;
+      } else if (hasValidData(staticData) && staticTime >= cloudTime && staticTime >= serverTime) {
+        externalCandidate = staticData;
+      } else if (hasValidData(cloudData)) {
+        externalCandidate = cloudData;
+      } else if (hasValidData(localServerData)) {
+        externalCandidate = localServerData;
+      } else if (hasValidData(staticData)) {
+        externalCandidate = staticData;
+      }
+
+      const externalTime = Number(externalCandidate?._lastSaved || 0);
+
+      // Detect if local cache has phantom / ghost clone entries or legacy duplicate migration batches
+      const hasGhostClones = Array.isArray(localCachedData?.transactions) && (
+        localCachedData.transactions.some(t => {
+          const vNo = String(t.voucherNo || t.refNo || t.id || '');
+          return /^LSL-03[7-9]\d$/i.test(vNo) || /^LSL-040\d$/i.test(vNo) || t.id === 'RC-786';
+        }) || (localTxs > ((externalCandidate?.transactions?.length || 0) + 100))
+      );
+
+      // If external dataset is newer, or local cache is empty/stale/polluted with duplicates, adopt external dataset
+      if (externalCandidate && (!hasValidData(localCachedData) || externalTime >= localTime || hasGhostClones)) {
+        mergedData = externalCandidate;
+        console.log(`[initFromServer] Adopted authoritative external dataset (${externalTime} vs local ${localTime}, ghostClones/duplicates: ${hasGhostClones}).`);
+      } else if (hasValidData(localCachedData)) {
+        mergedData = localCachedData;
+        console.log(`[initFromServer] Local cache is newest (${localTime}). Forward-syncing.`);
+      } else if (externalCandidate) {
+        mergedData = externalCandidate;
+      }
+
+      if (mergedData && typeof mergedData === "object" && (mergedData.transactions || mergedData.invoices || mergedData.purchases || mergedData.materials || mergedData.contacts || mergedData.ledgers)) {
+        this._serverLoadedData = mergedData;
+        try {
+          localStorage.setItem(`erp_company_data_${activeId}${fyId === 'default' ? '' : '_' + fyId}`, JSON.stringify(mergedData));
+        } catch (e) {}
+
+        if (dataUrl && mergedData !== localServerData) {
           try {
-            const staticDataRes = await fetch(`/data/${activeId}_${fyId}.json`);
-            if (staticDataRes.ok) {
-              loadedData = await staticDataRes.json();
-            } else {
-              const staticDefRes = await fetch(`/data/${activeId}.json`);
-              if (staticDefRes.ok) loadedData = await staticDefRes.json();
-            }
+            fetch(dataUrl, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(mergedData)
+            }).catch(() => {});
           } catch (e) {}
         }
-
-        if (loadedData && typeof loadedData === "object") {
-          this._serverLoadedData = loadedData;
-        }
-      } catch (e) {}
+      }
     }
 
+    this._isDataLoadedFromCloud = true;
     this.loadState();
+    this.initAppwriteRealtime();
     this.notifyListeners();
     if (typeof window !== "undefined" && typeof window.dispatchEvent === "function") {
       window.dispatchEvent(new CustomEvent("erp:data-refreshed"));
+    }
+  }
+
+  async syncAllTransactionsToAppwrite(activeId, fyId) {
+    try {
+      const compId = String(activeId || this.getActiveCompanyId() || "1");
+      const fId = String(fyId || this.getActiveFyId() || "default");
+      if (!compId || !Array.isArray(this.transactions) || this.transactions.length === 0) return;
+
+      console.log(`[Appwrite Cloud] Reconciling ${this.transactions.length} local transaction(s) to Appwrite Database collection...`);
+      for (const tx of this.transactions) {
+        if (tx && tx.id) {
+          this.syncTransactionToAppwrite(tx, false, compId, fId).catch(() => {});
+        }
+      }
+    } catch (e) {
+      console.warn("[Appwrite Cloud] syncAllTransactionsToAppwrite error:", e);
     }
   }
 
@@ -387,13 +1203,90 @@ class StateManager {
     try {
       const val = localStorage.getItem("erp_companies");
       if (!val || val === "undefined" || val === "null") return [];
-      return JSON.parse(val) || [];
+      const list = JSON.parse(val) || [];
+      let changed = false;
+      for (const c of list) {
+        c.financialYears = c.financialYears || [];
+        if (c.financialYears.length === 0) {
+          c.financialYears.push({
+            id: "default",
+            name: "Current F.Y",
+            startDate: c.financialYearStarts || "2026-04-01",
+            endDate: c.financialYearEnds || "2027-03-31"
+          });
+          changed = true;
+        }
+
+        // Deduplicate financialYears by unique ID (keep latest instance if duplicate IDs exist)
+        const uniqueById = [];
+        const seenIds = new Set();
+        for (let i = c.financialYears.length - 1; i >= 0; i--) {
+          const fy = c.financialYears[i];
+          if (!fy || !fy.id) continue;
+          const fid = String(fy.id);
+          if (!seenIds.has(fid)) {
+            seenIds.add(fid);
+            uniqueById.unshift(fy);
+          } else {
+            changed = true;
+          }
+        }
+
+        // Deduplicate financialYears by effective date period (startDate + endDate)
+        const uniqueByRange = [];
+        const seenRanges = new Set();
+        for (let i = uniqueById.length - 1; i >= 0; i--) {
+          const fy = uniqueById[i];
+          const start = fy.startDate || c.financialYearStarts || "";
+          const end = fy.endDate || (i === uniqueById.length - 1 ? c.financialYearEnds : "");
+          const rangeKey = `${start}_${end}`;
+          if (!seenRanges.has(rangeKey)) {
+            seenRanges.add(rangeKey);
+            uniqueByRange.unshift(fy);
+          } else {
+            // Remove unlinked local storage keys for duplicate FYs
+            if (fy.id && fy.id !== "default") {
+              try {
+                localStorage.removeItem(`erp_company_data_${c.id}_${fy.id}`);
+              } catch (e) {}
+            }
+            changed = true;
+          }
+        }
+
+        c.financialYears = uniqueByRange;
+
+        c.financialYears.forEach((fy, idx) => {
+          const isLatest = idx === c.financialYears.length - 1;
+          const startFmt = fy.startDate ? fy.startDate.split("-").reverse().join("/") : "";
+          const endFmt = fy.endDate ? fy.endDate.split("-").reverse().join("/") : "";
+          const rangeName = (startFmt && endFmt) ? `${startFmt} to ${endFmt}` : "Previous F.Y";
+
+          if (isLatest) {
+            if (fy.name !== "Current F.Y") {
+              fy.name = "Current F.Y";
+              changed = true;
+            }
+            c.financialYearStarts = fy.startDate || c.financialYearStarts;
+            c.financialYearEnds = fy.endDate || c.financialYearEnds;
+          } else {
+            if (fy.name !== rangeName) {
+              fy.name = rangeName;
+              changed = true;
+            }
+          }
+        });
+      }
+      if (changed) {
+        localStorage.setItem("erp_companies", JSON.stringify(list));
+      }
+      return list;
     } catch (e) {
       return [];
     }
   }
 
-  saveRegisteredCompanies(companies) {
+  async saveRegisteredCompanies(companies) {
     localStorage.setItem("erp_companies", JSON.stringify(companies));
     try {
       const companiesWithFy = companies.map(c => {
@@ -410,42 +1303,186 @@ class StateManager {
         }
         return c;
       });
-      const host = window.location.hostname || "localhost";
-      const apiUrl = (typeof window._getApiUrl === "function") 
-        ? window._getApiUrl("/api/companies") 
-        : `http://${host}:3001/api/companies`;
+      const apiUrl = this.getBackendApiUrl("/api/companies");
 
-      fetch(apiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(companiesWithFy)
-      });
-    } catch (e) {}
+      let localResp = null;
+      if (apiUrl) {
+        try {
+          const resp = await fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(companiesWithFy)
+          });
+          localResp = await resp.json();
+        } catch (e) {}
+      }
+
+      // Background push to Appwrite Cloud Database
+      try {
+        for (const c of companiesWithFy) {
+          const compId = String(c.id);
+          const docId = `comp_${compId}`.replace(/[^a-zA-Z0-9._-]/g, '_').substring(0, 36);
+          const compData = {
+            company_id: compId,
+            name: c.name || "Unnamed",
+            sub_name: c.subName || "",
+            phone: c.phone || "",
+            mobile: c.mobile || "",
+            gstin: c.gstin || "",
+            raw_data: JSON.stringify(c)
+          };
+
+          try {
+            await appwriteDatabases.updateDocument(APPWRITE_DATABASE_ID, "companies", docId, compData);
+          } catch (updateErr) {
+            if (updateErr.code === 404) {
+              await appwriteDatabases.createDocument(APPWRITE_DATABASE_ID, "companies", docId, compData).catch(e => {});
+            }
+          }
+
+          if (Array.isArray(c.financialYears)) {
+            for (const fy of c.financialYears) {
+              const fyDocId = `fy_${compId}_${fy.id || 'default'}`.replace(/[^a-zA-Z0-9._-]/g, '_').substring(0, 36);
+              const fyData = {
+                company_id: compId,
+                name: fy.name || "Current F.Y",
+                start_date: fy.startDate || "",
+                end_date: fy.endDate || ""
+              };
+              try {
+                await appwriteDatabases.updateDocument(APPWRITE_DATABASE_ID, "financial_years", fyDocId, fyData);
+              } catch (updateFyErr) {
+                if (updateFyErr.code === 404) {
+                  await appwriteDatabases.createDocument(APPWRITE_DATABASE_ID, "financial_years", fyDocId, fyData).catch(e => {});
+                }
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("Appwrite company sync error:", e);
+      }
+
+      return localResp || { success: true };
+    } catch (e) {
+      return null;
+    }
+  }
+
+  changeCompanyId(oldId, newId) {
+    if (!oldId || !newId) return { success: false, message: "Invalid company ID specified." };
+    const cleanOldId = String(oldId).trim();
+    const cleanNewId = String(newId).trim();
+
+    if (!cleanNewId) return { success: false, message: "New Company ID cannot be empty." };
+    if (cleanOldId === cleanNewId) return { success: true, message: "Company ID unchanged." };
+
+    const companies = this.getRegisteredCompanies();
+    const compIndex = companies.findIndex(c => String(c.id) === cleanOldId);
+    if (compIndex === -1) return { success: false, message: `Company with ID "${cleanOldId}" not found.` };
+
+    const isDuplicate = companies.some(c => String(c.id) === cleanNewId && String(c.id) !== cleanOldId);
+    if (isDuplicate) return { success: false, message: `Company ID "${cleanNewId}" is already assigned to another company.` };
+
+    // Update ID in company list
+    companies[compIndex].id = cleanNewId;
+
+    // Migrate all localStorage keys for this company ID
+    try {
+      const keys = Object.keys(localStorage);
+      for (const k of keys) {
+        if (k.endsWith(`_${cleanOldId}`)) {
+          const prefix = k.slice(0, k.length - cleanOldId.length);
+          const newKey = prefix + cleanNewId;
+          const val = localStorage.getItem(k);
+          if (val !== null) {
+            localStorage.setItem(newKey, val);
+            localStorage.removeItem(k);
+          }
+        } else if (k.startsWith(`erp_company_data_${cleanOldId}`)) {
+          const suffix = k.slice(`erp_company_data_${cleanOldId}`.length);
+          const newKey = `erp_company_data_${cleanNewId}${suffix}`;
+          const val = localStorage.getItem(k);
+          if (val !== null) {
+            localStorage.setItem(newKey, val);
+            localStorage.removeItem(k);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("LocalStorage migration error during Company ID change:", e);
+    }
+
+    // Update active company ID if current company was updated
+    const currentActiveId = String(this.getActiveCompanyId());
+    if (currentActiveId === cleanOldId) {
+      this.setActiveCompanyId(cleanNewId);
+    }
+
+    this.saveRegisteredCompanies(companies);
+
+    if (currentActiveId === cleanOldId) {
+      this.saveState();
+    }
+
+    this.notifyListeners();
+
+    return { success: true, message: `Company ID changed from "${cleanOldId}" to "${cleanNewId}" successfully.` };
+  }
+
+  getCurrentFinancialYearId(companyId) {
+    const activeId = companyId || this.getActiveCompanyId();
+    if (!activeId) return "default";
+    const companies = this.getRegisteredCompanies();
+    const company = companies.find(c => String(c.id) === String(activeId));
+    if (!company || !company.financialYears || company.financialYears.length === 0) {
+      return "default";
+    }
+    const currentFy = company.financialYears.find(f => f.name === "Current F.Y") || company.financialYears[company.financialYears.length - 1];
+    return currentFy ? currentFy.id : "default";
+  }
+
+  resetToCurrentFinancialYear(companyId) {
+    const activeId = companyId || this.getActiveCompanyId();
+    if (activeId) {
+      const currentFyId = this.getCurrentFinancialYearId(activeId);
+      this.setActiveFyId(currentFyId);
+      return currentFyId;
+    }
+    return "default";
   }
 
   getActiveFyId() {
     const activeId = this.getActiveCompanyId();
     if (!activeId) return "default";
     let fy = localStorage.getItem(`erp_active_fy_id_${activeId}`);
-    if (!fy) fy = "default";
-    return fy;
+    if (!fy) {
+      fy = this.getCurrentFinancialYearId(activeId);
+    }
+    return fy || "default";
   }
 
-  getFyDisplayLabel(fy) {
-    if (!fy || !fy.startDate || !fy.endDate) return fy ? fy.name : "";
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
-    const todayStr = `${yyyy}-${mm}-${dd}`;
+  getFyDisplayLabel(fy, company) {
+    if (!fy) return "";
+    const activeCompany = company || this.getRegisteredCompanies().find(c => String(c.id) === String(this.getActiveCompanyId()));
+    const fys = (activeCompany && activeCompany.financialYears) ? activeCompany.financialYears : [];
+    const isLatest = fys.length > 0 && String(fys[fys.length - 1].id) === String(fy.id);
 
-    if (fy.name === "Current F.Y" || (fy.startDate <= todayStr && todayStr <= fy.endDate)) {
+    const startFormatted = fy.startDate ? fy.startDate.split("-").reverse().join("/") : "";
+    const endFormatted = fy.endDate ? fy.endDate.split("-").reverse().join("/") : "";
+
+    if (isLatest) {
+      if (startFormatted && endFormatted) {
+        return `Current F.Y (${startFormatted} - ${endFormatted})`;
+      }
       return "Current F.Y";
     }
 
-    const startFormatted = fy.startDate.split("-").reverse().join("/");
-    const endFormatted = fy.endDate.split("-").reverse().join("/");
-    return `${startFormatted} to ${endFormatted}`;
+    // Previous financial year
+    if (startFormatted && endFormatted) {
+      return `${startFormatted} to ${endFormatted}`;
+    }
+    return (fy.name && fy.name !== "Current F.Y") ? fy.name : "Previous F.Y";
   }
 
   validateTransactionDate(date) {
@@ -453,17 +1490,36 @@ class StateManager {
     const activeCompanyId = this.getActiveCompanyId();
     if (!activeCompanyId) return;
     const companies = this.getRegisteredCompanies();
-    const company = companies.find(c => c.id === activeCompanyId);
+    const company = companies.find(c => String(c.id) === String(activeCompanyId));
     if (!company) return;
     const activeFyId = this.getActiveFyId();
-    const fy = (company.financialYears || []).find(f => f.id === activeFyId);
-    if (fy && fy.startDate) {
-      const txD = new Date(date);
-      const fyD = new Date(fy.startDate);
-      if (txD < fyD) {
-        const formattedDate = date.split("-").reverse().join("/");
-        const formattedStartDate = fy.startDate.split("-").reverse().join("/");
-        throw new Error(`TRANSACTION DATE (${formattedDate}) CANNOT BE BEFORE THE START OF THE FINANCIAL YEAR (${formattedStartDate}).`);
+    let fy = (company.financialYears || []).find(f => String(f.id) === String(activeFyId));
+    if (!fy && company.financialYears && company.financialYears.length > 0) {
+      fy = company.financialYears.find(f => f.name === "Current F.Y") || company.financialYears[0];
+    }
+    if (!fy && (company.financialYearStarts || company.financialYearEnds)) {
+      fy = {
+        startDate: company.financialYearStarts,
+        endDate: company.financialYearEnds
+      };
+    }
+    if (fy) {
+      const txIso = toIsoDateStr(date);
+      if (fy.startDate) {
+        const fyStartIso = toIsoDateStr(fy.startDate);
+        if (txIso && fyStartIso && txIso < fyStartIso) {
+          const formattedDate = txIso.split("-").reverse().join("/");
+          const formattedStartDate = fyStartIso.split("-").reverse().join("/");
+          throw new Error(`TRANSACTION DATE (${formattedDate}) CANNOT BE BEFORE THE START OF THE FINANCIAL YEAR (${formattedStartDate}).`);
+        }
+      }
+      if (fy.endDate) {
+        const fyEndIso = toIsoDateStr(fy.endDate);
+        if (txIso && fyEndIso && txIso > fyEndIso) {
+          const formattedDate = txIso.split("-").reverse().join("/");
+          const formattedEndDate = fyEndIso.split("-").reverse().join("/");
+          throw new Error(`TRANSACTION DATE (${formattedDate}) CANNOT BE BEYOND THE END OF THE FINANCIAL YEAR (${formattedEndDate}).`);
+        }
       }
     }
   }
@@ -472,22 +1528,22 @@ class StateManager {
     const activeCompanyId = this.getActiveCompanyId();
     if (!activeCompanyId) return null;
     const companies = this.getRegisteredCompanies();
-    const company = companies.find(c => c.id === activeCompanyId);
+    const company = companies.find(c => String(c.id) === String(activeCompanyId));
     if (!company) return null;
     const activeFyId = this.getActiveFyId();
-    const fy = (company.financialYears || []).find(f => f.id === activeFyId);
-    return fy ? fy.startDate : null;
+    const fy = (company.financialYears || []).find(f => String(f.id) === String(activeFyId)) || (company.financialYears ? company.financialYears[0] : null);
+    return fy ? fy.startDate : (company.financialYearStarts || null);
   }
 
   getActiveFinancialYearEndDate() {
     const activeCompanyId = this.getActiveCompanyId();
     if (!activeCompanyId) return null;
     const companies = this.getRegisteredCompanies();
-    const company = companies.find(c => c.id === activeCompanyId);
+    const company = companies.find(c => String(c.id) === String(activeCompanyId));
     if (!company) return null;
     const activeFyId = this.getActiveFyId();
-    const fy = (company.financialYears || []).find(f => f.id === activeFyId);
-    return fy ? fy.endDate : null;
+    const fy = (company.financialYears || []).find(f => String(f.id) === String(activeFyId)) || (company.financialYears ? company.financialYears[0] : null);
+    return fy ? fy.endDate : (company.financialYearEnds || null);
   }
 
 
@@ -499,6 +1555,10 @@ class StateManager {
         localStorage.setItem(`erp_active_fy_id_${activeId}`, fyId);
       } else {
         localStorage.removeItem(`erp_active_fy_id_${activeId}`);
+      }
+      this._serverLoadedData = null;
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("financialYearChanged", { detail: { fyId } }));
       }
     }
   }
@@ -514,20 +1574,16 @@ class StateManager {
 
   // ── Multi-User Management & Session ──────────────────────────────────────────
   getCurrentUser() {
-    try {
-      const val = localStorage.getItem("erp_current_user");
-      return val ? JSON.parse(val) : null;
-    } catch(e) {
-      return null;
-    }
+    return this._currentUser || null;
   }
 
   setCurrentUser(userObj) {
-    if (userObj) {
-      localStorage.setItem("erp_current_user", JSON.stringify(userObj));
-    } else {
-      localStorage.removeItem("erp_current_user");
-    }
+    this._currentUser = userObj ? { ...userObj } : null;
+    try {
+      if (typeof localStorage !== "undefined") {
+        localStorage.removeItem("erp_current_user");
+      }
+    } catch (e) {}
   }
 
   getCompanyUsers(companyId) {
@@ -537,17 +1593,22 @@ class StateManager {
     const comp = companies.find(c => String(c.id) === String(compId));
     if (!comp) return [];
 
-    if (!Array.isArray(comp.users) || comp.users.length === 0) {
-      comp.users = [
-        {
-          id: "USR-1",
-          username: comp.username || "admin",
-          password: comp.password || "123",
-          fullName: "Administrator",
-          role: "Admin",
-          status: "Active"
-        }
-      ];
+    if (!Array.isArray(comp.users)) {
+      comp.users = [];
+    }
+
+    // Ensure Admin user is ALWAYS present in comp.users
+    const hasAdmin = comp.users.some(u => (u.username || "").trim().toLowerCase() === "admin" || u.role === "Admin");
+    if (!hasAdmin) {
+      comp.users.unshift({
+        id: "USR-1",
+        username: comp.username || "admin",
+        password: String(comp.password ?? "123"),
+        fullName: "Administrator",
+        role: "Admin",
+        status: "Active",
+        allowedCompanies: companies.map(c => String(c.id))
+      });
       this.saveRegisteredCompanies(companies);
     }
     return comp.users;
@@ -557,65 +1618,188 @@ class StateManager {
     const compId = companyId || this.getActiveCompanyId();
     if (!compId) return null;
     const companies = this.getRegisteredCompanies();
-    const comp = companies.find(c => String(c.id) === String(compId));
-    if (!comp) return null;
 
-    if (!Array.isArray(comp.users)) comp.users = [];
+    const allowed = (Array.isArray(userData.allowedCompanies) && userData.allowedCompanies.length > 0)
+      ? userData.allowedCompanies.map(String)
+      : (userData.role === "Admin" || (userData.username && userData.username.toLowerCase() === "admin"))
+        ? companies.map(c => String(c.id))
+        : [String(compId)];
 
-    if (userData.id) {
-      const idx = comp.users.findIndex(u => u.id === userData.id);
-      if (idx !== -1) {
-        comp.users[idx] = { ...comp.users[idx], ...userData };
-        if (userData.username === comp.username) {
-          comp.password = userData.password;
+    const targetUserId = userData.id || ("USR-" + Date.now());
+    const usernameKey = (userData.username || "").trim().toLowerCase();
+
+    const updatedUserObj = {
+      id: targetUserId,
+      username: (userData.username || "").trim(),
+      password: String(userData.password ?? ""),
+      fullName: userData.fullName ? userData.fullName.trim() : (userData.username || "").trim(),
+      role: userData.role || "Sales Clerk",
+      status: userData.status || "Active",
+      allowedCompanies: allowed
+    };
+
+    companies.forEach(comp => {
+      if (!Array.isArray(comp.users)) comp.users = [];
+
+      // Ensure Admin exists in comp.users
+      const hasAdmin = comp.users.some(u => (u.username || "").trim().toLowerCase() === "admin" || u.role === "Admin");
+      if (!hasAdmin) {
+        comp.users.unshift({
+          id: "USR-1",
+          username: comp.username || "admin",
+          password: String(comp.password ?? "123"),
+          fullName: "Administrator",
+          role: "Admin",
+          status: "Active",
+          allowedCompanies: companies.map(c => String(c.id))
+        });
+      }
+
+      const compIdStr = String(comp.id);
+      const isAllowed = (updatedUserObj.role === "Admin" || updatedUserObj.username.toLowerCase() === "admin")
+        ? true
+        : allowed.includes(compIdStr);
+
+      const idx = comp.users.findIndex(u => String(u.id) === String(targetUserId) || ((u.username || "").trim().toLowerCase() === usernameKey));
+
+      if (isAllowed) {
+        if (idx !== -1) {
+          comp.users[idx] = { ...comp.users[idx], ...updatedUserObj };
+        } else {
+          comp.users.push({ ...updatedUserObj });
+        }
+        if (updatedUserObj.username.toLowerCase() === (comp.username || "admin").toLowerCase()) {
+          comp.password = updatedUserObj.password;
+        }
+      } else {
+        if (idx !== -1 && updatedUserObj.username.toLowerCase() !== "admin") {
+          comp.users.splice(idx, 1);
         }
       }
-    } else {
-      const newId = "USR-" + Date.now();
-      const newUser = {
-        id: newId,
-        username: userData.username.trim(),
-        password: userData.password,
-        fullName: userData.fullName ? userData.fullName.trim() : userData.username,
-        role: userData.role || "Sales Clerk",
-        status: userData.status || "Active"
-      };
-      comp.users.push(newUser);
-      userData.id = newId;
-    }
+    });
 
     this.saveRegisteredCompanies(companies);
-    return userData;
+    return updatedUserObj;
   }
 
   deleteCompanyUser(companyId, userId) {
-    const compId = companyId || this.getActiveCompanyId();
-    if (!compId) return false;
     const companies = this.getRegisteredCompanies();
-    const comp = companies.find(c => String(c.id) === String(compId));
-    if (!comp || !Array.isArray(comp.users)) return false;
+    let deletedAny = false;
 
-    comp.users = comp.users.filter(u => u.id !== userId);
-    this.saveRegisteredCompanies(companies);
-    return true;
+    companies.forEach(comp => {
+      if (Array.isArray(comp.users)) {
+        const initialLen = comp.users.length;
+        comp.users = comp.users.filter(u => String(u.id) !== String(userId) && String(u.username).toLowerCase() !== String(userId).toLowerCase());
+        if (comp.users.length !== initialLen) deletedAny = true;
+      }
+    });
+
+    if (deletedAny) {
+      this.saveRegisteredCompanies(companies);
+    }
+    return deletedAny;
+  }
+
+  getAllUsers() {
+    const companies = this.getRegisteredCompanies();
+    const userMap = new Map();
+
+    companies.forEach(comp => {
+      const users = (Array.isArray(comp.users) && comp.users.length > 0)
+        ? comp.users
+        : [
+            {
+              id: "USR-1",
+              username: comp.username || "admin",
+              password: String(comp.password ?? "123"),
+              fullName: "Administrator",
+              role: "Admin",
+              status: "Active",
+              allowedCompanies: companies.map(c => String(c.id))
+            }
+          ];
+
+      users.forEach(u => {
+        const key = (u.username || "").trim().toLowerCase();
+        if (key) {
+          if (!userMap.has(key)) {
+            userMap.set(key, { ...u });
+          } else {
+            const existing = userMap.get(key);
+            if (Array.isArray(u.allowedCompanies)) {
+              const existingAllowed = existing.allowedCompanies || [];
+              const mergedAllowed = Array.from(new Set([
+                ...existingAllowed.map(String),
+                ...u.allowedCompanies.map(String)
+              ]));
+              existing.allowedCompanies = mergedAllowed;
+            }
+          }
+        }
+      });
+    });
+
+    if (!userMap.has("admin") && companies.length > 0) {
+      userMap.set("admin", {
+        id: "USR-1",
+        username: companies[0].username || "admin",
+        password: String(companies[0].password ?? "123"),
+        fullName: "Administrator",
+        role: "Admin",
+        status: "Active",
+        allowedCompanies: companies.map(c => String(c.id))
+      });
+    }
+
+    return Array.from(userMap.values());
   }
 
   authenticateUser(companyId, username, password) {
-    const users = this.getCompanyUsers(companyId);
+    const compIdStr = String(companyId);
     const uInput = (username || "").trim().toLowerCase();
-    const match = users.find(u => u.username.toLowerCase() === uInput && u.password === password && u.status !== "Inactive");
-    if (match) return match;
+    const pInput = String(password ?? "").trim();
+
+    if (!uInput || !pInput) return null;
+
+    // 1. Check direct company users list
+    const users = this.getCompanyUsers(companyId);
+    let match = users.find(u => 
+      (u.username || "").trim().toLowerCase() === uInput && 
+      String(u.password ?? "").trim() === pInput && 
+      u.status !== "Inactive"
+    );
+
+    // 2. If not directly in company users, search across all system users
+    if (!match) {
+      const allUsers = this.getAllUsers();
+      match = allUsers.find(u => 
+        (u.username || "").trim().toLowerCase() === uInput && 
+        String(u.password ?? "").trim() === pInput && 
+        u.status !== "Inactive"
+      );
+    }
+
+    if (match) {
+      const isAdmin = match.role === "Admin" || (match.username || "").trim().toLowerCase() === "admin";
+      if (!isAdmin && Array.isArray(match.allowedCompanies) && match.allowedCompanies.length > 0) {
+        if (!match.allowedCompanies.map(String).includes(compIdStr)) {
+          return null;
+        }
+      }
+      return match;
+    }
 
     // Fallback: check main company legacy admin credentials
-    const comp = this.getRegisteredCompanies().find(c => String(c.id) === String(companyId));
-    if (comp && comp.username.toLowerCase() === uInput && comp.password === password) {
+    const comp = this.getRegisteredCompanies().find(c => String(c.id) === compIdStr);
+    if (comp && comp.username && (comp.username || "").trim().toLowerCase() === uInput && String(comp.password ?? "").trim() === pInput) {
       return {
         id: "USR-LEGACY-ADMIN",
         username: comp.username,
         password: comp.password,
         fullName: "Administrator",
         role: "Admin",
-        status: "Active"
+        status: "Active",
+        allowedCompanies: this.getRegisteredCompanies().map(c => String(c.id))
       };
     }
     return null;
@@ -623,13 +1807,22 @@ class StateManager {
 
   getActiveCompanyId() {
     const val = localStorage.getItem("erp_active_company_id");
-    if (!val || val === "undefined" || val === "null") return null;
-    return val;
+    if (val && val !== "undefined" && val !== "null") return val;
+    const registered = this.getRegisteredCompanies();
+    if (Array.isArray(registered) && registered.length > 0 && registered[0].id) {
+      const fallbackId = String(registered[0].id);
+      try {
+        localStorage.setItem("erp_active_company_id", fallbackId);
+      } catch (e) {}
+      return fallbackId;
+    }
+    return null;
   }
 
   setActiveCompanyId(companyId) {
     if (companyId) {
       localStorage.setItem("erp_active_company_id", companyId);
+      this.resetToCurrentFinancialYear(companyId);
     } else {
       localStorage.removeItem("erp_active_company_id");
     }
@@ -726,12 +1919,42 @@ class StateManager {
     this.notifyListeners();
   }
 
-  deleteFinancialYear(companyId, fyId) {
-    const targetCompanyId = companyId || this.getActiveCompanyId();
-    if (!targetCompanyId) return { success: false, message: "No active company found." };
+  calculateOneYearEnd(startDateStr) {
+    if (!startDateStr) return "";
+    const parts = startDateStr.split("-").map(Number);
+    if (parts.length !== 3 || isNaN(parts[0])) return startDateStr;
+    const endDateObj = new Date(parts[0] + 1, parts[1] - 1, parts[2] - 1);
+    const y = endDateObj.getFullYear();
+    const m = String(endDateObj.getMonth() + 1).padStart(2, '0');
+    const d = String(endDateObj.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
 
+  async deleteFinancialYear(companyId, fyId) {
+    const currentUser = this.getCurrentUser();
+    const isAdmin = !currentUser || currentUser.role === "Admin" || currentUser.role === "admin";
+    if (!isAdmin) {
+      return { success: false, message: "Access Restricted! Only Admin users can delete financial years." };
+    }
+
+    // Flexible argument ordering if passed as (fyId, companyId)
+    let targetCompanyId = companyId;
+    let targetFyId = fyId;
     const companies = this.getRegisteredCompanies();
-    const company = companies.find(c => String(c.id) === String(targetCompanyId));
+    let company = companies.find(c => String(c.id) === String(targetCompanyId));
+
+    if (!company) {
+      company = companies.find(c => String(c.id) === String(targetFyId));
+      if (company) {
+        // Swapped arguments
+        targetCompanyId = fyId;
+        targetFyId = companyId;
+      } else {
+        targetCompanyId = this.getActiveCompanyId();
+        company = companies.find(c => String(c.id) === String(targetCompanyId));
+      }
+    }
+
     if (!company) return { success: false, message: "Company not found." };
 
     company.financialYears = company.financialYears || [];
@@ -739,41 +1962,83 @@ class StateManager {
       return { success: false, message: "Cannot delete the only financial year. A company must have at least one financial year." };
     }
 
-    const fyIndex = company.financialYears.findIndex(f => String(f.id) === String(fyId));
+    const fyIndex = company.financialYears.findIndex(f => String(f.id) === String(targetFyId));
     if (fyIndex === -1) {
       return { success: false, message: "Financial Year not found in company." };
     }
 
+    const isDeletingLatest = fyIndex === company.financialYears.length - 1;
     const deletedFy = company.financialYears[fyIndex];
+
+    // Remove deleted FY from company.financialYears array
     company.financialYears.splice(fyIndex, 1);
 
-    // Remove from local storage
-    const lsKey = `erp_company_data_${targetCompanyId}${fyId === 'default' ? '' : '_' + fyId}`;
-    localStorage.removeItem(lsKey);
-
-    // Save registered companies
-    this.saveRegisteredCompanies(companies);
-
-    // If active FY was the deleted one, switch to remaining FY
-    const currentActiveFy = this.getActiveFyId();
-    if (String(currentActiveFy) === String(fyId)) {
-      const remainingFy = company.financialYears[company.financialYears.length - 1];
-      this.setActiveFyId(remainingFy.id);
+    // If deleting the latest/current FY, promote the remaining latest FY to be "Current F.Y"
+    // and auto-extend its endDate to complete 1 full year from its startDate
+    if (isDeletingLatest && company.financialYears.length > 0) {
+      const promotedFy = company.financialYears[company.financialYears.length - 1];
+      if (promotedFy) {
+        const start = promotedFy.startDate || company.financialYearStarts || "2026-04-01";
+        promotedFy.endDate = this.calculateOneYearEnd(start);
+        promotedFy.name = "Current F.Y";
+        company.financialYearStarts = start;
+        company.financialYearEnds = promotedFy.endDate;
+      }
     }
 
-    // Call server to delete file from disk and update companies.json
-    const host = window.location.hostname || "localhost";
-    const deleteApiUrl = (typeof window._getApiUrl === "function")
-      ? window._getApiUrl(`/api/data/${targetCompanyId}/${fyId}`)
-      : `http://${host}:3001/api/data/${targetCompanyId}/${fyId}`;
-    fetch(deleteApiUrl, {
-      method: "DELETE"
-    }).catch(e => console.error("Server financial year delete failed:", e));
+    // If targetFyId was active, switch to latest available FY
+    if (String(this.getActiveFyId()) === String(targetFyId)) {
+      const remainingFy = company.financialYears[company.financialYears.length - 1];
+      this.setActiveFyId(remainingFy ? remainingFy.id : "default");
+    }
 
-    this.loadState();
-    this.notifyListeners();
+    // Save updated registered companies list to localStorage & Supabase FIRST
+    await this.saveRegisteredCompanies(companies);
 
-    return { success: true, message: `Financial year '${deletedFy.name}' deleted successfully.` };
+    // Remove deleted FY's local storage key
+    const deletedLsKey = `erp_company_data_${targetCompanyId}${targetFyId === 'default' ? '' : '_' + targetFyId}`;
+    localStorage.removeItem(deletedLsKey);
+
+    // Call server to delete file from disk, promote previous FY, and update companies.json
+    const deleteApiUrl = this.getBackendApiUrl(`/api/data/${targetCompanyId}/${targetFyId}`);
+
+    let extraMsg = "";
+    if (deleteApiUrl) {
+      try {
+        const resp = await fetch(deleteApiUrl, {
+          method: "DELETE",
+          signal: getTimeoutSignal(1500)
+        });
+        if (resp.ok) {
+          const data = await resp.json();
+          if (data && data.renamedFiles && data.renamedFiles.length > 0) {
+            extraMsg = " Previous FY has been renamed to 'Current F.Y' and database file updated.";
+          }
+        }
+      } catch (e) {
+        console.error("Server financial year delete failed:", e);
+      }
+    }
+
+    // Delete records from Appwrite Cloud Database
+    try {
+      await this.purgeAppwriteCompanyData(targetCompanyId, targetFyId);
+      const fyDocId = `fy_${targetCompanyId}_${targetFyId}`.replace(/[^a-zA-Z0-9._-]/g, '_').substring(0, 36);
+      await appwriteDatabases.deleteDocument(APPWRITE_DATABASE_ID, "financial_years", fyDocId).catch(e => {});
+    } catch (e) {}
+
+    // Reload companies state from server with a safety timeout
+    try {
+      await Promise.race([
+        this.initFromServer(),
+        new Promise(resolve => setTimeout(resolve, 2500))
+      ]);
+    } catch (e) {
+      this.loadState();
+      this.notifyListeners();
+    }
+
+    return { success: true, message: `Financial year '${deletedFy.name}' deleted successfully.${extraMsg}` };
   }
 
   async deleteCompany(companyId) {
@@ -805,21 +2070,39 @@ class StateManager {
     const updatedCompanies = companies.filter(c => String(c.id) !== String(targetCompanyId));
     localStorage.setItem("erp_companies", JSON.stringify(updatedCompanies));
 
-    // 3. Call server to backup and delete from disk
+    // 3. Purge all company records from Appwrite Cloud Database
+    try {
+      const compDocId = `comp_${targetCompanyId}`.replace(/[^a-zA-Z0-9._-]/g, '_').substring(0, 36);
+      await appwriteDatabases.deleteDocument(APPWRITE_DATABASE_ID, "companies", compDocId).catch(e => {});
+      const allCols = ["financial_years", "materials", "contacts", "invoices", "purchases", "transactions", "ledgers", "sales_orders", "sales_returns", "purchase_returns", "company_settings"];
+      for (const col of allCols) {
+        try {
+          const res = await appwriteDatabases.listDocuments(APPWRITE_DATABASE_ID, col, [
+            Query.equal("company_id", String(targetCompanyId)),
+            Query.limit(100)
+          ]);
+          if (res && res.documents) {
+            await Promise.all(res.documents.map(d => appwriteDatabases.deleteDocument(APPWRITE_DATABASE_ID, col, d.$id).catch(e => {})));
+          }
+        } catch (e) {}
+      }
+    } catch (e) {
+      console.warn("Appwrite company delete error:", e);
+    }
+
+    // 4. Call server to backup and delete from disk
     let serverRes = null;
     try {
-      const host = window.location.hostname || "localhost";
-      const apiUrl = (typeof window._getApiUrl === "function") 
-        ? window._getApiUrl(`/api/companies/${targetCompanyId}`) 
-        : `http://${host}:3001/api/companies/${targetCompanyId}`;
-      
-      const res = await fetch(apiUrl, { method: "DELETE" });
-      serverRes = await res.json();
+      const apiUrl = this.getBackendApiUrl(`/api/companies/${targetCompanyId}`);
+      if (apiUrl) {
+        const res = await fetch(apiUrl, { method: "DELETE" });
+        serverRes = await res.json();
+      }
     } catch (err) {
       console.warn("Server company delete request failed:", err);
     }
 
-    // 4. If current active company was deleted, clear active company
+    // 5. If current active company was deleted, clear active company
     if (String(this.getActiveCompanyId()) === String(targetCompanyId)) {
       this.setActiveCompanyId(null);
     }
@@ -834,7 +2117,573 @@ class StateManager {
     };
   }
 
-  updateFinancialYearDates(companyId, fyId, newStartDate, newEndDate) {
+  async getDeletedCompanies() {
+    try {
+      const apiUrl = this.getBackendApiUrl("/api/deleted-companies");
+      if (!apiUrl) return [];
+      const res = await fetch(apiUrl);
+      if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      console.error("Failed to fetch deleted companies:", err);
+      return [];
+    }
+  }
+
+  async restoreCompany(companyId, backupFolder) {
+    try {
+      const apiUrl = this.getBackendApiUrl("/api/restore-company");
+      if (!apiUrl) throw new Error("Local backend server is not reachable in static cloud mode.");
+      
+      const res = await fetch(apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ companyId, backupFolder })
+      });
+
+      const serverRes = await res.json();
+      if (!res.ok || !serverRes.success) {
+        throw new Error(serverRes.error || serverRes.message || "Failed to restore company.");
+      }
+
+      if (serverRes.company) {
+        const companies = this.getRegisteredCompanies();
+        const existingIdx = companies.findIndex(c => String(c.id) === String(serverRes.company.id));
+        if (existingIdx !== -1) {
+          companies[existingIdx] = serverRes.company;
+        } else {
+          companies.push(serverRes.company);
+        }
+        localStorage.setItem("erp_companies", JSON.stringify(companies));
+        this.setActiveCompanyId(serverRes.company.id);
+
+        const restoredFyId = this.getActiveFyId() || "default";
+        const dataUrl = this.getBackendApiUrl(`/api/data/${serverRes.company.id}/${restoredFyId}`);
+        if (dataUrl) {
+          try {
+            const dataRes = await fetch(dataUrl);
+            if (dataRes.ok) {
+              const restoredData = await dataRes.json();
+              const lsKey = `erp_company_data_${serverRes.company.id}${restoredFyId === 'default' ? '' : '_' + restoredFyId}`;
+              localStorage.setItem(lsKey, JSON.stringify(restoredData));
+            }
+          } catch (e) {
+            console.error("Failed to fetch restored company data from server:", e);
+          }
+        }
+
+        this._serverLoadedData = null;
+        this.loadState();
+      }
+
+      this.notifyListeners();
+      return serverRes;
+    } catch (err) {
+      console.error("Server company restore failed:", err);
+      throw err;
+    }
+  }
+
+  async createAutoServerBackup(companyId, fyId) {
+    const activeId = companyId || this.getActiveCompanyId();
+    const activeFyId = fyId || this.getActiveFyId();
+    if (!activeId) return { success: false, message: "No active company selected." };
+    try {
+      const apiUrl = this.getBackendApiUrl(`/api/backup/${activeId}/${activeFyId}`);
+      if (!apiUrl) return { success: false, message: "Local backend server not reachable in cloud mode." };
+      const res = await fetch(apiUrl, {
+        method: "POST",
+        headers: { "Bypass-Tunnel-Reminder": "true" }
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to create server backup.");
+      }
+      return data;
+    } catch (err) {
+      console.error("Server auto backup failed:", err);
+      return { success: false, message: err.message };
+    }
+  }
+
+  async getServerBackupFiles(companyId) {
+    const activeId = companyId || this.getActiveCompanyId();
+    if (!activeId) return [];
+    try {
+      const apiUrl = this.getBackendApiUrl(`/api/backups/${activeId}`);
+      if (!apiUrl) return [];
+      const res = await fetch(apiUrl, {
+        headers: { "Bypass-Tunnel-Reminder": "true" }
+      });
+      if (!res.ok) return [];
+      return await res.json();
+    } catch (err) {
+      console.error("Failed to fetch server backup files:", err);
+      return [];
+    }
+  }
+
+  async restoreServerBackupFile(fileName, companyId, fyId) {
+    const activeId = companyId || this.getActiveCompanyId();
+    const activeFyId = fyId || this.getActiveFyId();
+    if (!activeId || !fileName) {
+      return { success: false, message: "Company ID and backup file name are required." };
+    }
+    try {
+      const apiUrl = this.getBackendApiUrl(`/api/restore/${activeId}/${activeFyId}`);
+      if (!apiUrl) return { success: false, message: "Local backend server not reachable in cloud mode." };
+
+      const res = await fetch(apiUrl, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Bypass-Tunnel-Reminder": "true"
+        },
+        body: JSON.stringify({ file: fileName })
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || data.message || "Failed to restore backup file on server.");
+      }
+
+      // Fetch freshly restored database content from server
+      const dataUrl = this.getBackendApiUrl(`/api/data/${activeId}/${activeFyId}`);
+      if (!dataUrl) {
+        throw new Error("No data URL available to fetch restored data.");
+      }
+
+      const dataRes = await fetch(dataUrl, {
+        headers: { "Bypass-Tunnel-Reminder": "true" }
+      });
+      if (!dataRes.ok) {
+        throw new Error("Backup file copied on server, but failed to fetch restored data.");
+      }
+
+      const restoredDb = await dataRes.json();
+      return await this.importDatabaseState(restoredDb);
+    } catch (err) {
+      console.error("Failed to restore server backup file:", err);
+      return { success: false, message: err.message };
+    }
+  }
+
+  async purgeAppwriteCompanyData(companyId, fyId) {
+    if (!companyId) return;
+    const cleanActiveId = String(companyId);
+    const targetFyId = String(fyId || "default");
+    const collections = [
+      "materials", "contacts", "invoices", "purchases",
+      "transactions", "ledgers", "sales_orders",
+      "sales_returns", "purchase_returns", "company_settings"
+    ];
+
+    try {
+      await Promise.all(collections.map(async col => {
+        try {
+          const res = await appwriteDatabases.listDocuments(
+            APPWRITE_DATABASE_ID,
+            col,
+            [
+              Query.equal("company_id", cleanActiveId),
+              Query.equal("fy_id", targetFyId),
+              Query.limit(100)
+            ]
+          );
+          if (res && res.documents) {
+            await Promise.all(res.documents.map(d =>
+              appwriteDatabases.deleteDocument(APPWRITE_DATABASE_ID, col, d.$id).catch(e => {})
+            ));
+          }
+        } catch (e) {}
+      }));
+    } catch (e) {
+      console.warn("Appwrite purge failed:", e);
+    }
+  }
+
+  async purgeSupabaseCompanyData(companyId, fyId) {
+    return this.purgeAppwriteCompanyData(companyId, fyId);
+  }
+
+  async importDatabaseState(dataObj) {
+    if (!dataObj || typeof dataObj !== "object") {
+      return { success: false, message: "Invalid database JSON backup file." };
+    }
+
+    this._isRestoring = true;
+    try {
+      // Determine payload root (handles exported full backup objects vs direct table dumps)
+      const payload = (dataObj.data && typeof dataObj.data === "object" && !Array.isArray(dataObj.data))
+        ? dataObj.data
+        : dataObj;
+
+      let targetCompany = dataObj.company || dataObj.companyProfile || payload.company || payload.companyProfile || null;
+      let targetCompanyId = dataObj.companyId || payload.companyId || (targetCompany ? targetCompany.id : null) || this.getActiveCompanyId() || ("comp_" + Date.now());
+      let targetCompanyName = (targetCompany ? targetCompany.name : null) || dataObj.companyName || payload.companyName || "Restored Company";
+
+      const companies = this.getRegisteredCompanies();
+      let company = companies.find(c => String(c.id) === String(targetCompanyId));
+
+      if (!company) {
+        company = targetCompany || {
+          id: targetCompanyId,
+          name: targetCompanyName,
+          financialYearStarts: dataObj.financialYearStarts || payload.financialYearStarts || "2026-04-01",
+          financialYearEnds: dataObj.financialYearEnds || payload.financialYearEnds || "2027-03-31",
+          financialYears: dataObj.financialYears || payload.financialYears || [
+            { id: "default", name: "Current F.Y", startDate: "2026-04-01", endDate: "2027-03-31" }
+          ]
+        };
+        companies.push(company);
+        this.saveRegisteredCompanies(companies);
+      } else if (targetCompany && typeof targetCompany === "object") {
+        Object.assign(company, targetCompany);
+        this.saveRegisteredCompanies(companies);
+      }
+
+      const fyId = dataObj.fyId || payload.fyId || this.getActiveFyId() || "default";
+      const lsKey = `erp_company_data_${targetCompanyId}${fyId === "default" ? "" : "_" + fyId}`;
+
+      const dbData = {
+        materials: payload.materials || [],
+        contacts: payload.contacts || [],
+        ledgers: payload.ledgers || [],
+        invoices: payload.invoices || [],
+        transactions: payload.transactions || [],
+        purchases: payload.purchases || [],
+        salesOrders: payload.salesOrders || [],
+        salesReturns: payload.salesReturns || [],
+        purchaseReturns: payload.purchaseReturns || [],
+        conversions: payload.conversions || [],
+        stockAdjustments: payload.stockAdjustments || [],
+        accountGroups: payload.accountGroups || (this.accountGroups && this.accountGroups.length > 0 ? this.accountGroups : []),
+        units: payload.units || (this.units && this.units.length > 0 ? this.units : []),
+        seriesMaster: payload.seriesMaster || [],
+        options: payload.options || this.options || {},
+        influencers: payload.influencers || [],
+        hsnCodes: payload.hsnCodes || [],
+        productGroups: payload.productGroups || [],
+        companies: payload.companies || [],
+        categories: payload.categories || [],
+        subCategories: payload.subCategories || [],
+        productNames: payload.productNames || []
+      };
+
+      // 1. Purge Supabase Cloud Database first to eliminate un-restored newer records
+      await this.purgeSupabaseCompanyData(targetCompanyId, fyId);
+
+      // 2. Overwrite localStorage & memory cache
+      localStorage.setItem(lsKey, JSON.stringify(dbData));
+      this._serverLoadedData = dbData;
+
+      // 3. Directly assign memory properties from dbData
+      this.materials = dbData.materials;
+      this.contacts = dbData.contacts;
+      this.ledgers = dbData.ledgers;
+      this.invoices = dbData.invoices;
+      this.transactions = dbData.transactions;
+      this.purchases = dbData.purchases;
+      this.salesOrders = dbData.salesOrders;
+      this.salesReturns = dbData.salesReturns;
+      this.purchaseReturns = dbData.purchaseReturns;
+      this.conversions = dbData.conversions;
+      this.stockAdjustments = dbData.stockAdjustments;
+      if (Array.isArray(dbData.accountGroups) && dbData.accountGroups.length > 0) this.accountGroups = dbData.accountGroups;
+      if (Array.isArray(dbData.units) && dbData.units.length > 0) this.units = dbData.units;
+      if (Array.isArray(dbData.seriesMaster)) this.seriesMaster = dbData.seriesMaster;
+
+      // 4. Overwrite local Express server disk file with isRestore=true
+      const saveUrl = this.getBackendApiUrl(`/api/data/${targetCompanyId}/${fyId}?isRestore=true`);
+      if (saveUrl) {
+        try {
+          await fetch(saveUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...dbData, _isRestore: true })
+          });
+        } catch (e) {
+          console.error("Syncing imported database state to server failed:", e);
+        }
+      }
+
+      this.setActiveCompanyId(targetCompanyId);
+      this.setActiveFyId(fyId);
+      this.saveState(false, true);
+      this.notifyListeners();
+
+      return { success: true, message: `Successfully restored database for '${company.name}' (ID: ${company.id}).` };
+    } finally {
+      this._isRestoring = false;
+    }
+  }
+
+  async backupToCustomFolder(targetPath) {
+    if (targetPath) {
+      this.options = this.options || {};
+      this.options.googleDriveBackupPath = targetPath;
+      this.saveState();
+    }
+
+    const downloadClientBackup = () => {
+      const activeId = this.getActiveCompanyId();
+      const company = (this.getRegisteredCompanies() || []).find(c => String(c.id) === String(activeId)) || { name: "METRO_AGENCIES" };
+      const compName = (company.name || "METRO_AGENCIES").replace(/[^a-zA-Z0-9_-]/g, "_");
+      const filename = `${compName}_Backup_${new Date().toISOString().split("T")[0]}.json`;
+
+      const fullData = {
+        _exportDate: new Date().toISOString(),
+        company: company,
+        materials: this.materials || [],
+        contacts: this.contacts || [],
+        invoices: this.invoices || [],
+        purchases: this.purchases || [],
+        salesOrders: this.salesOrders || [],
+        salesReturns: this.salesReturns || [],
+        purchaseReturns: this.purchaseReturns || [],
+        transactions: this.transactions || [],
+        ledgers: this.ledgers || []
+      };
+
+      const blob = new Blob([JSON.stringify(fullData, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    };
+
+    try {
+      const apiUrl = this.getBackendApiUrl("/api/backup-custom-drive");
+      if (!apiUrl) {
+        downloadClientBackup();
+        return { 
+          success: true, 
+          message: "Database snapshot exported and downloaded to your computer as a JSON file.", 
+          backupPath: "Downloads Folder" 
+        };
+      }
+
+      const res = await fetch(apiUrl, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Bypass-Tunnel-Reminder": "true"
+        },
+        body: JSON.stringify({ targetPath })
+      });
+
+      const contentType = res.headers.get("content-type") || "";
+      if (!res.ok || !contentType.includes("application/json")) {
+        downloadClientBackup();
+        return { 
+          success: true, 
+          message: "Database snapshot exported and downloaded to your computer as a JSON file.", 
+          backupPath: "Downloads Folder" 
+        };
+      }
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        downloadClientBackup();
+        return { 
+          success: true, 
+          message: "Database snapshot downloaded directly to your computer as a JSON file.", 
+          backupPath: "Downloads Folder" 
+        };
+      }
+
+      downloadClientBackup();
+      return {
+        success: true,
+        message: data.message + " (Also downloaded to your computer)",
+        backupPath: data.backupPath,
+        filesCopied: data.filesCopied
+      };
+    } catch (err) {
+      downloadClientBackup();
+      return { 
+        success: true, 
+        message: "Database backup downloaded directly to your computer as a JSON file.", 
+        backupPath: "Downloads Folder" 
+      };
+    }
+  }
+
+  createLocalDatabaseSnapshot(label = "Manual Point-in-Time Backup") {
+    const activeCompanyId = this.getActiveCompanyId();
+    if (!activeCompanyId) return { success: false, message: "No active company selected." };
+
+    const company = this.getRegisteredCompanies().find(c => String(c.id) === String(activeCompanyId));
+    const companyName = company ? company.name : "Company";
+    const fyId = this.getActiveFyId() || "default";
+
+    const now = new Date();
+    const ts = now.getTime();
+    const dateFormatted = now.toLocaleDateString("en-IN") + " " + now.toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const snapshotKey = `erp_snapshot_${activeCompanyId}_${ts}`;
+
+    const snapshotData = {
+      type: "ERP_POINT_IN_TIME_SNAPSHOT",
+      snapshotKey,
+      timestamp: ts,
+      dateFormatted,
+      label,
+      companyId: activeCompanyId,
+      companyName,
+      fyId,
+      company,
+      data: {
+        materials: JSON.parse(JSON.stringify(this.materials || [])),
+        contacts: JSON.parse(JSON.stringify(this.contacts || [])),
+        ledgers: JSON.parse(JSON.stringify(this.ledgers || [])),
+        invoices: JSON.parse(JSON.stringify(this.invoices || [])),
+        transactions: JSON.parse(JSON.stringify(this.transactions || [])),
+        purchases: JSON.parse(JSON.stringify(this.purchases || [])),
+        salesReturns: JSON.parse(JSON.stringify(this.salesReturns || [])),
+        purchaseReturns: JSON.parse(JSON.stringify(this.purchaseReturns || [])),
+        conversions: JSON.parse(JSON.stringify(this.conversions || [])),
+        stockAdjustments: JSON.parse(JSON.stringify(this.stockAdjustments || [])),
+        accountGroups: this.accountGroups,
+        units: this.units,
+        options: this.options,
+        seriesMaster: this.seriesMaster
+      }
+    };
+
+    try {
+      localStorage.setItem(snapshotKey, JSON.stringify(snapshotData));
+
+      const allKeys = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith(`erp_snapshot_${activeCompanyId}_`)) {
+          allKeys.push(k);
+        }
+      }
+      allKeys.sort();
+      while (allKeys.length > 15) {
+        const oldestKey = allKeys.shift();
+        localStorage.removeItem(oldestKey);
+      }
+
+      return {
+        success: true,
+        snapshotKey,
+        dateFormatted,
+        message: `Snapshot '${label}' created successfully for ${companyName} (${dateFormatted}).`
+      };
+    } catch (e) {
+      console.error("Failed to save local database snapshot:", e);
+      return { success: false, message: "Storage quota exceeded or failed to save snapshot." };
+    }
+  }
+
+  getLocalSnapshots() {
+    const activeCompanyId = this.getActiveCompanyId();
+    if (!activeCompanyId) return [];
+
+    const snapshots = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith(`erp_snapshot_${activeCompanyId}_`)) {
+        try {
+          const item = JSON.parse(localStorage.getItem(k));
+          if (item && item.timestamp) {
+            snapshots.push(item);
+          }
+        } catch (e) {}
+      }
+    }
+    snapshots.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    return snapshots;
+  }
+
+  async restoreLocalDatabaseSnapshot(snapshotKey) {
+    if (!snapshotKey) return { success: false, message: "Snapshot key is required." };
+    const raw = localStorage.getItem(snapshotKey);
+    if (!raw) return { success: false, message: "Snapshot data not found in local storage." };
+
+    try {
+      const snapshot = JSON.parse(raw);
+      const res = await this.importDatabaseState(snapshot.data ? {
+        ...snapshot.data,
+        company: snapshot.company,
+        companyId: snapshot.companyId,
+        companyName: snapshot.companyName,
+        fyId: snapshot.fyId
+      } : snapshot);
+
+      return {
+        success: true,
+        message: `Successfully rolled back database to condition at ${snapshot.dateFormatted} (${snapshot.label || 'Snapshot'}).`
+      };
+    } catch (e) {
+      console.error("Failed to restore snapshot:", e);
+      return { success: false, message: `Failed to restore snapshot: ${e.message}` };
+    }
+  }
+
+  exportFullCompanyBackupJson() {
+    const activeCompanyId = this.getActiveCompanyId();
+    const companies = this.getRegisteredCompanies();
+    const company = companies.find(c => String(c.id) === String(activeCompanyId));
+    const companyName = company ? company.name : "Company";
+    const fyId = this.getActiveFyId() || "default";
+
+    const now = new Date();
+    const dateStr = now.toISOString().split("T")[0];
+    const timeStr = now.toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit' }).replace(/:/g, "-").replace(/\s+/g, "");
+
+    const backupObj = {
+      type: "ERP_FULL_COMPANY_BACKUP",
+      backupVersion: "2.0",
+      backupTimestamp: now.toISOString(),
+      backupDateStr: now.toLocaleString("en-IN"),
+      companyId: activeCompanyId,
+      companyName,
+      fyId,
+      company,
+      financialYears: company ? company.financialYears : [],
+      data: {
+        materials: this.materials || [],
+        contacts: this.contacts || [],
+        ledgers: this.ledgers || [],
+        invoices: this.invoices || [],
+        transactions: this.transactions || [],
+        purchases: this.purchases || [],
+        salesReturns: this.salesReturns || [],
+        purchaseReturns: this.purchaseReturns || [],
+        conversions: this.conversions || [],
+        stockAdjustments: this.stockAdjustments || [],
+        accountGroups: this.accountGroups,
+        units: this.units,
+        options: this.options,
+        seriesMaster: this.seriesMaster,
+        hsnCodes: this.hsnCodes,
+        influencers: this.influencers
+      }
+    };
+
+    const jsonStr = JSON.stringify(backupObj, null, 2);
+    const blob = new Blob([jsonStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    const cleanCompName = companyName.replace(/[^a-zA-Z0-9_-]/g, "_");
+    a.download = `Backup_${cleanCompName}_${dateStr}_${timeStr}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    return { success: true, fileName: a.download, message: `Backup downloaded: ${a.download}` };
+  }
+
+  updateFinancialYearDates(companyId, fyId, newStartDate, newEndDate, newName) {
     const targetCompanyId = companyId || this.getActiveCompanyId();
     if (!targetCompanyId) return { success: false, message: "No active company found." };
 
@@ -849,6 +2698,13 @@ class StateManager {
     if (fy) {
       if (newStartDate) fy.startDate = newStartDate;
       if (newEndDate) fy.endDate = newEndDate;
+      if (newName && newName.trim()) {
+        fy.name = newName.trim();
+      } else if (fy.startDate && fy.endDate) {
+        const startFormatted = fy.startDate.split("-").reverse().join("/");
+        const endFormatted = fy.endDate.split("-").reverse().join("/");
+        fy.name = `${startFormatted} to ${endFormatted}`;
+      }
       // If it's the active FY or sole FY, also update company root fields
       if (company.financialYears.length === 1 || String(targetFyId) === String(this.getActiveFyId())) {
         if (newStartDate) company.financialYearStarts = newStartDate;
@@ -860,7 +2716,7 @@ class StateManager {
       if (company.financialYears.length === 0) {
         company.financialYears.push({
           id: "default",
-          name: "Current F.Y",
+          name: newName || "Current F.Y",
           startDate: newStartDate || "2026-04-01",
           endDate: newEndDate || "2027-03-31"
         });
@@ -870,7 +2726,7 @@ class StateManager {
     this.saveRegisteredCompanies(companies);
     this.notifyListeners();
 
-    return { success: true, message: "Financial year dates updated successfully." };
+    return { success: true, message: "Financial year configuration updated successfully." };
   }
 
   getCompanyState() {
@@ -1073,14 +2929,23 @@ class StateManager {
   }
 
   getLoginDate() {
-    return localStorage.getItem("erp_login_date") || new Date().toISOString().split("T")[0];
+    const rawDate = localStorage.getItem("erp_login_date") || new Date().toISOString().split("T")[0];
+    const fyStart = this.getActiveFinancialYearStartDate();
+    const fyEnd = this.getActiveFinancialYearEndDate();
+    if (fyStart && rawDate < fyStart) return fyStart;
+    if (fyEnd && rawDate > fyEnd) return fyEnd;
+    return rawDate;
   }
 
   setLoginDate(date) {
-    // Ensure login date is not before the current financial year start date
+    // Ensure login date is within active financial year start and end dates
     const fyStart = this.getActiveFinancialYearStartDate();
+    const fyEnd = this.getActiveFinancialYearEndDate();
     if (fyStart && date < fyStart) {
       date = fyStart;
+    }
+    if (fyEnd && date > fyEnd) {
+      date = fyEnd;
     }
     localStorage.setItem("erp_login_date", date);
   }
@@ -1165,15 +3030,14 @@ class StateManager {
     localStorage.setItem(`erp_company_data_${newId}`, JSON.stringify(seedState));
 
     // Immediately sync company seed data to backend server disk
-    const apiUrl = (typeof window._getApiUrl === "function") 
-      ? window._getApiUrl(`/api/data/${newId}/default`) 
-      : `http://${window.location.hostname || "localhost"}:3001/api/data/${newId}/default`;
-
-    fetch(apiUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(seedState)
-    }).catch(e => console.error("Immediate company seed sync failed:", e));
+    const apiUrl = this.getBackendApiUrl(`/api/data/${newId}/default`);
+    if (apiUrl) {
+      fetch(apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(seedState)
+      }).catch(e => console.error("Immediate company seed sync failed:", e));
+    }
 
     return newCompany;
   }
@@ -1502,44 +3366,12 @@ class StateManager {
                (ino && (tref === ino || tvno === ino || tid === ino));
       });
 
-      if (matchingTxs.length > 1) {
-        const bestTx = matchingTxs.find(t => t.entries && t.entries.length > 2) ||
-                       matchingTxs.find(t => t.voucherType === "PUR" || t.id === pur.id || t.voucherId === pur.id) ||
-                       matchingTxs[0];
-        const duplicatesToRemove = new Set(matchingTxs.filter(t => t !== bestTx).map(t => t.id));
-        this.transactions = this.transactions.filter(t => !duplicatesToRemove.has(t.id));
-        stateChanged = true;
-      }
+      // Preserve all transactions - do not delete duplicates automatically
     });
 
     this.invoices.forEach(inv => {
       if (!inv) return;
-      const iid = String(inv.id || "").trim().toUpperCase();
-      const vno = String(inv.voucherNo || "").trim().toUpperCase();
-      const rno = String(inv.refNo || "").trim().toUpperCase();
-
-      const matchingTxs = this.transactions.filter(t => {
-        if (!t || isManualVoucherOrReturn(t)) return false;
-        const tid = String(t.id || "").trim().toUpperCase();
-        const tvid = String(t.voucherId || "").trim().toUpperCase();
-        const tref = String(t.reference || "").trim().toUpperCase();
-        const tvno = String(t.voucherNo || "").trim().toUpperCase();
-        const tdesc = String(t.description || "").trim().toUpperCase();
-        if (tdesc.includes("PURCHASE") || (!tdesc.includes("SALES") && !tdesc.includes("INVOICE") && purchasePrefixes.some(p => tid.startsWith(p) || tref.startsWith(p)))) return false;
-        
-        return (iid && (tid === iid || tvid === iid || tref === iid || tvno === iid)) || 
-               (vno && (tref === vno || tvno === vno || tid === vno || tref === `INVOICE ${vno}`)) || 
-               (rno && (tref === rno || tvno === rno || tid === rno));
-      });
-
-      if (matchingTxs.length > 1) {
-        const bestTx = matchingTxs.find(t => t.entries && t.entries.length > 2) ||
-                       matchingTxs.find(t => t.voucherType === "SALE" || t.id === inv.id || t.voucherId === inv.id) ||
-                       matchingTxs[0];
-        const duplicatesToRemove = new Set(matchingTxs.filter(t => t !== bestTx).map(t => t.id));
-        this.transactions = this.transactions.filter(t => !duplicatesToRemove.has(t.id));
-        stateChanged = true;
-      }
+      // Preserve all transactions - do not delete duplicates automatically
     });
 
 
@@ -1560,6 +3392,7 @@ class StateManager {
 
     // 5. Re-append fresh tax entries for active Purchase Returns
     (this.purchaseReturns || []).forEach(pr => {
+      if (!pr || pr.isCancelled || pr.isCanceled || pr.status === "CANCELLED" || pr.status === "cancelled") return;
       const tx = this.transactions.find(t => {
         const tref = String(t.reference || "").toUpperCase();
         const tdesc = String(t.description || "").toUpperCase();
@@ -1622,6 +3455,7 @@ class StateManager {
 
     // 6. Re-append fresh tax entries for active Sales Returns
     (this.salesReturns || []).forEach(sr => {
+      if (!sr || sr.isCancelled || sr.isCanceled || sr.status === "CANCELLED" || sr.status === "cancelled") return;
       const tx = this.transactions.find(t => {
         const tref = String(t.reference || "").toUpperCase();
         const tdesc = String(t.description || "").toUpperCase();
@@ -1872,13 +3706,17 @@ class StateManager {
              (rno && (tref === rno || tvno === rno));
     });
 
+    inv.id = sVoucherNo;
+    inv.voucherNo = sVoucherNo;
+    if (!inv.refNo) inv.refNo = sVoucherNo;
+
     if (matchingTxs.length > 0) {
       const bestTx = matchingTxs.find(t => t.entries && t.entries.length > 2) ||
-                     matchingTxs.find(t => t.voucherType === "SALE" || t.id === inv.id || t.voucherId === inv.id) ||
+                     matchingTxs.find(t => t.voucherType === "SALE" || t.id === sVoucherNo || t.voucherId === sVoucherNo) ||
                      matchingTxs[0];
 
-      bestTx.id = inv.id;
-      bestTx.voucherId = inv.id;
+      bestTx.id = sVoucherNo;
+      bestTx.voucherId = sVoucherNo;
       bestTx.voucherType = "SALE";
       bestTx.voucherNo = sVoucherNo;
       bestTx.date = inv.date;
@@ -1887,14 +3725,11 @@ class StateManager {
       bestTx.siteName = inv.siteName || "";
       bestTx.entries = salesEntries;
 
-      if (matchingTxs.length > 1) {
-        const dupIds = new Set(matchingTxs.filter(t => t !== bestTx).map(t => t.id));
-        this.transactions = this.transactions.filter(t => !dupIds.has(t.id));
-      }
+      // Preserve all transactions - do not delete duplicates automatically
     } else {
       this.transactions.push({
-        id: inv.id,
-        voucherId: inv.id,
+        id: sVoucherNo,
+        voucherId: sVoucherNo,
         voucherType: "SALE",
         voucherNo: sVoucherNo,
         date: inv.date,
@@ -1910,77 +3745,31 @@ class StateManager {
     if (!this.transactions || !Array.isArray(this.transactions)) return;
     let stateChanged = false;
 
-    // 0a. Comprehensive Invoice Deduplication (exact ID match only)
-    if (this.invoices && Array.isArray(this.invoices) && this.invoices.length > 0) {
-      const seenInvIds = new Set();
-      const cleanInvs = [];
-      this.invoices.forEach(inv => {
-        if (!inv) return;
-        const id = String(inv.id || "").trim();
-        if (id) {
-          if (!seenInvIds.has(id)) {
-            seenInvIds.add(id);
-            cleanInvs.push(inv);
-          } else {
-            stateChanged = true;
-          }
-        } else {
-          cleanInvs.push(inv);
-        }
-      });
-      if (cleanInvs.length !== this.invoices.length) {
-        this.invoices = cleanInvs;
-        stateChanged = true;
-      }
+    // 0a. Clean null/undefined invoices
+    if (this.invoices && Array.isArray(this.invoices)) {
+      this.invoices = this.invoices.filter(Boolean);
     }
 
-    // 0b. Comprehensive Purchase Deduplication (exact ID match only)
-    if (this.purchases && Array.isArray(this.purchases) && this.purchases.length > 0) {
-      const seenPurIds = new Set();
-      const cleanPurs = [];
-      this.purchases.forEach(pur => {
-        if (!pur) return;
-        const id = String(pur.id || "").trim();
-        if (id) {
-          if (!seenPurIds.has(id)) {
-            seenPurIds.add(id);
-            cleanPurs.push(pur);
-          } else {
-            stateChanged = true;
-          }
-        } else {
-          cleanPurs.push(pur);
-        }
-      });
-      if (cleanPurs.length !== this.purchases.length) {
-        this.purchases = cleanPurs;
-        stateChanged = true;
-      }
+    // 0b. Clean null/undefined purchases
+    if (this.purchases && Array.isArray(this.purchases)) {
+      this.purchases = this.purchases.filter(Boolean);
     }
 
-    // Exact ID deduplication pass (only remove exact duplicate ID instances)
+    // Preserve all transactions and ensure each has a unique ID (never delete transactions automatically)
     const seenTxIds = new Set();
-    const cleanTransactions = [];
-
     this.transactions.forEach(tx => {
       if (!tx) return;
       const tid = String(tx.id || "").trim();
-      if (tid) {
-        if (!seenTxIds.has(tid)) {
-          seenTxIds.add(tid);
-          cleanTransactions.push(tx);
-        } else {
-          stateChanged = true;
+      if (!tid || seenTxIds.has(tid)) {
+        let newId = this.generateNextTxId();
+        while (seenTxIds.has(newId) || this.transactions.some(t => t !== tx && t && t.id === newId)) {
+          newId = this.generateNextTxId();
         }
-      } else {
-        cleanTransactions.push(tx);
+        tx.id = newId;
+        stateChanged = true;
       }
+      seenTxIds.add(tx.id);
     });
-
-    if (cleanTransactions.length !== this.transactions.length) {
-      this.transactions = cleanTransactions;
-      stateChanged = true;
-    }
 
     // 4. Round-off ledger entry repair pass: re-assign entries misallocated to "5600" for round-off to canonical round-off ledger
     const canonicalRoundCode = this.getOrCreateRoundOffLedger();
@@ -2107,7 +3896,7 @@ class StateManager {
       purchaseDebit = parseFloat(purchaseDebit.toFixed(2));
     } else {
       const subtotal = parseFloat(pur.subtotal) || 0;
-      const totalDiscount = parseFloat(pur.totalDiscount || pur.discount) || 0;
+      const totalDiscount = parseFloat(pur.totalDiscount !== undefined ? pur.totalDiscount : (pur.discountAmount || pur.discount || 0)) || 0;
       purchaseDebit = parseFloat((subtotal - totalDiscount).toFixed(2));
     }
 
@@ -2206,13 +3995,17 @@ class StateManager {
              (ino && (tref === ino || tvno === ino));
     });
 
+    pur.id = pVoucherNo;
+    pur.voucherNo = pVoucherNo;
+    if (!pur.refNo) pur.refNo = pVoucherNo;
+
     if (matchingTxs.length > 0) {
       const bestTx = matchingTxs.find(t => t.entries && t.entries.length > 2) ||
-                     matchingTxs.find(t => t.voucherType === "PUR" || t.id === pur.id || t.voucherId === pur.id) ||
+                     matchingTxs.find(t => t.voucherType === "PUR" || t.id === pVoucherNo || t.voucherId === pVoucherNo) ||
                      matchingTxs[0];
 
-      bestTx.id = pur.id;
-      bestTx.voucherId = pur.id;
+      bestTx.id = pVoucherNo;
+      bestTx.voucherId = pVoucherNo;
       bestTx.voucherType = "PUR";
       bestTx.voucherNo = pVoucherNo;
       bestTx.date = pur.date || new Date().toISOString().split("T")[0];
@@ -2221,14 +4014,11 @@ class StateManager {
       bestTx.siteName = pur.siteName || "";
       bestTx.entries = purchaseEntries;
 
-      if (matchingTxs.length > 1) {
-        const dupIds = new Set(matchingTxs.filter(t => t !== bestTx).map(t => t.id));
-        this.transactions = this.transactions.filter(t => !dupIds.has(t.id));
-      }
+      // Preserve all transactions - do not delete duplicates automatically
     } else {
       this.transactions.push({
-        id: pur.id,
-        voucherId: pur.id,
+        id: pVoucherNo,
+        voucherId: pVoucherNo,
         voucherType: "PUR",
         voucherNo: pVoucherNo,
         date: pur.date || new Date().toISOString().split("T")[0],
@@ -2401,6 +4191,84 @@ class StateManager {
       }
     });
 
+    // 3. Align all document and transaction IDs with their series voucher numbers
+    (this.invoices || []).forEach(inv => {
+      if (!inv) return;
+      const vno = String(inv.voucherNo || inv.refNo || inv.id || "").trim();
+      if (vno) {
+        if (inv.id !== vno) { inv.id = vno; changed = true; }
+        if (inv.voucherNo !== vno) { inv.voucherNo = vno; changed = true; }
+        if (!inv.refNo) { inv.refNo = vno; changed = true; }
+      }
+    });
+
+    (this.purchases || []).forEach(pur => {
+      if (!pur) return;
+      const vno = String(pur.voucherNo || pur.refNo || pur.id || "").trim();
+      if (vno) {
+        if (pur.id !== vno) { pur.id = vno; changed = true; }
+        if (pur.voucherNo !== vno) { pur.voucherNo = vno; changed = true; }
+        if (!pur.refNo) { pur.refNo = vno; changed = true; }
+      }
+    });
+
+    (this.transactions || []).forEach(t => {
+      if (!t) return;
+      const ref = String(t.reference || "").trim();
+      if (ref && !ref.includes("Stock Adj") && ref !== "JV") {
+        if (ref.endsWith(" COGS")) {
+          const baseDoc = ref.replace(/ COGS$/i, "").trim();
+          const targetId = `${baseDoc}-COGS`;
+          if (t.id !== targetId) { t.id = targetId; changed = true; }
+          if (t.voucherId !== baseDoc) { t.voucherId = baseDoc; changed = true; }
+          if (t.voucherNo !== baseDoc) { t.voucherNo = baseDoc; changed = true; }
+        } else {
+          if (t.id !== ref) { t.id = ref; changed = true; }
+          if (t.voucherId !== ref) { t.voucherId = ref; changed = true; }
+          if (t.voucherNo !== ref) { t.voucherNo = ref; changed = true; }
+        }
+      }
+    });
+
+    // 4. Synchronize all seriesMaster counters to actual max used + 1
+    (this.seriesMaster || []).forEach(s => {
+      if (!s || !s.prefix) return;
+      const prefixUpper = String(s.prefix).toUpperCase();
+      let maxNum = (parseInt(s.startingNumber) || 1) - 1;
+
+      if (s.txType === "Sales") {
+        (this.invoices || []).forEach(inv => {
+          if (!inv || inv.isCancelled || inv.isCanceled || String(inv.status).toUpperCase() === "CANCELLED") return;
+          const vno = String(inv.voucherNo || inv.refNo || inv.id || "").trim();
+          if (vno.toUpperCase().startsWith(prefixUpper)) {
+            const numPart = vno.substring(s.prefix.length);
+            if (/^\d+$/.test(numPart)) {
+              const n = parseInt(numPart, 10);
+              if (!isNaN(n) && n > maxNum) maxNum = n;
+            }
+          }
+        });
+      } else if (s.txType === "Purchase") {
+        (this.purchases || []).forEach(pur => {
+          if (!pur || pur.isCancelled || pur.isCanceled || String(pur.status).toUpperCase() === "CANCELLED") return;
+          const vno = String(pur.voucherNo || pur.refNo || pur.id || "").trim();
+          if (vno.toUpperCase().startsWith(prefixUpper)) {
+            const numPart = vno.substring(s.prefix.length);
+            if (/^\d+$/.test(numPart)) {
+              const n = parseInt(numPart, 10);
+              if (!isNaN(n) && n > maxNum) maxNum = n;
+            }
+          }
+        });
+      }
+
+      const expectedNext = maxNum + 1;
+      if (s.currentNumber !== expectedNext) {
+        s.currentNumber = expectedNext;
+        changed = true;
+      }
+    });
+
     this.deduplicateAndEnforceUniqueInvoices(false);
     this.deduplicateAndEnforceUniquePurchases(false);
 
@@ -2413,29 +4281,42 @@ class StateManager {
     if (!this.invoices || !Array.isArray(this.invoices)) return;
     let changed = false;
 
-    // Exact ID deduplication pass (only remove exact duplicate ID instances)
-    const seenInvIds = new Set();
-    const cleanInvs = [];
+    const seenKeys = new Set();
+    const uniqueInvoices = [];
 
     this.invoices.forEach(inv => {
       if (!inv) return;
-      const iid = String(inv.id || "").trim();
-      if (iid) {
-        if (!seenInvIds.has(iid)) {
-          seenInvIds.add(iid);
-          cleanInvs.push(inv);
-        } else {
-          changed = true;
-        }
+      const vKey = String(inv.voucherNo || inv.refNo || inv.id || "").trim().toUpperCase();
+      if (!vKey) return;
+
+      if (!seenKeys.has(vKey)) {
+        seenKeys.add(vKey);
+        uniqueInvoices.push(inv);
       } else {
-        cleanInvs.push(inv);
+        changed = true;
       }
     });
 
-    if (cleanInvs.length !== this.invoices.length) {
-      this.invoices = cleanInvs;
-      changed = true;
+    if (changed) {
+      this.invoices = uniqueInvoices;
     }
+
+    const extractNum = (str) => {
+      const m = String(str || "").match(/(\d+)/g);
+      return m ? parseInt(m[m.length - 1], 10) : 0;
+    };
+
+    this.invoices.sort((a, b) => {
+      if (!a) return 1;
+      if (!b) return -1;
+      const numA = extractNum(a.voucherNo || a.refNo || a.id);
+      const numB = extractNum(b.voucherNo || b.refNo || b.id);
+      if (numA !== numB) return numA - numB;
+      const dateA = toIsoDateStr(a.date);
+      const dateB = toIsoDateStr(b.date);
+      if (dateA !== dateB) return dateA.localeCompare(dateB);
+      return String(a.voucherNo || a.id || "").localeCompare(String(b.voucherNo || b.id || ""));
+    });
 
     if (changed && shouldSave) {
       this.saveState(true);
@@ -2446,29 +4327,42 @@ class StateManager {
     if (!this.purchases || !Array.isArray(this.purchases)) return;
     let changed = false;
 
-    // Exact ID deduplication pass (only remove exact duplicate ID instances)
-    const seenPurIds = new Set();
-    const cleanPurs = [];
+    const seenKeys = new Set();
+    const uniquePurchases = [];
 
     this.purchases.forEach(pur => {
       if (!pur) return;
-      const pid = String(pur.id || "").trim();
-      if (pid) {
-        if (!seenPurIds.has(pid)) {
-          seenPurIds.add(pid);
-          cleanPurs.push(pur);
-        } else {
-          changed = true;
-        }
+      const vKey = String(pur.voucherNo || pur.refNo || pur.id || "").trim().toUpperCase();
+      if (!vKey) return;
+
+      if (!seenKeys.has(vKey)) {
+        seenKeys.add(vKey);
+        uniquePurchases.push(pur);
       } else {
-        cleanPurs.push(pur);
+        changed = true;
       }
     });
 
-    if (cleanPurs.length !== this.purchases.length) {
-      this.purchases = cleanPurs;
-      changed = true;
+    if (changed) {
+      this.purchases = uniquePurchases;
     }
+
+    const extractNum = (str) => {
+      const m = String(str || "").match(/(\d+)/g);
+      return m ? parseInt(m[m.length - 1], 10) : 0;
+    };
+
+    this.purchases.sort((a, b) => {
+      if (!a) return 1;
+      if (!b) return -1;
+      const numA = extractNum(a.voucherNo || a.refNo || a.id);
+      const numB = extractNum(b.voucherNo || b.refNo || b.id);
+      if (numA !== numB) return numA - numB;
+      const dateA = toIsoDateStr(a.date);
+      const dateB = toIsoDateStr(b.date);
+      if (dateA !== dateB) return dateA.localeCompare(dateB);
+      return String(a.voucherNo || a.id || "").localeCompare(String(b.voucherNo || b.id || ""));
+    });
 
     if (changed && shouldSave) {
       this.saveState(true);
@@ -2477,7 +4371,7 @@ class StateManager {
 
   ensureStandardBaseLedgers() {
     if (!this.ledgers) this.ledgers = [];
-    const baseCodes = ["L016","L018","L019","L020","L021","L022","L023","L024","L025"];
+    const baseCodes = ["L018","L019","L020","L021","L022","L023","L024","L025"];
     const standardBaseLedgers = initialLedgers.filter(l => baseCodes.includes(l.code));
     
     let changed = false;
@@ -2571,6 +4465,17 @@ class StateManager {
       const idUpper = String(tx.id || "").toUpperCase();
       const refUpper = String(tx.reference || "").toUpperCase();
       const descUpper = String(tx.description || "").toUpperCase();
+
+      const isCogs = refUpper.includes("COGS") || descUpper.includes("COST OF GOODS");
+      if (isCogs) {
+        tx.entries.forEach(e => {
+          if (e.accountId === "L017" || e.accountId === "4100") {
+            e.accountId = "1200";
+            changed = true;
+          }
+        });
+        return;
+      }
 
       const isSales = salesPrefixes.some(p => idUpper.startsWith(p) || refUpper.startsWith(p)) || descUpper.includes("SALES") || descUpper.includes("INVOICE");
       const isPurchase = !isSales && (purchasePrefixes.some(p => idUpper.startsWith(p) || refUpper.startsWith(p)) || descUpper.includes("PURCHASE"));
@@ -2809,7 +4714,36 @@ class StateManager {
         return;
       }
 
-      let parsed = this._serverLoadedData || {};
+      const fyId = this.getActiveFyId();
+      const lsKey = `erp_company_data_${activeId}${fyId === 'default' ? '' : '_' + fyId}`;
+      let parsed = null;
+      try {
+        const stored = localStorage.getItem(lsKey);
+        if (stored) {
+          parsed = JSON.parse(stored);
+        }
+      } catch (e) {}
+
+      if (this._serverLoadedData && typeof this._serverLoadedData === "object" && !this._isRestoring) {
+        const serverFyId = this._serverLoadedData._fyId || fyId;
+        if (!serverFyId || String(serverFyId) === String(fyId)) {
+          parsed = parsed ? { ...parsed, ...this._serverLoadedData } : { ...this._serverLoadedData };
+          [
+            "materials", "contacts", "ledgers", "accountGroups", "salesOrders",
+            "salesReturns", "purchaseReturns", "purchases", "invoices", "transactions",
+            "units", "categories", "subCategories", "productGroups", "productNames",
+            "seriesMaster", "gstMaster", "options", "influencers", "influencerRedemptions", "loyaltyPrograms"
+          ].forEach(key => {
+            if (Array.isArray(this._serverLoadedData[key]) && this._serverLoadedData[key].length > 0) {
+              parsed[key] = this._serverLoadedData[key];
+            } else if (this._serverLoadedData[key] && typeof this._serverLoadedData[key] === "object") {
+              parsed[key] = this._serverLoadedData[key];
+            }
+          });
+        }
+      }
+
+      parsed = parsed || {};
 
       // Fire off background sync to ensure latest from Firebase without blocking init
       
@@ -2854,23 +4788,9 @@ class StateManager {
       if (!this.accountGroups.some(g => g.name === "SALES ACCOUNT")) {
         this.accountGroups.push({ id: "22", name: "SALES ACCOUNT", under: "INCOME", isDefault: true });
       }
-      if (!this.accountGroups.some(g => g.name === "SUNDRY CREDITORS")) {
-        this.accountGroups.push({ id: "29", name: "SUNDRY CREDITORS", under: "CURRENT LIABILITIES", isDefault: true });
-      }
-      if (!this.accountGroups.some(g => g.name === "SUNDRY DEBTORS")) {
-        this.accountGroups.push({ id: "30", name: "SUNDRY DEBTORS", under: "CURRENT ASSETS", isDefault: true });
-      }
-      const prebuiltGroups = [
-        { id: "23", name: "INPUT SGST", under: "DUTIES & TAXES" },
-        { id: "24", name: "INPUT CGST", under: "DUTIES & TAXES" },
-        { id: "25", name: "INPUT IGST", under: "DUTIES & TAXES" },
-        { id: "26", name: "OUTPUT SGST", under: "DUTIES & TAXES" },
-        { id: "27", name: "OUTPUT CGST", under: "DUTIES & TAXES" },
-        { id: "28", name: "OUTPUT IGST", under: "DUTIES & TAXES" }
-      ];
-      prebuiltGroups.forEach(pg => {
-        if (!this.accountGroups.some(g => g.name === pg.name)) {
-          this.accountGroups.push({ ...pg, isDefault: true });
+      initialAccountGroups.forEach(ig => {
+        if (!this.accountGroups.some(g => String(g.name || "").trim().toUpperCase() === String(ig.name || "").trim().toUpperCase())) {
+          this.accountGroups.push({ ...ig, isDefault: true });
         }
       });
 
@@ -2893,8 +4813,17 @@ class StateManager {
           "CAPITAL ACCOUNT": "EQUITY",
           "BANK ACCOUNTS": "CURRENT ASSETS",
           "CASH-IN-HAND": "CURRENT ASSETS",
+          "DEPOSITS": "CURRENT ASSETS",
           "DEPOSITS (ASSETS)": "CURRENT ASSETS",
-          "LOANS & ADVANCES(ASSET)": "CURRENT ASSETS"
+          "OTHER CURRENT ASSETS": "CURRENT ASSETS",
+          "ADAVANCE TO SUPPLIER": "CURRENT ASSETS",
+          "LOANS & ADVANCES(ASSET)": "CURRENT ASSETS",
+          "OUTSTANDING LIABILITIES & PROVISIONS": "CURRENT LIABILITIES",
+          "PROVISIONS": "CURRENT LIABILITIES",
+          "ADJUSTMENTS": "CURRENT LIABILITIES",
+          "ADJUSTMENT": "CURRENT LIABILITIES",
+          "AJUSTMENTS": "CURRENT LIABILITIES",
+          "AJUSTMENT": "CURRENT LIABILITIES"
         };
         let groupStateChanged = false;
         this.accountGroups.forEach(g => {
@@ -2919,9 +4848,8 @@ class StateManager {
           this.accountGroups.push({ id: "31", name: "ADJUSTMENTS", under: "CURRENT LIABILITIES", isDefault: true });
         }
 
-        // Ensure default ledgers exist (excluding L016 Purchase A/C)
+        // Ensure default ledgers exist (excluding L016 Purchase A/C & L017 Sales A/C)
         const defaultLedgers = [
-          { code: "L017", name: "SALES A/C", groupName: "SALES ACCOUNT", openingBalance: 0, balanceType: "Credit" },
           { code: "L018", name: "LOCAL PURCHASE", groupName: "PURCHASE ACCOUNT", openingBalance: 0, balanceType: "Debit" },
           { code: "L019", name: "INTERSTATE PURCHASE", groupName: "PURCHASE ACCOUNT", openingBalance: 0, balanceType: "Debit" },
           { code: "L020", name: "IGST PURCHASE", groupName: "PURCHASE ACCOUNT", openingBalance: 0, balanceType: "Debit" },
@@ -3073,8 +5001,7 @@ class StateManager {
         }
 
         this.repairMissingTransactions();
-        
-        
+        this.alignVoucherPrefixesWithSeries();
         this.productGroups = parsed.productGroups || ["Structural Supply", "Finishing Materials", "Plumbing & Fittings"];
         this.companies = parsed.companies || ["Ultratech", "Jindal", "Ambuja"];
         this.categories = parsed.categories || ["Cement", "Steel", "Sand", "Bricks", "Aggregates", "Other"];
@@ -3194,6 +5121,7 @@ class StateManager {
         }
 
         this.recomputeAllStocks();
+        this.normalizeAllDates();
         this.saveState();
         if (!skipNotify) {
           this.notifyListeners();
@@ -3201,6 +5129,45 @@ class StateManager {
     } catch (e) {
       console.error("Failed to load state", e);
     }
+  }
+
+  normalizeAllDates() {
+    let changed = false;
+    const normItem = (item) => {
+      if (!item) return;
+      if (item.date) {
+        const iso = toIsoDateStr(item.date);
+        if (iso && iso !== item.date) {
+          item.date = iso;
+          changed = true;
+        }
+      }
+      if (item.billDate) {
+        const iso = toIsoDateStr(item.billDate);
+        if (iso && iso !== item.billDate) {
+          item.billDate = iso;
+          changed = true;
+        }
+      }
+      if (item.invoiceDate) {
+        const iso = toIsoDateStr(item.invoiceDate);
+        if (iso && iso !== item.invoiceDate) {
+          item.invoiceDate = iso;
+          changed = true;
+        }
+      }
+    };
+
+    (this.invoices || []).forEach(normItem);
+    (this.purchases || []).forEach(normItem);
+    (this.salesReturns || []).forEach(normItem);
+    (this.purchaseReturns || []).forEach(normItem);
+    (this.transactions || []).forEach(normItem);
+
+    if (changed) {
+      this.invalidateBalancesCache();
+    }
+    return changed;
   }
 
   applySchemaDefaults(m) {
@@ -3243,16 +5210,34 @@ class StateManager {
       matById.set(m.id, m);
       m.batches = m.batches || [];
       
-      // Reset stock on all batches to their openingStock
+      // Reset stock on all batches to their openingStock & RENAME batchNo to equal landingCost
+      const renamedBatches = [];
       m.batches.forEach(b => {
         b.stock = parseFloat(b.openingStock) || 0;
+        const lCost = parseFloat(b.landingCost);
+        const bNum = parseFloat(b.batchNo);
+        const cost = !isNaN(lCost) && lCost > 0 ? lCost : (!isNaN(bNum) && bNum > 0 ? bNum : (parseFloat(m.landingCost) || 0));
+        b.landingCost = cost;
+        b.batchNo = formatRateValue(cost) || String(cost);
+
+        const existing = renamedBatches.find(rb => String(rb.batchNo).trim() === String(b.batchNo).trim());
+        if (existing) {
+          existing.openingStock = (parseFloat(existing.openingStock) || 0) + (parseFloat(b.openingStock) || 0);
+          existing.stock = (parseFloat(existing.stock) || 0) + (parseFloat(b.stock) || 0);
+          if (b.sellingPrice) existing.sellingPrice = b.sellingPrice;
+          if (b.mrp) existing.mrp = b.mrp;
+        } else {
+          renamedBatches.push(b);
+        }
       });
+      m.batches = renamedBatches;
 
       // If no batches exist, seed a default batch matching initial pricing
       if (m.batches.length === 0) {
+        const dCost = parseFloat(m.landingCost) || 0;
         m.batches.push({
-          batchNo: String(m.landingCost || 0),
-          landingCost: m.landingCost || 0,
+          batchNo: formatRateValue(dCost) || String(dCost),
+          landingCost: dCost,
           sellingPrice: m.gstExclRate || m.sellingPrice || 0,
           mrp: m.mrp || 0,
           openingStock: parseFloat(m.openingStock) || 0,
@@ -3271,20 +5256,24 @@ class StateManager {
       (pur.items || []).forEach(item => {
         const mat = matById.get(item.materialId);
         if (mat) {
-          const bNo = item.batchNo != null && String(item.batchNo).trim() !== "" 
-            ? String(item.batchNo).trim() 
-            : String(item.price || mat.landingCost || 350);
+          const itemRate = parseFloat(item.price);
+          const itemCost = !isNaN(itemRate) && itemRate > 0 ? itemRate : (parseFloat(item.landingCost) || mat.landingCost || 350);
+          const bNo = formatRateValue(itemCost) || String(itemCost);
+          item.batchNo = bNo; // rename batch on item to equal landing cost
           let batch = mat.batches.find(b => String(b.batchNo).trim() === bNo);
           if (!batch) {
             batch = {
               batchNo: bNo,
-              landingCost: parseFloat(item.price) || mat.landingCost || 350,
+              landingCost: itemCost,
               sellingPrice: parseFloat(item.sellingPrice) || mat.gstExclRate || 380,
               mrp: parseFloat(item.mrp) || mat.mrp || 400,
               openingStock: 0,
               stock: 0
             };
             mat.batches.push(batch);
+          } else {
+            batch.landingCost = itemCost;
+            batch.batchNo = bNo;
           }
           batch.stock += parseFloat(item.quantity) || 0;
         }
@@ -3298,16 +5287,24 @@ class StateManager {
         const mat = matById.get(item.materialId);
         if (mat) {
           let remQty = parseFloat(item.quantity) || 0;
-          const bNo = item.batchNo != null && String(item.batchNo).trim() !== "" 
+          const rawBNo = item.batchNo != null && String(item.batchNo).trim() !== "" 
             ? String(item.batchNo).trim() 
             : null;
           
-          if (bNo) {
-            let targetBatch = mat.batches.find(b => String(b.batchNo).trim() === bNo);
+          if (rawBNo) {
+            let targetBatch = mat.batches.find(b => String(b.batchNo).trim() === rawBNo);
             if (!targetBatch) {
+              const bNum = parseFloat(rawBNo);
+              if (!isNaN(bNum)) {
+                targetBatch = mat.batches.find(b => Math.abs((parseFloat(b.landingCost) || 0) - bNum) < 0.0001);
+              }
+            }
+            if (!targetBatch) {
+              const bCost = parseFloat(item.price) || mat.landingCost || 350;
+              const bNo = formatRateValue(bCost) || String(bCost);
               targetBatch = {
                 batchNo: bNo,
-                landingCost: parseFloat(item.price) || mat.landingCost || 350,
+                landingCost: bCost,
                 sellingPrice: parseFloat(item.sellingPrice) || mat.gstExclRate || 380,
                 mrp: parseFloat(item.mrp) || mat.mrp || 400,
                 openingStock: 0,
@@ -3342,14 +5339,16 @@ class StateManager {
       (ret.items || []).forEach(item => {
         const mat = matById.get(item.materialId);
         if (mat) {
-          const bNo = item.batchNo != null && String(item.batchNo).trim() !== "" 
+          const rawBNo = item.batchNo != null && String(item.batchNo).trim() !== "" 
             ? String(item.batchNo).trim() 
             : null;
-          let batch = bNo ? mat.batches.find(b => String(b.batchNo).trim() === bNo) : mat.batches[0];
-          if (!batch && bNo) {
+          let batch = rawBNo ? (mat.batches.find(b => String(b.batchNo).trim() === rawBNo) || mat.batches.find(b => Math.abs((parseFloat(b.landingCost) || 0) - parseFloat(rawBNo)) < 0.0001)) : mat.batches[0];
+          if (!batch && rawBNo) {
+            const bCost = !isNaN(parseFloat(rawBNo)) && parseFloat(rawBNo) > 0 ? parseFloat(rawBNo) : (mat.landingCost || 350);
+            const bNo = formatRateValue(bCost) || String(bCost);
             batch = {
               batchNo: bNo,
-              landingCost: mat.landingCost || 350,
+              landingCost: bCost,
               sellingPrice: mat.gstExclRate || 380,
               mrp: mat.mrp || 400,
               openingStock: 0,
@@ -3371,15 +5370,17 @@ class StateManager {
         const mat = matById.get(item.materialId);
         if (mat) {
           let remQty = parseFloat(item.quantity) || 0;
-          const bNo = item.batchNo != null && String(item.batchNo).trim() !== "" 
+          const rawBNo = item.batchNo != null && String(item.batchNo).trim() !== "" 
             ? String(item.batchNo).trim() 
             : null;
-          if (bNo) {
-            let targetBatch = mat.batches.find(b => String(b.batchNo).trim() === bNo);
+          if (rawBNo) {
+            let targetBatch = mat.batches.find(b => String(b.batchNo).trim() === rawBNo) || mat.batches.find(b => Math.abs((parseFloat(b.landingCost) || 0) - parseFloat(rawBNo)) < 0.0001);
             if (!targetBatch) {
+              const bCost = !isNaN(parseFloat(rawBNo)) && parseFloat(rawBNo) > 0 ? parseFloat(rawBNo) : (mat.landingCost || 350);
+              const bNo = formatRateValue(bCost) || String(bCost);
               targetBatch = {
                 batchNo: bNo,
-                landingCost: mat.landingCost || 350,
+                landingCost: bCost,
                 sellingPrice: mat.gstExclRate || 380,
                 mrp: mat.mrp || 400,
                 openingStock: 0,
@@ -3411,14 +5412,16 @@ class StateManager {
       (adj.items || []).forEach(item => {
         const mat = matById.get(item.materialId);
         if (mat) {
-          const bNo = item.batchNo != null && String(item.batchNo).trim() !== "" 
+          const rawBNo = item.batchNo != null && String(item.batchNo).trim() !== "" 
             ? String(item.batchNo).trim() 
             : null;
-          let batch = bNo ? mat.batches.find(b => String(b.batchNo).trim() === bNo) : mat.batches[0];
-          if (!batch && bNo) {
+          let batch = rawBNo ? (mat.batches.find(b => String(b.batchNo).trim() === rawBNo) || mat.batches.find(b => Math.abs((parseFloat(b.landingCost) || 0) - parseFloat(rawBNo)) < 0.0001)) : mat.batches[0];
+          if (!batch && rawBNo) {
+            const bCost = !isNaN(parseFloat(rawBNo)) && parseFloat(rawBNo) > 0 ? parseFloat(rawBNo) : (mat.landingCost || 350);
+            const bNo = formatRateValue(bCost) || String(bCost);
             batch = {
               batchNo: bNo,
-              landingCost: mat.landingCost || 350,
+              landingCost: bCost,
               sellingPrice: mat.gstExclRate || 380,
               mrp: mat.mrp || 400,
               openingStock: 0,
@@ -3464,18 +5467,38 @@ class StateManager {
     const mat = this.materials.find(m => m.id === materialId);
     if (!mat) return false;
     mat.batches = mat.batches || [];
-    const bNo = String(batchData.batchNo);
-    let existing = mat.batches.find(b => b.batchNo === bNo);
+    const cost = parseFloat(batchData.landingCost) !== undefined && !isNaN(parseFloat(batchData.landingCost)) && parseFloat(batchData.landingCost) > 0
+      ? parseFloat(batchData.landingCost)
+      : (!isNaN(parseFloat(batchData.batchNo)) && parseFloat(batchData.batchNo) > 0 ? parseFloat(batchData.batchNo) : (mat.landingCost || 0));
+    const bNo = formatRateValue(cost) || String(cost);
+    let existing = mat.batches.find(b => b.batchNo === bNo || (batchData.batchNo && b.batchNo === String(batchData.batchNo)));
     if (existing) {
-      existing.sellingPrice = parseFloat(batchData.sellingPrice) || existing.sellingPrice;
-      existing.mrp = parseFloat(batchData.mrp) || existing.mrp;
-      existing.landingCost = parseFloat(batchData.landingCost) || existing.landingCost;
+      existing.batchNo = bNo; // rename batch equal to landing cost
+      existing.landingCost = cost;
+      if (batchData.sellingPrice !== undefined && !isNaN(parseFloat(batchData.sellingPrice))) {
+        existing.sellingPrice = parseFloat(batchData.sellingPrice);
+      }
+      if (batchData.mrp !== undefined && !isNaN(parseFloat(batchData.mrp))) {
+        existing.mrp = parseFloat(batchData.mrp);
+      }
+      if (batchData.gstInclRate !== undefined && !isNaN(parseFloat(batchData.gstInclRate))) {
+        existing.gstInclRate = parseFloat(batchData.gstInclRate);
+      }
+      if (batchData.marginPercent !== undefined && !isNaN(parseFloat(batchData.marginPercent))) {
+        existing.marginPercent = parseFloat(batchData.marginPercent);
+      }
+      if (batchData.marginAmount !== undefined && !isNaN(parseFloat(batchData.marginAmount))) {
+        existing.marginAmount = parseFloat(batchData.marginAmount);
+      }
     } else {
       mat.batches.push({
         batchNo: bNo,
-        landingCost: parseFloat(batchData.landingCost) || mat.landingCost || 0,
-        sellingPrice: parseFloat(batchData.sellingPrice) || mat.gstExclRate || 0,
-        mrp: parseFloat(batchData.mrp) || mat.mrp || 0,
+        landingCost: cost,
+        sellingPrice: parseFloat(batchData.sellingPrice) !== undefined && !isNaN(parseFloat(batchData.sellingPrice)) ? parseFloat(batchData.sellingPrice) : (mat.gstExclRate || 0),
+        gstInclRate: parseFloat(batchData.gstInclRate) !== undefined && !isNaN(parseFloat(batchData.gstInclRate)) ? parseFloat(batchData.gstInclRate) : (mat.gstInclRate || 0),
+        marginPercent: parseFloat(batchData.marginPercent) !== undefined && !isNaN(parseFloat(batchData.marginPercent)) ? parseFloat(batchData.marginPercent) : (mat.marginPercent || 0),
+        marginAmount: parseFloat(batchData.marginAmount) !== undefined && !isNaN(parseFloat(batchData.marginAmount)) ? parseFloat(batchData.marginAmount) : (mat.marginAmount || 0),
+        mrp: parseFloat(batchData.mrp) !== undefined && !isNaN(parseFloat(batchData.mrp)) ? parseFloat(batchData.mrp) : (mat.mrp || 0),
         stock: 0
       });
     }
@@ -3708,10 +5731,8 @@ class StateManager {
     if (!activeId) return;
     const fyId = this.getActiveFyId();
     try {
-      const host = window.location.hostname || "localhost";
-      const dataUrl = (typeof window._getApiUrl === "function")
-        ? window._getApiUrl(`/api/data/${activeId}/${fyId}`)
-        : `http://${host}:3001/api/data/${activeId}/${fyId}`;
+      const dataUrl = this.getBackendApiUrl(`/api/data/${activeId}/${fyId}`);
+      if (!dataUrl) return;
       const res = await fetch(dataUrl);
       if (res.ok) {
         const data = await res.json();
@@ -3729,27 +5750,62 @@ class StateManager {
 
   async syncCompanies() {
     try {
-      const host = window.location.hostname || "localhost";
-      const apiUrl = (typeof window._getApiUrl === "function")
-        ? window._getApiUrl("/api/companies")
-        : `http://${host}:3001/api/companies`;
+      const apiUrl = this.getBackendApiUrl("/api/companies");
+      if (!apiUrl) return;
       const res = await fetch(apiUrl, {
-        signal: AbortSignal.timeout(500)
+        headers: { "Bypass-Tunnel-Reminder": "true" },
+        signal: getTimeoutSignal(5000)
       });
       if (res.ok) {
         const data = await res.json();
         const currentStr = localStorage.getItem("erp_companies");
         const current = currentStr ? JSON.parse(currentStr) : [];
         if (Array.isArray(data) && data.length > 0) {
-          // Merge financialYears from localStorage to prevent overwriting with old server data
           const mergedData = data.map(serverComp => {
-            const localComp = current.find(c => c.id === serverComp.id);
-            if (localComp && localComp.financialYears && localComp.financialYears.length > 0) {
-              const allFys = [...localComp.financialYears, ...(serverComp.financialYears || [])]; serverComp.financialYears = Array.from(new Map(allFys.map(item => [item.id, item])).values());
+            const localComp = current.find(c => String(c.id) === String(serverComp.id));
+            if (localComp) {
+              if (localComp.serverUrl) serverComp.serverUrl = localComp.serverUrl;
+              if (localComp.financialYears && localComp.financialYears.length > 0) {
+                const allFys = [...(serverComp.financialYears || []), ...localComp.financialYears];
+                serverComp.financialYears = Array.from(new Map(allFys.map(item => [item.id, item])).values());
+              }
+              // Merge users
+              const userMap = new Map();
+              if (Array.isArray(localComp.users)) {
+                localComp.users.forEach(u => {
+                  if (u && u.username) userMap.set(u.username.toLowerCase(), { ...u });
+                });
+              }
+              if (Array.isArray(serverComp.users)) {
+                serverComp.users.forEach(u => {
+                  if (u && u.username) {
+                    const k = u.username.toLowerCase();
+                    if (userMap.has(k)) {
+                      userMap.set(k, { ...userMap.get(k), ...u });
+                    } else {
+                      userMap.set(k, { ...u });
+                    }
+                  }
+                });
+              }
+              if (userMap.size > 0) {
+                serverComp.users = Array.from(userMap.values());
+              }
             }
             return serverComp;
           });
-          localStorage.setItem("erp_companies", JSON.stringify(mergedData));
+
+          current.forEach(lc => {
+            if (!mergedData.some(m => String(m.id) === String(lc.id))) {
+              mergedData.push(lc);
+            }
+          });
+
+          const mergedStr = JSON.stringify(mergedData);
+          if (mergedStr !== currentStr) {
+            localStorage.setItem("erp_companies", mergedStr);
+            this.notifyListeners();
+          }
           if (current.length === 0) {
             window.location.reload();
           }
@@ -3760,7 +5816,7 @@ class StateManager {
     } catch(e) {}
   }
 
-  saveState(skipNotify = false) {
+  saveState(skipNotify = false, isRestore = false) {
     this._accountBalancesCache = null;
     if (this._suppressSave) {
       this._pendingSave = true;
@@ -3771,7 +5827,9 @@ class StateManager {
       if (!activeId) return;
       const fyId = this.getActiveFyId();
 
+      const now = Date.now();
       const stateToSave = {
+        _lastSaved: now,
         materials: this.materials,
         contacts: this.contacts,
         invoices: this.invoices,
@@ -3805,38 +5863,45 @@ class StateManager {
         gstMaster: this.gstMaster || []
       };
 
-      // Immediate sync to local backend API server database on disk
-      const host = window.location.hostname || "localhost";
-      const saveApiUrl = (typeof window._getApiUrl === "function")
-        ? window._getApiUrl(`/api/data/${activeId}/${fyId}`)
-        : `http://${host}:3001/api/data/${activeId}/${fyId}`;
+      // Synchronously save directly to localStorage (authoritative data store)
+      try {
+        const lsKey = `erp_company_data_${activeId}${fyId === 'default' ? '' : '_' + fyId}`;
+        localStorage.setItem(lsKey, JSON.stringify(stateToSave));
+      } catch (lsErr) {
+        console.warn("Failed to set localStorage backup:", lsErr);
+      }
 
-      fetch(saveApiUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Bypass-Tunnel-Reminder": "true"
-        },
-        body: JSON.stringify(stateToSave)
-      })
-      .then(res => res.ok ? res.json() : null)
-      .then(resData => {
-        if (resData && resData.data && resData.data.invoices) {
-          const merged = resData.data;
-          this.invoices = merged.invoices || this.invoices;
-          this.salesOrders = merged.salesOrders || this.salesOrders;
-          this.purchases = merged.purchases || this.purchases;
-          this.transactions = merged.transactions || this.transactions;
-          stateToSave.invoices = this.invoices;
-          stateToSave.salesOrders = this.salesOrders;
-          stateToSave.purchases = this.purchases;
-        }
-      })
-      .catch(e => {
-        console.error("Local node server save failed:", e);
-      });
-
+      this._lastLocalSaveTime = now;
       this._serverLoadedData = stateToSave;
+
+      // Immediately write recent transaction documents directly to Appwrite's transactions collection (no delay)
+      if (!isRestore && !this._isRestoring) {
+        this.syncRecentTransactionsDirectly(activeId, fyId);
+      }
+
+      // Debounced sync to Appwrite Cloud Storage (1500ms debounce) for full snapshot backup
+      if (this._isDataLoadedFromCloud && !isRestore && !this._isRestoring) {
+        this.syncToAppwriteCloud(activeId, fyId, false);
+      }
+
+      // Optional background sync to local backend API server on disk
+      const isRestoreQuery = (isRestore || this._isRestoring) ? "?isRestore=true" : "";
+      const saveApiUrl = this.getBackendApiUrl(`/api/data/${activeId}/${fyId}${isRestoreQuery}`);
+
+      if (saveApiUrl) {
+        fetch(saveApiUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Bypass-Tunnel-Reminder": "true"
+          },
+          body: JSON.stringify({ ...stateToSave, ...((isRestore || this._isRestoring) ? { _isRestore: true } : {}) })
+        })
+        .catch(e => {
+          // Background server sync failed, silent handle since localstorage is primary
+        });
+      }
+
       if (!skipNotify) {
         this.notifyListeners();
       }
@@ -3845,15 +5910,268 @@ class StateManager {
     }
   }
 
+  syncRecentTransactionsDirectly(activeId, fyId) {
+    try {
+      const compId = String(activeId || this.getActiveCompanyId() || "1");
+      const fId = String(fyId || this.getActiveFyId() || "default");
+      if (!compId) return;
+
+      if (Array.isArray(this.transactions) && this.transactions.length > 0) {
+        // Sync the latest 5 transactions immediately in the background
+        const recentTxs = this.transactions.slice(-5);
+        for (const tx of recentTxs) {
+          if (tx && tx.id) {
+            this.syncTransactionToAppwrite(tx, false, compId, fId).catch(() => {});
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("[Appwrite Direct Sync] Error:", e);
+    }
+  }
+
+  async syncTransactionToAppwrite(tx, isDeleted = false, customActiveId = null, customFyId = null) {
+    if (!tx || !tx.id) return;
+    const activeId = String(customActiveId || this.getActiveCompanyId() || "1");
+    const fyId = String(customFyId || this.getActiveFyId() || "default");
+    const docId = sanitizeAppwriteId(`tx_${activeId}_${fyId}_${tx.id}`);
+
+    if (!this._inFlightTxSyncs) this._inFlightTxSyncs = new Set();
+    if (this._inFlightTxSyncs.has(docId)) return;
+    this._inFlightTxSyncs.add(docId);
+
+    try {
+      if (isDeleted) {
+        await appwriteDatabases.deleteDocument(APPWRITE_DATABASE_ID, "transactions", docId).catch(() => {});
+        console.log(`[Appwrite Cloud] Deleted transaction document (${docId})`);
+        return;
+      }
+
+      let partyName = tx.partyName || "";
+      let partyId = tx.partyId || "";
+      let totalAmt = Number(tx.amount !== undefined && tx.amount !== null && !isNaN(tx.amount) ? tx.amount : 0);
+
+      if (Array.isArray(tx.entries) && tx.entries.length > 0) {
+        if (!totalAmt) {
+          const debitSum = tx.entries.reduce((sum, e) => sum + (parseFloat(e.debit) || 0), 0);
+          const creditSum = tx.entries.reduce((sum, e) => sum + (parseFloat(e.credit) || 0), 0);
+          totalAmt = debitSum || creditSum || 0;
+        }
+        if (!partyName) {
+          const firstNonCashEntry = tx.entries.find(e => {
+            const accId = String(e.accountId || "");
+            return !accId.toLowerCase().includes("cash") && !accId.toLowerCase().includes("bank");
+          }) || tx.entries[0];
+          if (firstNonCashEntry && firstNonCashEntry.accountId) {
+            const contact = (this.contacts || []).find(c => String(c.id) === String(firstNonCashEntry.accountId) || String(c.name).toLowerCase() === String(firstNonCashEntry.accountId).toLowerCase());
+            const ledger = (this.ledgers || []).find(l => String(l.id) === String(firstNonCashEntry.accountId) || String(l.name).toLowerCase() === String(firstNonCashEntry.accountId).toLowerCase());
+            partyName = contact ? contact.name : (ledger ? ledger.name : firstNonCashEntry.accountId);
+            partyId = contact ? String(contact.id) : (ledger ? String(ledger.id) : String(firstNonCashEntry.accountId));
+          }
+        }
+      }
+
+      const docData = {
+        company_id: activeId,
+        fy_id: fyId,
+        voucher_no: String(tx.voucherNo || tx.reference || tx.id || "").substring(0, 95),
+        voucher_type: String(tx.voucherType || tx.type || "").substring(0, 45),
+        date: String(tx.date || "").substring(0, 45),
+        party_id: String(partyId || "").substring(0, 95),
+        party_name: String(partyName || "").substring(0, 250),
+        amount: totalAmt,
+        narration: String(tx.narration || tx.description || "").substring(0, 490),
+        raw_data: JSON.stringify(tx)
+      };
+
+      const permissions = [
+        Permission.read(Role.any()),
+        Permission.write(Role.any()),
+        Permission.update(Role.any()),
+        Permission.delete(Role.any())
+      ];
+
+      try {
+        await appwriteDatabases.updateDocument(APPWRITE_DATABASE_ID, "transactions", docId, docData);
+        console.log(`[Appwrite Cloud] Updated transaction (${tx.id || tx.voucherNo}) in database.`);
+      } catch (updateErr) {
+        if (updateErr.code === 404 || String(updateErr.message || "").includes("not found")) {
+          try {
+            await appwriteDatabases.createDocument(APPWRITE_DATABASE_ID, "transactions", docId, docData, permissions);
+            console.log(`[Appwrite Cloud] Created transaction (${tx.id || tx.voucherNo}) in database.`);
+          } catch (createErr) {
+            if (createErr.code !== 409 && createErr.code !== 429 && !String(createErr.message || "").includes("already exists")) {
+              const relayUrl = this.getBackendApiUrl("/api/appwrite/sync-transaction");
+              if (relayUrl) {
+                await fetch(relayUrl, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ docId, docData, isDeleted: false })
+                }).catch(() => {});
+              }
+            }
+          }
+        } else if (updateErr.code === 409) {
+          // Document already exists, silently handled
+        } else if (updateErr.code === 429) {
+          // Rate limit reached on document API; data is already preserved in cloud storage snapshot
+        } else {
+          // Relay via local server if available
+          const relayUrl = this.getBackendApiUrl("/api/appwrite/sync-transaction");
+          if (relayUrl) {
+            await fetch(relayUrl, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ docId, docData, isDeleted: false })
+            }).catch(() => {});
+          }
+        }
+      }
+    } catch (err) {
+      if (err.code !== 409 && err.code !== 429 && !String(err.message || "").includes("already exists")) {
+        try {
+          const relayUrl = this.getBackendApiUrl("/api/appwrite/sync-transaction");
+          if (relayUrl) {
+            await fetch(relayUrl, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ docId, docData, isDeleted })
+            }).catch(() => {});
+          }
+        } catch (e) {}
+      }
+    } finally {
+      this._inFlightTxSyncs.delete(docId);
+    }
+  }
+
+  async syncToAppwriteCloud(activeId, fyId, immediate = false) {
+    if (!activeId) return;
+    const cleanActiveId = String(activeId);
+    const cleanFyId = String(fyId || "default");
+
+    if (this._appwriteSyncDebounceTimer) {
+      clearTimeout(this._appwriteSyncDebounceTimer);
+      this._appwriteSyncDebounceTimer = null;
+    }
+
+    const performSync = async () => {
+      if (this._isAppwriteSyncing) return;
+      this._isAppwriteSyncing = true;
+      try {
+        if (typeof window !== "undefined" && typeof window.Blob !== "undefined" && typeof window.File !== "undefined") {
+          const fullSnapshot = {
+            _fyId: cleanFyId,
+            _lastSaved: Date.now(),
+            materials: this.materials || [],
+            contacts: this.contacts || [],
+            invoices: this.invoices || [],
+            purchases: this.purchases || [],
+            salesOrders: this.salesOrders || [],
+            salesReturns: this.salesReturns || [],
+            purchaseReturns: this.purchaseReturns || [],
+            transactions: this.transactions || [],
+            ledgers: this.ledgers || [],
+            influencers: this.influencers || [],
+            influencerRedemptions: this.influencerRedemptions || [],
+            loyaltyPrograms: this.loyaltyPrograms || [],
+            options: this.options || {},
+            accountGroups: this.accountGroups || [],
+            productGroups: this.productGroups || [],
+            categories: this.categories || [],
+            subCategories: this.subCategories || [],
+            productNames: this.productNames || [],
+            units: this.units || [],
+            gstMaster: this.gstMaster || [],
+            seriesMaster: this.seriesMaster || []
+          };
+          const targetFileIds = Array.from(new Set([
+            sanitizeAppwriteId(`db_${cleanActiveId}_${cleanFyId}`),
+            sanitizeAppwriteId(`db_${cleanActiveId}_default`),
+            sanitizeAppwriteId(`db_${cleanActiveId}_Current_F_Y`)
+          ]));
+
+          const permissions = [
+            Permission.read(Role.any()),
+            Permission.write(Role.any()),
+            Permission.update(Role.any()),
+            Permission.delete(Role.any())
+          ];
+
+          for (const fileId of targetFileIds) {
+            try {
+              const blob = new Blob([JSON.stringify(fullSnapshot)], { type: "application/json" });
+              const fileObj = new File([blob], `${fileId}.json`, { type: "application/json" });
+              try {
+                await appwriteStorage.deleteFile(APPWRITE_STORAGE_BUCKET, fileId);
+              } catch (delErr) {}
+
+              try {
+                await appwriteStorage.createFile(APPWRITE_STORAGE_BUCKET, fileId, fileObj, permissions);
+                console.log(`[Appwrite Cloud] Saved database snapshot (${fileId}) with ${fullSnapshot.transactions.length} transactions.`);
+              } catch (createErr) {
+                const relayUrl = this.getBackendApiUrl("/api/appwrite/sync-storage");
+                if (relayUrl) {
+                  await fetch(relayUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ fileId, data: fullSnapshot })
+                  }).catch(() => {});
+                }
+              }
+            } catch (fErr) {
+              const relayUrl = this.getBackendApiUrl("/api/appwrite/sync-storage");
+              if (relayUrl) {
+                await fetch(relayUrl, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ fileId, data: fullSnapshot })
+                }).catch(() => {});
+              }
+            }
+          }
+
+          // Background sync recent transactions for this company/FY to Appwrite transactions collection sequentially
+          if (Array.isArray(this.transactions) && this.transactions.length > 0) {
+            const txBatch = this.transactions.slice(-10);
+            for (const tx of txBatch) {
+              try {
+                await this.syncTransactionToAppwrite(tx, false, cleanActiveId, cleanFyId);
+              } catch (e) {}
+            }
+          }
+        }
+      } catch (storageErr) {
+        console.warn("[Appwrite Cloud] Sync error:", storageErr?.message || storageErr);
+      } finally {
+        this._isAppwriteSyncing = false;
+      }
+    };
+
+    if (immediate) {
+      return performSync();
+    } else {
+      this._appwriteSyncDebounceTimer = setTimeout(performSync, 1500);
+    }
+  }
+
+
+  async syncToSupabase(activeId, fyId) {
+    return this.syncToAppwriteCloud(activeId, fyId);
+  }
+
   // ── Force Sync All Data to Server ────────────────────────────────────────
   // Reads ALL company data from localStorage (every company, every FY) and
   // pushes it to the local server's disk files. Use this when server files
   // are missing or out of date (e.g. server was offline during saves).
   async forceSyncAllToServer() {
-    const getUrl = (endpoint) => (typeof window !== "undefined" && typeof window._getApiUrl === "function")
-      ? window._getApiUrl(endpoint)
-      : endpoint;
+    const getUrl = (endpoint) => this.getBackendApiUrl(endpoint);
     const results = { success: [], failed: [] };
+
+    const compUrl = getUrl("/api/companies");
+    if (!compUrl) {
+      return { success: false, message: "Local backend server is not reachable in static cloud mode." };
+    }
 
     // 1. Sync companies list (always includes financialYears now)
     try {
@@ -3873,7 +6191,7 @@ class StateManager {
         return c;
       });
 
-      const res = await fetch(getUrl("/api/companies"), {
+      const res = await fetch(compUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Bypass-Tunnel-Reminder": "true" },
         body: JSON.stringify(companiesWithFy)
@@ -3896,15 +6214,18 @@ class StateManager {
           if (stored) {
             try {
               const data = JSON.parse(stored);
-              const saveRes = await fetch(getUrl(`/api/data/${company.id}/${fyId}`), {
-                method: "POST",
-                headers: { "Content-Type": "application/json", "Bypass-Tunnel-Reminder": "true" },
-                body: JSON.stringify(data)
-              });
-              if (saveRes.ok) {
-                results.success.push(`company ${company.id} / FY: ${fyId}`);
-              } else {
-                results.failed.push(`company ${company.id} / FY: ${fyId} (HTTP ${saveRes.status})`);
+              const dataUrl = getUrl(`/api/data/${company.id}/${fyId}`);
+              if (dataUrl) {
+                const saveRes = await fetch(dataUrl, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json", "Bypass-Tunnel-Reminder": "true" },
+                  body: JSON.stringify(data)
+                });
+                if (saveRes.ok) {
+                  results.success.push(`company ${company.id} / FY: ${fyId}`);
+                } else {
+                  results.failed.push(`company ${company.id} / FY: ${fyId} (HTTP ${saveRes.status})`);
+                }
               }
             } catch (e) {
               results.failed.push(`company ${company.id} / FY: ${fyId} (${e.message})`);
@@ -3921,7 +6242,130 @@ class StateManager {
     return results;
   }
 
-  createNewFinancialYear(name, startDate, endDate) {
+  checkTransactionsAfterDate(targetEndDate) {
+    if (!targetEndDate) return { hasTransactions: false, message: "", offendingEntries: [] };
+
+    const targetIso = toIsoDateStr(targetEndDate);
+    const offendingEntries = [];
+
+    (this.transactions || []).forEach(t => {
+      const tIso = toIsoDateStr(t.date);
+      if (tIso && tIso > targetIso) {
+        const dF = tIso.split('-').reverse().join('/');
+        offendingEntries.push(`Voucher/Transaction #${t.voucherNo || t.id || ''} (${t.voucherType || 'Tx'} on ${dF})`);
+      }
+    });
+
+    (this.invoices || []).forEach(i => {
+      const iIso = toIsoDateStr(i.date);
+      if (iIso && iIso > targetIso) {
+        const dF = iIso.split('-').reverse().join('/');
+        offendingEntries.push(`Sales Invoice #${i.invoiceNo || i.id} (${dF})`);
+      }
+    });
+
+    (this.purchases || []).forEach(p => {
+      const pIso = toIsoDateStr(p.date);
+      if (pIso && pIso > targetIso) {
+        const dF = pIso.split('-').reverse().join('/');
+        offendingEntries.push(`Purchase Bill #${p.purchaseNo || p.id} (${dF})`);
+      }
+    });
+
+    (this.salesReturns || []).forEach(sr => {
+      const srIso = toIsoDateStr(sr.date);
+      if (srIso && srIso > targetIso) {
+        const dF = srIso.split('-').reverse().join('/');
+        offendingEntries.push(`Sales Return #${sr.returnNo || sr.id} (${dF})`);
+      }
+    });
+
+    (this.purchaseReturns || []).forEach(pr => {
+      const prIso = toIsoDateStr(pr.date);
+      if (prIso && prIso > targetIso) {
+        const dF = prIso.split('-').reverse().join('/');
+        offendingEntries.push(`Purchase Return #${pr.returnNo || pr.id} (${dF})`);
+      }
+    });
+
+    (this.stockAdjustments || []).forEach(sa => {
+      const saIso = toIsoDateStr(sa.date);
+      if (saIso && saIso > targetIso) {
+        const dF = saIso.split('-').reverse().join('/');
+        offendingEntries.push(`Stock Adjustment #${sa.id} (${dF})`);
+      }
+    });
+
+    (this.conversions || []).forEach(c => {
+      const cIso = toIsoDateStr(c.date);
+      if (cIso && cIso > targetIso) {
+        const dF = cIso.split('-').reverse().join('/');
+        offendingEntries.push(`Stock Conversion #${c.id} (${dF})`);
+      }
+    });
+
+    (this.salesOrders || []).forEach(so => {
+      const soIso = toIsoDateStr(so.date);
+      if (soIso && soIso > targetIso) {
+        const dF = soIso.split('-').reverse().join('/');
+        offendingEntries.push(`Sales Order #${so.orderNo || so.id} (${dF})`);
+      }
+    });
+
+    if (offendingEntries.length > 0) {
+      const formattedEndDate = targetIso.split('-').reverse().join('/');
+      const sampleList = offendingEntries.slice(0, 5).map(e => `• ${e}`).join('\n');
+      const extraCount = offendingEntries.length > 5 ? `\n...and ${offendingEntries.length - 5} more entry(ies)` : '';
+      return {
+        hasTransactions: true,
+        offendingEntries,
+        message: `CANNOT END FINANCIAL YEAR ON ${formattedEndDate}!\n\nThere are ${offendingEntries.length} transaction(s)/entry(ies) dated after ${formattedEndDate}:\n\n${sampleList}${extraCount}\n\nPlease delete or modify the date of these entries before ending the financial year on ${formattedEndDate}.`
+      };
+    }
+
+    return { hasTransactions: false, message: "", offendingEntries: [] };
+  }
+
+  isPLAccount(l) {
+    if (!l) return false;
+    const code = String(l.code || "").toUpperCase();
+    if (["L017", "L018", "L019", "L020", "L021", "L022", "L023", "L024", "L025"].includes(code)) {
+      return true;
+    }
+    const groupName = String(l.groupName || "").toUpperCase();
+    const plKeywords = [
+      "SALES ACCOUNTS", "SALES ACCOUNT", "PURCHASE ACCOUNTS", "PURCHASE ACCOUNT", 
+      "INCOME", "EXPENSE", "REVENUE", "SALES", "PURCHASE", "DIRECT EXPENSES", 
+      "INDIRECT EXPENSES", "DIRECT INCOME", "INDIRECT INCOME", "DEPRECIATION", "EMPLOYEE EXPENSES"
+    ];
+    if (plKeywords.some(kw => groupName.includes(kw))) {
+      return true;
+    }
+    
+    // Check recursively up the accountGroups tree if available
+    const accountGroups = this.accountGroups || [];
+    const groupByNameUpper = new Map();
+    accountGroups.forEach(g => {
+      if (g && g.name) groupByNameUpper.set(String(g.name).toUpperCase(), g);
+    });
+    let curr = groupName;
+    for (let i = 0; i < 15; i++) {
+      if (!curr) break;
+      if (["INCOME", "EXPENSE", "REVENUE", "SALES", "PURCHASE", "DEPRECIATION"].some(kw => curr.includes(kw))) {
+        return true;
+      }
+      if (["ASSETS", "CURRENT ASSETS", "FIXED ASSETS", "LIABILITIES", "CURRENT LIABILITIES", "EQUITY", "CAPITAL ACCOUNT"].some(kw => curr.includes(kw))) {
+        return false;
+      }
+      const parent = groupByNameUpper.get(curr);
+      if (parent && parent.under) curr = String(parent.under).toUpperCase();
+      else break;
+    }
+
+    return false;
+  }
+
+  async createNewFinancialYear(name, startDate, endDate, currentFyEnd) {
     const activeId = this.getActiveCompanyId();
     if (!activeId) return { success: false, message: "No active company" };
 
@@ -3929,9 +6373,10 @@ class StateManager {
     const company = companies.find(c => c.id === activeId);
     if (!company) return { success: false, message: "Company not found" };
 
-    // Check if name or dates overlap
+    // Check if name overlaps with another existing financial year (excluding current active year being ended)
+    const activeFyId = this.getActiveFyId();
     company.financialYears = company.financialYears || [];
-    if (company.financialYears.some(fy => fy.name === name)) {
+    if (company.financialYears.some(fy => String(fy.id) !== String(activeFyId) && fy.name === name)) {
       return { success: false, message: `Financial Year '${name}' already exists.` };
     }
 
@@ -3943,21 +6388,43 @@ class StateManager {
       endDate
     };
 
+    // Determine target ending date for the current financial year being ended
+    let currentFyEndDate = currentFyEnd;
+    if (!currentFyEndDate && startDate) {
+      const parts = startDate.split("-").map(Number);
+      const dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
+      dateObj.setDate(dateObj.getDate() - 1);
+      const prevYearEndYear = dateObj.getFullYear();
+      const prevYearEndMonth = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const prevYearEndDate = String(dateObj.getDate()).padStart(2, '0');
+      currentFyEndDate = `${prevYearEndYear}-${prevYearEndMonth}-${prevYearEndDate}`;
+    }
+
+    // Cannot end financial year if any transaction exists after currentFyEndDate
+    const checkRes = this.checkTransactionsAfterDate(currentFyEndDate);
+    if (checkRes.hasTransactions) {
+      return {
+        success: false,
+        message: checkRes.message
+      };
+    }
+
+    // Recompute all stocks and clear balance cache before computing closing balances
+    this.recomputeAllStocks();
+    this._accountBalancesCache = null;
+
     // Calculate closing balances and stock from the CURRENT financial year to carry forward
-    const closingBalances = this.getAccountBalances(); // uses active (which is previous) year
+    const closingBalances = this.getAccountBalances(currentFyEndDate);
     
     // We also want to compile current materials closing stocks
-    // Our active materials list contains computed stocks (via recomputeAllStocks done on load/save)
+    // If closing stock of last FY is negative, carry it forward as negative opening stock in next FY
     const materialsCarrier = JSON.parse(JSON.stringify(this.materials));
     materialsCarrier.forEach(m => {
       m.batches = m.batches || [];
-      // Carry forward batch stocks
       m.batches.forEach(b => {
         b.openingStock = parseFloat(b.stock) || 0;
-        b.stock = parseFloat(b.stock) || 0;
+        b.stock = b.openingStock;
       });
-      // Filter out zero stock batches, but keep at least one default if all are 0
-      m.batches = m.batches.filter(b => b.openingStock > 0);
       if (m.batches.length === 0) {
         m.batches.push({
           batchNo: String(m.landingCost || 0),
@@ -3978,16 +6445,14 @@ class StateManager {
       const balData = closingBalances[l.code];
       const bal = balData ? balData.balance : 0;
       
-      const groupName = (l.groupName || "").toUpperCase();
-      const isPL = ["SALES ACCOUNT", "PURCHASE ACCOUNT", "INCOME", "EXPENSE", "REVENUE", "SALES", "PURCHASE"].some(x => groupName.includes(x)) || 
-                   ["L017", "L018", "L019", "L020", "L021", "L022", "L023", "L024", "L025"].includes(l.code);
+      const isPL = this.isPLAccount(l);
       
       if (isPL) {
         // Income & Expense balances close out, reset to 0 in the new year
         l.openingBalance = 0;
         l.balanceType = "Debit";
       } else {
-        // Carry forward balance for Balance Sheet items
+        // Carry forward balance for Balance Sheet items (Assets, Liabilities, Capital)
         if (bal >= 0) {
           l.openingBalance = bal;
           l.balanceType = "Debit";
@@ -3998,15 +6463,38 @@ class StateManager {
       }
     });
 
-    // Automatically create Profit & Loss ledger under CAPITAL ACCOUNT for carrying forward
-    const activeFyId = this.getActiveFyId();
-    const currentFy = company.financialYears.find(fy => fy.id === activeFyId) || { name: "Default Year" };
-    const prevYearName = currentFy.name;
-    const profitLossData = this.getProfitLoss();
-    const netProfit = profitLossData.netProfit || 0;
+    // Automatically create Profit & Loss ledger under CAPITAL ACCOUNT for carrying forward to next FY
+    const activeFy = (company.financialYears || []).find(fy => fy.id === activeFyId);
+    const fyStart = (activeFy && activeFy.startDate) ? activeFy.startDate : (company.financialYearStarts || "");
+    const currBs = this.getBalanceSheet(fyStart, currentFyEndDate);
+    const currentYearNetProfit = (currBs && currBs.liabilities) ? currBs.liabilities.retainedEarnings : (this.getProfitLoss(fyStart, currentFyEndDate).netProfit || 0);
 
-    const plLedgerName = `PROFIT/LOSS OF THE F.Y. ${prevYearName}`;
-    let plLedger = ledgersCarrier.find(l => l.name === plLedgerName);
+    const isPlAccumulatedName = (name) => {
+      const u = String(name || "").trim().toUpperCase();
+      return u === "PROFIT AND LOSS ACCOUNT PREVIOUS YEAR" || 
+             u === "PROFIT AND LOSS ACCOUNT PREVIOUS YEARS" || 
+             u === "PREVIOUS YEAR PROFIT" || 
+             u === "PREVIOUS YEAR PROFIT A/C" || 
+             u === "PREVIOUS YEARS PROFIT" || 
+             u === "RETAINED EARNINGS" || 
+             u.includes("PROFIT/LOSS OF THE F.Y.") ||
+             (u.includes("PREVIOUS YEAR") && u.includes("PROFIT")) ||
+             (u.includes("PREVIOUS YEARS") && u.includes("PROFIT"));
+    };
+
+    let prevAccumulatedPl = 0;
+    this.ledgers.forEach(l => {
+      if (isPlAccumulatedName(l.name)) {
+        const balData = closingBalances[l.code];
+        const bal = balData ? balData.balance : (l.balanceType === "Debit" ? (l.openingBalance || 0) : -(l.openingBalance || 0));
+        prevAccumulatedPl += (bal < 0 ? Math.abs(bal) : -Math.abs(bal));
+      }
+    });
+
+    const totalAccumulatedProfit = currentYearNetProfit + prevAccumulatedPl;
+    const defaultPlLedgerName = "PROFIT AND LOSS ACCOUNT PREVIOUS YEAR";
+
+    let plLedger = ledgersCarrier.find(l => isPlAccumulatedName(l.name));
     if (!plLedger) {
       let maxNum = 0;
       ledgersCarrier.forEach(l => {
@@ -4018,27 +6506,44 @@ class StateManager {
       const targetCode = "L" + String(maxNum + 1).padStart(3, "0");
       plLedger = {
         code: targetCode,
-        name: plLedgerName,
+        name: defaultPlLedgerName,
         groupName: "CAPITAL ACCOUNT"
       };
       ledgersCarrier.push(plLedger);
+    } else {
+      plLedger.groupName = "CAPITAL ACCOUNT";
     }
-    plLedger.openingBalance = Math.abs(netProfit);
-    plLedger.balanceType = netProfit >= 0 ? "Credit" : "Debit";
 
-    // Also copy over contacts and carry forward their closing balances
+    plLedger.openingBalance = Math.abs(totalAccumulatedProfit);
+    plLedger.balanceType = totalAccumulatedProfit >= 0 ? "Credit" : "Debit";
+
+    // Also copy over contacts and carry forward their closing balances with explicit balanceType
     const contactsCarrier = JSON.parse(JSON.stringify(this.contacts));
     contactsCarrier.forEach(c => {
       const balData = closingBalances[c.id];
       const bal = balData ? balData.balance : 0;
-      c.openingBalance = bal;
+      if (bal >= 0) {
+        c.openingBalance = bal;
+        c.balanceType = "Debit";
+      } else {
+        c.openingBalance = Math.abs(bal);
+        c.balanceType = "Credit";
+      }
       c.balance = bal;
       if (c.siteType === "multiple" && Array.isArray(c.sites)) {
         c.openingBalances = c.openingBalances || {};
+        c.siteBalanceTypes = c.siteBalanceTypes || {};
         c.sites.forEach(site => {
           const siteKey = `${c.id}::${site}`;
           const siteBalData = closingBalances[siteKey];
-          c.openingBalances[site] = siteBalData ? siteBalData.balance : 0;
+          const siteBal = siteBalData ? siteBalData.balance : 0;
+          if (siteBal >= 0) {
+            c.openingBalances[site] = siteBal;
+            c.siteBalanceTypes[site] = "Debit";
+          } else {
+            c.openingBalances[site] = Math.abs(siteBal);
+            c.siteBalanceTypes[site] = "Credit";
+          }
         });
       }
     });
@@ -4076,43 +6581,104 @@ class StateManager {
       gstMaster: this.gstMaster || []
     };
 
-    // Update active/current financial year's ending date to be the day before the new FY starts
-    const existingFy = company.financialYears.find(fy => fy.id === activeFyId);
-    if (existingFy && startDate) {
-      const parts = startDate.split("-").map(Number);
-      const dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
-      dateObj.setDate(dateObj.getDate() - 1);
-      const prevYearEndYear = dateObj.getFullYear();
-      const prevYearEndMonth = String(dateObj.getMonth() + 1).padStart(2, '0');
-      const prevYearEndDate = String(dateObj.getDate()).padStart(2, '0');
-      existingFy.endDate = `${prevYearEndYear}-${prevYearEndMonth}-${prevYearEndDate}`;
+    // Update active/current financial year's ending date to the selected currentFyEndDate
+    const existingFy = company.financialYears.find(fy => String(fy.id) === String(activeFyId));
+    if (existingFy) {
+      if (currentFyEndDate) {
+        existingFy.endDate = currentFyEndDate;
+      }
 
-      // Update name of ended financial year to reflect its exact date period (e.g. 01-04-2026 to 30-08-2026)
-      const startFormatted = existingFy.startDate.split("-").reverse().join("-");
-      const endFormatted = existingFy.endDate.split("-").reverse().join("-");
-      existingFy.name = `${startFormatted} to ${endFormatted}`;
+      // Update name of ended financial year to reflect its exact date period (e.g. 01/04/2026 to 27/09/2026)
+      const startFormatted = existingFy.startDate ? existingFy.startDate.split("-").reverse().join("/") : (company.financialYearStarts ? company.financialYearStarts.split("-").reverse().join("/") : "");
+      const endFormatted = existingFy.endDate ? existingFy.endDate.split("-").reverse().join("/") : "";
+      existingFy.name = (startFormatted && endFormatted) ? `${startFormatted} to ${endFormatted}` : "Previous F.Y";
+    }
+
+    // Save the previous financial year's data in localStorage under its ended FY key
+    if (existingFy) {
+      const prevLsKey = `erp_company_data_${activeId}${existingFy.id === 'default' ? '' : '_' + existingFy.id}`;
+      const currentStoredData = localStorage.getItem(`erp_company_data_${activeId}`);
+      if (currentStoredData) {
+        localStorage.setItem(prevLsKey, currentStoredData);
+      }
     }
 
     // Set new active financial year name to Current F.Y
     newFy.name = "Current F.Y";
 
-    // Save the new company year in registered companies
+    // Update company root financial year date range to the new FY
+    company.financialYearStarts = startDate;
+    company.financialYearEnds = endDate;
+
+    // Save the new company year in registered companies and AWAIT server response FIRST
     company.financialYears.push(newFy);
-    this.saveRegisteredCompanies(companies);
+    await this.saveRegisteredCompanies(companies);
 
     // Save the new year's database state
-    localStorage.setItem(`erp_company_data_${activeId}_${newFyId}`, JSON.stringify(newState));
+    const newLsKey = `erp_company_data_${activeId}${newFyId === 'default' ? '' : '_' + newFyId}`;
+    localStorage.setItem(newLsKey, JSON.stringify(newState));
+    this._serverLoadedData = newState;
+    this._serverLoadedData._fyId = newFyId;
     
     // Sync with the server API for this new fyId
-    const host = window.location.hostname || "localhost";
-    const saveFyUrl = (typeof window._getApiUrl === "function")
-      ? window._getApiUrl(`/api/data/${activeId}/${newFyId}`)
-      : `http://${host}:3001/api/data/${activeId}/${newFyId}`;
-    fetch(saveFyUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newState)
-    }).catch(e => console.error("Syncing new financial year failed:", e));
+    const saveFyUrl = this.getBackendApiUrl(`/api/data/${activeId}/${newFyId}`);
+    if (saveFyUrl) {
+      try {
+        await fetch(saveFyUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newState)
+        });
+      } catch (e) {
+        console.error("Syncing new financial year failed:", e);
+      }
+    }
+
+    // Sync new FY state and previous FY state to Supabase Cloud Database
+    const originalMaterials = this.materials;
+    const originalContacts = this.contacts;
+    const originalLedgers = this.ledgers;
+    const originalInvoices = this.invoices;
+    const originalTransactions = this.transactions;
+    const originalPurchases = this.purchases;
+    const originalSalesReturns = this.salesReturns;
+    const originalPurchaseReturns = this.purchaseReturns;
+
+    this.materials = newState.materials;
+    this.contacts = newState.contacts;
+    this.ledgers = newState.ledgers;
+    this.invoices = newState.invoices;
+    this.transactions = newState.transactions;
+    this.purchases = newState.purchases;
+    this.salesReturns = newState.salesReturns;
+    this.purchaseReturns = newState.purchaseReturns;
+
+    try {
+      await this.syncToSupabase(activeId, newFyId);
+    } catch (e) {}
+
+    if (existingFy) {
+      this.materials = originalMaterials;
+      this.contacts = originalContacts;
+      this.ledgers = originalLedgers;
+      this.invoices = originalInvoices;
+      this.transactions = originalTransactions;
+      this.purchases = originalPurchases;
+      this.salesReturns = originalSalesReturns;
+      this.purchaseReturns = originalPurchaseReturns;
+      try {
+        await this.syncToSupabase(activeId, existingFy.id);
+      } catch (e) {}
+    } else {
+      this.materials = newState.materials;
+      this.contacts = newState.contacts;
+      this.ledgers = newState.ledgers;
+      this.invoices = newState.invoices;
+      this.transactions = newState.transactions;
+      this.purchases = newState.purchases;
+      this.salesReturns = newState.salesReturns;
+      this.purchaseReturns = newState.purchaseReturns;
+    }
 
     return { success: true, newFy };
   }
@@ -4173,10 +6739,13 @@ class StateManager {
     this.conversions = prevData.conversions || [];
     
     this.recomputeAllStocks();
+    this._accountBalancesCache = null;
     const prevClosingBalances = this.getAccountBalances();
     const prevClosingMaterials = JSON.parse(JSON.stringify(this.materials));
-    const prevProfitLossData = this.getProfitLoss();
-    const netProfit = prevProfitLossData.netProfit || 0;
+    const prevStart = (prevFy && prevFy.startDate) ? prevFy.startDate : (company.financialYearStarts || "");
+    const prevEnd = (prevFy && prevFy.endDate) ? prevFy.endDate : (company.financialYearEnds || "");
+    const prevBs = this.getBalanceSheet(prevStart, prevEnd);
+    const netProfit = (prevBs && prevBs.liabilities) ? prevBs.liabilities.retainedEarnings : (this.getProfitLoss(prevStart, prevEnd).netProfit || 0);
 
     // Swap state back to current year
     this.transactions = originalState.transactions;
@@ -4189,15 +6758,37 @@ class StateManager {
     this.purchaseReturns = originalState.purchaseReturns;
     this.stockAdjustments = originalState.stockAdjustments;
     this.conversions = originalState.conversions;
+    
+    // Clear cache again after restoring current year state context
+    this._accountBalancesCache = null;
+
+    // Copy any missing ledgers created in previous year into current year
+    (prevData.ledgers || []).forEach(pl => {
+      if (!this.ledgers.some(l => l.code === pl.code || String(l.name || "").toUpperCase() === String(pl.name || "").toUpperCase())) {
+        this.ledgers.push(JSON.parse(JSON.stringify(pl)));
+      }
+    });
+
+    // Copy any missing contacts created in previous year into current year
+    (prevData.contacts || []).forEach(pc => {
+      if (!this.contacts.some(c => c.id === pc.id)) {
+        this.contacts.push(JSON.parse(JSON.stringify(pc)));
+      }
+    });
+
+    // Copy any missing materials created in previous year into current year
+    (prevData.materials || []).forEach(pm => {
+      if (!this.materials.some(m => m.id === pm.id)) {
+        this.materials.push(JSON.parse(JSON.stringify(pm)));
+      }
+    });
 
     // Update current year's ledger opening balances
     this.ledgers.forEach(l => {
       const balData = prevClosingBalances[l.code];
       const bal = balData ? balData.balance : 0;
       
-      const groupName = (l.groupName || "").toUpperCase();
-      const isPL = ["SALES ACCOUNT", "PURCHASE ACCOUNT", "INCOME", "EXPENSE", "REVENUE", "SALES", "PURCHASE"].some(x => groupName.includes(x)) || 
-                   ["L017", "L018", "L019", "L020", "L021", "L022", "L023", "L024", "L025"].includes(l.code);
+      const isPL = this.isPLAccount(l);
       
       if (!isPL) {
         if (bal >= 0) {
@@ -4213,10 +6804,33 @@ class StateManager {
       }
     });
 
+    // Calculate accumulated profit/loss across previous years to carry forward
+    let prevAccumulatedPl = 0;
+    const isPlAccumulatedName = (name) => {
+      const u = String(name || "").trim().toUpperCase();
+      return u === "PROFIT AND LOSS ACCOUNT PREVIOUS YEAR" || 
+             u === "PROFIT AND LOSS ACCOUNT PREVIOUS YEARS" || 
+             u === "PREVIOUS YEAR PROFIT" || 
+             u === "PREVIOUS YEAR PROFIT A/C" || 
+             u === "PREVIOUS YEARS PROFIT" || 
+             u === "RETAINED EARNINGS" || 
+             u.includes("PROFIT/LOSS OF THE F.Y.") ||
+             (u.includes("PREVIOUS YEAR") && u.includes("PROFIT")) ||
+             (u.includes("PREVIOUS YEARS") && u.includes("PROFIT"));
+    };
+
+    (prevData.ledgers || []).forEach(l => {
+      if (isPlAccumulatedName(l.name)) {
+        const balData = prevClosingBalances[l.code];
+        const bal = balData ? balData.balance : (l.balanceType === "Debit" ? (parseFloat(l.openingBalance) || 0) : -(parseFloat(l.openingBalance) || 0));
+        prevAccumulatedPl += (bal < 0 ? Math.abs(bal) : -Math.abs(bal));
+      }
+    });
+    const totalAccumulatedProfit = netProfit + prevAccumulatedPl;
+
     // Automatically create or update Profit & Loss ledger under CAPITAL ACCOUNT for current year
-    const prevYearName = prevFy.name;
-    const plLedgerName = `PROFIT/LOSS OF THE F.Y. ${prevYearName}`;
-    let plLedger = this.ledgers.find(l => l.name === plLedgerName);
+    const defaultPlLedgerName = "PROFIT AND LOSS ACCOUNT PREVIOUS YEAR";
+    let plLedger = this.ledgers.find(l => isPlAccumulatedName(l.name));
     if (!plLedger) {
       let maxNum = 0;
       this.ledgers.forEach(l => {
@@ -4228,26 +6842,42 @@ class StateManager {
       const targetCode = "L" + String(maxNum + 1).padStart(3, "0");
       plLedger = {
         code: targetCode,
-        name: plLedgerName,
+        name: defaultPlLedgerName,
         groupName: "CAPITAL ACCOUNT"
       };
       this.ledgers.push(plLedger);
+    } else {
+      plLedger.groupName = "CAPITAL ACCOUNT";
     }
-    plLedger.openingBalance = Math.abs(netProfit);
-    plLedger.balanceType = netProfit >= 0 ? "Credit" : "Debit";
+    plLedger.openingBalance = Math.abs(totalAccumulatedProfit);
+    plLedger.balanceType = totalAccumulatedProfit >= 0 ? "Credit" : "Debit";
 
     // Update current year's contact opening balances
     this.contacts.forEach(c => {
       const balData = prevClosingBalances[c.id];
       const bal = balData ? balData.balance : 0;
-      c.openingBalance = bal;
+      if (bal >= 0) {
+        c.openingBalance = bal;
+        c.balanceType = "Debit";
+      } else {
+        c.openingBalance = Math.abs(bal);
+        c.balanceType = "Credit";
+      }
       c.balance = bal;
       if (c.siteType === "multiple" && Array.isArray(c.sites)) {
         c.openingBalances = c.openingBalances || {};
+        c.siteBalanceTypes = c.siteBalanceTypes || {};
         c.sites.forEach(site => {
           const siteKey = `${c.id}::${site}`;
           const siteBalData = prevClosingBalances[siteKey];
-          c.openingBalances[site] = siteBalData ? siteBalData.balance : 0;
+          const siteBal = siteBalData ? siteBalData.balance : 0;
+          if (siteBal >= 0) {
+            c.openingBalances[site] = siteBal;
+            c.siteBalanceTypes[site] = "Debit";
+          } else {
+            c.openingBalances[site] = Math.abs(siteBal);
+            c.siteBalanceTypes[site] = "Credit";
+          }
         });
       }
     });
@@ -4256,43 +6886,28 @@ class StateManager {
     this.materials.forEach(m => {
       const prevMat = prevClosingMaterials.find(pm => pm.id === m.id);
       if (prevMat) {
-        m.batches = m.batches || [];
         const prevBatches = prevMat.batches || [];
-        
-        m.batches.forEach(b => {
-          const prevB = prevBatches.find(pb => pb.batchNo === b.batchNo);
-          if (prevB) {
-            b.openingStock = parseFloat(prevB.stock) || 0;
-            b.stock = parseFloat(prevB.stock) || 0;
-          }
-        });
-        
-        // Add any batches that were created in the previous year but don't exist in current year yet
-        prevBatches.forEach(pb => {
-          if (!m.batches.some(b => b.batchNo === pb.batchNo)) {
-            m.batches.push({
-              batchNo: pb.batchNo,
-              landingCost: pb.landingCost || 0,
-              sellingPrice: pb.sellingPrice || 0,
-              mrp: pb.mrp || 0,
-              openingStock: parseFloat(pb.stock) || 0,
-              stock: parseFloat(pb.stock) || 0
-            });
-          }
-        });
-
-        m.batches = m.batches.filter(b => b.openingStock > 0);
-        if (m.batches.length === 0) {
-          m.batches.push({
+        if (prevBatches.length > 0) {
+          m.batches = prevBatches.map(pb => ({
+            batchNo: String(pb.batchNo != null ? pb.batchNo : (prevMat.landingCost || 0)).trim(),
+            landingCost: parseFloat(pb.landingCost) || 0,
+            sellingPrice: parseFloat(pb.sellingPrice || pb.sellingRate) || 0,
+            mrp: parseFloat(pb.mrp) || 0,
+            openingStock: parseFloat(pb.stock) || 0,
+            stock: parseFloat(pb.stock) || 0
+          }));
+        } else {
+          m.batches = [{
             batchNo: String(m.landingCost || 0),
             landingCost: m.landingCost || 0,
             sellingPrice: m.sellingPrice || m.gstExclRate || 0,
             mrp: m.mrp || 0,
-            openingStock: 0,
-            stock: 0
-          });
+            openingStock: parseFloat(prevMat.stock) || 0,
+            stock: parseFloat(prevMat.stock) || 0
+          }];
         }
         m.openingStock = m.batches.reduce((sum, b) => sum + (parseFloat(b.openingStock) || 0), 0);
+        m.stock = m.openingStock;
       }
     });
 
@@ -4328,22 +6943,57 @@ class StateManager {
 
     const nextData = JSON.parse(nextStored);
 
+    // Purge any stray transactions dated prior to next financial year start date
+    if (nextFy.startDate) {
+      nextData.purchases = (nextData.purchases || []).filter(p => p.date && p.date >= nextFy.startDate);
+      nextData.invoices = (nextData.invoices || []).filter(i => i.date && i.date >= nextFy.startDate);
+      nextData.transactions = (nextData.transactions || []).filter(t => t.date && t.date >= nextFy.startDate);
+      nextData.salesReturns = (nextData.salesReturns || []).filter(sr => sr.date && sr.date >= nextFy.startDate);
+      nextData.purchaseReturns = (nextData.purchaseReturns || []).filter(pr => pr.date && pr.date >= nextFy.startDate);
+      nextData.stockAdjustments = (nextData.stockAdjustments || []).filter(sa => sa.date && sa.date >= nextFy.startDate);
+    }
+
     // Compute current year's closing balances
     this.recomputeAllStocks();
+    this._accountBalancesCache = null;
     const currentClosingBalances = this.getAccountBalances();
     const currentClosingMaterials = JSON.parse(JSON.stringify(this.materials));
-    const currentProfitLossData = this.getProfitLoss();
-    const netProfit = currentProfitLossData.netProfit || 0;
+    const currentFyObj = company.financialYears[currentIndex];
+    const currStart = (currentFyObj && currentFyObj.startDate) ? currentFyObj.startDate : (company.financialYearStarts || "");
+    const currEnd = (currentFyObj && currentFyObj.endDate) ? currentFyObj.endDate : (company.financialYearEnds || "");
+    const currBs = this.getBalanceSheet(currStart, currEnd);
+    const netProfit = (currBs && currBs.liabilities) ? currBs.liabilities.retainedEarnings : (this.getProfitLoss(currStart, currEnd).netProfit || 0);
+
+    // Copy any missing ledgers created in current year into next year
+    nextData.ledgers = nextData.ledgers || [];
+    (this.ledgers || []).forEach(cl => {
+      if (!nextData.ledgers.some(l => l.code === cl.code || String(l.name || "").toUpperCase() === String(cl.name || "").toUpperCase())) {
+        nextData.ledgers.push(JSON.parse(JSON.stringify(cl)));
+      }
+    });
+
+    // Copy any missing contacts created in current year into next year
+    nextData.contacts = nextData.contacts || [];
+    (this.contacts || []).forEach(cc => {
+      if (!nextData.contacts.some(c => c.id === cc.id)) {
+        nextData.contacts.push(JSON.parse(JSON.stringify(cc)));
+      }
+    });
+
+    // Copy any missing materials created in current year into next year
+    nextData.materials = nextData.materials || [];
+    (this.materials || []).forEach(cm => {
+      if (!nextData.materials.some(m => m.id === cm.id)) {
+        nextData.materials.push(JSON.parse(JSON.stringify(cm)));
+      }
+    });
 
     // Update next year's ledger opening balances in nextData
-    nextData.ledgers = nextData.ledgers || [];
     nextData.ledgers.forEach(l => {
       const balData = currentClosingBalances[l.code];
       const bal = balData ? balData.balance : 0;
       
-      const groupName = (l.groupName || "").toUpperCase();
-      const isPL = ["SALES ACCOUNT", "PURCHASE ACCOUNT", "INCOME", "EXPENSE", "REVENUE", "SALES", "PURCHASE"].some(x => groupName.includes(x)) || 
-                   ["L017", "L018", "L019", "L020", "L021", "L022", "L023", "L024", "L025"].includes(l.code);
+      const isPL = this.isPLAccount(l);
       
       if (isPL) {
         l.openingBalance = 0;
@@ -4359,10 +7009,33 @@ class StateManager {
       }
     });
 
+    // Calculate accumulated profit/loss across current & previous years to carry forward to next year
+    let currentAccumulatedPl = 0;
+    const isPlAccumulatedName = (name) => {
+      const u = String(name || "").trim().toUpperCase();
+      return u === "PROFIT AND LOSS ACCOUNT PREVIOUS YEAR" || 
+             u === "PROFIT AND LOSS ACCOUNT PREVIOUS YEARS" || 
+             u === "PREVIOUS YEAR PROFIT" || 
+             u === "PREVIOUS YEAR PROFIT A/C" || 
+             u === "PREVIOUS YEARS PROFIT" || 
+             u === "RETAINED EARNINGS" || 
+             u.includes("PROFIT/LOSS OF THE F.Y.") ||
+             (u.includes("PREVIOUS YEAR") && u.includes("PROFIT")) ||
+             (u.includes("PREVIOUS YEARS") && u.includes("PROFIT"));
+    };
+
+    (this.ledgers || []).forEach(l => {
+      if (isPlAccumulatedName(l.name)) {
+        const balData = currentClosingBalances[l.code];
+        const bal = balData ? balData.balance : (l.balanceType === "Debit" ? (parseFloat(l.openingBalance) || 0) : -(parseFloat(l.openingBalance) || 0));
+        currentAccumulatedPl += (bal < 0 ? Math.abs(bal) : -Math.abs(bal));
+      }
+    });
+    const totalAccumulatedProfit = netProfit + currentAccumulatedPl;
+
     // Update next year's P&L carry forward ledger
-    const prevYearName = company.financialYears[currentIndex].name;
-    const plLedgerName = `PROFIT/LOSS OF THE F.Y. ${prevYearName}`;
-    let plLedger = nextData.ledgers.find(l => l.name === plLedgerName);
+    const defaultPlLedgerName = "PROFIT AND LOSS ACCOUNT PREVIOUS YEAR";
+    let plLedger = nextData.ledgers.find(l => isPlAccumulatedName(l.name));
     if (!plLedger) {
       let maxNum = 0;
       nextData.ledgers.forEach(l => {
@@ -4374,81 +7047,93 @@ class StateManager {
       const targetCode = "L" + String(maxNum + 1).padStart(3, "0");
       plLedger = {
         code: targetCode,
-        name: plLedgerName,
+        name: defaultPlLedgerName,
         groupName: "CAPITAL ACCOUNT"
       };
       nextData.ledgers.push(plLedger);
+    } else {
+      plLedger.groupName = "CAPITAL ACCOUNT";
     }
-    plLedger.openingBalance = Math.abs(netProfit);
-    plLedger.balanceType = netProfit >= 0 ? "Credit" : "Debit";
+    plLedger.openingBalance = Math.abs(totalAccumulatedProfit);
+    plLedger.balanceType = totalAccumulatedProfit >= 0 ? "Credit" : "Debit";
 
     // Update next year's material opening stock
     nextData.materials = nextData.materials || [];
     nextData.materials.forEach(nm => {
       const cm = currentClosingMaterials.find(x => x.id === nm.id);
       if (cm) {
-        nm.batches = nm.batches || [];
-        cm.batches = cm.batches || [];
-        
-        nm.batches.forEach(nb => {
-          const cb = cm.batches.find(x => x.batchNo === nb.batchNo);
-          if (cb) {
-            nb.openingStock = parseFloat(cb.stock) || 0;
-            nb.stock = parseFloat(cb.stock) || 0;
-          }
-        });
-        
-        cm.batches.forEach(cb => {
-          if (parseFloat(cb.stock) > 0 && !nm.batches.some(x => x.batchNo === cb.batchNo)) {
-            nm.batches.push({
-              batchNo: cb.batchNo,
-              landingCost: cb.landingCost || 0,
-              sellingPrice: cb.sellingPrice || cb.sellingRate || 0,
-              mrp: cb.mrp || 0,
-              openingStock: parseFloat(cb.stock) || 0,
-              stock: parseFloat(cb.stock) || 0
-            });
-          }
-        });
-
+        const cmBatches = cm.batches || [];
+        if (cmBatches.length > 0) {
+          nm.batches = cmBatches.map(cb => ({
+            batchNo: String(cb.batchNo != null ? cb.batchNo : (cm.landingCost || 0)).trim(),
+            landingCost: parseFloat(cb.landingCost) || 0,
+            sellingPrice: parseFloat(cb.sellingPrice || cb.sellingRate) || 0,
+            mrp: parseFloat(cb.mrp) || 0,
+            openingStock: parseFloat(cb.stock) || 0,
+            stock: parseFloat(cb.stock) || 0
+          }));
+        } else {
+          nm.batches = [{
+            batchNo: String(nm.landingCost || 0),
+            landingCost: nm.landingCost || 0,
+            sellingPrice: nm.sellingPrice || nm.gstExclRate || 0,
+            mrp: nm.mrp || 0,
+            openingStock: parseFloat(cm.stock) || 0,
+            stock: parseFloat(cm.stock) || 0
+          }];
+        }
         nm.openingStock = nm.batches.reduce((sum, b) => sum + (parseFloat(b.openingStock) || 0), 0);
         nm.stock = nm.openingStock;
       }
     });
 
-    // Update next year's contact opening balances
+    // Update next year's contact opening balances with explicit balanceType
     nextData.contacts = nextData.contacts || [];
     nextData.contacts.forEach(nc => {
       const cc = this.contacts.find(x => x.id === nc.id);
       if (cc) {
         const balData = currentClosingBalances[cc.id];
         const bal = balData ? balData.balance : 0;
-        nc.openingBalance = bal;
+        if (bal >= 0) {
+          nc.openingBalance = bal;
+          nc.balanceType = "Debit";
+        } else {
+          nc.openingBalance = Math.abs(bal);
+          nc.balanceType = "Credit";
+        }
         nc.balance = bal;
         
         if (cc.siteType === "multiple" && Array.isArray(cc.sites)) {
           nc.openingBalances = nc.openingBalances || {};
+          nc.siteBalanceTypes = nc.siteBalanceTypes || {};
           cc.sites.forEach(site => {
             const siteKey = `${cc.id}::${site}`;
             const siteBalData = currentClosingBalances[siteKey];
-            nc.openingBalances[site] = siteBalData ? siteBalData.balance : 0;
+            const siteBal = siteBalData ? siteBalData.balance : 0;
+            if (siteBal >= 0) {
+              nc.openingBalances[site] = siteBal;
+              nc.siteBalanceTypes[site] = "Debit";
+            } else {
+              nc.openingBalances[site] = Math.abs(siteBal);
+              nc.siteBalanceTypes[site] = "Credit";
+            }
           });
         }
       }
     });
 
     // Save and sync the next year state
-    localStorage.setItem(`erp_company_data_${activeId}_${nextFyId}`, JSON.stringify(nextData));
+    const nextLsKey = `erp_company_data_${activeId}${nextFyId === 'default' ? '' : '_' + nextFyId}`;
+    localStorage.setItem(nextLsKey, JSON.stringify(nextData));
     
-    const host = window.location.hostname || "localhost";
-    const saveNextUrl = (typeof window._getApiUrl === "function")
-      ? window._getApiUrl(`/api/data/${activeId}/${nextFyId}`)
-      : `http://${host}:3001/api/data/${activeId}/${nextFyId}`;
-    fetch(saveNextUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(nextData)
-    }).catch(e => console.error("Syncing updated next year opening balances failed:", e));
+    const saveNextUrl = this.getBackendApiUrl(`/api/data/${activeId}/${nextFyId}`);
+    if (saveNextUrl) {
+      fetch(saveNextUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(nextData)
+      }).catch(e => console.error("Syncing updated next year opening balances failed:", e));
+    }
 
     return { success: true };
   }
@@ -4463,14 +7148,56 @@ class StateManager {
         enableCessInSalesBill: false,
         enablePartyClosingBalanceBottom: true,
         enableHeadloader: true,
-        influencerLoyaltyRate: 1.0
+        influencerLoyaltyRate: 1.0,
+        allowPreviousYearEditing: false
       };
     }
     if (this.options.enableCessInSalesBill === undefined) this.options.enableCessInSalesBill = false;
     if (this.options.enablePartyClosingBalanceBottom === undefined) this.options.enablePartyClosingBalanceBottom = true;
     if (this.options.enableHeadloader === undefined) this.options.enableHeadloader = true;
     if (this.options.influencerLoyaltyRate === undefined) this.options.influencerLoyaltyRate = 1.0;
+    if (this.options.allowPreviousYearEditing === undefined) this.options.allowPreviousYearEditing = false;
     return this.options;
+  }
+
+  isPreviousFyLocked(txDate) {
+    const options = this.getOptions();
+    if (options.allowPreviousYearEditing === true) {
+      return { locked: false };
+    }
+
+    const activeCompanyId = this.getActiveCompanyId();
+    const activeFyId = this.getActiveFyId();
+    const companies = this.getRegisteredCompanies();
+    const company = companies.find(c => String(c.id) === String(activeCompanyId));
+
+    if (!company || !company.financialYears || company.financialYears.length <= 1) {
+      return { locked: false };
+    }
+
+    const fys = company.financialYears;
+    const latestFy = fys[fys.length - 1];
+
+    if (activeFyId && String(activeFyId) !== String(latestFy.id)) {
+      const activeFyObj = fys.find(f => String(f.id) === String(activeFyId));
+      const label = activeFyObj ? this.getFyDisplayLabel(activeFyObj) : activeFyId;
+      return {
+        locked: true,
+        reason: `PREVIOUS FINANCIAL YEAR LOCKED:\n\nEditing and entering transactions in Previous Financial Years is TURNED OFF in Admin Panel settings.\n\nCurrent Active Period (${label}) is a Previous Financial Year. Turn ON 'Allow Previous Year Editing' in Admin Panel to modify this period.`
+      };
+    }
+
+    if (txDate && latestFy.startDate) {
+      const formattedTxDate = toIsoDateStr(txDate);
+      if (formattedTxDate && formattedTxDate < latestFy.startDate) {
+        return {
+          locked: true,
+          reason: `PREVIOUS FINANCIAL YEAR LOCKED:\n\nTransaction date (${formattedTxDate.split('-').reverse().join('/')}) falls in a Previous Financial Year (prior to ${latestFy.startDate.split('-').reverse().join('/')}).\n\nEditing and entry in Previous Financial Years is TURNED OFF in Admin Panel settings.`
+        };
+      }
+    }
+
+    return { locked: false };
   }
 
   updateOptions(newOptions) {
@@ -4760,31 +7487,33 @@ class StateManager {
       .sort((a, b) => (b.prefix || "").length - (a.prefix || "").length);
 
     this.seriesMaster.forEach(series => {
-      const prefix = (series.prefix || "").toUpperCase();
+      const prefix = series.prefix || "";
+      const prefixUpper = prefix.toUpperCase();
       const txType = (series.txType || "").toLowerCase();
       let maxUsed = (series.startingNumber || 1) - 1;
 
       if (txType.includes("purchase")) {
         const purList = this.purchases || [];
         purList.forEach(pur => {
-          if (!pur) return;
-          const vno = String(pur.voucherNo || pur.id || "").trim();
+          if (!pur || pur.isCancelled || pur.isCanceled || String(pur.status).toUpperCase() === "CANCELLED") return;
+          const vno = String(pur.voucherNo || pur.refNo || "").trim();
           if (!vno) return;
           
           let matchesThisSeries = false;
-          if (pur.seriesId === series.id) {
-            matchesThisSeries = true;
-          } else if (!pur.seriesId && prefix) {
-            const vnoUpper = vno.toUpperCase();
-            const bestMatch = allPurSeries.find(s => vnoUpper.startsWith((s.prefix || "").toUpperCase()));
-            if (bestMatch && bestMatch.id === series.id) {
-              matchesThisSeries = true;
-            }
+          const vnoUpper = vno.toUpperCase();
+          if (prefixUpper) {
+            if (vnoUpper.startsWith(prefixUpper)) matchesThisSeries = true;
+          } else {
+            if (pur.seriesId === series.id) matchesThisSeries = true;
           }
 
           if (matchesThisSeries) {
-            const numPart = prefix && vno.toUpperCase().startsWith(prefix) ? vno.substring(prefix.length) : vno;
-            const num = parseInt(numPart, 10);
+            let num = NaN;
+            if (prefixUpper && vnoUpper.startsWith(prefixUpper)) {
+              num = parseInt(vno.substring(prefix.length), 10);
+            } else if (!prefixUpper) {
+              num = parseInt(vno, 10);
+            }
             if (!isNaN(num) && num > maxUsed) {
               maxUsed = num;
             }
@@ -4793,24 +7522,25 @@ class StateManager {
       } else {
         const invList = this.invoices || [];
         invList.forEach(inv => {
-          if (!inv) return;
-          const vno = String(inv.voucherNo || inv.refNo || inv.id || "").trim();
+          if (!inv || inv.isCancelled || inv.isCanceled || String(inv.status).toUpperCase() === "CANCELLED") return;
+          const vno = String(inv.voucherNo || inv.refNo || "").trim();
           if (!vno) return;
 
           let matchesThisSeries = false;
-          if (inv.seriesId === series.id) {
-            matchesThisSeries = true;
-          } else if (!inv.seriesId && prefix) {
-            const vnoUpper = vno.toUpperCase();
-            const bestMatch = allSalesSeries.find(s => vnoUpper.startsWith((s.prefix || "").toUpperCase()));
-            if (bestMatch && bestMatch.id === series.id) {
-              matchesThisSeries = true;
-            }
+          const vnoUpper = vno.toUpperCase();
+          if (prefixUpper) {
+            if (vnoUpper.startsWith(prefixUpper)) matchesThisSeries = true;
+          } else {
+            if (inv.seriesId === series.id) matchesThisSeries = true;
           }
 
           if (matchesThisSeries) {
-            const numPart = prefix && vno.toUpperCase().startsWith(prefix) ? vno.substring(prefix.length) : vno;
-            const num = parseInt(numPart, 10);
+            let num = NaN;
+            if (prefixUpper && vnoUpper.startsWith(prefixUpper)) {
+              num = parseInt(vno.substring(prefix.length), 10);
+            } else if (!prefixUpper) {
+              num = parseInt(vno, 10);
+            }
             if (!isNaN(num) && num > maxUsed) {
               maxUsed = num;
             }
@@ -4825,163 +7555,649 @@ class StateManager {
       }
     });
 
+    // Self-healing check: if an erroneous invoice with a jump (e.g. LSL-0399 right after LSL-0366) exists, fix it
+    const localSalesSeries = (this.seriesMaster || []).find(s => s.id === "SER-LOCAL-SALES" || (s.prefix === "LSL-" && s.txType === "Sales"));
+    if (localSalesSeries && this.invoices && this.invoices.length > 0) {
+      const lslInvs = this.invoices.filter(i => {
+        const vno = String(i.voucherNo || i.refNo || "").toUpperCase();
+        return vno.startsWith("LSL-");
+      });
+      const wrongInv = lslInvs.find(i => {
+        const vno = String(i.voucherNo || i.refNo || "").toUpperCase();
+        return vno === "LSL-0399" || vno === "LSL-399";
+      });
+      if (wrongInv) {
+        const otherNums = lslInvs
+          .filter(i => i !== wrongInv)
+          .map(i => parseInt(String(i.voucherNo || i.refNo).replace(/^[A-Za-z-]+/, ""), 10))
+          .filter(n => !isNaN(n))
+          .sort((a, b) => a - b);
+        const maxOther = otherNums.length > 0 ? otherNums[otherNums.length - 1] : 366;
+        const correctNum = maxOther + 1;
+        const correctVno = "LSL-" + String(correctNum).padStart(4, "0");
+        console.log(`[Self-Healing] Correcting erroneous invoice number ${wrongInv.voucherNo} -> ${correctVno}`);
+        
+        const oldVno = wrongInv.voucherNo;
+        wrongInv.voucherNo = correctVno;
+        wrongInv.refNo = correctVno;
+        
+        if (this.transactions) {
+          this.transactions.forEach(t => {
+            if (t.voucherNo === oldVno || t.reference === oldVno || t.reference === `INVOICE ${oldVno}` || t.reference === `${oldVno} COGS`) {
+              t.voucherNo = correctVno;
+              if (t.reference === oldVno) t.reference = correctVno;
+              else if (t.reference === `INVOICE ${oldVno}`) t.reference = `INVOICE ${correctVno}`;
+              else if (t.reference === `${oldVno} COGS`) t.reference = `${correctVno} COGS`;
+            }
+          });
+        }
+        localSalesSeries.currentNumber = correctNum + 1;
+        changed = true;
+      }
+    }
+
     if (changed) {
       this.saveState(true);
     }
   }
 
-  resequenceSeriesVoucherNumbers(shouldSave = true) {
-    if (!this.seriesMaster) return false;
-
-    let changed = false;
-
-    const isManualOrReturn = (t) => {
-      if (!t) return true;
-      const type = String(t.voucherType || "").toUpperCase();
-      const ref = String(t.reference || "").toUpperCase();
-      return type.includes("RETURN") || ref.includes("CREDIT NOTE") || ref.includes("DEBIT NOTE");
-    };
-
-    const allSalesSeries = (this.seriesMaster || [])
-      .filter(s => s.txType === "Sales" && s.prefix)
-      .sort((a, b) => (b.prefix || "").length - (a.prefix || "").length);
-
-    const allPurSeries = (this.seriesMaster || [])
-      .filter(s => s.txType === "Purchase" && s.prefix)
-      .sort((a, b) => (b.prefix || "").length - (a.prefix || "").length);
-
-    this.seriesMaster.forEach(series => {
-      const prefix = series.prefix || "";
-      const digits = parseInt(series.digits) || 4;
-      const startNum = parseInt(series.startingNumber) || 1;
-      const isPurchase = String(series.txType || "").toLowerCase().includes("purchase");
-
-      if (isPurchase) {
-        const purList = (this.purchases || []).filter(pur => {
-          if (!pur) return false;
-          if (pur.seriesId === series.id) return true;
-          if (!pur.seriesId && prefix) {
-            const vnoUpper = String(pur.voucherNo || pur.id || "").toUpperCase();
-            const bestMatch = allPurSeries.find(s => vnoUpper.startsWith((s.prefix || "").toUpperCase()));
-            if (bestMatch && bestMatch.id === series.id) return true;
-            if (vnoUpper.startsWith(prefix.toUpperCase())) return true;
-          }
-          return false;
-        });
-
-        purList.sort((a, b) => {
-          if (a.date !== b.date) return String(a.date || "").localeCompare(String(b.date || ""));
-          const matchA = String(a.voucherNo || a.id).match(/\d+$/);
-          const matchB = String(b.voucherNo || b.id).match(/\d+$/);
-          const numA = matchA ? parseInt(matchA[0], 10) : 0;
-          const numB = matchB ? parseInt(matchB[0], 10) : 0;
-          return numA - numB;
-        });
-
-        purList.forEach((pur, index) => {
-          pur.seriesId = series.id;
-          const seq = startNum + index;
-          const newVno = prefix + String(seq).padStart(digits, "0");
-          const oldVno = String(pur.voucherNo || pur.refNo || pur.id || "");
-
-          if (oldVno !== newVno) {
-            const prevId = pur.id;
-            pur.voucherNo = newVno;
-            pur.refNo = newVno;
-            pur.id = newVno;
-
-            (this.transactions || []).forEach(t => {
-              if (isManualOrReturn(t)) return;
-              if (t.reference === oldVno || t.reference === prevId) {
-                t.reference = newVno;
-                t.voucherNo = newVno;
-                changed = true;
-              }
-              if (t.id === oldVno || t.id === prevId) {
-                t.id = newVno;
-                t.voucherNo = newVno;
-                changed = true;
-              }
-            });
-            changed = true;
-          }
-        });
-
-        const targetCurrent = startNum + purList.length;
-        if (series.currentNumber !== targetCurrent) {
-          series.currentNumber = targetCurrent;
-          changed = true;
-        }
-      } else {
-        const invList = (this.invoices || []).filter(inv => {
-          if (!inv) return false;
-          if (inv.seriesId === series.id) return true;
-          if (!inv.seriesId && prefix) {
-            const vnoUpper = String(inv.voucherNo || inv.refNo || inv.id || "").toUpperCase();
-            const bestMatch = allSalesSeries.find(s => vnoUpper.startsWith((s.prefix || "").toUpperCase()));
-            if (bestMatch && bestMatch.id === series.id) return true;
-            if (vnoUpper.startsWith(prefix.toUpperCase()) || (prefix.toUpperCase().startsWith("B2B") && vnoUpper.startsWith("B2B"))) return true;
-          }
-          return false;
-        });
-
-        invList.sort((a, b) => {
-          if (a.date !== b.date) return String(a.date || "").localeCompare(String(b.date || ""));
-          const matchA = String(a.voucherNo || a.refNo || a.id).match(/\d+$/);
-          const matchB = String(b.voucherNo || b.refNo || b.id).match(/\d+$/);
-          const numA = matchA ? parseInt(matchA[0], 10) : 0;
-          const numB = matchB ? parseInt(matchB[0], 10) : 0;
-          return numA - numB;
-        });
-
-        invList.forEach((inv, index) => {
-          inv.seriesId = series.id;
-          const seq = startNum + index;
-          const newVno = prefix + String(seq).padStart(digits, "0");
-          const oldVno = String(inv.voucherNo || inv.refNo || inv.id || "");
-
-          if (oldVno !== newVno) {
-            const prevId = inv.id;
-            inv.voucherNo = newVno;
-            inv.refNo = newVno;
-            inv.id = newVno;
-
-            (this.transactions || []).forEach(t => {
-              if (isManualOrReturn(t)) return;
-              if (t.reference === oldVno || t.reference === prevId) {
-                t.reference = newVno;
-                t.voucherNo = newVno;
-                changed = true;
-              }
-              if (t.reference === `${oldVno} COGS` || t.reference === `${prevId} COGS`) {
-                t.reference = `${newVno} COGS`;
-                t.voucherNo = newVno;
-                changed = true;
-              }
-              if (t.id === oldVno || t.id === prevId) {
-                t.id = newVno;
-                t.voucherNo = newVno;
-                changed = true;
-              }
-            });
-            changed = true;
-          }
-        });
-
-        const targetCurrent = startNum + invList.length;
-        if (series.currentNumber !== targetCurrent) {
-          series.currentNumber = targetCurrent;
-          changed = true;
-        }
-      }
-    });
-
-    if (changed && shouldSave) {
-      this.saveState(true);
+  rearrangeBillsInSeries(seriesId, options = {}) {
+    if (!this.seriesMaster || !Array.isArray(this.seriesMaster)) {
+      return { success: false, message: "No series master configurations found." };
     }
 
-    return changed;
+    const {
+      excludeCancelled = true,
+      customStartingNumber = null,
+      txType: specifiedTxType = null
+    } = options;
+
+    let targetSeriesList = [];
+    if (seriesId === "ALL" || !seriesId) {
+      targetSeriesList = specifiedTxType 
+        ? this.seriesMaster.filter(s => String(s.txType || "").toLowerCase() === String(specifiedTxType).toLowerCase())
+        : this.seriesMaster;
+    } else {
+      targetSeriesList = this.seriesMaster.filter(s => String(s.id) === String(seriesId));
+    }
+
+    if (targetSeriesList.length === 0) {
+      return { success: false, message: "No matching series found to rearrange." };
+    }
+
+    let totalRearranged = 0;
+    const summaryDetails = [];
+
+    const extractNumber = (str) => {
+      if (!str) return 0;
+      const matches = String(str).match(/(\d+)/g);
+      if (matches && matches.length > 0) {
+        return parseInt(matches[matches.length - 1], 10) || 0;
+      }
+      return 0;
+    };
+
+    targetSeriesList.forEach(series => {
+      const sTxType = String(series.txType || "Sales").toLowerCase();
+      const prefix = series.prefix || "";
+      const prefixUpper = prefix.toUpperCase();
+      const digits = parseInt(series.digits) || 4;
+      let startNumber = customStartingNumber !== null ? parseInt(customStartingNumber) : (parseInt(series.startingNumber) || 1);
+      if (isNaN(startNumber) || startNumber < 1) startNumber = 1;
+
+      // Target the appropriate document collection for this series
+      const collectionType = sTxType.includes("purchase") ? "purchase" : "sales";
+
+      let targetCollection = [];
+      let collectionName = "";
+      if (sTxType.includes("purchase") && sTxType.includes("return")) {
+        targetCollection = this.purchaseReturns || [];
+        collectionName = "Purchase Return";
+      } else if (sTxType.includes("sales") && sTxType.includes("return")) {
+        targetCollection = this.salesReturns || [];
+        collectionName = "Sales Return";
+      } else if (sTxType.includes("purchase")) {
+        targetCollection = this.purchases || [];
+        collectionName = "Purchase";
+      } else {
+        targetCollection = this.invoices || [];
+        collectionName = "Sales";
+      }
+
+      // Deduplicate object references in collection
+      let seriesDocs = targetCollection.filter(doc => {
+        if (!doc) return false;
+        if (doc.seriesId && String(doc.seriesId) === String(series.id)) return true;
+        if (!doc.seriesId && prefixUpper) {
+          const vno = String(doc.voucherNo || doc.refNo || doc.id || "").toUpperCase();
+          if (vno.startsWith(prefixUpper)) return true;
+        }
+        return false;
+      });
+
+      // Deduplicate object references
+      const seenObjRefs = new Set();
+      const uniqueDocs = [];
+      seriesDocs.forEach(d => {
+        if (d && !seenObjRefs.has(d)) {
+          seenObjRefs.add(d);
+          uniqueDocs.push(d);
+        }
+      });
+      seriesDocs = uniqueDocs;
+
+      if (seriesDocs.length === 0) {
+        summaryDetails.push(`${series.name}: No bills found.`);
+        return;
+      }
+
+      if (excludeCancelled) {
+        const cancelledDocs = seriesDocs.filter(d => d.isCancelled || d.isCanceled || String(d.status).toUpperCase() === "CANCELLED");
+        cancelledDocs.forEach(cd => {
+          this.removeCancelledBill(cd.id, collectionType, false);
+        });
+        seriesDocs = seriesDocs.filter(d => !(d.isCancelled || d.isCanceled || String(d.status).toUpperCase() === "CANCELLED"));
+      }
+
+      if (seriesDocs.length === 0) {
+        summaryDetails.push(`${series.name}: All bills were cancelled and removed.`);
+        return;
+      }
+
+      // Sort in Ascending Order by Date (Chronological) FIRST, then by createdAt as tiebreaker
+      seriesDocs.sort((a, b) => {
+        const dateIsoA = toIsoDateStr(a.date);
+        const dateIsoB = toIsoDateStr(b.date);
+        if (dateIsoA !== dateIsoB) return dateIsoA.localeCompare(dateIsoB);
+
+        const createdA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const createdB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return createdA - createdB;
+      });
+
+      // Renumber sequentially without skipping
+      const idMappings = new Map();
+
+      seriesDocs.forEach((doc, idx) => {
+        const seqNum = startNumber + idx;
+        const newVoucherNo = prefix + String(seqNum).padStart(digits, '0');
+
+        const oldId = String(doc.id || "").trim();
+        const oldVno = String(doc.voucherNo || "").trim();
+        const oldRef = String(doc.refNo || "").trim();
+
+        doc.seriesId = series.id;
+        doc.voucherNo = newVoucherNo;
+        doc.refNo = newVoucherNo;
+        doc.id = newVoucherNo;
+        if (doc.billNo) doc.billNo = newVoucherNo;
+
+        if (oldId) idMappings.set(oldId, newVoucherNo);
+        if (oldVno && oldVno !== oldId) idMappings.set(oldVno, newVoucherNo);
+        if (oldRef && oldRef !== oldId && oldRef !== oldVno) idMappings.set(oldRef, newVoucherNo);
+      });
+
+      // Update double-entry accounting transactions references
+      if (this.transactions && Array.isArray(this.transactions)) {
+        this.transactions.forEach(tx => {
+          if (!tx) return;
+          const txIdStr = String(tx.id || "").trim();
+          const txVIdStr = String(tx.voucherId || "").trim();
+          const txVNoStr = String(tx.voucherNo || "").trim();
+          const txRefStr = String(tx.reference || "").trim();
+
+          idMappings.forEach((newVno, oldVal) => {
+            if (!oldVal) return;
+            if (txIdStr === oldVal) tx.id = newVno;
+            if (txVIdStr === oldVal) tx.voucherId = newVno;
+            if (txVNoStr === oldVal) tx.voucherNo = newVno;
+
+            if (txRefStr === oldVal) {
+              tx.reference = newVno;
+            } else if (txRefStr.includes(oldVal)) {
+              tx.reference = txRefStr.split(oldVal).join(newVno);
+            }
+
+            if (tx.description && tx.description.includes(oldVal)) {
+              tx.description = tx.description.split(oldVal).join(newVno);
+            }
+
+            if (tx.entries && Array.isArray(tx.entries)) {
+              tx.entries.forEach(e => {
+                if (e.description && e.description.includes(oldVal)) {
+                  e.description = e.description.split(oldVal).join(newVno);
+                }
+              });
+            }
+          });
+        });
+      }
+
+      // Recreate double-entry transactions for exact accounting precision
+      seriesDocs.forEach(doc => {
+        if (sTxType.includes("purchase")) {
+          this.recreatePurchaseTransaction(doc);
+        } else if (!sTxType.includes("return")) {
+          this.recreateInvoiceTransaction(doc);
+        }
+      });
+
+      totalRearranged += seriesDocs.length;
+      const endSeq = startNumber + seriesDocs.length - 1;
+      const startFmt = `${prefix}${String(startNumber).padStart(digits, '0')}`;
+      const endFmt = `${prefix}${String(endSeq).padStart(digits, '0')}`;
+      summaryDetails.push(`${series.name} (${series.txType}): ${seriesDocs.length} bill(s) rearranged in ascending order (${startFmt} to ${endFmt}).`);
+    });
+
+    // Sort this.invoices and this.purchases arrays in place by normalized date ascending & voucher number ascending
+    if (this.invoices && Array.isArray(this.invoices)) {
+      this.invoices.sort((a, b) => {
+        if (!a) return 1;
+        if (!b) return -1;
+        const dateA = toIsoDateStr(a.date);
+        const dateB = toIsoDateStr(b.date);
+        if (dateA !== dateB) return dateA.localeCompare(dateB);
+        const numA = extractNumber(a.voucherNo || a.refNo || a.id);
+        const numB = extractNumber(b.voucherNo || b.refNo || b.id);
+        if (numA !== numB) return numA - numB;
+        return String(a.voucherNo || a.id || "").localeCompare(String(b.voucherNo || b.id || ""));
+      });
+    }
+
+    if (this.purchases && Array.isArray(this.purchases)) {
+      this.purchases.sort((a, b) => {
+        if (!a) return 1;
+        if (!b) return -1;
+        const dateA = toIsoDateStr(a.date);
+        const dateB = toIsoDateStr(b.date);
+        if (dateA !== dateB) return dateA.localeCompare(dateB);
+        const numA = extractNumber(a.voucherNo || a.refNo || a.id);
+        const numB = extractNumber(b.voucherNo || b.refNo || b.id);
+        if (numA !== numB) return numA - numB;
+        return String(a.voucherNo || a.id || "").localeCompare(String(b.voucherNo || b.id || ""));
+      });
+    }
+
+    this.realignSeriesCurrentNumbers();
+    this.recomputeAllStocks();
+    this.invalidateBalancesCache();
+    this.saveState();
+    this.notifyListeners();
+
+    if (typeof window !== "undefined" && typeof window.dispatchEvent === "function") {
+      window.dispatchEvent(new CustomEvent("erp:data-refreshed"));
+    }
+
+    return {
+      success: true,
+      totalRearranged,
+      details: summaryDetails,
+      message: `Successfully rearranged ${totalRearranged} bill(s) in ascending order without skipping series numbers.`
+    };
   }
+
+
+  getVoucherCategory(tx) {
+    if (!tx) return null;
+
+    // Check if tx is attached to an invoice, purchase bill, or return document
+    const docRefSet = new Set();
+    (this.purchases || []).forEach(p => {
+      if (!p) return;
+      if (p.voucherNo) docRefSet.add(String(p.voucherNo).trim().toUpperCase());
+      if (p.refNo) docRefSet.add(String(p.refNo).trim().toUpperCase());
+      if (p.id) docRefSet.add(String(p.id).trim().toUpperCase());
+    });
+    (this.invoices || []).forEach(i => {
+      if (!i) return;
+      if (i.voucherNo) docRefSet.add(String(i.voucherNo).trim().toUpperCase());
+      if (i.refNo) docRefSet.add(String(i.refNo).trim().toUpperCase());
+      if (i.id) docRefSet.add(String(i.id).trim().toUpperCase());
+    });
+
+    const refClean = String(tx.reference || tx.voucherNo || tx.id || "").trim();
+    const refUpper = refClean.toUpperCase();
+    const refLower = refClean.toLowerCase();
+    const vTypeUpper = String(tx.voucherType || "").trim().toUpperCase();
+
+    if (docRefSet.has(refUpper) || refUpper.includes("COGS")) {
+      return null; // Invoice / Purchase transaction, not manual voucher
+    }
+
+    const cashBankIds = new Set(
+      (this.getLedgers() || [])
+        .filter(l => l.groupName === "CASH-IN-HAND" || l.groupName === "BANK ACCOUNTS")
+        .map(l => l.code)
+    );
+    cashBankIds.add("1010");
+    cashBankIds.add("1020");
+
+    const entries = tx.entries || [];
+    const debitsCashBank = entries.some(e => cashBankIds.has(e.accountId) && parseFloat(e.debit) > 0);
+    const creditsCashBank = entries.some(e => cashBankIds.has(e.accountId) && parseFloat(e.credit) > 0);
+    const creditsNonCashBank = entries.some(e => !cashBankIds.has(e.accountId) && parseFloat(e.credit) > 0);
+    const debitsNonCashBank = entries.some(e => !cashBankIds.has(e.accountId) && parseFloat(e.debit) > 0);
+    const onlyCashBank = entries.length > 0 && entries.every(e => cashBankIds.has(e.accountId));
+
+    // 1. Contra Check
+    if (
+      vTypeUpper === "CONTRA" || vTypeUpper === "CON" ||
+      refUpper.startsWith("CO-") || refUpper.startsWith("CNTR-") ||
+      (refUpper.startsWith("CO") && !refUpper.startsWith("COGS")) ||
+      (onlyCashBank && debitsCashBank && creditsCashBank && entries.length === 2)
+    ) {
+      return "contra";
+    }
+
+    // 2. Receipt Check
+    if (
+      vTypeUpper === "RECEIPT" || vTypeUpper === "REC" ||
+      refUpper.startsWith("RC-") || refUpper.startsWith("RC") ||
+      refLower.includes("receipt") || refLower.includes("rcpt") ||
+      (refUpper.startsWith("R") && !refUpper.startsWith("RC-") && !refUpper.startsWith("RCPT") && !refUpper.startsWith("RECEIPT") && /^[R]\d+$/.test(refUpper)) ||
+      (debitsCashBank && creditsNonCashBank)
+    ) {
+      return "receipt";
+    }
+
+    // 3. Payment Check
+    if (
+      vTypeUpper === "PAYMENT" || vTypeUpper === "PAY" ||
+      refUpper.startsWith("PM-") || refUpper.startsWith("PM") ||
+      refLower.includes("payment") || refLower.includes("pay") ||
+      (refUpper.startsWith("P") && !refUpper.startsWith("PR") && !refUpper.startsWith("PM") && /^[P]\d+$/.test(refUpper)) ||
+      (creditsCashBank && debitsNonCashBank)
+    ) {
+      return "payment";
+    }
+
+    // 4. Debit Note Check
+    if (
+      vTypeUpper === "DEBIT NOTE" || vTypeUpper === "DEBIT" || vTypeUpper === "DN" ||
+      refUpper.startsWith("DN-") || refUpper.startsWith("DN") ||
+      refLower.includes("debit note") || refLower.includes("dbn-") ||
+      (refUpper.startsWith("D") && /^[D]\d+$/.test(refUpper))
+    ) {
+      return "debit";
+    }
+
+    // 5. Credit Note Check
+    if (
+      vTypeUpper === "CREDIT NOTE" || vTypeUpper === "CREDIT" || vTypeUpper === "CN" ||
+      refUpper.startsWith("CN-") || refUpper.startsWith("CN") ||
+      refLower.includes("credit note") || refLower.includes("crn-") ||
+      (refUpper.startsWith("C") && !refUpper.startsWith("CN-") && !refUpper.startsWith("CO-") && !refUpper.startsWith("COGS") && /^[C]\d+$/.test(refUpper))
+    ) {
+      return "credit";
+    }
+
+    // 6. Journal Check
+    if (
+      vTypeUpper === "JOURNAL" || vTypeUpper === "JV" ||
+      refUpper.startsWith("JV-") || refUpper.startsWith("JV") ||
+      refLower.includes("journal") ||
+      (refUpper.startsWith("J") && /^[J]\d+$/.test(refUpper))
+    ) {
+      return "journal";
+    }
+
+    return "journal"; // Default fallback for manual vouchers
+  }
+
+  getVouchersForRearrange(options = {}) {
+    const {
+      voucherType = "receipt",
+      prefix = null,
+      startingNumber = 1,
+      digits = null,
+      dateScope = "current_fy",
+      fromDate = null,
+      toDate = null
+    } = options;
+
+    let startDate = null;
+    let endDate = null;
+
+    if (dateScope === "current_fy") {
+      startDate = this.getActiveFinancialYearStartDate ? this.getActiveFinancialYearStartDate() : "2026-04-01";
+      endDate = this.getActiveFinancialYearEndDate ? this.getActiveFinancialYearEndDate() : "2027-03-31";
+    } else if (dateScope === "custom") {
+      startDate = fromDate;
+      endDate = toDate;
+    }
+
+    const startIso = startDate ? toIsoDateStr(startDate) : null;
+    const endIso = endDate ? toIsoDateStr(endDate) : null;
+
+    const extractNumber = (str) => {
+      if (!str) return 0;
+      const matches = String(str).match(/(\d+)/g);
+      if (matches && matches.length > 0) {
+        return parseInt(matches[matches.length - 1], 10) || 0;
+      }
+      return 0;
+    };
+
+    const extractPrefixAndDigits = (ref, defaultPrefix, defaultDigits = 3) => {
+      if (!ref) return { prefix: defaultPrefix, digits: defaultDigits };
+      const str = String(ref).trim();
+      const match = str.match(/^([A-Za-z\-_]+)(\d+)$/);
+      if (match) {
+        return {
+          prefix: match[1],
+          digits: match[2].length
+        };
+      }
+      return { prefix: defaultPrefix, digits: defaultDigits };
+    };
+
+    const DEFAULT_PREFIXES = {
+      receipt: "RC-",
+      payment: "PM-",
+      contra: "CO-",
+      journal: "JV-",
+      debit: "DN-",
+      credit: "CN-"
+    };
+
+    const typesToProcess = String(voucherType).toUpperCase() === "ALL"
+      ? ["receipt", "payment", "contra", "journal", "debit", "credit"]
+      : [String(voucherType).toLowerCase()];
+
+    const allTxs = this.transactions || [];
+    const results = [];
+
+    typesToProcess.forEach(type => {
+      const typeTxs = allTxs.filter(tx => {
+        if (!tx || !tx.id || tx.isCancelled) return false;
+        const cat = this.getVoucherCategory(tx);
+        if (cat !== type) return false;
+
+        const txDateIso = toIsoDateStr(tx.date);
+        if (!txDateIso) return false;
+        if (startIso && txDateIso < startIso) return false;
+        if (endIso && txDateIso > endIso) return false;
+        return true;
+      });
+
+      if (typeTxs.length === 0) return;
+
+      // Detect prefix & digits from existing vouchers if not explicitly customized
+      let typePrefix = prefix;
+      let typeDigits = digits !== null && digits !== undefined && !isNaN(parseInt(digits)) ? parseInt(digits) : null;
+
+      if (!typePrefix) {
+        const prefixCounts = {};
+        typeTxs.forEach(tx => {
+          const info = extractPrefixAndDigits(tx.reference || tx.voucherNo, DEFAULT_PREFIXES[type] || "V-", 3);
+          prefixCounts[info.prefix] = (prefixCounts[info.prefix] || 0) + 1;
+        });
+        let maxCount = 0;
+        let bestPrefix = DEFAULT_PREFIXES[type] || "V-";
+        Object.keys(prefixCounts).forEach(p => {
+          if (prefixCounts[p] > maxCount) {
+            maxCount = prefixCounts[p];
+            bestPrefix = p;
+          }
+        });
+        typePrefix = bestPrefix;
+      }
+
+      if (!typeDigits || typeDigits < 1) {
+        let maxDigits = 0;
+        typeTxs.forEach(tx => {
+          const str = String(tx.reference || tx.voucherNo || "").trim();
+          const match = str.match(/^([A-Za-z\-_]+)(\d+)$/);
+          if (match && match[2].length > maxDigits) {
+            maxDigits = match[2].length;
+          }
+        });
+        typeDigits = maxDigits >= 2 ? maxDigits : 3;
+      }
+
+      let startNum = startingNumber !== null && startingNumber !== undefined && !isNaN(parseInt(startingNumber))
+        ? parseInt(startingNumber)
+        : 1;
+      if (startNum < 1) startNum = 1;
+
+      // Sort in Ascending Order by Date (Chronological)
+      const sortedTxs = [...typeTxs].sort((a, b) => {
+        const dateIsoA = toIsoDateStr(a.date);
+        const dateIsoB = toIsoDateStr(b.date);
+        if (dateIsoA !== dateIsoB) return dateIsoA.localeCompare(dateIsoB);
+
+        const numA = extractNumber(a.reference || a.voucherNo || a.id);
+        const numB = extractNumber(b.reference || b.voucherNo || b.id);
+        if (numA !== numB) return numA - numB;
+
+        const createdA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const createdB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        if (createdA !== createdB) return createdA - createdB;
+
+        return String(a.id || "").localeCompare(String(b.id || ""));
+      });
+
+      sortedTxs.forEach((tx, idx) => {
+        const seqNum = startNum + idx;
+        const newVoucherNo = typePrefix + String(seqNum).padStart(typeDigits, '0');
+        results.push({
+          type,
+          tx,
+          oldVoucherNo: String(tx.reference || tx.voucherNo || tx.id || "").trim(),
+          newVoucherNo,
+          date: tx.date,
+          dateIso: toIsoDateStr(tx.date),
+          description: tx.description || "",
+          entries: tx.entries || []
+        });
+      });
+    });
+
+    return results;
+  }
+
+  rearrangeVouchersByDate(options = {}) {
+    const previewList = this.getVouchersForRearrange(options);
+    if (!previewList || previewList.length === 0) {
+      return { success: false, message: "No vouchers found matching the specified criteria to rearrange." };
+    }
+
+    const idMappings = new Map();
+    let totalRearranged = 0;
+    const summaryByType = {};
+
+    previewList.forEach(item => {
+      const { tx, oldVoucherNo, newVoucherNo, type } = item;
+      if (!tx) return;
+
+      const oldId = String(tx.id || "").trim();
+      const oldRef = String(tx.reference || "").trim();
+      const oldVno = String(tx.voucherNo || "").trim();
+
+      tx.voucherNo = newVoucherNo;
+      tx.reference = newVoucherNo;
+      tx.voucherType = type.toUpperCase();
+
+      if (oldRef && oldRef !== newVoucherNo) idMappings.set(oldRef, newVoucherNo);
+      if (oldVno && oldVno !== newVoucherNo) idMappings.set(oldVno, newVoucherNo);
+      if (oldId && oldId !== newVoucherNo && !oldId.startsWith("TX-")) idMappings.set(oldId, newVoucherNo);
+
+      totalRearranged++;
+      if (!summaryByType[type]) {
+        summaryByType[type] = { count: 0, startVno: newVoucherNo, endVno: newVoucherNo };
+      }
+      summaryByType[type].count++;
+      summaryByType[type].endVno = newVoucherNo;
+    });
+
+    // Update references in double-entry transactions
+    if (idMappings.size > 0 && this.transactions && Array.isArray(this.transactions)) {
+      this.transactions.forEach(tx => {
+        if (!tx) return;
+        idMappings.forEach((newVno, oldVal) => {
+          if (!oldVal || oldVal === newVno) return;
+          if (tx.description && tx.description.includes(oldVal)) {
+            tx.description = tx.description.split(oldVal).join(newVno);
+          }
+          if (tx.entries && Array.isArray(tx.entries)) {
+            tx.entries.forEach(e => {
+              if (e.description && e.description.includes(oldVal)) {
+                e.description = e.description.split(oldVal).join(newVno);
+              }
+            });
+          }
+        });
+      });
+    }
+
+    // Sort this.transactions in place by Date ascending & voucher number ascending
+    const extractNumber = (str) => {
+      if (!str) return 0;
+      const matches = String(str).match(/(\d+)/g);
+      if (matches && matches.length > 0) {
+        return parseInt(matches[matches.length - 1], 10) || 0;
+      }
+      return 0;
+    };
+
+    if (this.transactions && Array.isArray(this.transactions)) {
+      this.transactions.sort((a, b) => {
+        if (!a) return 1;
+        if (!b) return -1;
+        const dateA = toIsoDateStr(a.date);
+        const dateB = toIsoDateStr(b.date);
+        if (dateA !== dateB) return dateA.localeCompare(dateB);
+        const numA = extractNumber(a.reference || a.voucherNo || a.id);
+        const numB = extractNumber(b.reference || b.voucherNo || b.id);
+        if (numA !== numB) return numA - numB;
+        return String(a.reference || a.id || "").localeCompare(String(b.reference || b.id || ""));
+      });
+    }
+
+    const summaryDetails = Object.keys(summaryByType).map(t => {
+      const s = summaryByType[t];
+      const typeLabel = t.charAt(0).toUpperCase() + t.slice(1);
+      return `${typeLabel} Vouchers: ${s.count} voucher(s) reset in chronological date order (${s.startVno} to ${s.endVno}).`;
+    });
+
+    this.realignSeriesCurrentNumbers();
+    this.invalidateBalancesCache();
+    this.saveState(true);
+    this.notifyListeners();
+
+    if (typeof window !== "undefined" && typeof window.dispatchEvent === "function") {
+      window.dispatchEvent(new CustomEvent("erp:data-refreshed"));
+    }
+
+    return {
+      success: true,
+      totalRearranged,
+      details: summaryDetails,
+      message: `Successfully reset & rearranged ${totalRearranged} voucher(s) in chronological ascending order by Date.`
+    };
+  }
+
+
 
   forceAlignTransactionUnits() {
     if (!this.materials || !Array.isArray(this.materials)) return;
@@ -5381,7 +8597,17 @@ class StateManager {
   getMaterials() { return this.materials; }
   getHeadloaderProductIds() {
     if (!this.headloaderProductIds || !Array.isArray(this.headloaderProductIds)) {
-      this.headloaderProductIds = [];
+      const activeId = this.getActiveCompanyId();
+      try {
+        const ls = localStorage.getItem(`erp_headloader_products_${activeId}`);
+        if (ls) {
+          const parsed = JSON.parse(ls);
+          if (Array.isArray(parsed)) this.headloaderProductIds = parsed;
+        }
+      } catch (e) {}
+      if (!Array.isArray(this.headloaderProductIds)) {
+        this.headloaderProductIds = [];
+      }
     }
     return this.headloaderProductIds;
   }
@@ -5535,7 +8761,13 @@ class StateManager {
      return this.stockAdjustments;
    }
    saveStockAdjustment(doc) {
-     this.validateTransactionDate(doc.date || new Date().toISOString().split("T")[0]);
+     const txDate = doc.date || new Date().toISOString().split("T")[0];
+     const fyCheck = this.isPreviousFyLocked(txDate);
+     if (fyCheck.locked) {
+       alert(fyCheck.reason);
+       return false;
+     }
+     this.validateTransactionDate(txDate);
      if (!this.stockAdjustments) this.stockAdjustments = [];
      const idx = this.stockAdjustments.findIndex(a => a.id === doc.id);
      if (idx >= 0) {
@@ -5552,6 +8784,11 @@ class StateManager {
      if (!this.stockAdjustments) return false;
      const doc = this.stockAdjustments.find(a => a.id === id);
      if (!doc) return false;
+     const fyCheck = this.isPreviousFyLocked(doc.date);
+     if (fyCheck.locked) {
+       alert(fyCheck.reason);
+       return false;
+     }
      this.stockAdjustments = this.stockAdjustments.filter(a => a.id !== id);
      this.transactions = this.transactions.filter(t => t.reference !== `Stock Adj: ${doc.refNo}`);
      this.recomputeAllStocks();
@@ -5588,6 +8825,13 @@ class StateManager {
   getAccountGroups() {
     if (!this.accountGroups || this.accountGroups.length === 0) {
       this.accountGroups = JSON.parse(JSON.stringify(initialAccountGroups));
+    } else {
+      const existingUpper = new Set(this.accountGroups.map(g => String(g.name || "").trim().toUpperCase()));
+      initialAccountGroups.forEach(ig => {
+        if (ig && ig.name && !existingUpper.has(String(ig.name).trim().toUpperCase())) {
+          this.accountGroups.push({ ...ig, isDefault: true });
+        }
+      });
     }
     return this.accountGroups;
   }
@@ -5686,9 +8930,81 @@ class StateManager {
     return false;
   }
   
+  purgeContactLedgers() {
+    if (!this.ledgers || !this.contacts || this.contacts.length === 0) return;
+    const protectedGroups = new Set([
+      "CASH-IN-HAND", "CASH IN HAND", "BANK ACCOUNTS", "BANK ACCOUNT", "FIXED ASSETS", "CAPITAL ACCOUNT", "EQUITY",
+      "DUTIES & TAXES", "INPUT SGST", "INPUT CGST", "INPUT IGST", "OUTPUT SGST", "OUTPUT CGST", "OUTPUT IGST",
+      "PURCHASE ACCOUNT", "SALES ACCOUNT", "INDIRECT EXPENSES", "INDIRECT INCOME", "DIRECT EXPENSES", "DIRECT INCOME",
+      "DEPOSITS", "DEPOSITS (ASSETS)", "OTHER CURRENT ASSETS", "CURRENT ASSETS", "CURRENT LIABILITIES",
+      "OUTSTANDING LIABILITIES & PROVISIONS", "PROVISIONS", "ADJUSTMENTS", "DEPRECIATION", "SALARY", "UNSECURED LOANS", "SUSPENSE A/C"
+    ]);
+
+    const contactNames = new Set(this.contacts.map(c => (c.name || "").trim().toUpperCase()).filter(Boolean));
+    const contactIds = new Set(this.contacts.map(c => (c.id || "").trim().toUpperCase()).filter(Boolean));
+    const initialCount = this.ledgers.length;
+
+    this.ledgers = this.ledgers.filter(l => {
+      if (!l || !l.name) return false;
+      const gName = String(l.groupName || "").trim().toUpperCase();
+      if (protectedGroups.has(gName)) return true;
+
+      const isExplicitSubledger = !!(l.parentCustomerId || l.isCustomerSubLedger || l.isVendorSubLedger || l.isContactLedger);
+      const isContactGroup = gName === "SUNDRY DEBTORS" || gName === "SUNDRY CREDITORS" || gName === "CUSTOMERS" || gName === "VENDORS";
+      const cleanName = String(l.name).trim().toUpperCase();
+
+      if (isExplicitSubledger) return false;
+      if (isContactGroup && contactNames.has(cleanName)) return false;
+      if (l.parentCustomerId && contactIds.has(String(l.parentCustomerId).trim().toUpperCase())) return false;
+
+      return true;
+    });
+
+    if (this.ledgers.length !== initialCount) {
+      console.log(`[PURGE] Removed ${initialCount - this.ledgers.length} contact subledgers.`);
+      this.saveState();
+    }
+  }
+
+  deduplicateAndEnforceUniqueLedgers(shouldSave = true) {
+    if (!this.ledgers || !Array.isArray(this.ledgers)) return;
+    let changed = false;
+    const seen = new Set();
+    const clean = [];
+
+    this.ledgers.forEach(l => {
+      if (!l) return;
+      const code = String(l.code || l.id || "").trim().toUpperCase();
+      const name = String(l.name || "").trim().toUpperCase();
+      const key = code ? `code:${code}` : `name:${name}`;
+
+      if (key) {
+        if (!seen.has(key)) {
+          seen.add(key);
+          clean.push(l);
+        } else {
+          changed = true;
+        }
+      } else {
+        clean.push(l);
+      }
+    });
+
+    if (clean.length !== this.ledgers.length) {
+      this.ledgers = clean;
+      changed = true;
+    }
+
+    if (changed && shouldSave) {
+      this.saveState(true);
+    }
+  }
+
   getLedgers() {
+    this.deduplicateAndEnforceUniqueLedgers(false);
     this.ensureDefaultLedgers();
     this.ensureStandardGstLedgers();
+    this.purgeContactLedgers();
     return this.ledgers || [];
   }
   
@@ -5846,6 +9162,18 @@ class StateManager {
   getCanonicalAccountId(accId) {
     if (!accId) return accId;
     const strId = String(accId).trim();
+    if (this._canonicalAccountCache && this._canonicalAccountCache.has(strId)) {
+      return this._canonicalAccountCache.get(strId);
+    }
+    const res = this._computeCanonicalAccountId(strId);
+    if (!this._canonicalAccountCache) {
+      this._canonicalAccountCache = new Map();
+    }
+    this._canonicalAccountCache.set(strId, res);
+    return res;
+  }
+
+  _computeCanonicalAccountId(strId) {
     if (ACCOUNTS[strId]) return strId;
 
     const baseId = strId.includes("::") ? strId.split("::")[0] : strId;
@@ -5857,13 +9185,13 @@ class StateManager {
         const c = this.contacts[i];
         const cNormName = String(c.name || "").trim().toUpperCase();
         if (c.id === baseId || (c.ledgerCode && c.ledgerCode === baseId) || (cNormName && cNormName === baseId.toUpperCase())) {
-          const canonical = c.ledgerCode || c.id;
+          const canonical = c.id;
           return site ? `${canonical}::${site}` : canonical;
         }
       }
     }
 
-    // 2. Direct Ledger match (if ledger belongs to a contact, return the contact's canonical key)
+    // 2. Direct Ledger match
     if (this.ledgers) {
       for (let i = 0; i < this.ledgers.length; i++) {
         const l = this.ledgers[i];
@@ -5871,48 +9199,154 @@ class StateManager {
         if (l.code === baseId || (lNormName && lNormName === baseId.toUpperCase())) {
           if (this.contacts) {
             const cMatch = this.contacts.find(c => c.ledgerCode === l.code || c.id === l.code || (c.name && String(c.name).trim().toUpperCase() === lNormName));
-            if (cMatch) {
-              const canonical = cMatch.ledgerCode || cMatch.id;
-              return site ? `${canonical}::${site}` : canonical;
-            }
+            if (cMatch) return site ? `${cMatch.id}::${site}` : cMatch.id;
           }
           return site ? `${l.code}::${site}` : l.code;
         }
       }
     }
 
-    // 3. Match unpadded/3-digit L-codes (e.g. L022 -> L0022) or Tradeasy ID
-    const matchL = baseId.match(/^L(\d+)$/i);
+    // 3. Flexible L-code and CUST/VEND matching
+    const matchL = baseId.match(/^L0*(\d+)$/i);
     if (matchL) {
-      const padded = "L" + matchL[1].padStart(4, "0");
+      const num = parseInt(matchL[1], 10);
+      const p3 = "L" + String(num).padStart(3, "0");
+      const p4 = "L" + String(num).padStart(4, "0");
+      const unp = "L" + String(num);
+
+      const custP3 = "CUST-" + String(num).padStart(3, "0");
+      const custP4 = "CUST-" + String(num).padStart(4, "0");
+      const vendP3 = "VEND-" + String(num).padStart(3, "0");
+      const vendP4 = "VEND-" + String(num).padStart(4, "0");
+
       if (this.contacts) {
-        const cMatch = this.contacts.find(c => c.ledgerCode === padded || c.id === padded);
-        if (cMatch) {
-          const canonical = cMatch.ledgerCode || cMatch.id;
-          return site ? `${canonical}::${site}` : canonical;
-        }
+        const cMatch = this.contacts.find(c => 
+          c.ledgerCode === p3 || c.id === p3 || c.ledgerCode === p4 || c.id === p4 || c.ledgerCode === unp || c.id === unp ||
+          c.id === custP3 || c.ledgerCode === custP3 || c.id === custP4 || c.ledgerCode === custP4 ||
+          c.id === vendP3 || c.ledgerCode === vendP3 || c.id === vendP4 || c.ledgerCode === vendP4 ||
+          (c.tradeasyLedgerId && c.tradeasyLedgerId === num)
+        );
+        if (cMatch) return site ? `${cMatch.id}::${site}` : cMatch.id;
       }
+
       if (this.ledgers) {
-        const lMatch = this.ledgers.find(l => l.code === padded);
-        if (lMatch) return site ? `${padded}::${site}` : padded;
-      }
-      const num = parseInt(matchL[1]);
-      if (this.ledgers) {
-        const lMatch = this.ledgers.find(l => l.tradeasyId === num);
+        const lMatch = this.ledgers.find(l => l.code === p3 || l.code === p4 || l.code === unp || l.tradeasyId === num);
         if (lMatch) return site ? `${lMatch.code}::${site}` : lMatch.code;
       }
     }
 
-    // 4. Match unpadded/3-digit CUST-codes (e.g. CUST-022 -> CUST-0022) or Tradeasy ID
-    const matchCust = baseId.match(/^(CUST|VEND)-(\d+)$/i);
-    if (matchCust) {
-      const padded = matchCust[1].toUpperCase() + "-" + matchCust[2].padStart(4, "0");
-      if (this.contacts) {
-        const cMatch = this.contacts.find(c => c.id === padded || c.ledgerCode === padded);
-        if (cMatch) {
-          const canonical = cMatch.ledgerCode || cMatch.id;
-          return site ? `${canonical}::${site}` : canonical;
+    return strId;
+  }
+
+  getAccountDisplayName(accId, tx = null) {
+    if (!accId) return "";
+    const strId = String(accId).trim();
+    const baseId = strId.includes("::") ? strId.split("::")[0] : strId;
+    const sitePart = strId.includes("::") ? strId.split("::")[1] : "";
+    const canonicalId = this.getCanonicalAccountId(baseId);
+
+    // 1. Control accounts (1100 / 2100) with tx context or description resolution
+    if (baseId === "1100" || baseId === "2100" || canonicalId === "1100" || canonicalId === "2100") {
+      if (tx) {
+        if (tx.contactName) return sitePart ? `${tx.contactName} (${sitePart})` : tx.contactName;
+        if (tx.supplierName) return sitePart ? `${tx.supplierName} (${sitePart})` : tx.supplierName;
+        const desc = tx.description || "";
+        if (desc.includes("Receipt from Customer:")) {
+          const parsed = desc.replace("Receipt from Customer:", "").split("(")[0].trim();
+          if (parsed) return sitePart ? `${parsed} (${sitePart})` : parsed;
         }
+        if (desc.includes("Receipt from Supplier:")) {
+          const parsed = desc.replace("Receipt from Supplier:", "").split("(")[0].trim();
+          if (parsed) return sitePart ? `${parsed} (${sitePart})` : parsed;
+        }
+        if (desc.includes("Payment to Supplier:")) {
+          const parsed = desc.replace("Payment to Supplier:", "").split("(")[0].trim();
+          if (parsed) return sitePart ? `${parsed} (${sitePart})` : parsed;
+        }
+        if (desc.includes("Payment to Customer:")) {
+          const parsed = desc.replace("Payment to Customer:", "").split("(")[0].trim();
+          if (parsed) return sitePart ? `${parsed} (${sitePart})` : parsed;
+        }
+      }
+    }
+
+    // 2. Direct match in contacts list (check contacts FIRST)
+    if (this.contacts && Array.isArray(this.contacts)) {
+      const baseUpper = baseId.toUpperCase();
+      const matchC = this.contacts.find(c => {
+        if (!c) return false;
+        if (c.id === baseId || c.id === canonicalId) return true;
+        if (c.ledgerCode && (c.ledgerCode === baseId || c.ledgerCode === canonicalId)) return true;
+        if (c.code && (c.code === baseId || c.code === canonicalId)) return true;
+        if (c.tradeasyLedgerId && (String(c.tradeasyLedgerId) === baseId || String(c.tradeasyLedgerId) === canonicalId)) return true;
+        if (c.name && c.name.trim().toUpperCase() === baseUpper) return true;
+        const cCan = this.getCanonicalAccountId(c.id);
+        if (cCan && (cCan === canonicalId || cCan === baseId)) return true;
+        return false;
+      });
+      if (matchC && matchC.name) {
+        return sitePart ? `${matchC.name} (${sitePart})` : matchC.name;
+      }
+    }
+
+    // 3. Direct match in ledgers list
+    if (this.ledgers && Array.isArray(this.ledgers)) {
+      const baseUpper = baseId.toUpperCase();
+      const matchL = this.ledgers.find(l => {
+        if (!l) return false;
+        if (l.code === baseId || l.code === canonicalId) return true;
+        if (l.id && (l.id === baseId || l.id === canonicalId)) return true;
+        if (l.tradeasyId && (String(l.tradeasyId) === baseId || String(l.tradeasyId) === canonicalId)) return true;
+        if (l.name && l.name.trim().toUpperCase() === baseUpper) return true;
+        const lCan = this.getCanonicalAccountId(l.code);
+        if (lCan && (lCan === canonicalId || lCan === baseId)) return true;
+        return false;
+      });
+      if (matchL) {
+        // If this ledger belongs to a contact, return the contact's name instead
+        if (this.contacts && Array.isArray(this.contacts)) {
+          const normName = String(matchL.name || "").trim().toUpperCase();
+          const parentC = this.contacts.find(c => c && (c.ledgerCode === matchL.code || c.id === matchL.code || (c.name && String(c.name).trim().toUpperCase() === normName)));
+          if (parentC && parentC.name) {
+            return sitePart ? `${parentC.name} (${sitePart})` : parentC.name;
+          }
+        }
+        if (matchL.name && !matchL.name.match(/^L\d+$/i)) return sitePart ? `${matchL.name} (${sitePart})` : matchL.name;
+      }
+    }
+
+    // 4. Static Accounts
+    if (ACCOUNTS[baseId] && ACCOUNTS[baseId].name) {
+      return sitePart ? `${ACCOUNTS[baseId].name} (${sitePart})` : ACCOUNTS[baseId].name;
+    }
+    if (ACCOUNTS[canonicalId] && ACCOUNTS[canonicalId].name) {
+      return sitePart ? `${ACCOUNTS[canonicalId].name} (${sitePart})` : ACCOUNTS[canonicalId].name;
+    }
+
+    // 5. Unpadded L-codes or CUST/VEND codes
+    const matchLCode = baseId.match(/^L(\d+)$/i);
+    if (matchLCode) {
+      const padded = "L" + matchLCode[1].padStart(4, "0");
+      if (this.contacts) {
+        const cMatch = this.contacts.find(c => c && (c.ledgerCode === padded || c.id === padded));
+        if (cMatch && cMatch.name) return sitePart ? `${cMatch.name} (${sitePart})` : cMatch.name;
+      }
+      if (this.ledgers) {
+        const lMatch = this.ledgers.find(l => l && (l.code === padded || l.id === padded));
+        if (lMatch) {
+          const cMatch = this.contacts?.find(c => c && (c.ledgerCode === lMatch.code || c.id === lMatch.code));
+          if (cMatch && cMatch.name) return sitePart ? `${cMatch.name} (${sitePart})` : cMatch.name;
+          if (lMatch.name && !lMatch.name.match(/^L\d+$/i)) return sitePart ? `${lMatch.name} (${sitePart})` : lMatch.name;
+        }
+      }
+    }
+
+    const matchCustCode = baseId.match(/^(CUST|VEND)-(\d+)$/i);
+    if (matchCustCode) {
+      const padded = matchCustCode[1].toUpperCase() + "-" + matchCustCode[2].padStart(4, "0");
+      if (this.contacts) {
+        const cMatch = this.contacts.find(c => c && (c.id === padded || c.ledgerCode === padded));
+        if (cMatch && cMatch.name) return sitePart ? `${cMatch.name} (${sitePart})` : cMatch.name;
       }
     }
 
@@ -5931,6 +9365,18 @@ class StateManager {
     }
     balances["1100"] = { balance: 0 };
     balances["2100"] = { balance: 0 };
+
+    const outputCgstCode = "L0053";
+    const outputSgstCode = "L0048";
+    const outputIgstCode = "L0058";
+    const inputCgstCode = "L0038";
+    const inputSgstCode = "L0033";
+    const inputIgstCode = "L0043";
+    const roundOffCode = "L0012";
+
+    [outputCgstCode, outputSgstCode, outputIgstCode, inputCgstCode, inputSgstCode, inputIgstCode, roundOffCode].forEach(code => {
+      if (!balances[code]) balances[code] = { balance: 0 };
+    });
 
     const ledgers = this.getLedgers();
     ledgers.forEach(l => {
@@ -5967,7 +9413,6 @@ class StateManager {
             if (siteOpBal !== 0 && bType === "Credit") siteOpBal = -Math.abs(siteOpBal);
             else if (siteOpBal !== 0 && bType === "Debit") siteOpBal = Math.abs(siteOpBal);
             balances[`${c.id}::${site}`] = { balance: siteOpBal };
-            // Mirror opening balance into control account
             if (siteOpBal !== 0 && balances[controlAcc]) {
               balances[controlAcc].balance += siteOpBal;
             }
@@ -5977,7 +9422,6 @@ class StateManager {
           if (opBal !== 0 && bType === "Credit") opBal = -Math.abs(opBal);
           else if (opBal !== 0 && bType === "Debit") opBal = Math.abs(opBal);
           balances[c.id] = { balance: opBal };
-          // Mirror opening balance into control account
           if (opBal !== 0 && balances[controlAcc]) {
             balances[controlAcc].balance += opBal;
           }
@@ -5985,27 +9429,11 @@ class StateManager {
       });
     }
 
-    const invByDocId = new Map();
-    (this.invoices || []).forEach(i => {
-      if (!i) return;
-      if (i.id) invByDocId.set(String(i.id), i);
-      if (i.voucherNo) invByDocId.set(String(i.voucherNo), i);
-      if (i.refNo) invByDocId.set(String(i.refNo), i);
-    });
-    const purByDocId = new Map();
-    (this.purchases || []).forEach(p => {
-      if (!p) return;
-      if (p.id) purByDocId.set(String(p.id), p);
-      if (p.voucherNo) purByDocId.set(String(p.voucherNo), p);
-      if (p.refNo) purByDocId.set(String(p.refNo), p);
-      if (p.invoiceNo) purByDocId.set(String(p.invoiceNo), p);
-    });
-
     const seenTxIds = new Set();
     const txsByRef = new Set();
 
     (this.transactions || []).forEach(tx => {
-      if (!tx || !tx.id || seenTxIds.has(tx.id) || tx.isCancelled) return;
+      if (!tx || !tx.id || seenTxIds.has(tx.id) || tx.isCancelled || this.isTransactionForCancelledDoc(tx)) return;
       if (endDate && tx.date > endDate) return;
 
       const vRef = String(tx.reference || "").trim();
@@ -6049,6 +9477,39 @@ class StateManager {
       });
     });
 
+    const getGstHelper = (doc, isPurchase = false) => {
+      let cgst = parseFloat(doc.cgst || 0);
+      let sgst = parseFloat(doc.sgst || 0);
+      let igst = parseFloat(doc.igst || 0);
+
+      if (cgst === 0 && sgst === 0 && igst === 0) {
+        const totalGst = parseFloat(doc.totalGst || 0);
+        if (totalGst > 0) {
+          const isInterstate = doc.state && doc.state.toUpperCase() !== "KERALA";
+          if (isInterstate) {
+            igst = totalGst;
+          } else {
+            cgst = totalGst / 2;
+            sgst = totalGst / 2;
+          }
+        } else if (doc.items && Array.isArray(doc.items)) {
+          doc.items.forEach(item => {
+            const itemGst = parseFloat(item.gstAmount || 0);
+            if (itemGst > 0) {
+              const isInterstate = doc.state && doc.state.toUpperCase() !== "KERALA";
+              if (isInterstate) {
+                igst += itemGst;
+              } else {
+                cgst += itemGst / 2;
+                sgst += itemGst / 2;
+              }
+            }
+          });
+        }
+      }
+      return { cgst, sgst, igst };
+    };
+
     (this.invoices || []).forEach(inv => {
       if (!inv || inv.isCancelled) return;
       if (endDate && inv.date > endDate) return;
@@ -6060,12 +9521,24 @@ class StateManager {
         const vNo = inv.voucherNo || inv.id || "";
         const docSig = `Sales::${vNo}`;
         if (!txsByRef.has(vNo) && !txsByRef.has(docSig)) {
+          const sub = (parseFloat(inv.subtotal) || 0) - (parseFloat(inv.totalDiscount) || 0);
+          if (!balances["L0004"]) balances["L0004"] = { balance: 0 };
+          balances["L0004"].balance -= sub;
+
           const amt = parseFloat(inv.total) || 0;
           if (balances[contact.id]) balances[contact.id].balance += amt;
           const controlAcc = (contact.type === "supplier" || contact.listInVendorList || contact.groupName === "SUNDRY CREDITORS") ? "2100" : "1100";
           if (balances[controlAcc]) {
             balances[controlAcc].balance += amt;
           }
+
+          const gst = getGstHelper(inv, false);
+          balances[outputCgstCode].balance -= gst.cgst;
+          balances[outputSgstCode].balance -= gst.sgst;
+          balances[outputIgstCode].balance -= gst.igst;
+
+          const ro = parseFloat(inv.roundOff || inv.roundoff || 0);
+          if (ro !== 0) balances[roundOffCode].balance += ro;
         }
       }
     });
@@ -6081,12 +9554,24 @@ class StateManager {
         const vNo = pur.voucherNo || pur.id || pur.invoiceNo || "";
         const docSig = `Purchase::${vNo}`;
         if (!txsByRef.has(vNo) && !txsByRef.has(docSig)) {
+          const sub = (parseFloat(pur.subtotal) || 0) - (parseFloat(pur.totalDiscount) || 0);
+          if (!balances["L0005"]) balances["L0005"] = { balance: 0 };
+          balances["L0005"].balance += sub;
+
           const amt = parseFloat(pur.total) || 0;
           if (balances[contact.id]) balances[contact.id].balance -= amt;
           const controlAcc = (contact.type === "supplier" || contact.listInVendorList || contact.groupName === "SUNDRY CREDITORS") ? "2100" : "1100";
           if (balances[controlAcc]) {
             balances[controlAcc].balance -= amt;
           }
+
+          const gst = getGstHelper(pur, true);
+          balances[inputCgstCode].balance += gst.cgst;
+          balances[inputSgstCode].balance += gst.sgst;
+          balances[inputIgstCode].balance += gst.igst;
+
+          const ro = parseFloat(pur.roundOff || pur.roundoff || 0);
+          if (ro !== 0) balances[roundOffCode].balance += ro;
         }
       }
     });
@@ -7299,7 +10784,13 @@ class StateManager {
 
   // --- PURCHASES (BATCH-WISE INCOMING) ---
   recordPurchase(purchaseData) {
-    this.validateTransactionDate(purchaseData.date || new Date().toISOString().split("T")[0]);
+    const txDate = purchaseData.date || new Date().toISOString().split("T")[0];
+    const fyCheck = this.isPreviousFyLocked(txDate);
+    if (fyCheck.locked) {
+      alert(fyCheck.reason);
+      return false;
+    }
+    this.validateTransactionDate(txDate);
     const supplier = this.contacts.find(c => c.id === purchaseData.supplierId && (c.type === "supplier" || c.listInVendorList === true));
     if (!supplier) return false;
 
@@ -7336,6 +10827,39 @@ class StateManager {
       }
     }
 
+    let tempSubtotal = 0;
+    let tempRowDiscount = 0;
+    purchaseData.items.forEach(item => {
+      const mat = this.materials.find(m => m.id === item.materialId);
+      if (mat) {
+        const qty = parseFloat(item.quantity) || 0;
+        const rate = parseFloat(item.price) || 0;
+        const discountPercent = parseFloat(item.rowDiscountPercent !== undefined ? item.rowDiscountPercent : item.discountPercent) || 0;
+        let rowDisAmt = item.rowDiscountAmount !== undefined ? parseFloat(item.rowDiscountAmount) : 0;
+        const amt = qty * rate;
+        if (discountPercent !== 0 && rowDisAmt === 0) {
+          rowDisAmt = amt * (discountPercent / 100);
+        } else if (discountPercent !== 0) {
+          rowDisAmt = amt * (discountPercent / 100);
+        } else if (rowDisAmt === 0 && item.discountAmount !== undefined && (parseFloat(purchaseData.discountAmount) || 0) === 0 && (parseFloat(purchaseData.discountPercent) || 0) === 0) {
+          rowDisAmt = parseFloat(item.discountAmount) || 0;
+        }
+        tempSubtotal += amt;
+        tempRowDiscount += rowDisAmt;
+      }
+    });
+    const baseSubtotalNet = tempSubtotal - tempRowDiscount;
+
+    let generalDiscPercent = parseFloat(purchaseData.discountPercent) || 0;
+    let generalDiscAmount = parseFloat(purchaseData.discountAmount) || 0;
+    if (baseSubtotalNet > 0) {
+      if (generalDiscPercent !== 0 && generalDiscAmount === 0) {
+        generalDiscAmount = baseSubtotalNet * (generalDiscPercent / 100);
+      } else if (generalDiscAmount !== 0 && generalDiscPercent === 0) {
+        generalDiscPercent = (generalDiscAmount / baseSubtotalNet) * 100;
+      }
+    }
+
     let subtotal = 0;
     let totalDiscount = 0;
     let totalGst = 0;
@@ -7349,14 +10873,22 @@ class StateManager {
       const qty = parseFloat(item.quantity) || 0;
       const rate = parseFloat(item.price) || 0;
       const mrp = parseFloat(item.mrp) || rate * 1.5;
-      const discountPercent = parseFloat(item.discountPercent) || 0;
-      
+      const discountPercent = parseFloat(item.rowDiscountPercent !== undefined ? item.rowDiscountPercent : item.discountPercent) || 0;
+      let rowDisAmt = item.rowDiscountAmount !== undefined ? parseFloat(item.rowDiscountAmount) : 0;
       const amt = qty * rate;
-      const disAmt = amt * (discountPercent / 100);
-      const netVal = amt - disAmt;
+      if (discountPercent !== 0 && rowDisAmt === 0) {
+        rowDisAmt = amt * (discountPercent / 100);
+      } else if (discountPercent !== 0) {
+        rowDisAmt = amt * (discountPercent / 100);
+      } else if (rowDisAmt === 0 && item.discountAmount !== undefined && generalDiscAmount === 0 && generalDiscPercent === 0) {
+        rowDisAmt = parseFloat(item.discountAmount) || 0;
+      }
+      const taxableBeforeGeneral = amt - rowDisAmt;
+      const genDisAmt = baseSubtotalNet > 0 ? (taxableBeforeGeneral / baseSubtotalNet) * generalDiscAmount : 0;
+      const netVal = taxableBeforeGeneral - genDisAmt;
 
       subtotal += amt;
-      totalDiscount += disAmt;
+      totalDiscount += (rowDisAmt + genDisAmt);
 
       // GST calculations
       const gstPercent = seriesType === "NONTAXABLE" ? 0 : ((item.gstPercent !== undefined && item.gstPercent !== null && item.gstPercent !== "") ? parseFloat(item.gstPercent) : ((mat.igst !== undefined && mat.igst !== null) ? mat.igst : 18));
@@ -7370,9 +10902,9 @@ class StateManager {
 
       // Update material landing cost (weighted average) and record line item
       const oldStock = mat.stock || 0;
-      const newLandingCost = oldStock > 0
-        ? ((oldStock * mat.landingCost) + (qty * (netVal / qty))) / (oldStock + qty)
-        : (netVal / qty);
+      const newLandingCost = (oldStock > 0 && qty > 0)
+        ? ((oldStock * (mat.landingCost || 0)) + (qty * (netVal / qty))) / (oldStock + qty)
+        : (qty > 0 ? (netVal / qty) : (mat.landingCost || 0));
       mat.landingCost = newLandingCost;
       mat.costPrice = newLandingCost;
 
@@ -7380,13 +10912,16 @@ class StateManager {
         materialId: item.materialId,
         name: mat.name,
         code: mat.code || item.code || "",
-        batchNo: item.batchNo || "",
+        batchNo: item.batchNo || (rate > 0 ? String(rate) : (mat.landingCost ? String(mat.landingCost) : "")),
         quantity: qty,
         unit: item.unit || mat.unit,
         price: rate,
+        landingCost: qty > 0 ? (netVal / qty) : rate,
         mrp: mrp,
+        rowDiscountPercent: discountPercent,
+        rowDiscountAmount: rowDisAmt,
         discountPercent: discountPercent,
-        discountAmount: disAmt,
+        discountAmount: rowDisAmt + genDisAmt,
         netValue: netVal,
         gstPercent: gstPercent,
         gstAmount: gstAmt,
@@ -7400,8 +10935,6 @@ class StateManager {
     
     // Net total calculations
     const itemsNetTotal = (subtotal - totalDiscount) + totalGst + totalCess + adjustments + additionalCess + roundOff;
-
-    const txId = this.generateNextTxId();
     
     // Select normal account offset based on Pay Mode
     let creditAccount = purchaseData.siteName ? `${purchaseData.supplierId}::${purchaseData.siteName}` : purchaseData.supplierId;
@@ -7416,6 +10949,11 @@ class StateManager {
     // Track whether this is a new voucher number or reuse of an existing one (edit case)
     const isNewVoucherNo = !purchaseData.voucherNo;
     const pVoucherNo = purchaseData.voucherNo || purchaseData.refNo || this.generateNextVoucherNo("purchase");
+    const pId = pVoucherNo;
+    const txId = pVoucherNo;
+    purchaseData.id = pVoucherNo;
+    purchaseData.voucherNo = pVoucherNo;
+
     const isInterstate = this.isInterstatePurchase(purchaseData, supplier);
     const isKerala = !isInterstate;
     const taxGroups = {};
@@ -7456,7 +10994,6 @@ class StateManager {
         purchaseDebitLedger = l ? (l.code || l.id) : "L018";
       }
     }
-    const pId = purchaseData.id || purchaseData.refNo || ("PUR-" + String(this.purchases.length + 1).padStart(3, "0"));
 
     const tx = {
       id: txId,
@@ -7560,7 +11097,7 @@ class StateManager {
       supplier.balance = (supplier.balance || 0) - itemsNetTotal;
     }
 
-    this.purchases.push({
+    const newPurDoc = {
       id: pId,
       seriesId: purchaseData.seriesId || "",
       voucherNo: pVoucherNo,
@@ -7575,6 +11112,8 @@ class StateManager {
       creditPeriod: purchaseData.creditPeriod || "",
       narration: purchaseData.narration || "",
       headloaderType: purchaseData.headloaderType || "std",
+      discountPercent: String(purchaseData.discountPercent || "0"),
+      discountAmount: String(purchaseData.discountAmount || "0.00"),
       items: purchaseItems,
       subtotal: subtotal,
       totalDiscount: totalDiscount,
@@ -7585,7 +11124,19 @@ class StateManager {
       additionalCess: additionalCess,
       roundOff: roundOff,
       total: itemsNetTotal
-    });
+    };
+
+    const cleanPVUpper = String(pVoucherNo).trim().toUpperCase();
+    const existingPurIdx = (this.purchases || []).findIndex(p => 
+      p.id === pId || 
+      (cleanPVUpper && String(p.voucherNo || p.refNo || "").trim().toUpperCase() === cleanPVUpper && !p.isCancelled && !p.isCanceled && String(p.status).toUpperCase() !== "CANCELLED")
+    );
+
+    if (existingPurIdx !== -1) {
+      this.purchases[existingPurIdx] = newPurDoc;
+    } else {
+      this.purchases.push(newPurDoc);
+    }
 
     // Increment series number only for new purchases (not edits which reuse the existing voucherNo)
     if (isNewVoucherNo && purchaseData.seriesId) {
@@ -7599,7 +11150,13 @@ class StateManager {
   }
 
   createPurchaseReturn(returnData) {
-    this.validateTransactionDate(returnData.date || new Date().toISOString().split("T")[0]);
+    const txDate = returnData.date || new Date().toISOString().split("T")[0];
+    const fyCheck = this.isPreviousFyLocked(txDate);
+    if (fyCheck.locked) {
+      alert(fyCheck.reason);
+      return false;
+    }
+    this.validateTransactionDate(txDate);
     const supplier = this.contacts.find(c => c.id === returnData.contactId && (c.type === "supplier" || c.listInVendorList === true));
     if (!supplier) return false;
 
@@ -7620,6 +11177,7 @@ class StateManager {
       totalGst += gstAmt;
       returnItems.push({
         materialId: item.materialId,
+        batchNo: item.batchNo || "",
         name: mat.name,
         quantity: qty,
         unit: mat.unit,
@@ -7761,7 +11319,13 @@ class StateManager {
     return true;
   }
   createSalesReturn(returnData) {
-    this.validateTransactionDate(returnData.date || new Date().toISOString().split("T")[0]);
+    const txDate = returnData.date || new Date().toISOString().split("T")[0];
+    const fyCheck = this.isPreviousFyLocked(txDate);
+    if (fyCheck.locked) {
+      alert(fyCheck.reason);
+      return false;
+    }
+    this.validateTransactionDate(txDate);
     const customer = this.contacts.find(c => c.id === returnData.contactId && (c.type === "customer" || c.listInCustomerList === true));
     if (!customer) return false;
 
@@ -7786,6 +11350,7 @@ class StateManager {
 
       returnItems.push({
         materialId: item.materialId,
+        batchNo: item.batchNo || "",
         name: mat.name,
         quantity: qty,
         unit: mat.unit,
@@ -7954,7 +11519,13 @@ class StateManager {
 
   // --- SALES INVOICES (BATCH-WISE OUTGOING - ERP Style) ---
   createInvoice(invoiceData) {
-    this.validateTransactionDate(invoiceData.date || new Date().toISOString().split("T")[0]);
+    const txDate = invoiceData.date || new Date().toISOString().split("T")[0];
+    const fyCheck = this.isPreviousFyLocked(txDate);
+    if (fyCheck.locked) {
+      alert(fyCheck.reason);
+      return null;
+    }
+    this.validateTransactionDate(txDate);
     let customer = null;
     if (invoiceData.contactId === "__CASH__") {
       customer = { id: "__CASH__", name: "CASH SALES", balance: 0 };
@@ -7962,8 +11533,6 @@ class StateManager {
       customer = this.contacts.find(c => c.id === invoiceData.contactId && (c.type === "customer" || c.listInCustomerList === true));
     }
     if (!customer) return null;
-
-    const invoiceId = invoiceData.id || String(this.invoices.length + 1);
 
     let series = null;
     if (invoiceData.seriesId) {
@@ -7980,10 +11549,18 @@ class StateManager {
       if (mat) {
         const qty = parseFloat(item.quantity) || 0;
         const rate = parseFloat(item.price) || 0;
-        const discountPercent = parseFloat(item.discountPercent) || 0;
+        const discountPercent = parseFloat(item.rowDiscountPercent !== undefined ? item.rowDiscountPercent : item.discountPercent) || 0;
+        let rowDisAmt = item.rowDiscountAmount !== undefined ? parseFloat(item.rowDiscountAmount) : 0;
         const amt = qty * rate;
+        if (discountPercent !== 0 && rowDisAmt === 0) {
+          rowDisAmt = amt * (discountPercent / 100);
+        } else if (discountPercent !== 0) {
+          rowDisAmt = amt * (discountPercent / 100);
+        } else if (rowDisAmt === 0 && item.discountAmount !== undefined && (parseFloat(invoiceData.discountAmount) || 0) === 0 && (parseFloat(invoiceData.discountPercent) || 0) === 0) {
+          rowDisAmt = parseFloat(item.discountAmount) || 0;
+        }
         tempSubtotal += amt;
-        tempRowDiscount += amt * (discountPercent / 100);
+        tempRowDiscount += rowDisAmt;
       }
     });
     const baseSubtotalNet = tempSubtotal - tempRowDiscount;
@@ -7991,9 +11568,9 @@ class StateManager {
     let generalDiscPercent = parseFloat(invoiceData.discountPercent) || 0;
     let generalDiscAmount = parseFloat(invoiceData.discountAmount) || 0;
     if (baseSubtotalNet > 0) {
-      if (generalDiscPercent > 0 && generalDiscAmount === 0) {
+      if (generalDiscPercent !== 0 && generalDiscAmount === 0) {
         generalDiscAmount = baseSubtotalNet * (generalDiscPercent / 100);
-      } else if (generalDiscAmount > 0 && generalDiscPercent === 0) {
+      } else if (generalDiscAmount !== 0 && generalDiscPercent === 0) {
         generalDiscPercent = (generalDiscAmount / baseSubtotalNet) * 100;
       }
     }
@@ -8013,14 +11590,20 @@ class StateManager {
       const qty = parseFloat(item.quantity) || 0;
       const rate = parseFloat(item.price) || 0;
       const mrp = parseFloat(item.mrp) || rate * 1.25;
-      const discountPercent = parseFloat(item.discountPercent) || 0;
-      
+      const discountPercent = parseFloat(item.rowDiscountPercent !== undefined ? item.rowDiscountPercent : item.discountPercent) || 0;
+      let rowDisAmt = item.rowDiscountAmount !== undefined ? parseFloat(item.rowDiscountAmount) : 0;
       const amt = qty * rate;
-      const rowDisAmt = amt * (discountPercent / 100);
+      if (discountPercent !== 0 && rowDisAmt === 0) {
+        rowDisAmt = amt * (discountPercent / 100);
+      } else if (discountPercent !== 0) {
+        rowDisAmt = amt * (discountPercent / 100);
+      } else if (rowDisAmt === 0 && item.discountAmount !== undefined && generalDiscAmount === 0 && generalDiscPercent === 0) {
+        rowDisAmt = parseFloat(item.discountAmount) || 0;
+      }
       const taxableBeforeGeneral = amt - rowDisAmt;
       
       const gstPercent = seriesType === "NONTAXABLE" ? 0 : ((item.gstPercent !== undefined && item.gstPercent !== null && item.gstPercent !== "") ? parseFloat(item.gstPercent) : ((mat.igst !== undefined && mat.igst !== null) ? mat.igst : 18));
-      const genDisAmt = (taxableBeforeGeneral * (generalDiscPercent / 100)) / (1 + (gstPercent / 100));
+      const genDisAmt = baseSubtotalNet > 0 ? (taxableBeforeGeneral / baseSubtotalNet) * generalDiscAmount : 0;
       const netVal = taxableBeforeGeneral - genDisAmt;
 
       subtotal += amt;
@@ -8048,6 +11631,8 @@ class StateManager {
         unit: item.unit || mat.unit,
         price: rate,
         mrp: mrp,
+        rowDiscountPercent: discountPercent,
+        rowDiscountAmount: rowDisAmt,
         discountPercent: discountPercent,
         discountAmount: rowDisAmt + genDisAmt,
         netValue: netVal,
@@ -8062,8 +11647,6 @@ class StateManager {
     const roundOff = parseFloat(invoiceData.roundOff) || 0;
 
     const itemsNetTotal = (subtotal - totalDiscount) + totalGst + totalCess + adjustments + additionalCess + roundOff;
-
-    const invoiceTxId = this.generateNextTxId();
     
     // Choose debit account offset based on Pay Mode
     let payMode = invoiceData.payMode || "Cash";
@@ -8236,67 +11819,17 @@ class StateManager {
     }
 
     // ── Generate / resolve the voucher number ────────────────────────────────
-    // For EDITS: use the existing voucherNo (passed explicitly).
-    // For NEW invoices with a series: generate from the series counter RIGHT NOW
-    //   (not from the UI field / refNo) so duplicates are impossible.
-    // For NEW invoices without a series: fall back to generateNextVoucherNo.
     let sVoucherNo;
     if (invoiceData.voucherNo) {
       // Editing an existing invoice – keep the original number.
       sVoucherNo = invoiceData.voucherNo;
-    } else if (invoiceData.seriesId) {
-      // New invoice with a series – generate fresh from series counter.
-      const s = this.seriesMaster?.find(ser => ser.id === invoiceData.seriesId);
-      if (s) {
-        const prefix  = s.prefix || "";
-        const digits  = parseInt(s.digits) || 4;
-        let maxUsed = (s.startingNumber || 1) - 1;
-        const allSalesSeries = (this.seriesMaster || [])
-          .filter(ser => ser.txType === "Sales" && ser.prefix)
-          .sort((a, b) => (b.prefix || "").length - (a.prefix || "").length);
-
-        (this.invoices || []).forEach(inv => {
-          const vno = String(inv.voucherNo || inv.id || "").trim();
-          if (!vno) return;
-
-          let matchesThisSeries = false;
-          if (inv.seriesId === s.id) {
-            matchesThisSeries = true;
-          } else if (!inv.seriesId && prefix) {
-            const vnoUpper = vno.toUpperCase();
-            const bestMatch = allSalesSeries.find(ser => vnoUpper.startsWith((ser.prefix || "").toUpperCase()));
-            if (bestMatch && bestMatch.id === s.id) {
-              matchesThisSeries = true;
-            }
-          }
-
-          if (matchesThisSeries) {
-            const numPart = prefix && vno.toUpperCase().startsWith(prefix.toUpperCase()) ? vno.substring(prefix.length) : vno;
-            const n = parseInt(numPart, 10);
-            if (!isNaN(n) && n > maxUsed) maxUsed = n;
-          }
-        });
-
-        let nextNum = Math.max(s.currentNumber || 1, maxUsed + 1);
-        sVoucherNo = prefix + String(nextNum).padStart(digits, "0");
-        while (this.invoices.some(inv => String(inv.voucherNo || inv.id || "").toUpperCase() === sVoucherNo.toUpperCase())) {
-          nextNum++;
-          sVoucherNo = prefix + String(nextNum).padStart(digits, "0");
-        }
-        // Immediately increment so the next invoice gets a different number
-        s.currentNumber = nextNum + 1;
-      } else {
-        sVoucherNo = this.generateNextVoucherNo("sales");
-        while (this.invoices.some(inv => String(inv.voucherNo || inv.id || "").toUpperCase() === sVoucherNo.toUpperCase())) {
-          sVoucherNo = this.generateNextVoucherNo("sales");
-        }
-      }
     } else {
-      sVoucherNo = this.generateNextVoucherNo("sales");
-      while (this.invoices.some(inv => String(inv.voucherNo || inv.id || "").toUpperCase() === sVoucherNo.toUpperCase())) {
-        sVoucherNo = this.generateNextVoucherNo("sales");
-      }
+      // New invoice with a series – generate strictly the next sequential number for this series
+      sVoucherNo = this.generateNextVoucherNo("sales", invoiceData.seriesId || (series ? series.id : null));
     }
+
+    const invoiceId = sVoucherNo;
+    const invoiceTxId = sVoucherNo;
 
     // Purge any existing transactions for this invoice ID/voucherNo to prevent duplication on edit
     const cleanVNoUpper = String(sVoucherNo).trim().toUpperCase();
@@ -8326,7 +11859,7 @@ class StateManager {
     });
 
     if (totalCogs > 0) {
-      const cogsTxId = this.generateNextTxId();
+      const cogsTxId = `${sVoucherNo}-COGS`;
       this.transactions.push({
         id: cogsTxId,
         voucherId: invoiceId,
@@ -8334,7 +11867,7 @@ class StateManager {
         voucherNo: sVoucherNo,
         date: invoiceData.date || new Date().toISOString().split("T")[0],
         reference: `${sVoucherNo} COGS`,
-        description: "",
+        description: `Cost of Goods Sold for invoice ${sVoucherNo}`,
         entries: [
           { accountId: "5100", debit: totalCogs, credit: 0 },
           { accountId: "1200", debit: 0, credit: totalCogs }
@@ -8357,7 +11890,7 @@ class StateManager {
       id: invoiceId,
       seriesId: invoiceData.seriesId || (series ? series.id : ""),
       voucherNo: sVoucherNo,
-      refNo: invoiceData.refNo || "",
+      refNo: invoiceData.refNo || sVoucherNo,
       employee: invoiceData.employee || "",
       influencer: invoiceData.influencer || "",
       date: invDateStr,
@@ -8388,22 +11921,38 @@ class StateManager {
       status: payMode !== "Credit" ? "paid" : "unpaid"
     };
 
-    // Note: series currentNumber is already incremented above when sVoucherNo was generated.
+    const cleanVNoUpperCheck = String(sVoucherNo).trim().toUpperCase();
+    const existingIdx = (this.invoices || []).findIndex(inv => 
+      inv.id === invoiceId || 
+      (cleanVNoUpperCheck && String(inv.voucherNo || "").trim().toUpperCase() === cleanVNoUpperCheck && !inv.isCancelled && !inv.isCanceled && String(inv.status).toUpperCase() !== "CANCELLED")
+    );
 
-    this.invoices.push(newInvoice);
+    if (existingIdx !== -1) {
+      this.invoices[existingIdx] = newInvoice;
+    } else {
+      this.invoices.push(newInvoice);
+    }
+
+    this.recreateInvoiceTransaction(newInvoice);
+    this.invalidateBalancesCache();
     this.recomputeAllStocks();
     this.saveState();
     return newInvoice;
   }
 
   createContraVoucher(data) {
-    this.validateTransactionDate(data.date || new Date().toISOString().split("T")[0]);
+    const txDate = data.date || new Date().toISOString().split("T")[0];
+    const fyCheck = this.isPreviousFyLocked(txDate);
+    if (fyCheck.locked) {
+      alert(fyCheck.reason);
+      return false;
+    }
+    this.validateTransactionDate(txDate);
     const amount = parseFloat(data.amount) || 0;
     if (amount <= 0) return false;
 
-    const txId = this.generateNextTxId();
-    this.transactions.push({
-      id: txId,
+    return this.addTransaction({
+      id: data.id,
       date: data.date || new Date().toISOString().split("T")[0],
       reference: data.reference || "Contra",
       description: data.description || "",
@@ -8412,18 +11961,21 @@ class StateManager {
         { accountId: data.fromAccountId, debit: 0, credit: amount }
       ]
     });
-    this.saveState();
-    return true;
   }
 
   createReceiptVoucher(data) {
-    this.validateTransactionDate(data.date || new Date().toISOString().split("T")[0]);
+    const txDate = data.date || new Date().toISOString().split("T")[0];
+    const fyCheck = this.isPreviousFyLocked(txDate);
+    if (fyCheck.locked) {
+      alert(fyCheck.reason);
+      return false;
+    }
+    this.validateTransactionDate(txDate);
     const cashAmt = parseFloat(data.cashAmount) || 0;
     const bankAmt = parseFloat(data.bankAmount) || 0;
     const amount = (cashAmt > 0 || bankAmt > 0) ? (cashAmt + bankAmt) : (parseFloat(data.amount) || 0);
     if (amount <= 0) return false;
 
-    const txId = this.generateNextTxId();
     const date = data.date || new Date().toISOString().split("T")[0];
     const ref = data.reference || this.generateNextVoucherNo("receipt");
     
@@ -8433,8 +11985,6 @@ class StateManager {
     if (!data.isGeneral) {
       const contact = this.contacts.find(c => c.id === data.contactId);
       if (!contact) return false;
-      
-      contact.balance = (contact.balance || 0) - amount;
       creditAcc = data.siteName ? `${contact.id}::${data.siteName}` : contact.id;
     }
 
@@ -8453,26 +12003,29 @@ class StateManager {
     }
     entries.push({ accountId: creditAcc, debit: 0, credit: amount });
 
-    this.transactions.push({
-      id: txId,
+    return this.addTransaction({
+      id: data.id,
       date: date,
       reference: ref,
       description: desc,
       siteName: data.siteName || "",
       entries: entries
     });
-    this.saveState();
-    return true;
   }
 
   createPaymentVoucher(data) {
-    this.validateTransactionDate(data.date || new Date().toISOString().split("T")[0]);
+    const txDate = data.date || new Date().toISOString().split("T")[0];
+    const fyCheck = this.isPreviousFyLocked(txDate);
+    if (fyCheck.locked) {
+      alert(fyCheck.reason);
+      return false;
+    }
+    this.validateTransactionDate(txDate);
     const cashAmt = parseFloat(data.cashAmount) || 0;
     const bankAmt = parseFloat(data.bankAmount) || 0;
     const amount = (cashAmt > 0 || bankAmt > 0) ? (cashAmt + bankAmt) : (parseFloat(data.amount) || 0);
     if (amount <= 0) return false;
 
-    const txId = this.generateNextTxId();
     const date = data.date || new Date().toISOString().split("T")[0];
     const ref = data.reference || this.generateNextVoucherNo("payment");
     
@@ -8482,13 +12035,7 @@ class StateManager {
     if (!data.isGeneral) {
       const contact = this.contacts.find(c => c.id === data.contactId);
       if (!contact) return false;
-
       debitAcc = data.siteName ? `${contact.id}::${data.siteName}` : contact.id;
-      if (contact.type === "supplier" || contact.listInVendorList) {
-        contact.balance = (contact.balance || 0) + amount;
-      } else {
-        contact.balance = (contact.balance || 0) - amount;
-      }
     }
 
     const defaultCash = this.ledgers?.find(l => l.groupName === "CASH-IN-HAND" || l.name?.toUpperCase() === "CASH")?.code || "L0001";
@@ -8506,16 +12053,14 @@ class StateManager {
       entries.push({ accountId: data.fromAccountId || (data.paymentMode === "cash" ? defaultCash : defaultBank), debit: 0, credit: amount });
     }
 
-    this.transactions.push({
-      id: txId,
+    return this.addTransaction({
+      id: data.id,
       date: date,
       reference: ref,
       description: desc,
       siteName: data.siteName || "",
       entries: entries
     });
-    this.saveState();
-    return true;
   }
 
   recordPayment(contactId, amount, method, ref, date) {
@@ -8650,6 +12195,8 @@ class StateManager {
       else if (type === "payment") prefix = "PM-";
       else if (type === "journal") prefix = "JV-";
       else if (type === "contra") prefix = "CO-";
+      else if (type === "debit") prefix = "DN-";
+      else if (type === "credit") prefix = "CN-";
       else if (type === "purchase") prefix = "PR-";
       else if (type === "sales" || type === "invoice") prefix = "SA-";
       else if (type === "stock-adjust") {
@@ -8668,102 +12215,79 @@ class StateManager {
     let maxNum = startNum - 1;
     const prefixUpper = prefix.toUpperCase();
 
-    const allMatchingSeries = (this.seriesMaster || [])
-      .filter(s => s.prefix)
-      .sort((a, b) => (b.prefix || "").length - (a.prefix || "").length);
-
-    if (series && this.invoices) {
-      this.invoices.forEach(inv => {
+    // STRICT PER-SERIES SEPARATION:
+    // If this is a Sales series, scan ONLY sales invoices matching this series
+    if (series && series.txType === "Sales") {
+      (this.invoices || []).forEach(inv => {
+        if (!inv || inv.isCancelled || inv.isCanceled || String(inv.status).toUpperCase() === "CANCELLED") return;
         const ref = String(inv.voucherNo || inv.refNo || inv.id || "").trim();
         if (!ref) return;
 
         let matchesThisSeries = false;
-        if (inv.seriesId === series.id) {
+        if (prefixUpper && ref.toUpperCase().startsWith(prefixUpper)) {
           matchesThisSeries = true;
-        } else if (!inv.seriesId && prefixUpper) {
-          const refUpper = ref.toUpperCase();
-          const bestMatch = allMatchingSeries.find(s => s.txType === "Sales" && refUpper.startsWith((s.prefix || "").toUpperCase()));
-          if (bestMatch && bestMatch.id === series.id) {
-            matchesThisSeries = true;
-          }
+        } else if (!prefixUpper && inv.seriesId === series.id) {
+          matchesThisSeries = true;
         }
 
         if (matchesThisSeries) {
-          const numPart = prefixUpper && ref.toUpperCase().startsWith(prefixUpper) ? ref.substring(prefix.length) : ref;
-          const parsed = parseInt(numPart, 10);
-          if (!isNaN(parsed) && parsed > maxNum) {
-            maxNum = parsed;
+          const numPart = prefixUpper ? ref.substring(prefix.length) : ref;
+          if (/^\d+$/.test(numPart)) {
+            const parsed = parseInt(numPart, 10);
+            if (!isNaN(parsed) && parsed > maxNum) {
+              maxNum = parsed;
+            }
           }
         }
       });
-    }
-
-    if (series && this.purchases) {
-      this.purchases.forEach(pur => {
+    } else if (series && series.txType === "Purchase") {
+      // If this is a Purchase series, scan ONLY purchases matching this series
+      (this.purchases || []).forEach(pur => {
+        if (!pur || pur.isCancelled || pur.isCanceled || String(pur.status).toUpperCase() === "CANCELLED") return;
         const ref = String(pur.voucherNo || pur.refNo || pur.id || "").trim();
         if (!ref) return;
 
         let matchesThisSeries = false;
-        if (pur.seriesId === series.id) {
+        if (prefixUpper && ref.toUpperCase().startsWith(prefixUpper)) {
           matchesThisSeries = true;
-        } else if (!pur.seriesId && prefixUpper) {
-          const refUpper = ref.toUpperCase();
-          const bestMatch = allMatchingSeries.find(s => s.txType === "Purchase" && refUpper.startsWith((s.prefix || "").toUpperCase()));
-          if (bestMatch && bestMatch.id === series.id) {
-            matchesThisSeries = true;
-          }
+        } else if (!prefixUpper && pur.seriesId === series.id) {
+          matchesThisSeries = true;
         }
 
         if (matchesThisSeries) {
-          const numPart = prefixUpper && ref.toUpperCase().startsWith(prefixUpper) ? ref.substring(prefix.length) : ref;
-          const parsed = parseInt(numPart, 10);
-          if (!isNaN(parsed) && parsed > maxNum) {
-            maxNum = parsed;
+          const numPart = prefixUpper ? ref.substring(prefix.length) : ref;
+          if (/^\d+$/.test(numPart)) {
+            const parsed = parseInt(numPart, 10);
+            if (!isNaN(parsed) && parsed > maxNum) {
+              maxNum = parsed;
+            }
           }
         }
       });
-    }
-
-    if (!series) {
+    } else {
+      // Direct Vouchers (Receipt, Payment, Contra, Journal, etc.) - scan transactions with this prefix
       if (this.transactions) {
         this.transactions.forEach(t => {
-          const ref = (t.reference || "").trim();
-          if (prefixUpper && ref.toUpperCase().startsWith(prefixUpper)) {
+          if (!t) return;
+          const ref = String(t.reference || t.voucherNo || t.id || "").trim();
+          if (prefixUpper && ref.toUpperCase().startsWith(prefixUpper) && !ref.endsWith(" COGS")) {
             const numPart = ref.substring(prefix.length);
-            const parsed = parseInt(numPart, 10);
-            if (!isNaN(parsed) && parsed > maxNum) {
-              maxNum = parsed;
-            }
-          }
-        });
-      }
-      if (this.invoices) {
-        this.invoices.forEach(inv => {
-          const ref = (inv.voucherNo || inv.refNo || inv.id || "").trim();
-          if (prefixUpper && ref.toUpperCase().startsWith(prefixUpper)) {
-            const numPart = ref.substring(prefix.length);
-            const parsed = parseInt(numPart, 10);
-            if (!isNaN(parsed) && parsed > maxNum) {
-              maxNum = parsed;
-            }
-          }
-        });
-      }
-      if (this.purchases) {
-        this.purchases.forEach(pur => {
-          const ref = (pur.voucherNo || pur.refNo || pur.id || "").trim();
-          if (prefixUpper && ref.toUpperCase().startsWith(prefixUpper)) {
-            const numPart = ref.substring(prefix.length);
-            const parsed = parseInt(numPart, 10);
-            if (!isNaN(parsed) && parsed > maxNum) {
-              maxNum = parsed;
+            if (/^\d+$/.test(numPart)) {
+              const parsed = parseInt(numPart, 10);
+              if (!isNaN(parsed) && parsed > maxNum) {
+                maxNum = parsed;
+              }
             }
           }
         });
       }
     }
 
-    const nextNum = Math.max(series ? (series.currentNumber || 1) : 1, maxNum + 1);
+    // Strictly sequential: always maxNum + 1 (never skip numbers)
+    const nextNum = Math.max(startNum, maxNum + 1);
+    if (series) {
+      series.currentNumber = nextNum + 1;
+    }
     return prefix + String(nextNum).padStart(digits, "0");
   }
 
@@ -8909,9 +12433,14 @@ class StateManager {
     if (this.transactions) {
       const cancelledInvoiceIds = new Set((this.invoices || []).filter(i => i.isCancelled).map(i => i.id).filter(Boolean));
       const cancelledPurchaseIds = new Set((this.purchases || []).filter(p => p.isCancelled).map(p => p.id).filter(Boolean));
+      const cancelledSalesReturnIds = new Set((this.salesReturns || []).filter(r => r.isCancelled).flatMap(r => [String(r.id || '').trim(), String(r.voucherNo || '').trim()]).filter(Boolean));
+      const cancelledPurchaseReturnIds = new Set((this.purchaseReturns || []).filter(r => r.isCancelled).flatMap(r => [String(r.id || '').trim(), String(r.voucherNo || '').trim(), String(r.billNo || '').trim()]).filter(Boolean));
+
       const cancelledInvoiceNos = new Set((this.invoices || []).filter(i => i.isCancelled).map(i => String(i.voucherNo).trim()).filter(Boolean));
       const cancelledPurchaseNos = new Set((this.purchases || []).filter(p => p.isCancelled).map(p => String(p.voucherNo || p.refNo || p.invoiceNo).trim()).filter(Boolean));
-      
+      const cancelledSalesReturnNos = new Set((this.salesReturns || []).filter(r => r.isCancelled).flatMap(r => [String(r.voucherNo || '').trim(), String(r.id || '').trim()]).filter(Boolean));
+      const cancelledPurchaseReturnNos = new Set((this.purchaseReturns || []).filter(r => r.isCancelled).flatMap(r => [String(r.voucherNo || '').trim(), String(r.id || '').trim(), String(r.billNo || '').trim()]).filter(Boolean));
+
       const validInvoiceNos = new Set((this.invoices || []).filter(i => !i.isCancelled).flatMap(i => [String(i.voucherNo || '').trim(), String(i.id || '').trim(), String(i.billNo || '').trim()]).filter(Boolean));
       const validPurchaseNos = new Set((this.purchases || []).filter(p => !p.isCancelled).flatMap(p => [String(p.voucherNo || '').trim(), String(p.refNo || '').trim(), String(p.invoiceNo || '').trim(), String(p.id || '').trim()]).filter(Boolean));
 
@@ -8920,25 +12449,71 @@ class StateManager {
 
       const beforeLen = this.transactions.length;
       this.transactions = this.transactions.filter(tx => {
-        if (isManualVoucherOrReturn(tx)) return true;
-        if (tx.id && (cancelledInvoiceIds.has(tx.id) || cancelledPurchaseIds.has(tx.id))) {
+        if (this.isTransactionForCancelledDoc(tx)) {
           return false;
         }
+        const txIdUpper = String(tx.id || "").trim().toUpperCase();
+        const tvidUpper = String(tx.voucherId || "").trim().toUpperCase();
         const refStr = String(tx.reference || "").trim();
+        const refUpper = refStr.toUpperCase();
+        const cleanRef = refStr.split(" ")[0].trim().toUpperCase();
+
+        if (tx.id && (cancelledInvoiceIds.has(tx.id) || cancelledPurchaseIds.has(tx.id) || cancelledSalesReturnIds.has(tx.id) || cancelledPurchaseReturnIds.has(tx.id))) {
+          return false;
+        }
+
+        if (refStr && (cancelledInvoiceNos.has(cleanRef) || cancelledPurchaseNos.has(cleanRef) || cancelledSalesReturnNos.has(cleanRef) || cancelledPurchaseReturnNos.has(cleanRef))) {
+          return false;
+        }
+
+        for (const srId of cancelledSalesReturnIds) {
+          const sUpper = srId.toUpperCase();
+          if (sUpper && (txIdUpper === sUpper || tvidUpper === sUpper || refUpper.includes(sUpper) || cleanRef === sUpper)) {
+            return false;
+          }
+        }
+        for (const prId of cancelledPurchaseReturnIds) {
+          const pUpper = prId.toUpperCase();
+          if (pUpper && (txIdUpper === pUpper || tvidUpper === pUpper || refUpper.includes(pUpper) || cleanRef === pUpper)) {
+            return false;
+          }
+        }
+
+        // Clean orphaned Sales Return transactions when document no longer exists
+        if (refUpper.startsWith("SALES RETURN") || refUpper.startsWith("SR-") || refUpper.includes("SALES RETURN") || (refUpper.endsWith(" COGS") && (refUpper.startsWith("SR-") || refUpper.startsWith("CN-") || refUpper.includes("RETURN")))) {
+          const validSalesReturnIds = new Set((this.salesReturns || []).flatMap(r => [String(r.id || '').trim().toUpperCase(), String(r.voucherNo || '').trim().toUpperCase()]).filter(Boolean));
+          let matchesValidSr = false;
+          for (const srId of validSalesReturnIds) {
+            if (srId && (txIdUpper === srId || tvidUpper === srId || refUpper.includes(srId) || cleanRef === srId)) {
+              matchesValidSr = true;
+              break;
+            }
+          }
+          if (!matchesValidSr) return false;
+        }
+
+        // Clean orphaned Purchase Return transactions when document no longer exists
+        if (refUpper.startsWith("PURCHASE RETURN") || (refUpper.startsWith("PR-") && !cleanRef.startsWith("LPR-") && !cleanRef.startsWith("IPR-") && !cleanRef.startsWith("NPR-"))) {
+          const validPurchaseReturnIds = new Set((this.purchaseReturns || []).flatMap(r => [String(r.id || '').trim().toUpperCase(), String(r.voucherNo || '').trim().toUpperCase(), String(r.billNo || '').trim().toUpperCase()]).filter(Boolean));
+          let matchesValidPr = false;
+          for (const prId of validPurchaseReturnIds) {
+            if (prId && (txIdUpper === prId || tvidUpper === prId || refUpper.includes(prId) || cleanRef === prId)) {
+              matchesValidPr = true;
+              break;
+            }
+          }
+          if (!matchesValidPr) return false;
+        }
+
+        if (isManualVoucherOrReturn(tx)) return true;
         const idStr = String(tx.id || "").trim();
         const descStr = String(tx.description || "").toLowerCase();
-        const cleanRef = refStr.split(" ")[0].trim();
         const cleanId = idStr.split(" ")[0].trim();
 
-        if (refStr && (cancelledInvoiceNos.has(cleanRef) || cancelledPurchaseNos.has(cleanRef))) {
-          return false;
-        }
-
-        // Check if manual voucher (do not drop authentic manual payment/receipt/journal/contra/debit note vouchers)
+        // Check if manual voucher (do not drop authentic manual payment/receipt/journal/contra vouchers)
         const isManualVoucher = tx.voucherType === "RECEIPT" || tx.voucherType === "PAYMENT" || tx.voucherType === "JOURNAL" || tx.voucherType === "CONTRA" ||
-                                cleanRef.startsWith("RC-") || cleanRef.startsWith("PY-") || cleanRef.startsWith("JV-") || cleanRef.startsWith("CN-") || cleanRef.startsWith("DN-") ||
-                                cleanId.startsWith("RC-") || cleanId.startsWith("PY-") || cleanId.startsWith("JV-") || cleanId.startsWith("CN-") || cleanId.startsWith("DN-");
-
+                                cleanRef.startsWith("RC-") || cleanRef.startsWith("PY-") || cleanRef.startsWith("JV-") ||
+                                cleanId.startsWith("RC-") || cleanId.startsWith("PY-") || cleanId.startsWith("JV-");
 
         return true;
       });
@@ -9111,6 +12686,68 @@ class StateManager {
     }
 
     if (this.invoices) {
+      // Auto-recover B2B0023 if it was erroneously dropped
+      if (!this.invoices.some(i => {
+        const v = String(i.voucherNo || i.refNo || i.id || "").trim().toUpperCase();
+        return v === "B2B0023" || v === "B2B-0023";
+      })) {
+        const b2b23Invoice = {
+          id: "B2B0023",
+          billNo: 260,
+          voucherNo: "B2B0023",
+          seriesId: "SER-B2B-SALES",
+          refNo: "B2B0023",
+          date: "2026-07-24",
+          dueDate: "2026-07-24",
+          contactId: "CUST-0427",
+          customerId: "CUST-0427",
+          contactName: "MANEESH PV",
+          customerName: "MANEESH PV",
+          ledgerId: 427,
+          items: [
+            {
+              materialId: "MAT-0730",
+              name: "CEMENT",
+              code: "AMBUJA",
+              model: "AMBUJA",
+              batchNo: "228.813",
+              quantity: 150,
+              unit: "Nos",
+              price: 243.22,
+              amount: 36483,
+              netValue: 36483,
+              taxRate: 18,
+              gstPercent: 18,
+              gstAmount: 6566.94,
+              cessPercent: 0,
+              netAmount: 43049.94,
+              hsn: "2523",
+              cgst: 3283.47,
+              sgst: 3283.47,
+              igst: 0
+            }
+          ],
+          subtotal: 36483,
+          taxRate: 18,
+          taxAmount: 6566.94,
+          cgst: 3283.47,
+          sgst: 3283.47,
+          igst: 0,
+          shipping: 0,
+          discount: 0,
+          roundOff: 0.06,
+          total: 43050,
+          paidAmount: 0,
+          status: "unpaid",
+          cancelFlag: false,
+          payMode: "Credit",
+          paymode: "Credit"
+        };
+        this.invoices.push(b2b23Invoice);
+        stateChanged = true;
+        console.log("[Auto-Recovery] Successfully restored missing invoice B2B0023.");
+      }
+
       this.invoices.forEach(inv => {
         if (!inv || inv.isCancelled) return;
         if ((!inv.contactId || inv.contactId === "__CASH__") && inv.contactName) {
@@ -9153,7 +12790,22 @@ class StateManager {
 
     if (this.salesReturns) {
       this.salesReturns.forEach(sr => {
-        if (!sr || sr.isCancelled) return;
+        if (!sr) return;
+        if (sr.isCancelled) {
+          const srid = String(sr.id || "").trim().toUpperCase();
+          const vno = String(sr.voucherNo || "").trim().toUpperCase();
+          const beforeLen = this.transactions.length;
+          this.transactions = this.transactions.filter(t => {
+            const tref = String(t.reference || "").toUpperCase();
+            const tvno = String(t.voucherNo || "").toUpperCase();
+            const tid = String(t.id || "").toUpperCase();
+            if (srid && (tref.includes(srid) || tvno === srid || tid === srid)) return false;
+            if (vno && (tref.includes(vno) || tvno === vno || tid === vno)) return false;
+            return true;
+          });
+          if (this.transactions.length !== beforeLen) stateChanged = true;
+          return;
+        }
         const customer = this.contacts.find(c => c.id === sr.contactId);
         const isKerala = (sr.state || (customer ? customer.state : this.getCompanyState()) || this.getCompanyState()).toUpperCase() === this.getCompanyState();
         
@@ -9299,7 +12951,22 @@ class StateManager {
 
     if (this.purchaseReturns) {
       this.purchaseReturns.forEach(pr => {
-        if (!pr || pr.isCancelled) return;
+        if (!pr) return;
+        if (pr.isCancelled) {
+          const prid = String(pr.id || "").trim().toUpperCase();
+          const vno = String(pr.voucherNo || pr.billNo || "").trim().toUpperCase();
+          const beforeLen = this.transactions.length;
+          this.transactions = this.transactions.filter(t => {
+            const tref = String(t.reference || "").toUpperCase();
+            const tvno = String(t.voucherNo || "").toUpperCase();
+            const tid = String(t.id || "").toUpperCase();
+            if (prid && (tref.includes(prid) || tvno === prid || tid === prid)) return false;
+            if (vno && (tref.includes(vno) || tvno === vno || tid === vno)) return false;
+            return true;
+          });
+          if (this.transactions.length !== beforeLen) stateChanged = true;
+          return;
+        }
         const supplier = this.contacts.find(c => c.id === pr.contactId);
 
         // Resolve the original purchase's series type to correctly identify IGST vs Local
@@ -9311,6 +12978,15 @@ class StateManager {
         
         const taxGroups = {};
         (pr.items || []).forEach(item => {
+          if (!item.batchNo || String(item.batchNo).trim() === "") {
+            if (originalPurchase && originalPurchase.items) {
+              const purItem = originalPurchase.items.find(pi => pi.materialId === item.materialId || pi.name === item.name);
+              if (purItem && (purItem.batchNo || purItem.price)) {
+                item.batchNo = purItem.batchNo || String(purItem.price);
+                stateChanged = true;
+              }
+            }
+          }
           const mat = this.materials.find(m => m.id === item.materialId);
           const rate = getValidGstRate(item, mat, 18);
           const qty = parseFloat(item.quantity) || 0;
@@ -9430,24 +13106,84 @@ class StateManager {
   }
 
   addTransaction(data) {
-    const txId = data.id || this.generateNextTxId();
     const date = data.date || new Date().toISOString().split("T")[0];
+    const fyCheck = this.isPreviousFyLocked(date);
+    if (fyCheck.locked) {
+      alert(fyCheck.reason);
+      return false;
+    }
     this.validateTransactionDate(date);
+
+    const refUpper = String(data.reference || "").trim().toUpperCase();
+    const formattedEntries = (data.entries || []).map(e => ({
+      accountId: e.accountId,
+      debit: parseFloat(e.debit) || 0,
+      credit: parseFloat(e.credit) || 0
+    }));
+    const newEntriesSig = formattedEntries
+      .map(e => `${e.accountId}:${e.debit.toFixed(2)}:${e.credit.toFixed(2)}`)
+      .sort()
+      .join("|");
+
+    // Check if matching transaction already exists by ID or Reference+Date+Entries
+    let existingTx = null;
+    if (data.id) {
+      existingTx = (this.transactions || []).find(t => t && t.id === data.id);
+    }
+    if (!existingTx && refUpper && refUpper !== "JV" && refUpper !== "CONTRA") {
+      existingTx = (this.transactions || []).find(t => {
+        if (!t) return false;
+        const tRef = String(t.reference || "").trim().toUpperCase();
+        if (tRef !== refUpper || t.date !== date) return false;
+        const tEntriesSig = (t.entries || [])
+          .map(e => `${e.accountId || e.accountCode || ""}:${parseFloat(e.debit || 0).toFixed(2)}:${parseFloat(e.credit || 0).toFixed(2)}`)
+          .sort()
+          .join("|");
+        return tEntriesSig === newEntriesSig;
+      });
+    }
+
+    if (existingTx) {
+      this.reverseTransactionImpact(existingTx);
+      existingTx.date = date;
+      existingTx.reference = data.reference || existingTx.reference || "JV";
+      existingTx.description = data.description !== undefined ? data.description : existingTx.description;
+      existingTx.siteName = data.siteName !== undefined ? data.siteName : existingTx.siteName;
+      existingTx.entries = formattedEntries;
+      existingTx._normDocKeys = null;
+      this.applyTransactionImpact(existingTx);
+      this.saveState();
+      this.syncTransactionToAppwrite(existingTx);
+      return true;
+    }
+
+    const refStr = String(data.reference || "JV").trim();
+    const isDocRef = refStr && refStr !== "JV" && !refStr.endsWith(" COGS");
+    const txId = data.id || (isDocRef ? refStr : this.generateNextTxId());
+    let inferredVType = data.voucherType || "";
+    if (!inferredVType) {
+      const refUpper = refStr.toUpperCase();
+      if (refUpper.startsWith("RC-") || refUpper.startsWith("REC")) inferredVType = "RECEIPT";
+      else if (refUpper.startsWith("PM-") || refUpper.startsWith("PY-") || refUpper.startsWith("PAY")) inferredVType = "PAYMENT";
+      else if (refUpper.startsWith("CO-") || refUpper.startsWith("CON-") || refUpper.startsWith("CNTR")) inferredVType = "CONTRA";
+      else if (refUpper.startsWith("JV-") || refUpper.startsWith("JV")) inferredVType = "JOURNAL";
+    }
+
     const newTx = {
       id: txId,
+      voucherId: data.voucherId || txId,
+      voucherType: inferredVType,
+      voucherNo: data.voucherNo || refStr,
       date: date,
-      reference: data.reference || "JV",
+      reference: refStr,
       description: data.description || "",
       siteName: data.siteName || "",
-      entries: data.entries.map(e => ({
-        accountId: e.accountId,
-        debit: parseFloat(e.debit) || 0,
-        credit: parseFloat(e.credit) || 0
-      }))
+      entries: formattedEntries
     };
     this.transactions.push(newTx);
     this.applyTransactionImpact(newTx);
     this.saveState();
+    this.syncTransactionToAppwrite(newTx);
     return true;
   }
 
@@ -9455,9 +13191,15 @@ class StateManager {
     const txIndex = this.transactions.findIndex(t => t.id === id);
     if (txIndex !== -1) {
       const tx = this.transactions[txIndex];
+      const fyCheck = this.isPreviousFyLocked(tx.date);
+      if (fyCheck.locked) {
+        alert(fyCheck.reason);
+        return false;
+      }
       this.reverseTransactionImpact(tx);
       this.transactions.splice(txIndex, 1);
       this.saveState();
+      this.syncTransactionToAppwrite(tx, true);
       return true;
     }
     return false;
@@ -9541,9 +13283,11 @@ class StateManager {
   }
 
   getStockValuationAtDate(targetDateStr = "", materialIdFilter = null) {
-    const targetDate = targetDateStr ? new Date(targetDateStr) : null;
-    if (targetDate) {
-      targetDate.setHours(23, 59, 59, 999);
+    let targetTime = 0;
+    if (targetDateStr) {
+      const d = parseDateSafely(targetDateStr);
+      d.setHours(23, 59, 59, 999);
+      targetTime = d.getTime();
     }
 
     const materialById = new Map((this.materials || []).map(m => [m.id, m]));
@@ -9567,7 +13311,7 @@ class StateManager {
       defaultBatches.forEach(b => {
         const key = `${m.id}::${b.batchNo}`;
         stockMap[key] = parseFloat(b.openingStock) || 0;
-        batchCostMap[key] = parseFloat(b.landingCost) || 0;
+        batchCostMap[key] = parseFloat(b.landingCost) || parseFloat(m.landingCost) || parseFloat(m.purchasePrice) || 0;
       });
     });
 
@@ -9587,9 +13331,14 @@ class StateManager {
       }
     };
 
+    const isAfterTarget = (dateStr) => {
+      if (!targetTime || !dateStr) return false;
+      return parseDateSafely(dateStr).getTime() > targetTime;
+    };
+
     (this.purchases || []).forEach(pur => {
       if (pur.isCancelled) return;
-      if (targetDate && new Date(pur.date) > targetDate) return;
+      if (isAfterTarget(pur.date)) return;
       (pur.items || []).forEach(item => {
         const mat = materialById.get(item.materialId);
         if (mat) {
@@ -9605,7 +13354,7 @@ class StateManager {
 
     (this.invoices || []).forEach(inv => {
       if (inv.isCancelled) return;
-      if (targetDate && new Date(inv.date) > targetDate) return;
+      if (isAfterTarget(inv.date)) return;
       (inv.items || []).forEach(item => {
         const mat = materialById.get(item.materialId);
         if (mat) {
@@ -9617,7 +13366,7 @@ class StateManager {
 
     (this.salesReturns || []).forEach(ret => {
       if (ret.isCancelled) return;
-      if (targetDate && new Date(ret.date) > targetDate) return;
+      if (isAfterTarget(ret.date)) return;
       (ret.items || []).forEach(item => {
         const mat = materialById.get(item.materialId);
         if (mat) {
@@ -9629,7 +13378,7 @@ class StateManager {
 
     (this.purchaseReturns || []).forEach(ret => {
       if (ret.isCancelled) return;
-      if (targetDate && new Date(ret.date) > targetDate) return;
+      if (isAfterTarget(ret.date)) return;
       (ret.items || []).forEach(item => {
         const mat = materialById.get(item.materialId);
         if (mat) {
@@ -9641,7 +13390,7 @@ class StateManager {
 
     (this.stockAdjustments || []).forEach(adj => {
       if (adj.isCancelled) return;
-      if (targetDate && new Date(adj.date) > targetDate) return;
+      if (isAfterTarget(adj.date)) return;
       (adj.items || []).forEach(item => {
         const mat = materialById.get(item.materialId);
         if (mat) {
@@ -9679,446 +13428,615 @@ class StateManager {
     }, 0);
   }
 
-  getProfitLoss(startDate = "", endDate = "") {
-    const filteredTxs = this.filterTxsByDate(this.transactions, startDate, endDate);
-
-    const contactById = new Map();
-    const contactByNameUpper = new Map();
-    (this.contacts || []).forEach(c => {
-      if (c && c.id) contactById.set(c.id, c);
-      if (c && c.name) contactByNameUpper.set(String(c.name).toUpperCase(), c);
-    });
-
-    const groupByNameUpper = new Map();
-    (this.accountGroups || []).forEach(g => {
-      if (g && g.name) groupByNameUpper.set(String(g.name).toUpperCase(), g);
-    });
-
-    const ledgers = this.getLedgers();
-    const ledgerByCode = new Map();
-    ledgers.forEach(l => {
-      if (l && l.code) ledgerByCode.set(String(l.code), l);
-    });
+  isSalesAccount(accId, ledgerObj = null) {
+    if (!accId && !ledgerObj) return false;
+    const strCode = accId ? String(accId).trim().toUpperCase() : "";
+    const canonical = accId ? String(this.getCanonicalAccountId(accId)).toUpperCase() : "";
     
-    const getGroupCategory = (gName) => {
-      if (!gName) return "";
-      const gnUpper = String(gName).toUpperCase();
-      if (contactByNameUpper.has(gnUpper) || contactById.has(gName)) {
-        return "BALANCE_SHEET";
-      }
-      let currentGroup = groupByNameUpper.get(gnUpper);
-      if (!currentGroup) {
-        if (gnUpper === "ASSETS" || gnUpper.includes("ASSET") || gnUpper.includes("DEBTORS") || gnUpper.includes("CREDITORS")) return "BALANCE_SHEET";
-        if (gnUpper === "LIABILITIES" || gnUpper.includes("LIABILITY") || gnUpper === "EQUITY" || gnUpper.includes("CAPITAL")) return "BALANCE_SHEET";
-        if (gnUpper.includes("EXPENSE") || gnUpper.includes("COST") || gnUpper.includes("LOSS") || gnUpper === "DEPRECIATION") return "EXPENSE";
-        if (gnUpper.includes("INCOME") || gnUpper.includes("REVENUE") || gnUpper.includes("GAIN")) return "INCOME";
-        return "";
-      }
+    const coreSalesCodes = new Set(["4100", "L0004", "L022", "L023", "L024", "L025"]);
+    if (coreSalesCodes.has(strCode) || coreSalesCodes.has(canonical)) return true;
 
-      let under = currentGroup.under ? currentGroup.under.toUpperCase() : "";
-      for (let i = 0; i < 10; i++) {
-        if (under === "ASSETS" || under === "LIABILITIES" || under === "EQUITY") {
-          return "BALANCE_SHEET";
-        }
-        if (under === "EXPENSE" || under === "INCOME") {
-          return under;
-        }
-        const parentGroup = groupByNameUpper.get(under);
-        if (!parentGroup) break;
-        under = parentGroup.under ? parentGroup.under.toUpperCase() : "";
-      }
+    const l = ledgerObj || (this.ledgers || []).find(x => 
+      String(x.code).toUpperCase() === strCode || 
+      String(x.code).toUpperCase() === canonical || 
+      (x.id && String(x.id).toUpperCase() === strCode)
+    );
 
-      if (gnUpper === "ASSETS" || gnUpper.includes("ASSET") || gnUpper.includes("DEBTORS") || gnUpper.includes("CASH") || gnUpper.includes("BANK") || gnUpper.includes("INVESTMENT")) return "BALANCE_SHEET";
-      if (gnUpper === "LIABILITIES" || gnUpper.includes("LIABILITY") || gnUpper === "EQUITY" || gnUpper.includes("CAPITAL") || gnUpper.includes("CREDITORS") || gnUpper.includes("TAX") || gnUpper.includes("DUTIES") || gnUpper.includes("GST") || gnUpper.includes("CESS")) return "BALANCE_SHEET";
-      if (gnUpper.includes("EXPENSE") || gnUpper.includes("COST") || gnUpper.includes("LOSS") || gnUpper === "DEPRECIATION") return "EXPENSE";
-      if (gnUpper.includes("INCOME") || gnUpper.includes("REVENUE") || gnUpper.includes("GAIN")) return "INCOME";
-      return "";
-    };
+    const gn = l ? String(l.groupName || "").trim().toUpperCase() : (accId ? this.getAccountGroupName(accId).toUpperCase() : "");
+    const name = l ? String(l.name || "").trim().toUpperCase() : (accId ? this.getAccountName(accId).toUpperCase() : "");
 
-    const periodChanges = {};
+    if (gn === "SALES ACCOUNTS" || gn === "SALES ACCOUNT" || gn === "SALES" || gn.includes("SALES ACCOUNT") || gn.includes("SALES ACCOUNTS")) return true;
 
-    filteredTxs.forEach(tx => {
-      tx.entries.forEach(e => {
-        const id = this.getCanonicalAccountId(e.accountId);
-        if (periodChanges[id] === undefined) {
-          periodChanges[id] = 0;
-        }
-        periodChanges[id] += (e.debit - e.credit);
-      });
-    });
+    const groupByNameUpper = this.getGroupParentMap();
+    let currGn = gn;
+    for (let i = 0; i < 10; i++) {
+      if (!currGn) break;
+      if (currGn === "SALES ACCOUNTS" || currGn === "SALES ACCOUNT" || currGn === "SALES" || currGn.includes("SALES ACCOUNT")) return true;
+      const parent = groupByNameUpper.get(currGn);
+      if (!parent || !parent.under) break;
+      currGn = String(parent.under).trim().toUpperCase();
+    }
 
-    const getAccountDetails = (accId) => {
-      const canonicalAcc = this.getCanonicalAccountId(accId);
-      const led = ledgerByCode.get(String(canonicalAcc)) || ledgerByCode.get(String(accId));
-      if (led) {
-        return {
-          name: led.name,
-          groupName: led.groupName || "",
-          balanceType: led.balanceType || "Debit"
-        };
-      }
-      const staticAcc = ACCOUNTS[canonicalAcc] || ACCOUNTS[accId];
-      if (staticAcc) {
-        return {
-          name: staticAcc.name,
-          groupName: "",
-          balanceType: (staticAcc.type === "asset" || staticAcc.type === "expense") ? "Debit" : "Credit"
-        };
-      }
-      return {
-        name: canonicalAcc || accId,
-        groupName: "",
-        balanceType: "Debit"
-      };
-    };
-
-    const filteredInvoices = this.invoices.filter(inv => {
-      if (inv.isCancelled) return false;
-      if (startDate && inv.date < startDate) return false;
-      if (endDate && inv.date > endDate) return false;
+    if (name.includes("SALES") && !gn.includes("EXPENSE") && !gn.includes("INCOME") && !gn.includes("ASSET") && !gn.includes("LIABILITY")) {
       return true;
-    });
-    const salesVal = filteredInvoices.reduce((sum, inv) => sum + ((parseFloat(inv.subtotal) || 0) - (parseFloat(inv.totalDiscount) || 0)), 0);
+    }
 
-    const filteredSalesReturns = this.salesReturns.filter(sr => {
-      if (sr.isCancelled) return false;
-      if (startDate && sr.date < startDate) return false;
-      if (endDate && sr.date > endDate) return false;
+    return false;
+  }
+
+  isPurchaseAccount(accId, ledgerObj = null) {
+    if (!accId && !ledgerObj) return false;
+    const strCode = accId ? String(accId).trim().toUpperCase() : "";
+    const canonical = accId ? String(this.getCanonicalAccountId(accId)).toUpperCase() : "";
+
+    const corePurCodes = new Set(["L0005", "L018", "L019", "L020", "L021"]);
+    if (corePurCodes.has(strCode) || corePurCodes.has(canonical)) return true;
+
+    const l = ledgerObj || (this.ledgers || []).find(x => 
+      String(x.code).toUpperCase() === strCode || 
+      String(x.code).toUpperCase() === canonical || 
+      (x.id && String(x.id).toUpperCase() === strCode)
+    );
+
+    const gn = l ? String(l.groupName || "").trim().toUpperCase() : (accId ? this.getAccountGroupName(accId).toUpperCase() : "");
+    const name = l ? String(l.name || "").trim().toUpperCase() : (accId ? this.getAccountName(accId).toUpperCase() : "");
+
+    if (gn === "PURCHASE ACCOUNTS" || gn === "PURCHASE ACCOUNT" || gn === "PURCHASE" || gn.includes("PURCHASE ACCOUNT") || gn.includes("PURCHASE ACCOUNTS")) return true;
+
+    const groupByNameUpper = this.getGroupParentMap();
+    let currGn = gn;
+    for (let i = 0; i < 10; i++) {
+      if (!currGn) break;
+      if (currGn === "PURCHASE ACCOUNTS" || currGn === "PURCHASE ACCOUNT" || currGn === "PURCHASE" || currGn.includes("PURCHASE ACCOUNT")) return true;
+      const parent = groupByNameUpper.get(currGn);
+      if (!parent || !parent.under) break;
+      currGn = String(parent.under).trim().toUpperCase();
+    }
+
+    if (name.includes("PURCHASE") && !gn.includes("EXPENSE") && !gn.includes("INCOME") && !gn.includes("ASSET") && !gn.includes("LIABILITY")) {
       return true;
-    });
-    const salesReturnsVal = filteredSalesReturns.reduce((sum, sr) => sum + (parseFloat(sr.subtotal) || 0), 0);
+    }
 
-    const otherIncomes = [];
-    const otherExpenses = [];
+    return false;
+  }
 
-    Object.keys(periodChanges).forEach(accId => {
-      const changeDb = periodChanges[accId];
-      if (Math.abs(changeDb) < 0.001) return;
+  getProfitLoss(startDate = "", endDate = "") {
+    const fyStart = this.getActiveFinancialYearStartDate();
+    const effectiveStartDate = startDate || "";
 
-      const strAccId = String(accId);
-      const led = ledgerByCode.get(strAccId);
-      const isChildLedgerOfCustomer = led && (led.parentCustomerId || contactByNameUpper.has(String(led.groupName || "").toUpperCase()) || contactById.has(led.groupName));
-      const isContact = contactById.has(strAccId) || contactById.has(strAccId.split("::")[0]) || strAccId.includes("::") || isChildLedgerOfCustomer;
-      if (isContact) {
-        return;
-      }
-
-      const details = getAccountDetails(accId);
-      const nameUpper = String(details.name || "").toUpperCase();
-      const groupUpper = String(details.groupName || "").toUpperCase();
-
-      // Exclude core Sales, Purchase, COGS, Stock hand, and Return accounts from other Income/Expenses
-      if (accId === "4100" || accId === "4110" || 
-          nameUpper.includes("SALES") || groupUpper.includes("SALES") || 
-          nameUpper.includes("PURCHASE") || groupUpper.includes("PURCHASE") || 
-          accId === "1200" || accId === "5100" || accId === "5110" || 
-          accId === "4300" || accId === "5500" ||
-          nameUpper.includes("COGS") || nameUpper.includes("COST OF GOODS")) {
-        return;
-      }
-
-      const isExpense = accId.startsWith("5") || 
-                        groupUpper.includes("EXPENSE") || 
-                        groupUpper.includes("EXPENSES") || 
-                        groupUpper.includes("LOSS") || 
-                        groupUpper.includes("SALARIES") ||
-                        details.balanceType === "Debit";
-
-      let isBalanceSheetAccount = false;
-      if (details.groupName) {
-        isBalanceSheetAccount = getGroupCategory(details.groupName) === "BALANCE_SHEET";
-      } else {
-        const staticAcc = ACCOUNTS[accId];
-        if (staticAcc) {
-          isBalanceSheetAccount = staticAcc.type === "asset" || staticAcc.type === "liability" || staticAcc.type === "equity";
-        }
-      }
-
-      if (isBalanceSheetAccount) {
-        return;
-      }
-
-      if (isExpense) {
-        otherExpenses.push({
-          code: accId,
-          name: details.name,
-          amount: changeDb
-        });
-      } else {
-        otherIncomes.push({
-          code: accId,
-          name: details.name,
-          amount: -changeDb
-        });
-      }
-    });
-
+    // Stock Valuations
     let openingStock = 0;
-    if (startDate) {
-      const prevDate = new Date(new Date(startDate) - 86400000).toISOString().split("T")[0];
+    if (effectiveStartDate && fyStart && effectiveStartDate > fyStart) {
+      const prevDate = new Date(new Date(effectiveStartDate) - 86400000).toISOString().split("T")[0];
       openingStock = this.getStockValuationAtDate(prevDate);
     } else {
       openingStock = this.getOpeningStockValuation();
     }
-
     const closingStock = this.getStockValuationAtDate(endDate);
 
-    const filteredPurchases = this.purchases.filter(p => {
-      if (p.isCancelled) return false;
-      if (startDate && p.date < startDate) return false;
-      if (endDate && p.date > endDate) return false;
-      return true;
+    // Sales Accounts & Sales Details (derived from Group Summary for 100% consistency)
+    const salesSummary = this.getGroupSummary("SALES ACCOUNTS", effectiveStartDate, endDate);
+    const salesDetails = [];
+    let salesVal = 0;
+
+    salesSummary.forEach(item => {
+      const netPeriodSales = item.credit - item.debit;
+      const ledgerOp = (!effectiveStartDate || effectiveStartDate <= fyStart) ? (item.opening < 0 ? Math.abs(item.opening) : -item.opening) : 0;
+      const totalSales = netPeriodSales + (ledgerOp > 0 ? ledgerOp : 0);
+
+      if (Math.abs(totalSales) > 0.001) {
+        salesVal += totalSales;
+        salesDetails.push({
+          code: item.accountId,
+          name: item.name,
+          amount: totalSales
+        });
+      }
     });
-    const purchase = filteredPurchases.reduce((sum, p) => sum + ((parseFloat(p.subtotal) || 0) - (parseFloat(p.totalDiscount) || 0)), 0);
 
-    const filteredPurchaseReturns = this.purchaseReturns.filter(pr => {
-      if (pr.isCancelled) return false;
-      if (startDate && pr.date < startDate) return false;
-      if (endDate && pr.date > endDate) return false;
-      return true;
+    if (salesVal === 0 && (!this.transactions || this.transactions.length === 0)) {
+      const filteredInvoices = (this.invoices || []).filter(inv => !inv.isCancelled && !inv.isCanceled && String(inv.status).toUpperCase() !== "CANCELLED" && (!effectiveStartDate || inv.date >= effectiveStartDate) && (!endDate || inv.date <= endDate));
+      salesVal = filteredInvoices.reduce((sum, inv) => sum + ((parseFloat(inv.subtotal) || 0) - (parseFloat(inv.totalDiscount) || 0)), 0);
+    }
+
+    // Purchase Accounts & Purchase Details (derived from Group Summary for 100% consistency)
+    const purSummary = this.getGroupSummary("PURCHASE ACCOUNTS", effectiveStartDate, endDate);
+    const purchaseDetails = [];
+    let purchaseVal = 0;
+
+    purSummary.forEach(item => {
+      const netPeriodPur = item.debit - item.credit;
+      const ledgerOp = (!effectiveStartDate || effectiveStartDate <= fyStart) ? (item.opening > 0 ? item.opening : 0) : 0;
+      const totalPur = netPeriodPur + ledgerOp;
+
+      if (Math.abs(totalPur) > 0.001) {
+        purchaseVal += totalPur;
+        purchaseDetails.push({
+          code: item.accountId,
+          name: item.name,
+          amount: totalPur
+        });
+      }
     });
-    const purchaseReturn = filteredPurchaseReturns.reduce((sum, pr) => sum + (parseFloat(pr.subtotal) || 0), 0);
-    const netPurchase = purchase - purchaseReturn;
 
-    const netSales = salesVal - salesReturnsVal;
+    if (purchaseVal === 0 && (!this.transactions || this.transactions.length === 0)) {
+      const filteredPurchases = (this.purchases || []).filter(p => !p.isCancelled && !p.isCanceled && String(p.status).toUpperCase() !== "CANCELLED" && (!effectiveStartDate || p.date >= effectiveStartDate) && (!endDate || p.date <= endDate));
+      purchaseVal = filteredPurchases.reduce((sum, p) => sum + ((parseFloat(p.subtotal) || 0) - (parseFloat(p.totalDiscount) || 0)), 0);
+    }
 
-    const grossProfit = netSales + closingStock - (openingStock + netPurchase);
+    // Other Incomes and Other Expenses
+    const start = effectiveStartDate ? parseDateSafely(effectiveStartDate) : null;
+    const end = endDate ? parseDateSafely(endDate) : null;
+    if (end) end.setHours(23, 59, 59, 999);
+    const startTime = start ? start.getTime() : 0;
+    const endTime = end ? end.getTime() : 0;
 
-    const otherIncomesTotal = otherIncomes.reduce((sum, i) => sum + i.amount, 0);
-    const otherExpensesTotal = otherExpenses.reduce((sum, e) => sum + e.amount, 0);
+    const canonicalMap = new Map();
+    const getCanonical = (code) => {
+      if (!code) return "";
+      const str = String(code).trim();
+      if (canonicalMap.has(str)) return canonicalMap.get(str);
+      const res = this.getCanonicalAccountId(str);
+      canonicalMap.set(str, res);
+      return res;
+    };
 
-    const totalRevenue = netSales + closingStock + otherIncomesTotal;
-    const totalExpenses = openingStock + netPurchase + otherExpensesTotal;
+    const plAccountActivity = new Map();
+
+    (this.transactions || []).forEach(tx => {
+      if (!tx || !tx.id || !tx.entries || tx.isCancelled || this.isTransactionForCancelledDoc(tx)) return;
+      let txTime = 0;
+      if (tx.date) {
+        txTime = parseDateSafely(tx.date).getTime();
+      }
+      if (startTime && txTime && txTime < startTime) return;
+      if (endTime && txTime && txTime > endTime) return;
+
+      tx.entries.forEach(e => {
+        if (!e || !e.accountId) return;
+        const targetAcc = getCanonical(e.accountId);
+        if (!targetAcc) return;
+
+        const dr = parseFloat(e.debit) || 0;
+        const cr = parseFloat(e.credit) || 0;
+
+        let accData = plAccountActivity.get(targetAcc);
+        if (!accData) {
+          accData = { debit: 0, credit: 0 };
+          plAccountActivity.set(targetAcc, accData);
+        }
+        accData.debit += dr;
+        accData.credit += cr;
+      });
+    });
+
+    const otherIncomes = [];
+    const otherExpenses = [];
+    const salesAccSet = new Set(salesSummary.map(s => getCanonical(s.accountId)));
+    const purAccSet = new Set(purSummary.map(p => getCanonical(p.accountId)));
+    const bsControlCodes = new Set(["1010", "1020", "1100", "1200", "2100", "2200", "3100", "3200", "5100"]);
+
+    const groupByNameUpper = this.getGroupParentMap();
+    const bsGroupCache = new Map();
+    const isBsGroup = (gn) => {
+      if (!gn) return false;
+      const originalGn = String(gn).trim().toUpperCase();
+      if (bsGroupCache.has(originalGn)) return bsGroupCache.get(originalGn);
+
+      const bsKeywords = [
+        "ADJUSTMENTS", "ADJUSTMENT", "AJUSTMENTS", "AJUSTMENT", 
+        "CURRENT LIABILITIES", "LIABILITIES", "CURRENT ASSETS", 
+        "FIXED ASSETS", "ASSETS", "CAPITAL ACCOUNT", "EQUITY", 
+        "SUNDRY CREDITORS", "SUNDRY DEBTORS", "DUTIES & TAXES", 
+        "DUTIES AND TAXES", "PROVISIONS", "LOANS (LIABILITY)", 
+        "LOANS & ADVANCES(ASSET)", "BANK ACCOUNTS", "CASH-IN-HAND", 
+        "BRANCH / DIVISIONS", "SUSPENSE A/C", "RESERVES & SURPLUS"
+      ];
+      if (bsKeywords.includes(originalGn)) {
+        bsGroupCache.set(originalGn, true);
+        return true;
+      }
+      let curr = originalGn;
+      let res = false;
+      for (let i = 0; i < 10; i++) {
+        const parent = groupByNameUpper.get(curr);
+        if (!parent || !parent.under) break;
+        curr = String(parent.under).trim().toUpperCase();
+        if (bsKeywords.includes(curr)) {
+          res = true;
+          break;
+        }
+      }
+      bsGroupCache.set(originalGn, res);
+      return res;
+    };
+
+    const isCogsAccount = (code, name) => {
+      const cUpper = String(code || "").trim().toUpperCase();
+      const nUpper = String(name || "").trim().toUpperCase();
+      if (cUpper === "5100" || cUpper === "1200" || cUpper === "L0003") return true;
+      if (nUpper.includes("COST OF GOODS") || nUpper.includes("COGS") || nUpper.includes("COST OF SALES")) return true;
+      return false;
+    };
+
+    const allLedgers = this.getLedgers() || [];
+    allLedgers.forEach(l => {
+      if (!l || !l.code) return;
+      const canonical = getCanonical(l.code);
+      if (salesAccSet.has(canonical) || purAccSet.has(canonical) || bsControlCodes.has(canonical) || bsControlCodes.has(l.code)) return;
+      if (this.isSalesAccount(l.code, l) || this.isPurchaseAccount(l.code, l) || isCogsAccount(l.code, l.name)) return;
+
+      const gnUpper = String(l.groupName || "").trim().toUpperCase();
+      if (isBsGroup(gnUpper)) return;
+
+      const nameUpper = String(l.name || "").trim().toUpperCase();
+      if (isCogsAccount(l.code, nameUpper)) return;
+
+      const activity = plAccountActivity.get(canonical) || plAccountActivity.get(l.code) || { debit: 0, credit: 0 };
+      
+      let op = 0;
+      if (!effectiveStartDate || effectiveStartDate <= fyStart) {
+        op = parseFloat(l.openingBalance) || 0;
+        if (l.balanceType === "Credit") op = -op;
+      }
+
+      const netBalance = op + (activity.debit - activity.credit);
+
+      if (Math.abs(netBalance) < 0.001) return;
+
+      const isInc = gnUpper.includes("INCOME") || gnUpper.includes("REVENUE") || nameUpper.includes("INCOME");
+      const isExp = gnUpper.includes("EXPENSE") || gnUpper.includes("DEPRECIATION") || gnUpper.includes("SALARY");
+
+      if (isInc) {
+        const amt = netBalance < 0 ? Math.abs(netBalance) : -netBalance;
+        otherIncomes.push({ code: l.code, name: nameUpper, groupName: gnUpper || "INDIRECT INCOME", amount: amt });
+      } else if (isExp) {
+        const amt = netBalance > 0 ? netBalance : -Math.abs(netBalance);
+        otherExpenses.push({ code: l.code, name: nameUpper, groupName: gnUpper || "INDIRECT EXPENSES", amount: amt });
+      } else {
+        if (netBalance < 0) {
+          otherIncomes.push({ code: l.code, name: nameUpper, groupName: gnUpper || "INDIRECT INCOME", amount: Math.abs(netBalance) });
+        } else {
+          otherExpenses.push({ code: l.code, name: nameUpper, groupName: gnUpper || "INDIRECT EXPENSES", amount: netBalance });
+        }
+      }
+    });
+
+    const otherIncomesTotal = otherIncomes.reduce((s, i) => s + i.amount, 0);
+    const otherExpensesTotal = otherExpenses.reduce((s, e) => s + e.amount, 0);
+
+    const cogs = openingStock + purchaseVal - closingStock;
+    const grossProfit = salesVal - cogs;
+    const netProfit = grossProfit + otherIncomesTotal - otherExpensesTotal;
+    const totalExpenses = cogs + otherExpensesTotal;
 
     return {
       openingStock,
       closingStock,
-      purchase: netPurchase,
-      sales: netSales,
+      purchase: purchaseVal,
+      sales: salesVal,
+      salesDetails,
+      purchaseDetails,
+      cogs,
       grossProfit,
       otherIncomes,
       otherExpenses,
-      revenueTotal: totalRevenue,
+      revenueTotal: salesVal + otherIncomesTotal,
       expensesTotal: totalExpenses,
-      netProfit: totalRevenue - totalExpenses
+      revenue: { total: salesVal, grandTotal: salesVal + otherIncomesTotal },
+      expenses: { total: totalExpenses, purchase: purchaseVal, cogs },
+      netProfit
     };
   }
 
   getBalanceSheet(startDate = "", endDate = "") {
     const balances = this.getAccountBalances(endDate);
+    const fyStartForBs = startDate || this.getActiveFinancialYearStartDate() || (this.companies && this.companies[0] ? this.companies[0].financialYearStarts : "");
+    const allTimePl = this.getProfitLoss(fyStartForBs, endDate);
+    const retainedEarnings = allTimePl.netProfit;
 
-    const contactById = new Map();
-    const contactByNameUpper = new Map();
+    const contactCodes = new Set();
     (this.contacts || []).forEach(c => {
-      if (c && c.id) contactById.set(c.id, c);
-      if (c && c.name) contactByNameUpper.set(String(c.name).toUpperCase(), c);
+      if (c && c.id) contactCodes.add(String(c.id));
+      if (c && c.ledgerCode) contactCodes.add(String(c.ledgerCode));
+    });
+
+    const rawLedgersByCode = new Map();
+    (this.getLedgers() || []).forEach(l => {
+      if (l && l.code) rawLedgersByCode.set(String(l.code).toUpperCase(), l);
     });
 
     const groupByNameUpper = new Map();
     (this.accountGroups || []).forEach(g => {
-      if (g && g.name) groupByNameUpper.set(String(g.name).toUpperCase(), g);
+      if (g && g.name) groupByNameUpper.set(String(g.name).trim().toUpperCase(), g);
     });
 
-    const isLiabilitiesAccount = (gName) => {
-      if (!gName) return false;
-      let current = String(gName).toUpperCase();
-      const supp = contactByNameUpper.get(current) || contactById.get(current);
-      if (supp && (supp.type === "supplier" || supp.listInVendorList === true || supp.groupName === "SUNDRY CREDITORS")) return true;
-      const targetGroups = ["CURRENT LIABILITIES", "DUTIES & TAXES", "SUNDRY CREDITORS", "BANK OD A/C", "BRANCH / DIVISIONS", "LIABILITIES", "INPUT SGST", "INPUT CGST", "INPUT IGST", "OUTPUT SGST", "OUTPUT CGST", "OUTPUT IGST"];
+    const plLedgerCodes = new Set([
+      '4100', '5100', '1200', 'L0003', 'L0004', 'L0005', 'L0007', 'L0008', 'L0009', 'L0010', 'L0012',
+      'L0013', 'L0014', 'L0015', 'L0016', 'L0060', 'L0061', 'L0062', 'L0063', 'L0064', 'L0065', 'L0066', 'L0067', 'L0099',
+      'L0101', 'L0116', 'L0120', 'L0124', 'L0126', 'L0135', 'L0139', 'L0146', 'L0150', 'L0151', 'L0155', 'L0156',
+      'L0553', 'L1017', 'L1122'
+    ]);
+
+    const isPlLedger = (gnUpper, nameUpper, code) => {
+      if (plLedgerCodes.has(code)) return true;
+
+      const bsKeywords = ['ADJUSTMENTS', 'ADJUSTMENT', 'AJUSTMENTS', 'AJUSTMENT', 'CURRENT LIABILITIES', 'LIABILITIES', 'CURRENT ASSETS', 'FIXED ASSETS', 'ASSETS', 'CAPITAL ACCOUNT', 'EQUITY'];
+      let curr = gnUpper;
       for (let i = 0; i < 15; i++) {
-        if (targetGroups.includes(current)) return true;
-        const parent = groupByNameUpper.get(current);
-        if (parent && parent.under) current = String(parent.under).toUpperCase();
-        else break;
-      }
-      return false;
-    };
-
-    const isCapitalAccount = (gName) => {
-      if (!gName) return false;
-      let current = String(gName).toUpperCase();
-      const targetGroups = ["CAPITAL ACCOUNT", "EQUITY"];
-      for (let i = 0; i < 15; i++) {
-        if (targetGroups.includes(current)) return true;
-        const parent = groupByNameUpper.get(current);
-        if (parent && parent.under) current = String(parent.under).toUpperCase();
-        else break;
-      }
-      return false;
-    };
-
-    const isCurrentAssetsAccount = (gName) => {
-      if (!gName) return false;
-      let current = String(gName).toUpperCase();
-      const cust = contactByNameUpper.get(current) || contactById.get(current);
-      if (cust && (cust.type === "customer" || cust.listInCustomerList === true || cust.groupName === "SUNDRY DEBTORS")) return true;
-      const targetGroups = ["CURRENT ASSETS", "BANK ACCOUNTS", "CASH-IN-HAND", "SUNDRY DEBTORS", "LOANS & ADVANCES(ASSET)", "DEPOSITS", "ADAVANCE TO SUPPLIER", "ASSETS"];
-      for (let i = 0; i < 15; i++) {
-        if (targetGroups.includes(current)) return true;
-        const parent = groupByNameUpper.get(current);
-        if (parent && parent.under) current = String(parent.under).toUpperCase();
-        else break;
-      }
-      return false;
-    };
-
-    const isFixedAssetsAccount = (gName) => {
-      if (!gName) return false;
-      let current = String(gName).toUpperCase();
-      const targetGroups = ["FIXED ASSETS"];
-      for (let i = 0; i < 15; i++) {
-        if (targetGroups.includes(current)) return true;
-        const parent = groupByNameUpper.get(current);
-        if (parent && parent.under) current = String(parent.under).toUpperCase();
-        else break;
-      }
-      return false;
-    };
-
-    const closingStockVal = this.getStockValuationAtDate(endDate);
-
-    let capitalVal = balances["3100"] ? -balances["3100"].balance : 0;
-    let currentLiabilitiesVal = (balances["2100"] ? -balances["2100"].balance : 0) + (balances["2200"] ? -balances["2200"].balance : 0);
-    let fixedAssetsVal = 0;
-    let currentAssetsVal = (balances["1010"] ? balances["1010"].balance : 0) + 
-                           (balances["1020"] ? balances["1020"].balance : 0) + 
-                           (balances["1100"] ? balances["1100"].balance : 0) + 
-                           closingStockVal;
-    let otherCurrentAssetsVal = 0;
-
-    const capitalDetails = [];
-    const currentLiabilitiesDetails = [];
-    const fixedAssetsDetails = [];
-    const currentAssetsDetails = [];
-    const otherCurrentAssetsDetails = [];
-
-    if (balances["3100"] && balances["3100"].balance !== 0) {
-      capitalDetails.push({ name: "Capital / Owner Equity", balance: -balances["3100"].balance });
-    }
-    if (balances["2100"] && balances["2100"].balance !== 0) {
-      currentLiabilitiesDetails.push({ name: "Sundry Creditors (Accounts Payable)", balance: -balances["2100"].balance });
-    }
-    if (balances["2200"] && balances["2200"].balance !== 0) {
-      currentLiabilitiesDetails.push({ name: "GST/VAT Payable", balance: -balances["2200"].balance });
-    }
-    if (balances["1010"] && balances["1010"].balance !== 0) {
-      currentAssetsDetails.push({ name: "Cash in Hand", balance: balances["1010"].balance });
-    }
-    if (balances["1020"] && balances["1020"].balance !== 0) {
-      currentAssetsDetails.push({ name: "Bank Current Account", balance: balances["1020"].balance });
-    }
-    if (balances["1100"] && balances["1100"].balance !== 0) {
-      currentAssetsDetails.push({ name: "Sundry Debtors (Accounts Receivable)", balance: balances["1100"].balance });
-    }
-    if (closingStockVal !== 0) {
-      currentAssetsDetails.push({ name: "Stock on Hand", balance: closingStockVal });
-    }
-
-    if (this.ledgers) {
-      this.ledgers.forEach(l => {
-        const bal = balances[l.code] ? balances[l.code].balance : 0;
-        if (bal === 0) return;
-
-        const parentCust = (l.parentCustomerId && contactById.get(l.parentCustomerId)) || contactByNameUpper.get(String(l.groupName || "").toUpperCase());
-        const gnUpper = (l.groupName || "").toUpperCase();
-
-        if (parentCust || gnUpper === "SUNDRY DEBTORS" || gnUpper === "SUNDRY CREDITORS") {
-          return; // Already represented in 1100 and 2100 control accounts
-        } else if (isCapitalAccount(gnUpper)) {
-          capitalVal -= bal;
-          capitalDetails.push({ name: l.name, balance: -bal, group: l.groupName });
-        } else if (isLiabilitiesAccount(gnUpper)) {
-          currentLiabilitiesVal -= bal;
-          currentLiabilitiesDetails.push({ name: l.name, balance: -bal, group: l.groupName });
-        } else if (isFixedAssetsAccount(gnUpper)) {
-          fixedAssetsVal += bal;
-          fixedAssetsDetails.push({ name: l.name, balance: bal, group: l.groupName });
-        } else if (isCurrentAssetsAccount(gnUpper)) {
-          currentAssetsVal += bal;
-          currentAssetsDetails.push({ name: l.name, balance: bal, group: l.groupName });
+        if (!curr) break;
+        if (bsKeywords.includes(curr)) {
+          return false;
         }
-      });
-    }
+        if (['EXPENSE', 'INCOME', 'REVENUE', 'SALES', 'PURCHASE', 'DIRECT EXPENSES', 'INDIRECT EXPENSES', 'DIRECT INCOME', 'INDIRECT INCOME', 'SALARY', 'DEPRECIATION', 'TRADING', 'PROFIT & LOSS'].some(kw => curr.includes(kw))) {
+          return true;
+        }
+        const parent = groupByNameUpper.get(curr);
+        if (parent && parent.under) curr = String(parent.under).trim().toUpperCase();
+        else break;
+      }
 
-    // Difference due to opening balance (including ledgers, contacts, and opening stock)
-    const openingStockVal = this.materials.reduce((sum, m) => sum + (m.batches || []).reduce((bSum, b) => bSum + ((parseFloat(b.openingStock) || 0) * (parseFloat(b.landingCost) || 0)), 0), 0);
-    let diff = openingStockVal;
-    const seenDiffCanonicals = new Set();
+      if (['SALES ACCOUNT', 'PURCHASE ACCOUNT', 'DIRECT EXPENSES', 'INDIRECT EXPENSES', 'DIRECT INCOME', 'INDIRECT INCOME', 'TRADING', 'PROFIT & LOSS'].includes(gnUpper)) {
+        return true;
+      }
 
-    if (this.contacts) {
-      this.contacts.forEach(c => {
-        const canonical = this.getCanonicalAccountId(c.id);
-        seenDiffCanonicals.add(canonical);
-        let bType = c.balanceType || ((c.type === "supplier" || c.listInVendorList) ? "Credit" : "Debit");
-        if (c.siteType === "multiple" && Array.isArray(c.sites) && c.sites.length > 0) {
-          c.sites.forEach(site => {
-            const siteOpBal = c.openingBalances && c.openingBalances[site] !== undefined ? parseFloat(c.openingBalances[site]) : 0;
-            if (bType === "Credit") {
-              diff -= Math.abs(siteOpBal);
-            } else {
-              diff += Math.abs(siteOpBal);
-            }
-          });
-        } else {
-          const opBal = parseFloat(c.openingBalance) || 0;
-          if (bType === "Credit") {
-            diff -= Math.abs(opBal);
-          } else {
-            diff += Math.abs(opBal);
+      const bsGroupKeywords = ['ASSET', 'LIABIL', 'CAPITAL', 'DEPOSIT', 'ADVANCE', 'DEBTOR', 'CREDITOR', 'BANK', 'CASH', 'DUTY', 'DUTIES', 'TAX', 'PROVISION', 'ADJUSTMENT', 'AJUSTMENT'];
+      if (!bsGroupKeywords.some(kw => gnUpper.includes(kw))) {
+        if (['PURCHASE', 'SALES', 'DISCOUNT ALLOWED', 'DISCOUNT RECEIVED', 'FREIGHT', 'ROUND OFF', 'UNLOADING CHARGE', 'LOADING CHARGE', 'BANK CHARGES', 'GST LATE FEE', 'SOFTWARE UPDATION', 'PRICE CHANGE'].some(kw => nameUpper.includes(kw))) {
+          if (!nameUpper.includes('PAYABLE') && !nameUpper.includes('RECEIVABLE') && !nameUpper.includes('ADVANCE')) {
+            return true;
           }
         }
-      });
+      }
+
+      return false;
+    };
+
+    const isDutiesAndTaxes = (gnUpper, nameUpper) => {
+      let curr = gnUpper;
+      for (let i = 0; i < 15; i++) {
+        if (!curr) break;
+        if (['DUTIES & TAXES', 'DUTIES AND TAXES', 'INPUT SGST', 'INPUT CGST', 'INPUT IGST', 'OUTPUT SGST', 'OUTPUT CGST', 'OUTPUT IGST'].some(kw => curr === kw || curr.includes('DUTIES'))) return true;
+        const parent = groupByNameUpper.get(curr);
+        if (parent && parent.under) curr = String(parent.under).trim().toUpperCase();
+        else break;
+      }
+      if (['INPUT SGST', 'INPUT CGST', 'INPUT IGST', 'OUTPUT SGST', 'OUTPUT CGST', 'OUTPUT IGST', 'DUTIES & TAXES', 'DUTIES AND TAXES'].includes(gnUpper)) return true;
+      if (['INPUT SGST', 'INPUT CGST', 'INPUT IGST', 'OUTPUT SGST', 'OUTPUT CGST', 'OUTPUT IGST', 'GST PAID', 'GST PAYABLE'].some(kw => nameUpper.includes(kw))) return true;
+      return false;
+    };
+
+    const getRootCategory = (gnUpper, nameUpper) => {
+      let curr = gnUpper;
+      for (let i = 0; i < 15; i++) {
+        if (!curr) break;
+        if (['CAPITAL ACCOUNT', 'EQUITY', 'RESERVES & SURPLUS'].some(kw => curr === kw || curr.includes('CAPITAL') || curr.includes('RESERVE'))) {
+          return 'CAPITAL';
+        }
+        if (['SECURED LOANS', 'UNSECURED LOANS', 'LONG TERM LOANS', 'LOANS (LIABILITY)', 'LONG TERM LIABILITIES'].some(kw => curr === kw || curr.includes('SECURED') || curr.includes('UNSECURED') || curr.includes('LONG TERM'))) {
+          return 'LONG_TERM_LIABILITIES';
+        }
+        if (['FIXED ASSETS'].some(kw => curr === kw || curr.includes('FIXED ASSET'))) {
+          return 'FIXED_ASSETS';
+        }
+        if (['INVESTMENTS', 'FIXED DEPOSITS'].some(kw => curr === kw || curr.includes('INVESTMENT'))) {
+          return 'INVESTMENTS';
+        }
+        if (['CURRENT ASSETS', 'BANK ACCOUNTS', 'CASH-IN-HAND', 'SUNDRY DEBTORS', 'LOANS & ADVANCES(ASSET)', 'DEPOSITS', 'DEPOSITS (ASSETS)', 'ADAVANCE TO SUPPLIER', 'OTHER CURRENT ASSETS', 'STOCK-IN-HAND'].some(kw => curr === kw || curr.includes('CURRENT ASSET') || curr.includes('DEBTOR') || curr.includes('CASH') || curr.includes('BANK'))) {
+          return 'CURRENT_ASSETS';
+        }
+        if (['CURRENT LIABILITIES', 'DUTIES & TAXES', 'SUNDRY CREDITORS', 'BANK OD A/C', 'BRANCH / DIVISIONS', 'OUTSTANDING LIABILITIES & PROVISIONS', 'PROVISIONS', 'SUSPENSE A/C', 'ADJUSTMENTS', 'ADJUSTMENT', 'AJUSTMENTS', 'AJUSTMENT'].some(kw => curr === kw || curr.includes('LIABILIT') || curr.includes('CREDITOR') || curr.includes('DUTY') || curr.includes('TAX') || curr.includes('ADJUSTMENT') || curr.includes('AJUSTMENT'))) {
+          return 'CURRENT_LIABILITIES';
+        }
+        const parent = groupByNameUpper.get(curr);
+        if (parent && parent.under) curr = String(parent.under).trim().toUpperCase();
+        else break;
+      }
+
+      if (nameUpper.includes('CAPITAL') || nameUpper.includes('PREVIOUS YEAR PROFIT')) return 'CAPITAL';
+      if (nameUpper.includes('BUILDING') || nameUpper.includes('FURNITURE') || nameUpper.includes('MACHINERY') || nameUpper.includes('WEIGHING MACHINE') || nameUpper.includes('GENERATOR') || nameUpper.includes('WATER TANK')) return 'FIXED_ASSETS';
+
+      return 'OTHER';
+    };
+
+    let capitalVal = 0;
+    let longTermLiabilitiesVal = 0;
+    let currentLiabilitiesVal = 0;
+    let fixedAssetsVal = 0;
+    let investmentsVal = 0;
+    let currentAssetsVal = 0;
+
+    const capitalDetails = [];
+    const longTermLiabilitiesDetails = [];
+    const currentLiabilitiesDetails = [];
+    const fixedAssetsDetails = [];
+    const investmentsDetails = [];
+    const currentAssetsDetails = [];
+
+    let netTaxBal = 0; // Debit is +, Credit is -
+    const dutiesAndTaxesDetails = [];
+
+    // Control accounts
+    if (balances['3100'] && Math.abs(balances['3100'].balance) > 0.001) {
+      capitalVal -= balances['3100'].balance;
+      capitalDetails.push({ name: 'Capital / Owner Equity', balance: -balances['3100'].balance, group: 'CAPITAL ACCOUNT' });
+    }
+    if (balances['2100'] && Math.abs(balances['2100'].balance) > 0.001) {
+      const b = balances['2100'].balance;
+      if (b < 0) {
+        currentLiabilitiesVal -= b;
+        currentLiabilitiesDetails.push({ name: 'Sundry Creditors (Accounts Payable)', balance: -b, group: 'SUNDRY CREDITORS' });
+      } else {
+        currentAssetsVal += b;
+        currentAssetsDetails.push({ name: 'Advance to Suppliers (Creditors Dr)', balance: b, group: 'SUNDRY CREDITORS' });
+      }
+    }
+    if (balances['1100'] && Math.abs(balances['1100'].balance) > 0.001) {
+      const b = balances['1100'].balance;
+      if (b > 0) {
+        currentAssetsVal += b;
+        currentAssetsDetails.push({ name: 'Sundry Debtors (Accounts Receivable)', balance: b, group: 'SUNDRY DEBTORS' });
+      } else {
+        currentLiabilitiesVal -= b;
+        currentLiabilitiesDetails.push({ name: 'Advance from Customers (Debtors Cr)', balance: -b, group: 'SUNDRY DEBTORS' });
+      }
     }
 
-    if (this.ledgers) {
-      this.ledgers.forEach(l => {
-        const canonical = this.getCanonicalAccountId(l.code);
-        if (seenDiffCanonicals.has(canonical)) return;
-        seenDiffCanonicals.add(canonical);
-        const op = parseFloat(l.openingBalance) || 0;
-        if (l.balanceType === "Debit") {
-          diff += op;
-        } else {
-          diff -= op;
-        }
-      });
+    const closingStockVal = this.getStockValuationAtDate(endDate);
+    if (closingStockVal !== 0) {
+      currentAssetsVal += closingStockVal;
+      currentAssetsDetails.push({ name: 'Stock on Hand', balance: closingStockVal, group: 'Stock-in-Hand' });
     }
+
+    const skipControlCodes = new Set(['1010', '1020', '1100', '2100', '2200', '3100']);
+
+    Object.entries(balances).forEach(([code, data]) => {
+      const bal = data.balance;
+      if (Math.abs(bal) < 0.001 || skipControlCodes.has(code)) return;
+      if (contactCodes.has(code) || code.startsWith('CUST-') || code.startsWith('VEND-') || code.startsWith('SITE-')) return;
+
+      const l = rawLedgersByCode.get(code.toUpperCase());
+      const gnUpper = l ? String(l.groupName || '').toUpperCase() : '';
+      const nameUpper = l ? String(l.name || '').toUpperCase() : code;
+
+      const isPl = isPlLedger(gnUpper, nameUpper, code);
+      if (isPl) return; // STRICT EXCLUSION OF P&L NOMINAL ACCOUNTS
+
+      // Net aggregate Duties & Taxes ledgers so they show on ONLY ONE side
+      if (isDutiesAndTaxes(gnUpper, nameUpper)) {
+        netTaxBal += bal;
+        dutiesAndTaxesDetails.push({
+          code,
+          name: l ? l.name : nameUpper,
+          balance: bal,
+          group: 'Duties & Taxes'
+        });
+        return;
+      }
+
+      const cat = getRootCategory(gnUpper, nameUpper);
+      const displayGroup = l ? (l.groupName || 'Current Assets') : 'Current Assets';
+
+      if (cat === 'CAPITAL') {
+        capitalVal -= bal;
+        capitalDetails.push({ name: nameUpper, balance: -bal, group: displayGroup });
+      } else if (cat === 'LONG_TERM_LIABILITIES') {
+        longTermLiabilitiesVal -= bal;
+        longTermLiabilitiesDetails.push({ name: nameUpper, balance: -bal, group: displayGroup });
+      } else if (cat === 'FIXED_ASSETS') {
+        fixedAssetsVal += bal;
+        fixedAssetsDetails.push({ name: nameUpper, balance: bal, group: displayGroup });
+      } else if (cat === 'INVESTMENTS') {
+        if (bal > 0) {
+          investmentsVal += bal;
+          investmentsDetails.push({ name: nameUpper, balance: bal, group: displayGroup });
+        } else {
+          currentLiabilitiesVal -= bal;
+          currentLiabilitiesDetails.push({ name: nameUpper, balance: -bal, group: displayGroup });
+        }
+      } else if (cat === 'CURRENT_ASSETS') {
+        if (bal > 0) {
+          currentAssetsVal += bal;
+          currentAssetsDetails.push({ name: nameUpper, balance: bal, group: displayGroup });
+        } else {
+          currentLiabilitiesVal -= bal;
+          currentLiabilitiesDetails.push({ name: nameUpper, balance: -bal, group: displayGroup });
+        }
+      } else if (cat === 'CURRENT_LIABILITIES') {
+        if (bal < 0) {
+          currentLiabilitiesVal -= bal;
+          currentLiabilitiesDetails.push({ name: nameUpper, balance: -bal, group: displayGroup });
+        } else {
+          currentAssetsVal += bal;
+          currentAssetsDetails.push({ name: nameUpper, balance: bal, group: displayGroup });
+        }
+      } else {
+        if (bal < 0) {
+          currentLiabilitiesVal -= bal;
+          currentLiabilitiesDetails.push({ name: nameUpper, balance: -bal, group: displayGroup });
+        } else {
+          currentAssetsVal += bal;
+          currentAssetsDetails.push({ name: nameUpper, balance: bal, group: displayGroup });
+        }
+      }
+    });
+
+    // Place Net Duties & Taxes on EXACTLY ONE SIDE of Balance Sheet
+    if (Math.abs(netTaxBal) > 0.001) {
+      if (netTaxBal > 0) {
+        // Net Debit = Asset (Input Tax Credit)
+        currentAssetsVal += netTaxBal;
+        if (dutiesAndTaxesDetails.length > 0) {
+          dutiesAndTaxesDetails.forEach(d => {
+            currentAssetsDetails.push({ name: d.name, balance: d.balance, group: 'Duties & Taxes', code: d.code });
+          });
+        } else {
+          currentAssetsDetails.push({ name: 'Duties & Taxes (Input Tax Credit)', balance: netTaxBal, group: 'Duties & Taxes' });
+        }
+      } else {
+        // Net Credit = Liability (Tax Payable)
+        const absBal = Math.abs(netTaxBal);
+        currentLiabilitiesVal += absBal;
+        if (dutiesAndTaxesDetails.length > 0) {
+          dutiesAndTaxesDetails.forEach(d => {
+            currentLiabilitiesDetails.push({ name: d.name, balance: -d.balance, group: 'Duties & Taxes', code: d.code });
+          });
+        } else {
+          currentLiabilitiesDetails.push({ name: 'Duties & Taxes (Tax Payable)', balance: absBal, group: 'Duties & Taxes' });
+        }
+      }
+    }
+
+    const rawAssets = fixedAssetsVal + investmentsVal + currentAssetsVal;
+    const rawLiab = capitalVal + longTermLiabilitiesVal + currentLiabilitiesVal + retainedEarnings;
+    const rawDiff = rawAssets - rawLiab;
 
     let diffLiab = 0;
     let diffAsset = 0;
-    if (diff > 0) {
-      diffLiab = diff;
-    } else if (diff < 0) {
-      diffAsset = Math.abs(diff);
+    if (Math.abs(rawDiff) > 0.001) {
+      if (rawDiff < 0) diffAsset = Math.abs(rawDiff);
+      else diffLiab = rawDiff;
     }
 
-    const allTimePl = this.getProfitLoss(startDate, endDate);
-    const retainedEarnings = allTimePl.netProfit;
-
-    const totalAssets = fixedAssetsVal + currentAssetsVal + otherCurrentAssetsVal + diffAsset;
-    const totalLiabilities = capitalVal + currentLiabilitiesVal + retainedEarnings + diffLiab;
+    const totalAssets = fixedAssetsVal + investmentsVal + currentAssetsVal + diffAsset;
+    const totalLiabilities = capitalVal + longTermLiabilitiesVal + currentLiabilitiesVal + retainedEarnings + diffLiab;
+    const difference = totalAssets - totalLiabilities;
 
     return {
       assets: {
         fixedAssetsVal,
+        investmentsVal,
         currentAssetsVal,
-        otherCurrentAssetsVal,
+        otherCurrentAssetsVal: 0,
         diffAsset,
         total: totalAssets,
         fixedAssetsDetails,
+        investmentsDetails,
         currentAssetsDetails,
-        otherCurrentAssetsDetails
+        otherCurrentAssetsDetails: []
       },
       liabilities: {
         capitalVal,
+        longTermLiabilitiesVal,
         currentLiabilitiesVal,
         diffLiab,
         retainedEarnings,
         total: totalLiabilities,
         capitalDetails,
+        longTermLiabilitiesDetails,
         currentLiabilitiesDetails
       },
-      inBalance: Math.abs(totalAssets - totalLiabilities) < 0.05
+      capital: { total: capitalVal, details: capitalDetails },
+      reserves: { total: 0, details: [] },
+      longTermLiabilities: { total: longTermLiabilitiesVal, details: longTermLiabilitiesDetails },
+      currentLiabilities: { total: currentLiabilitiesVal, details: currentLiabilitiesDetails },
+      fixedAssets: { total: fixedAssetsVal, details: fixedAssetsDetails },
+      investments: { total: investmentsVal, details: investmentsDetails },
+      currentAssets: { total: currentAssetsVal, details: currentAssetsDetails },
+      profitAndLoss: { amount: Math.abs(retainedEarnings), type: retainedEarnings >= 0 ? "profit" : "loss" },
+      rawDiff,
+      inBalance: Math.abs(rawDiff) < 0.01,
+      difference: rawDiff
     };
   }
 
@@ -10140,7 +14058,7 @@ class StateManager {
       let current = String(gName).toUpperCase();
       const supp = contactByNameUpper.get(current) || contactById.get(current);
       if (supp && (supp.type === "supplier" || supp.listInVendorList === true || supp.groupName === "SUNDRY CREDITORS")) return true;
-      const targetGroups = ["CURRENT LIABILITIES", "DUTIES & TAXES", "SUNDRY CREDITORS", "BANK OD A/C", "BRANCH / DIVISIONS", "LIABILITIES", "INPUT SGST", "INPUT CGST", "INPUT IGST", "OUTPUT SGST", "OUTPUT CGST", "OUTPUT IGST"];
+      const targetGroups = ["CURRENT LIABILITIES", "DUTIES & TAXES", "SUNDRY CREDITORS", "BANK OD A/C", "BRANCH / DIVISIONS", "LIABILITIES", "INPUT SGST", "INPUT CGST", "INPUT IGST", "OUTPUT SGST", "OUTPUT CGST", "OUTPUT IGST", "OUTSTANDING LIABILITIES & PROVISIONS", "PROVISIONS", "UNSECURED LOANS", "SUSPENSE A/C", "OUTSTANDING LIABILITIES AND PROVISIONS", "ADJUSTMENTS", "ADJUSTMENT", "AJUSTMENTS", "AJUSTMENT"];
       for (let i = 0; i < 15; i++) {
         if (targetGroups.includes(current)) return true;
         const parent = groupByNameUpper.get(current);
@@ -10168,7 +14086,7 @@ class StateManager {
       let current = String(gName).toUpperCase();
       const cust = contactByNameUpper.get(current) || contactById.get(current);
       if (cust && (cust.type === "customer" || cust.listInCustomerList === true || cust.groupName === "SUNDRY DEBTORS")) return true;
-      const targetGroups = ["CURRENT ASSETS", "BANK ACCOUNTS", "CASH-IN-HAND", "SUNDRY DEBTORS", "LOANS & ADVANCES(ASSET)", "DEPOSITS", "ADAVANCE TO SUPPLIER", "ASSETS"];
+      const targetGroups = ["CURRENT ASSETS", "BANK ACCOUNTS", "CASH-IN-HAND", "SUNDRY DEBTORS", "LOANS & ADVANCES(ASSET)", "DEPOSITS", "DEPOSITS (ASSETS)", "ADAVANCE TO SUPPLIER", "OTHER CURRENT ASSETS", "ASSETS"];
       for (let i = 0; i < 15; i++) {
         if (targetGroups.includes(current)) return true;
         const parent = groupByNameUpper.get(current);
@@ -10206,9 +14124,16 @@ class StateManager {
 
     let contactDebtorsOp = 0;
     let contactCreditorsOp = 0;
+
+    const processedContactIds = new Set();
+
     if (this.contacts) {
       this.contacts.forEach(c => {
-        let bType = c.balanceType || ((c.type === "supplier" || c.listInVendorList) ? "Credit" : "Debit");
+        if (c.id) processedContactIds.add(String(c.id).toUpperCase());
+        if (c.ledgerCode) processedContactIds.add(String(c.ledgerCode).toUpperCase());
+
+        const isCreditor = c.type === "supplier" || c.listInVendorList === true || String(c.groupName || "").toUpperCase() === "SUNDRY CREDITORS";
+        let bType = c.balanceType || (isCreditor ? "Credit" : "Debit");
         let cOp = 0;
         if (c.siteType === "multiple" && Array.isArray(c.sites) && c.sites.length > 0) {
           c.sites.forEach(site => {
@@ -10220,11 +14145,37 @@ class StateManager {
         }
 
         if (cOp !== 0) {
-          if (bType === "Credit" || c.type === "supplier" || c.listInVendorList) {
-            contactCreditorsOp += cOp;
+          if (isCreditor) {
+            if (bType === "Credit") {
+              contactCreditorsOp += cOp;
+            } else {
+              contactCreditorsOp -= cOp;
+            }
           } else {
-            contactDebtorsOp += cOp;
+            if (bType === "Debit") {
+              contactDebtorsOp += cOp;
+            } else {
+              contactDebtorsOp -= cOp;
+            }
           }
+        }
+      });
+    }
+
+    if (this.ledgers) {
+      this.ledgers.forEach(l => {
+        const op = parseFloat(l.openingBalance) || 0;
+        if (op === 0) return;
+        const codeUpper = String(l.code || "").toUpperCase();
+        if (processedContactIds.has(codeUpper)) return;
+
+        const gnUpper = String(l.groupName || "").toUpperCase();
+        if (gnUpper === "SUNDRY CREDITORS") {
+          const val = l.balanceType === "Debit" ? -op : op;
+          contactCreditorsOp += val;
+        } else if (gnUpper === "SUNDRY DEBTORS") {
+          const val = l.balanceType === "Credit" ? -op : op;
+          contactDebtorsOp += val;
         }
       });
     }
@@ -10271,7 +14222,13 @@ class StateManager {
     }
 
     if (this.ledgers) {
+      const seenOpeningLedgers = new Set();
       this.ledgers.forEach(l => {
+        if (!l) return;
+        const key = String(l.code || l.id || l.name || "").trim().toUpperCase();
+        if (!key || seenOpeningLedgers.has(key)) return;
+        seenOpeningLedgers.add(key);
+
         const op = parseFloat(l.openingBalance) || 0;
         if (op === 0) return;
         const parentCust = (l.parentCustomerId && contactById.get(l.parentCustomerId)) || contactByNameUpper.get(String(l.groupName || "").toUpperCase());
@@ -10424,6 +14381,12 @@ class StateManager {
     const inv = this.invoices.find(i => i.id === id);
     if (!inv || inv.isCancelled) return false;
 
+    const fyCheck = this.isPreviousFyLocked(inv.date);
+    if (fyCheck.locked) {
+      alert(fyCheck.reason);
+      return false;
+    }
+
     if (inv.payMode === "Credit") {
       const customer = this.contacts.find(c => c.id === inv.contactId);
       if (customer) {
@@ -10431,11 +14394,16 @@ class StateManager {
       }
     }
 
+    inv.isCancelled = true;
+    this.invalidateBalancesCache();
+
     const invIdUpper = String(inv.id || "").trim().toUpperCase();
     const vNoUpper = String(inv.voucherNo || "").trim().toUpperCase();
     const refNoUpper = String(inv.refNo || "").trim().toUpperCase();
 
     this.transactions = this.transactions.filter(tx => {
+      if (this.isTransactionForCancelledDoc(tx)) return false;
+
       const txIdUpper = String(tx.id || "").trim().toUpperCase();
       const tvidUpper = String(tx.voucherId || "").trim().toUpperCase();
       if (txIdUpper === invIdUpper) return false;
@@ -10456,7 +14424,6 @@ class StateManager {
       return true;
     });
 
-    inv.isCancelled = true;
     this.recomputeAllStocks();
     this.saveState();
     return true;
@@ -10466,6 +14433,12 @@ class StateManager {
     const inv = this.invoices.find(i => i.id === id);
     if (!inv || !inv.isCancelled) return false;
 
+    const fyCheck = this.isPreviousFyLocked(inv.date);
+    if (fyCheck.locked) {
+      alert(fyCheck.reason);
+      return false;
+    }
+
     if (inv.payMode === "Credit") {
       const customer = this.contacts.find(c => c.id === inv.contactId);
       if (customer) {
@@ -10474,6 +14447,7 @@ class StateManager {
     }
 
     inv.isCancelled = false;
+    this.invalidateBalancesCache();
 
     const sVoucherNo = inv.voucherNo || inv.refNo || this.generateNextVoucherNo("sales");
     inv.voucherNo = sVoucherNo;
@@ -10489,6 +14463,12 @@ class StateManager {
     const pur = this.purchases.find(p => p.id === id);
     if (!pur || pur.isCancelled) return false;
 
+    const fyCheck = this.isPreviousFyLocked(pur.date);
+    if (fyCheck.locked) {
+      alert(fyCheck.reason);
+      return false;
+    }
+
     if (pur.payMode === "Credit") {
       const supplier = this.contacts.find(c => c.id === pur.contactId);
       if (supplier) {
@@ -10496,12 +14476,17 @@ class StateManager {
       }
     }
 
+    pur.isCancelled = true;
+    this.invalidateBalancesCache();
+
     const purIdUpper = String(pur.id || "").trim().toUpperCase();
     const vNoUpper = String(pur.voucherNo || "").trim().toUpperCase();
     const refNoUpper = String(pur.refNo || "").trim().toUpperCase();
     const invNoUpper = String(pur.invoiceNo || "").trim().toUpperCase();
 
     this.transactions = this.transactions.filter(tx => {
+      if (this.isTransactionForCancelledDoc(tx)) return false;
+
       const txIdUpper = String(tx.id || "").trim().toUpperCase();
       const tvidUpper = String(tx.voucherId || "").trim().toUpperCase();
       if (txIdUpper === purIdUpper) return false;
@@ -10525,7 +14510,6 @@ class StateManager {
       return true;
     });
 
-    pur.isCancelled = true;
     this.recomputeAllStocks();
     this.saveState();
     return true;
@@ -10535,6 +14519,12 @@ class StateManager {
     const pur = this.purchases.find(p => p.id === id);
     if (!pur || !pur.isCancelled) return false;
 
+    const fyCheck = this.isPreviousFyLocked(pur.date);
+    if (fyCheck.locked) {
+      alert(fyCheck.reason);
+      return false;
+    }
+
     if (pur.payMode === "Credit") {
       const supplier = this.contacts.find(c => c.id === pur.contactId);
       if (supplier) {
@@ -10543,6 +14533,7 @@ class StateManager {
     }
 
     pur.isCancelled = false;
+    this.invalidateBalancesCache();
 
     const pVoucherNo = pur.voucherNo || this.generateNextVoucherNo("purchase");
     pur.voucherNo = pVoucherNo;
@@ -10554,52 +14545,384 @@ class StateManager {
     return true;
   }
 
-  deleteInvoice(id) {
-    const idx = this.invoices.findIndex(i => i.id === id);
-    if (idx !== -1) {
-      const inv = this.invoices[idx];
-      if (!inv.isCancelled) {
-        this.cancelInvoice(id);
-      }
-      this.invoices.splice(idx, 1);
-      this.saveState();
-      return true;
+  removeCancelledBill(id, type = "sales", adjustSeries = true) {
+    if (type === "sales_return" || type === "salesReturns") {
+      return this.deleteSalesReturn(id);
     }
-    return false;
+    if (type === "purchase_return" || type === "purchaseReturns") {
+      return this.deletePurchaseReturn(id);
+    }
+    let removed = false;
+    const isSales = type === "sales" || type === "invoices";
+
+    if (isSales) {
+      const targetIdStr = String(id || "").trim().toUpperCase();
+      const idx = (this.invoices || []).findIndex(i => 
+        String(i.id || "").trim().toUpperCase() === targetIdStr ||
+        (i.voucherNo && String(i.voucherNo).trim().toUpperCase() === targetIdStr) ||
+        (i.refNo && String(i.refNo).trim().toUpperCase() === targetIdStr)
+      );
+      if (idx !== -1) {
+        const inv = this.invoices[idx];
+        const realId = inv.id;
+        const fyCheck = this.isPreviousFyLocked(inv.date);
+        if (fyCheck.locked) {
+          alert(fyCheck.reason);
+          return false;
+        }
+        if (!inv.isCancelled) {
+          this.cancelInvoice(realId);
+        }
+        const invIdUpper = String(inv.id || "").trim().toUpperCase();
+        const vNoUpper = String(inv.voucherNo || "").trim().toUpperCase();
+        const refNoUpper = String(inv.refNo || "").trim().toUpperCase();
+
+        this.transactions = (this.transactions || []).filter(tx => {
+          const txIdUpper = String(tx.id || "").trim().toUpperCase();
+          const tvidUpper = String(tx.voucherId || "").trim().toUpperCase();
+          if (txIdUpper === invIdUpper || (tvidUpper && tvidUpper === invIdUpper)) return false;
+
+          const ref = String(tx.reference || "").trim().toUpperCase();
+          const tvno = String(tx.voucherNo || "").trim().toUpperCase();
+          if (vNoUpper && (ref === vNoUpper || tvno === vNoUpper || ref === `${vNoUpper} COGS` || ref.startsWith("INVOICE " + vNoUpper))) return false;
+          if (invIdUpper && (ref === invIdUpper || tvno === invIdUpper || ref === `${invIdUpper} COGS` || ref.startsWith("INVOICE " + invIdUpper))) return false;
+          if (refNoUpper && (ref === refNoUpper || tvno === refNoUpper || ref === `INVOICE ${refNoUpper}`)) return false;
+          return true;
+        });
+
+        this.invoices.splice(idx, 1);
+        removed = true;
+      }
+    } else {
+      const targetIdStr = String(id || "").trim().toUpperCase();
+      const idx = (this.purchases || []).findIndex(p => 
+        String(p.id || "").trim().toUpperCase() === targetIdStr ||
+        (p.voucherNo && String(p.voucherNo).trim().toUpperCase() === targetIdStr) ||
+        (p.refNo && String(p.refNo).trim().toUpperCase() === targetIdStr)
+      );
+      if (idx !== -1) {
+        const pur = this.purchases[idx];
+        const realId = pur.id;
+        const fyCheck = this.isPreviousFyLocked(pur.date);
+        if (fyCheck.locked) {
+          alert(fyCheck.reason);
+          return false;
+        }
+        if (!pur.isCancelled) {
+          this.cancelPurchase(realId);
+        }
+        const purIdUpper = String(pur.id || "").trim().toUpperCase();
+        const vNoUpper = String(pur.voucherNo || "").trim().toUpperCase();
+        const refNoUpper = String(pur.refNo || "").trim().toUpperCase();
+
+        this.transactions = (this.transactions || []).filter(tx => {
+          const txIdUpper = String(tx.id || "").trim().toUpperCase();
+          const tvidUpper = String(tx.voucherId || "").trim().toUpperCase();
+          if (txIdUpper === purIdUpper || (tvidUpper && tvidUpper === purIdUpper)) return false;
+
+          const ref = String(tx.reference || "").trim().toUpperCase();
+          const tvno = String(tx.voucherNo || "").trim().toUpperCase();
+          if (vNoUpper && (ref === vNoUpper || tvno === vNoUpper || ref.startsWith("PURCHASE " + vNoUpper))) return false;
+          if (purIdUpper && (ref === purIdUpper || tvno === purIdUpper || ref.startsWith("PURCHASE " + purIdUpper))) return false;
+          if (refNoUpper && (ref === refNoUpper || tvno === refNoUpper || ref === `PURCHASE ${refNoUpper}`)) return false;
+          return true;
+        });
+
+        this.purchases.splice(idx, 1);
+        removed = true;
+      }
+    }
+
+    if (removed) {
+      if (adjustSeries) {
+        this.realignSeriesCurrentNumbers();
+      }
+      this.recomputeAllStocks();
+      this.saveState();
+      this.notifyListeners();
+    }
+    return removed;
   }
 
-  deletePurchase(id) {
-    const idx = this.purchases.findIndex(p => p.id === id);
-    if (idx !== -1) {
-      const pur = this.purchases[idx];
-      if (!pur.isCancelled) {
-        this.cancelPurchase(id);
-      }
-      this.purchases.splice(idx, 1);
-      this.saveState();
-      return true;
+  removeAllCancelledBills(type = "sales", adjustSeries = true) {
+    let count = 0;
+    const isSales = type === "sales" || type === "invoices";
+    const isBoth = type === "all";
+
+    if (isSales || isBoth) {
+      const cancelledInvIds = (this.invoices || []).filter(i => i.isCancelled).map(i => i.id);
+      cancelledInvIds.forEach(id => {
+        if (this.removeCancelledBill(id, "sales", false)) {
+          count++;
+        }
+      });
     }
-    return false;
+
+    if (!isSales || isBoth) {
+      const cancelledPurIds = (this.purchases || []).filter(p => p.isCancelled).map(p => p.id);
+      cancelledPurIds.forEach(id => {
+        if (this.removeCancelledBill(id, "purchase", false)) {
+          count++;
+        }
+      });
+    }
+
+    if (count > 0) {
+      if (adjustSeries) {
+        this.realignSeriesCurrentNumbers();
+      }
+      this.recomputeAllStocks();
+      this.saveState();
+      this.notifyListeners();
+    }
+
+    return count;
+  }
+
+  removeDuplicateInvoices(type = "sales") {
+    const isSales = type === "sales" || type === "invoices";
+    const collection = isSales ? (this.invoices || []) : (this.purchases || []);
+
+    let removedCount = 0;
+    const vMap = new Map();
+
+    // 1. First pass: Deduplicate strictly by voucherNo / refNo / id
+    collection.forEach(doc => {
+      if (!doc) return;
+      const vKey = String(doc.voucherNo || doc.refNo || doc.id || "").trim().toUpperCase();
+      if (!vKey) return;
+
+      if (!vMap.has(vKey)) {
+        vMap.set(vKey, [doc]);
+      } else {
+        vMap.get(vKey).push(doc);
+      }
+    });
+
+    // Only deduplicate exact duplicate document records by unique voucherNo/id
+    const idsToRemove = new Set();
+    vMap.forEach((docs) => {
+      if (docs.length > 1) {
+        // Prefer non-cancelled doc over cancelled doc
+        docs.sort((a, b) => {
+          const aCanc = a.isCancelled || a.isCanceled || String(a.status).toUpperCase() === "CANCELLED" ? 1 : 0;
+          const bCanc = b.isCancelled || b.isCanceled || String(b.status).toUpperCase() === "CANCELLED" ? 1 : 0;
+          if (aCanc !== bCanc) return aCanc - bCanc;
+          return String(a.id || "").localeCompare(String(b.id || ""));
+        });
+
+        // Keep docs[0], mark duplicate clone copies docs[1..N-1] for deletion
+        for (let i = 1; i < docs.length; i++) {
+          idsToRemove.add(docs[i].id);
+          removedCount++;
+        }
+      }
+    });
+
+    if (idsToRemove.size > 0) {
+      if (isSales) {
+        this.invoices = (this.invoices || []).filter(inv => !idsToRemove.has(inv.id));
+      } else {
+        this.purchases = (this.purchases || []).filter(pur => !idsToRemove.has(pur.id));
+      }
+
+      this.transactions = (this.transactions || []).filter(tx => {
+        const tid = String(tx.id || "").toUpperCase();
+        const tvid = String(tx.voucherId || "").toUpperCase();
+        return !idsToRemove.has(tid) && !idsToRemove.has(tvid);
+      });
+
+      this.realignSeriesCurrentNumbers();
+      this.recomputeAllStocks();
+      this.saveState();
+      this.notifyListeners();
+    }
+
+    return removedCount;
+  }
+
+  deleteInvoice(id, adjustSeries = true) {
+    return this.removeCancelledBill(id, "sales", adjustSeries);
+  }
+
+  deletePurchase(id, adjustSeries = true) {
+    return this.removeCancelledBill(id, "purchase", adjustSeries);
+  }
+
+  cancelSalesReturn(id) {
+    const ret = (this.salesReturns || []).find(r => r.id === id);
+    if (!ret || ret.isCancelled) return false;
+
+    const fyCheck = this.isPreviousFyLocked(ret.date);
+    if (fyCheck.locked) {
+      alert(fyCheck.reason);
+      return false;
+    }
+
+    if (ret.payMode !== "Cash" && ret.payMode !== "Bank") {
+      const customer = this.contacts.find(c => c.id === ret.contactId);
+      if (customer) {
+        customer.balance = (customer.balance || 0) + ret.total;
+      }
+    }
+
+    ret.isCancelled = true;
+    this.invalidateBalancesCache();
+
+    const retIdUpper = String(ret.id || "").trim().toUpperCase();
+    const vNoUpper = String(ret.voucherNo || ret.billNo || "").trim().toUpperCase();
+
+    this.transactions = this.transactions.filter(tx => {
+      if (this.isTransactionForCancelledDoc(tx)) return false;
+
+      const txIdUpper = String(tx.id || "").trim().toUpperCase();
+      const tvidUpper = String(tx.voucherId || "").trim().toUpperCase();
+      if (retIdUpper && (txIdUpper === retIdUpper || tvidUpper === retIdUpper)) return false;
+      if (vNoUpper && (txIdUpper === vNoUpper || tvidUpper === vNoUpper)) return false;
+
+      const ref = String(tx.reference || "").trim().toUpperCase();
+      const tvno = String(tx.voucherNo || "").trim().toUpperCase();
+
+      if (retIdUpper && (ref.includes(retIdUpper) || tvno.includes(retIdUpper))) return false;
+      if (vNoUpper && (ref.includes(vNoUpper) || tvno.includes(vNoUpper))) return false;
+
+      return true;
+    });
+
+    this.recomputeAllStocks();
+    this.saveState();
+    return true;
+  }
+
+  restoreSalesReturn(id) {
+    const ret = (this.salesReturns || []).find(r => r.id === id);
+    if (!ret || !ret.isCancelled) return false;
+
+    const fyCheck = this.isPreviousFyLocked(ret.date);
+    if (fyCheck.locked) {
+      alert(fyCheck.reason);
+      return false;
+    }
+
+    if (ret.payMode !== "Cash" && ret.payMode !== "Bank") {
+      const customer = this.contacts.find(c => c.id === ret.contactId);
+      if (customer) {
+        customer.balance = (customer.balance || 0) - ret.total;
+      }
+    }
+
+    ret.isCancelled = false;
+    this.invalidateBalancesCache();
+    this.repairTaxEntries();
+    this.recomputeAllStocks();
+    this.saveState();
+    return true;
+  }
+
+  repairTaxEntries() {
+    if (typeof this.rebuildAllTaxTransactions === "function") {
+      this.rebuildAllTaxTransactions();
+    }
+  }
+
+  cancelPurchaseReturn(id) {
+    const ret = (this.purchaseReturns || []).find(r => r.id === id);
+    if (!ret || ret.isCancelled) return false;
+
+    const fyCheck = this.isPreviousFyLocked(ret.date);
+    if (fyCheck.locked) {
+      alert(fyCheck.reason);
+      return false;
+    }
+
+    if (ret.payMode !== "Cash" && ret.payMode !== "Bank") {
+      const supplier = this.contacts.find(c => c.id === ret.contactId);
+      if (supplier) {
+        supplier.balance = (supplier.balance || 0) - ret.total;
+      }
+    }
+
+    ret.isCancelled = true;
+    this.invalidateBalancesCache();
+
+    const retIdUpper = String(ret.id || "").trim().toUpperCase();
+    const vNoUpper = String(ret.voucherNo || ret.billNo || "").trim().toUpperCase();
+
+    this.transactions = this.transactions.filter(tx => {
+      if (this.isTransactionForCancelledDoc(tx)) return false;
+
+      const txIdUpper = String(tx.id || "").trim().toUpperCase();
+      const tvidUpper = String(tx.voucherId || "").trim().toUpperCase();
+      if (retIdUpper && (txIdUpper === retIdUpper || tvidUpper === retIdUpper)) return false;
+      if (vNoUpper && (txIdUpper === vNoUpper || tvidUpper === vNoUpper)) return false;
+
+      const ref = String(tx.reference || "").trim().toUpperCase();
+      const tvno = String(tx.voucherNo || "").trim().toUpperCase();
+
+      if (retIdUpper && (ref.includes(retIdUpper) || tvno.includes(retIdUpper))) return false;
+      if (vNoUpper && (ref.includes(vNoUpper) || tvno.includes(vNoUpper))) return false;
+
+      return true;
+    });
+
+    this.recomputeAllStocks();
+    this.saveState();
+    return true;
+  }
+
+  restorePurchaseReturn(id) {
+    const ret = (this.purchaseReturns || []).find(r => r.id === id);
+    if (!ret || !ret.isCancelled) return false;
+
+    const fyCheck = this.isPreviousFyLocked(ret.date);
+    if (fyCheck.locked) {
+      alert(fyCheck.reason);
+      return false;
+    }
+
+    if (ret.payMode !== "Cash" && ret.payMode !== "Bank") {
+      const supplier = this.contacts.find(c => c.id === ret.contactId);
+      if (supplier) {
+        supplier.balance = (supplier.balance || 0) + ret.total;
+      }
+    }
+
+    ret.isCancelled = false;
+    this.invalidateBalancesCache();
+    this.repairTaxEntries();
+    this.recomputeAllStocks();
+    this.saveState();
+    return true;
   }
 
   deleteSalesReturn(id) {
-    const idx = this.salesReturns.findIndex(r => r.id === id);
+    const targetIdStr = String(id || "").trim().toUpperCase();
+    const idx = (this.salesReturns || []).findIndex(r => 
+      String(r.id || "").trim().toUpperCase() === targetIdStr ||
+      (r.voucherNo && String(r.voucherNo).trim().toUpperCase() === targetIdStr) ||
+      (r.refNo && String(r.refNo).trim().toUpperCase() === targetIdStr)
+    );
     if (idx !== -1) {
       const ret = this.salesReturns[idx];
-      if (ret.payMode !== "Cash") {
-        const customer = this.contacts.find(c => c.id === ret.contactId);
-        if (customer) {
-          customer.balance = (customer.balance || 0) + ret.total;
-        }
+      const realId = ret.id;
+      const fyCheck = this.isPreviousFyLocked(ret.date);
+      if (fyCheck.locked) {
+        alert(fyCheck.reason);
+        return false;
       }
-      this.transactions = this.transactions.filter(tx => 
-        tx.reference !== `Credit Note ${ret.id}` &&
-        tx.reference !== `Sales Return ${ret.id}` &&
-        !tx.reference.startsWith(ret.id) &&
-        !tx.reference.startsWith(`CN-${id}`) &&
-        !tx.reference.startsWith(`SR-${id}`)
+      if (!ret.isCancelled) {
+        this.cancelSalesReturn(realId);
+      }
+      const newIdx = (this.salesReturns || []).findIndex(r => 
+        String(r.id || "").trim().toUpperCase() === targetIdStr ||
+        (r.voucherNo && String(r.voucherNo).trim().toUpperCase() === targetIdStr) ||
+        (r.refNo && String(r.refNo).trim().toUpperCase() === targetIdStr)
       );
-      this.salesReturns.splice(idx, 1);
+      if (newIdx !== -1) {
+        this.salesReturns.splice(newIdx, 1);
+      }
+      this.invalidateBalancesCache();
+      this.transactions = (this.transactions || []).filter(tx => !this.isTransactionForCancelledDoc(tx));
       this.recomputeAllStocks();
       this.saveState();
       return true;
@@ -10608,23 +14931,33 @@ class StateManager {
   }
 
   deletePurchaseReturn(id) {
-    const idx = this.purchaseReturns.findIndex(r => r.id === id);
+    const targetIdStr = String(id || "").trim().toUpperCase();
+    const idx = (this.purchaseReturns || []).findIndex(r => 
+      String(r.id || "").trim().toUpperCase() === targetIdStr ||
+      (r.voucherNo && String(r.voucherNo).trim().toUpperCase() === targetIdStr) ||
+      (r.refNo && String(r.refNo).trim().toUpperCase() === targetIdStr)
+    );
     if (idx !== -1) {
       const ret = this.purchaseReturns[idx];
-      if (ret.payMode !== "Cash") {
-        const supplier = this.contacts.find(c => c.id === ret.contactId);
-        if (supplier) {
-          supplier.balance = (supplier.balance || 0) - ret.total;
-        }
+      const realId = ret.id;
+      const fyCheck = this.isPreviousFyLocked(ret.date);
+      if (fyCheck.locked) {
+        alert(fyCheck.reason);
+        return false;
       }
-      this.transactions = this.transactions.filter(tx => 
-        tx.reference !== `Debit Note ${ret.id}` &&
-        tx.reference !== `Purchase Return ${ret.id}` &&
-        !tx.reference.startsWith(ret.id) &&
-        !tx.reference.startsWith(`DN-${id}`) &&
-        !tx.reference.startsWith(`PR-${id}`)
+      if (!ret.isCancelled) {
+        this.cancelPurchaseReturn(realId);
+      }
+      const newIdx = (this.purchaseReturns || []).findIndex(r => 
+        String(r.id || "").trim().toUpperCase() === targetIdStr ||
+        (r.voucherNo && String(r.voucherNo).trim().toUpperCase() === targetIdStr) ||
+        (r.refNo && String(r.refNo).trim().toUpperCase() === targetIdStr)
       );
-      this.purchaseReturns.splice(idx, 1);
+      if (newIdx !== -1) {
+        this.purchaseReturns.splice(newIdx, 1);
+      }
+      this.invalidateBalancesCache();
+      this.transactions = (this.transactions || []).filter(tx => !this.isTransactionForCancelledDoc(tx));
       this.recomputeAllStocks();
       this.saveState();
       return true;
@@ -10693,13 +15026,15 @@ class StateManager {
 
   getGroupAccounts(groupName) {
     const list = [];
+    const normGroupName = String(groupName || "").trim().toUpperCase();
+    
     const getSubGroups = (g) => {
       const children = [];
-      const gUpper = String(g || "").toUpperCase();
+      const gUpper = String(g || "").trim().toUpperCase();
       if (this.accountGroups) {
         this.accountGroups.forEach(cg => {
-          if (String(cg.under || "").toUpperCase() === gUpper) {
-            children.push(String(cg.name || "").toUpperCase());
+          if (String(cg.under || "").trim().toUpperCase() === gUpper) {
+            children.push(String(cg.name || "").trim().toUpperCase());
             children.push(...getSubGroups(cg.name));
           }
         });
@@ -10707,9 +15042,40 @@ class StateManager {
       return children;
     };
 
-    const targetGroups = [String(groupName || "").toUpperCase(), ...getSubGroups(groupName)];
+    const baseGroups = [normGroupName];
+    if (normGroupName === "SALES ACCOUNTS" || normGroupName === "SALES ACCOUNT" || normGroupName === "SALES") {
+      baseGroups.push("SALES ACCOUNTS", "SALES ACCOUNT", "SALES");
+    }
+    if (normGroupName === "PURCHASE ACCOUNTS" || normGroupName === "PURCHASE ACCOUNT" || normGroupName === "PURCHASE") {
+      baseGroups.push("PURCHASE ACCOUNTS", "PURCHASE ACCOUNT", "PURCHASE");
+    }
+    if (normGroupName === "SUNDRY DEBTORS" || normGroupName === "DEBTORS") {
+      baseGroups.push("SUNDRY DEBTORS", "DEBTORS", "CURRENT ASSETS");
+    }
+    if (normGroupName === "SUNDRY CREDITORS" || normGroupName === "CREDITORS") {
+      baseGroups.push("SUNDRY CREDITORS", "CREDITORS", "CURRENT LIABILITIES");
+    }
+    if (normGroupName === "DUTIES & TAXES" || normGroupName === "DUTIES AND TAXES") {
+      baseGroups.push("DUTIES & TAXES", "DUTIES AND TAXES");
+    }
 
-    if (targetGroups.includes("CURRENT ASSETS") || targetGroups.includes("SUNDRY DEBTORS")) {
+    const targetGroups = Array.from(new Set([
+      ...baseGroups,
+      ...baseGroups.flatMap(g => getSubGroups(g))
+    ]));
+
+    const isSalesReq = targetGroups.some(g => g === "SALES ACCOUNTS" || g === "SALES ACCOUNT" || g === "SALES");
+    const isPurReq = targetGroups.some(g => g === "PURCHASE ACCOUNTS" || g === "PURCHASE ACCOUNT" || g === "PURCHASE");
+
+    if (isSalesReq) {
+      list.push("4100", "L0004", "L022", "L023", "L024", "L025");
+    }
+
+    if (isPurReq) {
+      list.push("L0005", "L018", "L019", "L020", "L021");
+    }
+
+    if (targetGroups.some(g => g === "CURRENT ASSETS" || g === "SUNDRY DEBTORS")) {
       if (this.contacts) {
         this.contacts.forEach(c => {
           if (c.type === "customer" || c.listInCustomerList) {
@@ -10722,7 +15088,7 @@ class StateManager {
       }
     }
 
-    if (targetGroups.includes("CURRENT LIABILITIES") || targetGroups.includes("SUNDRY CREDITORS")) {
+    if (targetGroups.some(g => g === "CURRENT LIABILITIES" || g === "SUNDRY CREDITORS")) {
       if (this.contacts) {
         this.contacts.forEach(c => {
           if (c.type === "supplier" || c.listInVendorList) {
@@ -10735,29 +15101,30 @@ class StateManager {
       }
     }
 
-    if (targetGroups.includes("CURRENT ASSETS") || targetGroups.includes("STOCK IN HAND")) {
+    if (targetGroups.some(g => g === "CURRENT ASSETS" || g === "STOCK IN HAND")) {
       list.push("1200");
     }
 
-    if (targetGroups.includes("CASH-IN-HAND")) {
+    if (targetGroups.some(g => g === "CASH-IN-HAND")) {
       list.push("1010");
     }
 
-    if (targetGroups.includes("BANK ACCOUNTS")) {
+    if (targetGroups.some(g => g === "BANK ACCOUNTS")) {
       list.push("1020");
     }
 
-    if (targetGroups.includes("DUTIES & TAXES")) {
+    if (targetGroups.some(g => g === "DUTIES & TAXES" || g === "DUTIES AND TAXES")) {
       list.push("2200");
     }
 
-    if (targetGroups.includes("CAPITAL ACCOUNT")) {
+    if (targetGroups.some(g => g === "CAPITAL ACCOUNT")) {
       list.push("3100");
     }
 
     if (this.ledgers) {
       this.ledgers.forEach(l => {
-        if (targetGroups.includes(String(l.groupName || "").toUpperCase())) {
+        const lGn = String(l.groupName || "").trim().toUpperCase();
+        if (targetGroups.includes(lGn) || (isSalesReq && this.isSalesAccount(l.code, l)) || (isPurReq && this.isPurchaseAccount(l.code, l))) {
           list.push(l.code);
         }
       });
@@ -10767,8 +15134,11 @@ class StateManager {
     const seenCanonicals = new Set();
     list.forEach(id => {
       const canonical = this.getCanonicalAccountId(id);
-      if (!seenCanonicals.has(canonical)) {
+      if (canonical && !seenCanonicals.has(canonical)) {
         seenCanonicals.add(canonical);
+        result.push(canonical);
+      } else if (!canonical && !seenCanonicals.has(id)) {
+        seenCanonicals.add(id);
         result.push(id);
       }
     });
@@ -10777,19 +15147,27 @@ class StateManager {
   }
 
   getAccountName(accId) {
+    if (this.getAccountDisplayName) {
+      const dName = this.getAccountDisplayName(accId);
+      if (dName && dName !== accId) return dName;
+    }
     const canonicalAcc = this.getCanonicalAccountId(accId);
     const staticAcc = ACCOUNTS[canonicalAcc] || ACCOUNTS[accId];
     if (staticAcc) return staticAcc.name;
     const strAcc = String(canonicalAcc || accId);
-    if (strAcc.includes("::")) {
-      const [baseId, site] = strAcc.split("::");
-      const contact = this.contacts?.find(c => c.id === baseId);
-      return contact ? `${contact.name} (${site})` : strAcc;
+    const baseId = strAcc.includes("::") ? strAcc.split("::")[0] : strAcc;
+    const site = strAcc.includes("::") ? strAcc.split("::")[1] : null;
+
+    const contact = this.contacts?.find(c => c && (c.id === baseId || c.ledgerCode === baseId || c.code === baseId || (c.name && String(c.name).toUpperCase() === baseId.toUpperCase())));
+    if (contact && contact.name) return site ? `${contact.name} (${site})` : contact.name;
+
+    const ledger = this.ledgers?.find(l => l && (l.code === baseId || l.id === baseId));
+    if (ledger) {
+      const parentC = this.contacts?.find(c => c && (c.ledgerCode === ledger.code || c.id === ledger.code || (c.name && String(c.name).toUpperCase() === String(ledger.name).toUpperCase())));
+      if (parentC && parentC.name) return site ? `${parentC.name} (${site})` : parentC.name;
+      if (ledger.name && !ledger.name.match(/^L\d+$/i)) return site ? `${ledger.name} (${site})` : ledger.name;
     }
-    const contact = this.contacts?.find(c => c.id === strAcc);
-    if (contact) return contact.name;
-    const ledger = this.ledgers?.find(l => l.code === strAcc);
-    if (ledger) return ledger.name;
+
     return strAcc;
   }
 
@@ -10808,7 +15186,7 @@ class StateManager {
     }
     const strAcc = String(canonicalAcc || accId);
     const baseId = strAcc.includes("::") ? strAcc.split("::")[0] : strAcc;
-    const contact = this.contacts?.find(c => c.id === baseId);
+    const contact = this.contacts?.find(c => c.id === baseId || c.ledgerCode === baseId || (c.name && String(c.name).toUpperCase() === baseId.toUpperCase()));
     if (contact) {
       return (contact.type === "supplier" || contact.listInVendorList) ? "SUNDRY CREDITORS" : "SUNDRY DEBTORS";
     }
@@ -10819,9 +15197,25 @@ class StateManager {
 
   getGroupSummary(groupName, startDate = "", endDate = "") {
     const accountIds = this.getGroupAccounts(groupName);
+
+    const activeFyStartDate = this.getActiveFinancialYearStartDate ? this.getActiveFinancialYearStartDate() : null;
+    if (activeFyStartDate) {
+      const activeFyStartD = parseDateSafely(activeFyStartDate);
+      const fromD = startDate ? parseDateSafely(startDate) : null;
+      const toD = endDate ? parseDateSafely(endDate) : null;
+      if (!startDate || (fromD && fromD < activeFyStartD)) {
+        startDate = activeFyStartDate;
+      }
+      if (endDate && toD && toD < activeFyStartD) {
+        endDate = activeFyStartDate;
+      }
+    }
+
     const start = startDate ? parseDateSafely(startDate) : null;
     const end = endDate ? parseDateSafely(endDate) : null;
     if (end) end.setHours(23, 59, 59, 999);
+    const startTime = start ? start.getTime() : 0;
+    const endTime = end ? end.getTime() : 0;
 
     const canonicalMap = new Map();
     const getCanonical = (code) => {
@@ -10836,10 +15230,13 @@ class StateManager {
     const summaryMap = new Map();
 
     (this.transactions || []).forEach(tx => {
-      if (!tx || !tx.id || !tx.entries) return;
-      const txDate = tx.date ? parseDateSafely(tx.date) : null;
-      const isBeforeStart = start && txDate && txDate < start;
-      const isWithinRange = (!start || (txDate && txDate >= start)) && (!end || (txDate && txDate <= end));
+      if (!tx || !tx.id || !tx.entries || tx.isCancelled || this.isTransactionForCancelledDoc(tx)) return;
+      let txTime = 0;
+      if (tx.date) {
+        txTime = parseDateSafely(tx.date).getTime();
+      }
+      const isBeforeStart = startTime && txTime && txTime < startTime;
+      const isWithinRange = (!startTime || (txTime && txTime >= startTime)) && (!endTime || (txTime && txTime <= endTime));
 
       if (!isBeforeStart && !isWithinRange) return;
 
@@ -10866,6 +15263,16 @@ class StateManager {
       });
     });
 
+    const contactMap = new Map();
+    (this.contacts || []).forEach(c => {
+      if (c && c.id) contactMap.set(c.id, c);
+    });
+
+    const ledgerMap = new Map();
+    (this.ledgers || []).forEach(l => {
+      if (l && l.code) ledgerMap.set(l.code, l);
+    });
+
     const items = [];
 
     accountIds.forEach(accId => {
@@ -10875,9 +15282,9 @@ class StateManager {
       const staticAcc = ACCOUNTS[accId];
       if (staticAcc) {
         isDebitType = (staticAcc.type === "asset" || staticAcc.type === "expense");
-      } else if (accId.includes("::") || this.contacts?.some(c => c.id === accId)) {
+      } else {
         const baseId = accId.includes("::") ? accId.split("::")[0] : accId;
-        const contact = this.contacts.find(c => c.id === baseId);
+        const contact = contactMap.get(baseId);
         if (contact) {
           let bType = contact.balanceType || ((contact.type === "supplier" || contact.listInVendorList) ? "Credit" : "Debit");
           isDebitType = (bType === "Debit");
@@ -10887,12 +15294,22 @@ class StateManager {
           } else {
             initialBal = parseFloat(contact.openingBalance) || 0;
           }
-        }
-      } else if (this.ledgers) {
-        const ledger = this.ledgers.find(l => l.code === accId);
-        if (ledger) {
-          isDebitType = ledger.balanceType === "Debit";
-          initialBal = parseFloat(ledger.openingBalance) || 0;
+        } else {
+          const ledger = ledgerMap.get(accId);
+          if (ledger) {
+            isDebitType = ledger.balanceType === "Debit";
+            initialBal = parseFloat(ledger.openingBalance) || 0;
+          } else {
+            const isSalesL = this.isSalesAccount ? this.isSalesAccount(accId) : false;
+            const isPurL = this.isPurchaseAccount ? this.isPurchaseAccount(accId) : false;
+            if (isSalesL) {
+              isDebitType = false;
+            } else if (isPurL) {
+              isDebitType = true;
+            } else {
+              isDebitType = true;
+            }
+          }
         }
       }
 
@@ -10933,9 +15350,439 @@ class StateManager {
 
     return items;
   }
+
+  // ── Missing & Unbalanced Double Entry Finder & Audit Engine ────────────────────────
+  findMissingAndUnbalancedDoubleEntries(options = {}) {
+    const findings = [];
+    const onlyCurrentFy = options.onlyCurrentFy !== false;
+    const fyStart = onlyCurrentFy ? this.getActiveFinancialYearStartDate() : null;
+    const fyEnd = onlyCurrentFy ? this.getActiveFinancialYearEndDate() : null;
+
+    const isInFyRange = (dateStr) => {
+      if (!onlyCurrentFy || (!fyStart && !fyEnd)) return true;
+      const iso = toIsoDateStr(dateStr);
+      if (!iso) return true;
+      if (fyStart && iso < toIsoDateStr(fyStart)) return false;
+      if (fyEnd && iso > toIsoDateStr(fyEnd)) return false;
+      return true;
+    };
+
+    const getPartyName = (partyId) => {
+      if (!partyId) return "";
+      const baseId = partyId.includes("::") ? partyId.split("::")[0] : partyId;
+      const contact = (this.contacts || []).find(c => c.id === baseId);
+      if (contact) return contact.name;
+      const ledger = (this.ledgers || []).find(l => l.code === partyId);
+      if (ledger) return ledger.name;
+      const staticAcc = ACCOUNTS[partyId];
+      if (staticAcc) return staticAcc.name;
+      return partyId;
+    };
+
+    // 1. Audit Existing Journal Entries in `this.transactions`
+    const txs = this.transactions || [];
+    txs.forEach(tx => {
+      if (!tx) return;
+      if (!isInFyRange(tx.date)) return;
+
+      const txId = String(tx.id || "");
+      const vNo = tx.voucherNo || tx.reference || tx.id || "-";
+      const vType = tx.voucherType || "VOUCHER";
+      const party = getPartyName(tx.partyId) || tx.description || "General Journal";
+
+      if (!Array.isArray(tx.entries) || tx.entries.length === 0) {
+        findings.push({
+          id: `CORRUPT-${txId}`,
+          docId: txId,
+          sourceType: "TRANSACTION",
+          voucherType: vType,
+          voucherNo: vNo,
+          date: tx.date || "-",
+          partyName: party,
+          issueType: "EMPTY_ENTRIES",
+          issueSeverity: "HIGH",
+          debitTotal: 0,
+          creditTotal: 0,
+          difference: 0,
+          description: `Transaction record ${vNo} has 0 debit/credit journal entries.`,
+          canAutoFix: true,
+          rawRecord: tx
+        });
+        return;
+      }
+
+      let dTotal = 0;
+      let cTotal = 0;
+      let hasInvalidAccount = false;
+
+      tx.entries.forEach(e => {
+        if (!e) return;
+        const d = parseFloat(e.debit) || 0;
+        const c = parseFloat(e.credit) || 0;
+        dTotal += d;
+        cTotal += c;
+
+        if (!e.accountId) {
+          hasInvalidAccount = true;
+        }
+      });
+
+      dTotal = Math.round(dTotal * 100) / 100;
+      cTotal = Math.round(cTotal * 100) / 100;
+      const diff = Math.abs(Math.round((dTotal - cTotal) * 100) / 100);
+
+      if (diff > 0.01) {
+        findings.push({
+          id: `UNBALANCED-${txId}`,
+          docId: txId,
+          sourceType: "TRANSACTION",
+          voucherType: vType,
+          voucherNo: vNo,
+          date: tx.date || "-",
+          partyName: party,
+          issueType: "UNBALANCED",
+          issueSeverity: "CRITICAL",
+          debitTotal: dTotal,
+          creditTotal: cTotal,
+          difference: diff,
+          description: `Unbalanced Entry: Total Debit (₹${dTotal.toLocaleString("en-IN")}) ≠ Total Credit (₹${cTotal.toLocaleString("en-IN")}). Discrepancy: ₹${diff.toLocaleString("en-IN")}`,
+          canAutoFix: true,
+          rawRecord: tx
+        });
+      } else if (hasInvalidAccount) {
+        findings.push({
+          id: `BAD_ACCOUNT-${txId}`,
+          docId: txId,
+          sourceType: "TRANSACTION",
+          voucherType: vType,
+          voucherNo: vNo,
+          date: tx.date || "-",
+          partyName: party,
+          issueType: "UNKNOWN_LEDGER",
+          issueSeverity: "MEDIUM",
+          debitTotal: dTotal,
+          creditTotal: cTotal,
+          difference: 0,
+          description: `Transaction ${vNo} contains journal entries with missing/unresolved ledger account IDs.`,
+          canAutoFix: true,
+          rawRecord: tx
+        });
+      } else if ((dTotal > 0 && cTotal === 0) || (cTotal > 0 && dTotal === 0)) {
+        findings.push({
+          id: `SINGLE_ENTRY-${txId}`,
+          docId: txId,
+          sourceType: "TRANSACTION",
+          voucherType: vType,
+          voucherNo: vNo,
+          date: tx.date || "-",
+          partyName: party,
+          issueType: "SINGLE_ENTRY",
+          issueSeverity: "HIGH",
+          debitTotal: dTotal,
+          creditTotal: cTotal,
+          difference: Math.max(dTotal, cTotal),
+          description: `Single-entry voucher: Contains ${dTotal > 0 ? "Debit" : "Credit"} side of ₹${Math.max(dTotal, cTotal).toLocaleString("en-IN")} but missing opposing entry.`,
+          canAutoFix: true,
+          rawRecord: tx
+        });
+      }
+    });
+
+    // 2. Audit Missing Double Entry Journal Transactions for Invoices
+    const invoices = this.invoices || [];
+    invoices.forEach(inv => {
+      if (!inv || !isInFyRange(inv.date)) return;
+      const iId = String(inv.id || "");
+      const iNo = inv.invoiceNo || inv.reference || inv.id || "-";
+      const party = getPartyName(inv.customer || inv.customerId) || inv.customerName || "Customer";
+      const netTotal = Math.round((parseFloat(inv.grandTotal || inv.total || 0)) * 100) / 100;
+
+      const txMatch = txs.find(t => {
+        if (!t) return false;
+        const tid = String(t.id || "").trim();
+        const tvid = String(t.voucherId || "").trim();
+        const tref = String(t.reference || "").trim();
+        const tvno = String(t.voucherNo || "").trim();
+        return tid === iId || tvid === iId || tref === iNo || tvno === iNo || tref === `INVOICE ${iNo}`;
+      });
+
+      if (!txMatch) {
+        findings.push({
+          id: `MISSING_INV-${iId}`,
+          docId: iId,
+          sourceType: "INVOICE",
+          voucherType: "SALE INVOICE",
+          voucherNo: iNo,
+          date: inv.date || "-",
+          partyName: party,
+          issueType: "MISSING_DOUBLE_ENTRY",
+          issueSeverity: "CRITICAL",
+          debitTotal: netTotal,
+          creditTotal: 0,
+          difference: netTotal,
+          description: `Sales Invoice ${iNo} (₹${netTotal.toLocaleString("en-IN")}) exists in Sales Register but has NO accounting double-entry transaction recorded in journal!`,
+          canAutoFix: true,
+          rawRecord: inv
+        });
+      }
+    });
+
+    // 3. Audit Missing Double Entry Journal Transactions for Purchases
+    const purchases = this.purchases || [];
+    purchases.forEach(pur => {
+      if (!pur || !isInFyRange(pur.date)) return;
+      const pId = String(pur.id || "");
+      const pNo = pur.voucherNo || pur.refNo || pur.invoiceNo || pur.id || "-";
+      const party = getPartyName(pur.supplier || pur.supplierId) || pur.supplierName || "Supplier";
+      const netTotal = Math.round((parseFloat(pur.grandTotal || pur.total || 0)) * 100) / 100;
+
+      const txMatch = txs.find(t => {
+        if (!t) return false;
+        const tid = String(t.id || "").trim();
+        const tvid = String(t.voucherId || "").trim();
+        const tref = String(t.reference || "").trim();
+        const tvno = String(t.voucherNo || "").trim();
+        return tid === pId || tvid === pId || tref === pNo || tvno === pNo;
+      });
+
+      if (!txMatch) {
+        findings.push({
+          id: `MISSING_PUR-${pId}`,
+          docId: pId,
+          sourceType: "PURCHASE",
+          voucherType: "PURCHASE BILL",
+          voucherNo: pNo,
+          date: pur.date || "-",
+          partyName: party,
+          issueType: "MISSING_DOUBLE_ENTRY",
+          issueSeverity: "CRITICAL",
+          debitTotal: netTotal,
+          creditTotal: 0,
+          difference: netTotal,
+          description: `Purchase Bill ${pNo} (₹${netTotal.toLocaleString("en-IN")}) exists in Purchase Register but has NO accounting double-entry transaction recorded in journal!`,
+          canAutoFix: true,
+          rawRecord: pur
+        });
+      }
+    });
+
+    // 4. Audit Missing Double Entry Journal Transactions for Sales Returns
+    const salesReturns = this.salesReturns || [];
+    salesReturns.forEach(sr => {
+      if (!sr || !isInFyRange(sr.date)) return;
+      const srId = String(sr.id || "");
+      const srNo = sr.creditNoteNo || sr.reference || sr.id || "-";
+      const party = getPartyName(sr.customer || sr.customerId) || "Customer";
+      const netTotal = Math.round((parseFloat(sr.grandTotal || sr.total || 0)) * 100) / 100;
+
+      const txMatch = txs.find(t => t && (String(t.id) === srId || String(t.voucherId) === srId || String(t.reference) === srNo));
+      if (!txMatch) {
+        findings.push({
+          id: `MISSING_SR-${srId}`,
+          docId: srId,
+          sourceType: "SALES_RETURN",
+          voucherType: "SALES RETURN (CREDIT NOTE)",
+          voucherNo: srNo,
+          date: sr.date || "-",
+          partyName: party,
+          issueType: "MISSING_DOUBLE_ENTRY",
+          issueSeverity: "HIGH",
+          debitTotal: netTotal,
+          creditTotal: 0,
+          difference: netTotal,
+          description: `Sales Return / Credit Note ${srNo} (₹${netTotal.toLocaleString("en-IN")}) has NO accounting double-entry transaction in journal!`,
+          canAutoFix: true,
+          rawRecord: sr
+        });
+      }
+    });
+
+    // 5. Audit Missing Double Entry Journal Transactions for Purchase Returns
+    const purchaseReturns = this.purchaseReturns || [];
+    purchaseReturns.forEach(pr => {
+      if (!pr || !isInFyRange(pr.date)) return;
+      const prId = String(pr.id || "");
+      const prNo = pr.debitNoteNo || pr.reference || pr.id || "-";
+      const party = getPartyName(pr.supplier || pr.supplierId) || "Supplier";
+      const netTotal = Math.round((parseFloat(pr.grandTotal || pr.total || 0)) * 100) / 100;
+
+      const txMatch = txs.find(t => t && (String(t.id) === prId || String(t.voucherId) === prId || String(t.reference) === prNo));
+      if (!txMatch) {
+        findings.push({
+          id: `MISSING_PR-${prId}`,
+          docId: prId,
+          sourceType: "PURCHASE_RETURN",
+          voucherType: "PURCHASE RETURN (DEBIT NOTE)",
+          voucherNo: prNo,
+          date: pr.date || "-",
+          partyName: party,
+          issueType: "MISSING_DOUBLE_ENTRY",
+          issueSeverity: "HIGH",
+          debitTotal: netTotal,
+          creditTotal: 0,
+          difference: netTotal,
+          description: `Purchase Return / Debit Note ${prNo} (₹${netTotal.toLocaleString("en-IN")}) has NO accounting double-entry transaction in journal!`,
+          canAutoFix: true,
+          rawRecord: pr
+        });
+      }
+    });
+
+    // 6. Audit Missing Double Entry Journal Transactions for Stock Adjustments
+    const stockAdjs = this.stockAdjustments || [];
+    stockAdjs.forEach(sa => {
+      if (!sa || !isInFyRange(sa.date)) return;
+      const saId = String(sa.id || "");
+      const saNo = sa.refNo || sa.id || "-";
+      const refSearch = `Stock Adj: ${saNo}`;
+
+      const txMatch = txs.find(t => t && (String(t.reference) === refSearch || String(t.id) === saId));
+      if (!txMatch) {
+        findings.push({
+          id: `MISSING_SA-${saId}`,
+          docId: saId,
+          sourceType: "STOCK_ADJ",
+          voucherType: "STOCK ADJUSTMENT",
+          voucherNo: saNo,
+          date: sa.date || "-",
+          partyName: sa.employee || "Inventory Control",
+          issueType: "MISSING_DOUBLE_ENTRY",
+          issueSeverity: "MEDIUM",
+          debitTotal: 0,
+          creditTotal: 0,
+          difference: 0,
+          description: `Stock Adjustment ${saNo} has NO matching double-entry accounting transaction in ledger.`,
+          canAutoFix: true,
+          rawRecord: sa
+        });
+      }
+    });
+
+    return findings;
+  }
+
+  autoFixDoubleEntryIssue(finding) {
+    if (!finding) return { success: false, message: "Invalid finding record." };
+
+    const { sourceType, docId, issueType, rawRecord } = finding;
+
+    try {
+      if (sourceType === "INVOICE") {
+        const inv = rawRecord || (this.invoices || []).find(i => String(i.id) === String(docId));
+        if (inv) {
+          this.recreateInvoiceTransaction(inv);
+          this.saveState();
+          return { success: true, message: `Successfully generated double-entry transaction for Invoice #${finding.voucherNo}.` };
+        }
+      } else if (sourceType === "PURCHASE") {
+        const pur = rawRecord || (this.purchases || []).find(p => String(p.id) === String(docId));
+        if (pur) {
+          this.recreatePurchaseTransaction(pur);
+          this.saveState();
+          return { success: true, message: `Successfully generated double-entry transaction for Purchase Bill #${finding.voucherNo}.` };
+        }
+      } else if (sourceType === "STOCK_ADJ") {
+        const doc = rawRecord || (this.stockAdjustments || []).find(a => String(a.id) === String(docId));
+        if (doc) {
+          this.recreateStockAdjustmentTransaction(doc);
+          this.saveState();
+          return { success: true, message: `Successfully re-created double-entry transaction for Stock Adjustment #${finding.voucherNo}.` };
+        }
+      } else if (sourceType === "TRANSACTION") {
+        const txIndex = (this.transactions || []).findIndex(t => String(t.id) === String(docId));
+        if (txIndex >= 0) {
+          const tx = this.transactions[txIndex];
+          if (issueType === "EMPTY_ENTRIES") {
+            this.transactions.splice(txIndex, 1);
+            this.saveState();
+            return { success: true, message: `Removed empty corrupted transaction #${finding.voucherNo}.` };
+          } else if (issueType === "UNBALANCED" || issueType === "SINGLE_ENTRY") {
+            let dSum = 0, cSum = 0;
+            (tx.entries || []).forEach(e => {
+              dSum += parseFloat(e.debit) || 0;
+              cSum += parseFloat(e.credit) || 0;
+            });
+            dSum = Math.round(dSum * 100) / 100;
+            cSum = Math.round(cSum * 100) / 100;
+
+            if (dSum > cSum) {
+              const diff = Math.round((dSum - cSum) * 100) / 100;
+              tx.entries.push({ accountId: "3200", debit: 0, credit: diff, description: "Auto-balancing entry" });
+            } else if (cSum > dSum) {
+              const diff = Math.round((cSum - dSum) * 100) / 100;
+              tx.entries.push({ accountId: "3200", debit: diff, credit: 0, description: "Auto-balancing entry" });
+            }
+            this.saveState();
+            return { success: true, message: `Auto-balanced transaction #${finding.voucherNo} with Retained Earnings entry.` };
+          } else if (issueType === "UNKNOWN_LEDGER") {
+            (tx.entries || []).forEach(e => {
+              if (!e.accountId) e.accountId = "1010";
+            });
+            this.saveState();
+            return { success: true, message: `Resolved missing account IDs in transaction #${finding.voucherNo}.` };
+          }
+        }
+      }
+
+      this.rebuildAllTaxTransactions();
+      this.saveState();
+      return { success: true, message: `Re-processed accounting entries for #${finding.voucherNo}.` };
+    } catch (err) {
+      return { success: false, message: `Failed to fix issue: ${err.message}` };
+    }
+  }
+
+  autoFixAllDoubleEntryIssues(options = {}) {
+    const findings = this.findMissingAndUnbalancedDoubleEntries(options);
+    if (!findings || findings.length === 0) {
+      return { success: true, fixedCount: 0, message: "No missing or unbalanced double entry transactions found!" };
+    }
+
+    let fixedCount = 0;
+    this._suppressSave = true;
+
+    this.rebuildAllTaxTransactions();
+    this.cleanDuplicateTransactions();
+
+    findings.forEach(f => {
+      const res = this.autoFixDoubleEntryIssue(f);
+      if (res && res.success) fixedCount++;
+    });
+
+    this._suppressSave = false;
+    this.saveState(true);
+
+    return {
+      success: true,
+      fixedCount,
+      totalCount: findings.length,
+      message: `Successfully resolved ${fixedCount} missing/unbalanced double entry transaction issue(s)!`
+    };
+  }
 }
+
 
 const state = new StateManager();
 
+if (typeof window !== "undefined") {
+  window._getApiUrl = (endpoint) => state.getBackendApiUrl(endpoint);
+
+  window.addEventListener("beforeunload", () => {
+    try {
+      if (state && typeof state.syncToAppwriteCloud === "function") {
+        state.syncToAppwriteCloud(state.getActiveCompanyId(), state.getActiveFyId(), true);
+      }
+    } catch (e) {}
+  });
+
+  window.addEventListener("pagehide", () => {
+    try {
+      if (state && typeof state.syncToAppwriteCloud === "function") {
+        state.syncToAppwriteCloud(state.getActiveCompanyId(), state.getActiveFyId(), true);
+      }
+    } catch (e) {}
+  });
+}
 
 export { state };
+

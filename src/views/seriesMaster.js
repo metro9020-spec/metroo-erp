@@ -1,5 +1,6 @@
 import { state } from "../state.js";
 import { makeDraggable } from "../utils/draggable.js";
+import { showRearrangeBillsModal } from "./rearrangeBillsModal.js";
 
 export function showSeriesMasterModal(container) {
   const root = document.getElementById("modal-container-root") || container;
@@ -34,7 +35,7 @@ export function showSeriesMasterModal(container) {
 
     root.innerHTML = `
       <div class="modal-overlay active" id="series-master-modal" style="display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.55); position:fixed; inset:0; z-index:9999;">
-        <div style="background:#b0c4de; border:2px solid #3b629b; border-radius:4px; width:720px; max-width:98vw; max-height:95vh; display:flex; flex-direction:column; font-family:Tahoma,sans-serif; font-size:12px; box-shadow:0 8px 32px rgba(0,0,0,0.4); color:#000;">
+        <div style="background:#b0c4de; border:2px solid #3b629b; border-radius:4px; width:740px; max-width:98vw; max-height:95vh; display:flex; flex-direction:column; font-family:Tahoma,sans-serif; font-size:12px; box-shadow:0 8px 32px rgba(0,0,0,0.4); color:#000;">
           
           <!-- Classic Windows Title Bar -->
           <div style="background:linear-gradient(180deg,#1d4a88 0%, #366cb5 100%); color:#fff; font-weight:bold; font-size:12px; padding:4px 8px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #102a50;">
@@ -130,7 +131,7 @@ export function showSeriesMasterModal(container) {
 
           <!-- Bottom Action Buttons Ribbon -->
           <div style="display:flex; justify-content:flex-end; gap:4px; padding:6px 10px; background:#b4c6e0; border-top:1px solid #8ca6c8; align-items:center;">
-            <button type="button" id="sm-btn-resequence" style="min-width:140px; padding:4px 12px; font-weight:bold; background:#e0f2fe; border:1px solid #0284c7; color:#0369a1; border-radius:2px; cursor:pointer;" title="Re-adjust and fill skipped numbers sequentially for all series">Fill Skipped Numbers</button>
+            <button type="button" id="sm-btn-rearrange" style="min-width:115px; padding:4px 10px; font-weight:bold; background:#1e3a8a; color:#fff; border:1px solid #102a50; border-radius:2px; cursor:pointer; margin-right:auto;"><i class="fa-solid fa-arrow-down-1-9"></i> <u>R</u>earrange Bills</button>
             <button type="button" id="sm-btn-new" style="min-width:75px; padding:4px 12px; font-weight:bold; background:#dce6f2; border:1px solid #6b8cb6; border-radius:2px; cursor:pointer;"><u>N</u>ew</button>
             <button type="button" id="sm-btn-save" style="min-width:75px; padding:4px 12px; font-weight:bold; background:#dce6f2; border:1px solid #6b8cb6; border-radius:2px; cursor:pointer;"><u>S</u>ave</button>
             <button type="button" id="sm-btn-delete" style="min-width:75px; padding:4px 12px; font-weight:bold; background:#dce6f2; border:1px solid #6b8cb6; border-radius:2px; cursor:pointer;"><u>D</u>elete</button>
@@ -152,6 +153,10 @@ export function showSeriesMasterModal(container) {
 
     document.getElementById("sm-win-close")?.addEventListener("click", close);
     document.getElementById("sm-btn-close")?.addEventListener("click", close);
+
+    document.getElementById("sm-btn-rearrange")?.addEventListener("click", () => {
+      showRearrangeBillsModal(editingSeries?.id || "ALL");
+    });
 
     // Transaction Type Change
     document.getElementById("sm-tx-type")?.addEventListener("change", e => {
@@ -246,14 +251,6 @@ export function showSeriesMasterModal(container) {
       }
     });
 
-    // Fill Skipped Numbers / Resequence Button
-    document.getElementById("sm-btn-resequence")?.addEventListener("click", () => {
-      if (confirm("Are you sure you want to re-adjust all series numbers chronologically to fill skipped numbers?\n\nThis will re-sequence invoices continuously (e.g. LSL-0001, LSL-0002... B2B001, B2B002...) without any gaps.")) {
-        state.resequenceSeriesVoucherNumbers(true);
-        alert("Series numbers have been successfully re-adjusted without any skipped numbers!");
-        render();
-      }
-    });
 
     // Series List Item Selection
     document.querySelectorAll(".sm-series-row").forEach(row => {
