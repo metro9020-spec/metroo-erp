@@ -386,10 +386,6 @@ class StateManager {
     this.realignSeriesCurrentNumbers();
     this.forceAlignTransactionUnits();
     this._suppressSave = false;
-    if (this._pendingSave) {
-      this._pendingSave = false;
-      this.saveState(true);
-    }
     this.notifyListeners();
   }
 
@@ -1136,21 +1132,21 @@ class StateManager {
 
       const externalTime = Number(externalCandidate?._lastSaved || 0);
 
-      // Detect if local cache has phantom / ghost clone entries or legacy duplicate migration batches
+      // Detect if local cache has duplicate / corrupted vouchers
       const hasGhostClones = Array.isArray(localCachedData?.transactions) && (
         localCachedData.transactions.some(t => {
           const vNo = String(t.voucherNo || t.refNo || t.id || '');
-          return /^LSL-03[7-9]\d$/i.test(vNo) || /^LSL-040\d$/i.test(vNo) || t.id === 'RC-786';
-        }) || (localTxs > ((externalCandidate?.transactions?.length || 0) + 100))
+          return /^LSL-03[7-9]\d$/i.test(vNo) || /^LSL-040\d$/i.test(vNo) || t.id === 'RC-786' || t.id === 'PM-3' || t.id === 'PM-43' || /^TX-127\d$/i.test(t.id);
+        }) || (localTxs > ((externalCandidate?.transactions?.length || 0) + 10))
       );
 
-      // If external dataset is newer, or local cache is empty/stale/polluted with duplicates, adopt external dataset
-      if (externalCandidate && (!hasValidData(localCachedData) || externalTime >= localTime || hasGhostClones)) {
+      // In static / cloud hosting mode (e.g. Cloudflare Pages with Appwrite), external candidate is the authoritative remote truth
+      if (externalCandidate && (!dataUrl || !hasValidData(localCachedData) || externalTime >= localTime || hasGhostClones)) {
         mergedData = externalCandidate;
         console.log(`[initFromServer] Adopted authoritative external dataset (${externalTime} vs local ${localTime}, ghostClones/duplicates: ${hasGhostClones}).`);
       } else if (hasValidData(localCachedData)) {
         mergedData = localCachedData;
-        console.log(`[initFromServer] Local cache is newest (${localTime}). Forward-syncing.`);
+        console.log(`[initFromServer] Local cache adopted (${localTime}).`);
       } else if (externalCandidate) {
         mergedData = externalCandidate;
       }
@@ -3755,7 +3751,39 @@ class StateManager {
       this.purchases = this.purchases.filter(Boolean);
     }
 
-    // Preserve all transactions and ensure each has a unique ID (never delete transactions automatically)
+    // 1. Exact Duplicate Remover (Date + VoucherType + Entries Signature)
+    const seenSigs = new Map();
+    const cleanTxs = [];
+    for (const t of this.transactions) {
+      if (!t || !Array.isArray(t.entries) || t.entries.length === 0) continue;
+      const tid = String(t.id || t.voucherNo || '').trim();
+      const date = String(t.date || '');
+      const vType = String(t.voucherType || t.type || '').toUpperCase();
+      
+      const entriesSig = t.entries
+        .map(e => `${e.accountId || e.accountCode}:${(parseFloat(e.debit) || 0).toFixed(2)}:${(parseFloat(e.credit) || 0).toFixed(2)}`)
+        .sort()
+        .join('|');
+      
+      const sig = `${date}||${vType}||${entriesSig}`;
+      if (seenSigs.has(sig)) {
+        const existing = seenSigs.get(sig);
+        const isCurrentCanonical = /^TX-(PAY|REC|JRN|CNT)-\d+$/i.test(tid) || /^LSL-\d+$/i.test(tid);
+        const isExistingLegacy = /^PM-\d+$/i.test(existing.id) || /^RC-\d+$/i.test(existing.id) || /^TX-\d+$/i.test(existing.id);
+        if (isCurrentCanonical && isExistingLegacy) {
+          const idx = cleanTxs.indexOf(existing);
+          if (idx >= 0) cleanTxs[idx] = t;
+          seenSigs.set(sig, t);
+        }
+        stateChanged = true;
+      } else {
+        seenSigs.set(sig, t);
+        cleanTxs.push(t);
+      }
+    }
+    this.transactions = cleanTxs;
+
+    // 2. Ensure each transaction has a unique ID
     const seenTxIds = new Set();
     this.transactions.forEach(tx => {
       if (!tx) return;
@@ -15766,22 +15794,6 @@ const state = new StateManager();
 
 if (typeof window !== "undefined") {
   window._getApiUrl = (endpoint) => state.getBackendApiUrl(endpoint);
-
-  window.addEventListener("beforeunload", () => {
-    try {
-      if (state && typeof state.syncToAppwriteCloud === "function") {
-        state.syncToAppwriteCloud(state.getActiveCompanyId(), state.getActiveFyId(), true);
-      }
-    } catch (e) {}
-  });
-
-  window.addEventListener("pagehide", () => {
-    try {
-      if (state && typeof state.syncToAppwriteCloud === "function") {
-        state.syncToAppwriteCloud(state.getActiveCompanyId(), state.getActiveFyId(), true);
-      }
-    } catch (e) {}
-  });
 }
 
 export { state };
